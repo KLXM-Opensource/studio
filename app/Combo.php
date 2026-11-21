@@ -181,16 +181,16 @@ final class Combo
         $custom = ['name' => 'label_custom', 'label' => __('Eigene Beschriftung'), 'type' => 'text', 'max' => 60, 'show_if' => ['label' => [self::CUSTOM]]];
         if ($type === 'addresses') {
             array_push($fields,
-                ['name' => 'street', 'label' => __('Straße und Hausnummer'), 'type' => 'text', 'max' => 200],
-                ['name' => 'zip', 'label' => __('PLZ'), 'type' => 'text', 'max' => 20, 'width' => 'half'],
-                ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'max' => 120, 'width' => 'half'],
-                ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text', 'max' => 80],
+                ['name' => 'street', 'label' => __('Straße und Hausnummer'), 'type' => 'text'],
+                ['name' => 'zip', 'label' => __('PLZ'), 'type' => 'text', 'width' => 'half'],
+                ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'width' => 'half'],
+                ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text'],
                 ['name' => 'public', 'label' => __('Sichtbarkeit'), 'type' => 'select', 'options' => ['0' => __('Intern'), 'city' => __('Nur Ort öffentlich'), '1' => __('Öffentlich')], 'default' => '0'],
                 $custom);
             return $fields;
         }
         $fields[] = ['name' => 'value', 'label' => match ($type) { 'phones' => __('Nummer'), 'emails' => __('E-Mail-Adresse'), default => __('Webadresse') },
-            'type' => match ($type) { 'phones' => 'tel', 'emails' => 'email', default => 'url' }, 'required' => true, 'max' => 255];
+            'type' => match ($type) { 'phones' => 'tel', 'emails' => 'email', default => 'url' }, 'required' => true];
         $fields[] = ['name' => 'public', 'label' => __('Öffentlich'), 'type' => 'bool'];
         $fields[] = $custom;
         return $fields;

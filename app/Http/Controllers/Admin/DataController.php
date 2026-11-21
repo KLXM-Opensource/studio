@@ -502,6 +502,14 @@ final class DataController extends AdminController
     public static function makeTemplate(array $t): int
     {
         if (\Core\Data\Jobs::is($t)) return \Core\Data\Jobs::makeTemplate($t);   // Stellen: Eckdaten + Bewerbungsformular
+        // Adressbuch (Core\Data\Kinds): Porträt mit allen Feldern – Foto, Funktion, Kontakt-Knöpfe aus freigegebenen Angaben, Vita …
+        if (\Core\Data\Kinds::isContacts($t)) {
+            $id = Pages::create(['slug' => '_vorlage-' . $t['handle'], 'title' => $t['name'] . ' – Detailseite', 'type' => 'template',
+                'template_for' => $t['handle'], 'status' => 'published', 'noindex' => 0], Pages::sanitizeBlocks([['id' => bin2hex(random_bytes(5)), 'type' => 'data_fields',
+                'data' => ['table' => $t['handle'], 'layout' => 'portrait', 'fields' => [], 'ratio' => '3:4', 'back_label' => 'Zur Übersicht', 'back_link' => '/' . $t['settings']['route']]]]));
+            Tables::setDetailPage($t, $id);
+            return $id;
+        }
         // Kopf: Titel, Datum (erstes Datumsfeld, sonst Veröffentlichung), Auswahlfelder, Bild – darunter die übrigen Felder
         $h = $t['handle'] . '.';
         $st = $t['settings'];

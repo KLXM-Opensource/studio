@@ -132,7 +132,8 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
         <?php if ($inbox): ?>
         <div class="set-row"><div class="set-row__main"><span class="set-row__sub"><?= e(__('„Nur per E-Mail“ und „Anfragen sammeln“ folgen der Wahl im Bereich „Verschlüsselung“.')) ?></span></div></div>
         <?php endif; ?>
-        <input type="hidden" name="settings[kind]" value="<?= $inbox ? 'inbox' : 'content' ?>">
+        <?php // Tabellenart mit Grundschema (Core\Data\Kinds, z. B. Adressbuch) bleibt beim Speichern erhalten ?>
+        <input type="hidden" name="settings[kind]" value="<?= $inbox ? 'inbox' : e(\Core\Data\Kinds::isSpecial((string) ($def['settings']['kind'] ?? '')) ? (string) $def['settings']['kind'] : 'content') ?>">
       </div>
     </section>
 

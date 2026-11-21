@@ -177,6 +177,23 @@ final class Kinds
     }
 
     /**
+     * Felder der Detailseite eines Kontakts ohne eigene Auswahl (Block „Datensatz-Felder“): Foto, Listen, Funktion, Organisation,
+     * Kontaktangaben, dann eigene Felder – ohne Namensteile, Schalter und Felder, die auf der Website nie erscheinen.
+     */
+    public static function detailFields(array $t): array
+    {
+        $first = ['foto', 'listen', 'position', 'firma', 'telefon', 'email', 'web', 'adresse'];
+        $skip = [self::PUBLIC_FIELD, 'name', 'praefix', 'vorname', 'nachname', 'ist_firma', 'abteilung', 'geburtstag', 'notiz'];
+        $names = array_column($t['fields'], 'name');
+        $out = array_values(array_intersect($first, $names));
+        foreach ($t['fields'] as $f) {
+            if (in_array($f['name'], $first, true) || in_array($f['name'], $skip, true) || $f['type'] === 'blocks') continue;
+            $out[] = $f['name'];
+        }
+        return Exposure::publicNames($t, $out);
+    }
+
+    /**
      * Beim Speichern (Entries::save): Anzeigename aus Titel, Vor- und Nachname bzw. Organisation, wenn leer.
      * Neue Kontakte: „Auf der Website zeigen“ ohne Angabe = aus.
      */

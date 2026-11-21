@@ -32,8 +32,9 @@ $layout = $d['layout'] ?? 'prose';
 $fields = Exposure::publicNames($t, $fields);
 $e = Exposure::publicEntry($t, $e);
 if (!$fields) {
-    $fields = $layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
-        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks' && Exposure::publicNames($t, [$f['name']]) !== []), 'name'), fn($n) => $n !== $t['settings']['title_field']));   // Inhaltsblöcke: eigener Block entry_blocks
+    // Adressbuch (Kinds): Titel, Foto, Funktion, Kontaktangaben, eigene Felder – ohne Namensteile und Schalter
+    $fields = \Core\Data\Kinds::isContacts($t) && $layout !== 'head' ? ['_title', ...\Core\Data\Kinds::detailFields($t)] : ($layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
+        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks' && Exposure::publicNames($t, [$f['name']]) !== []), 'name'), fn($n) => $n !== $t['settings']['title_field'])));   // Inhaltsblöcke: eigener Block entry_blocks
 }
 $label = fn(string $f) => $f === '_title' ? lt('Titel') : ($f === '_when' ? lt('Termin') : ($f === 'published_at' ? lt('Veröffentlicht') : Tables::label(Tables::field($t, $f) ?? ['label' => $f])));
 $type = fn(string $f) => Tables::field($t, $f)['type'] ?? ($f === '_title' ? 'title' : 'date');

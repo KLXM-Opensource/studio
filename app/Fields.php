@@ -794,7 +794,7 @@ final class Fields
 
         $h = '<div class="f f--repeater"><div class="rep" data-name="' . e($inputName) . '">'
             . '<div class="rep-head"><span class="f-label">' . $label . '</span>'
-            . (count($items) > 1 ? ' <button type="button" class="adm-link rep-all" data-rep="all">' . e(__('Alle aufklappen')) . '</button>' : '')
+            . (count($items) > 1 && empty($f['rows']) ? ' <button type="button" class="adm-link rep-all" data-rep="all">' . e(__('Alle aufklappen')) . '</button>' : '')
             . (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '') . '</div><div class="rep-items">';
         foreach (array_values($items) as $i => $item) {
             $h .= $renderItem(is_array($item) ? $item : [], (string) $i);

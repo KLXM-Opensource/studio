@@ -3824,6 +3824,7 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 
 /* Beschriftete Mehrfachfelder (Core\Combo, Fields 'rows'): Zeile Beschriftung · Wert · Freigabe · Entfernen – wie Adressbuch-Apps */
 .rep-row{display:flex;align-items:flex-start;gap:8px;border:0;padding:0;margin:0 0 6px;background:none}
+.rep-item.rep-row.is-collapsed>.rep-fields{display:grid}   /* Zeilen klappen nie ein */
 .rep-row .rep-row__fields{flex:1;display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,2fr) auto;gap:0 8px;align-items:start}
 .rep-row .rep-row__fields>.f,.rep-row .rep-row__fields>.f-vis>.f{grid-column:auto;margin:0}
 .rep-row .rep-row__fields>.f-vis{grid-column:1/2}
@@ -3851,8 +3852,8 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .f-exp__pop legend{padding:0 4px;font-size:12px;color:var(--adm-t2)}
 
 /* Tabellen-Designer: Freigabe je Feld */
-.dt-field__expose{flex-wrap:wrap;align-items:flex-end;gap:8px 16px}
+.dt-field__row.dt-field__expose{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 20px}
 .dt-expose__targets{display:flex;flex-wrap:wrap;gap:4px 14px;border:0;margin:0;padding:0}
 .dt-expose__targets legend{font-size:12px;color:var(--adm-t2);padding:0;margin-bottom:4px}
-.dt-field__expose .f-help{flex-basis:100%;margin:0}
+.dt-field__row.dt-field__expose>.f-help{flex:1 1 100%;margin:0;max-width:none}
 .dt-field__system{display:flex;gap:6px;align-items:center}
