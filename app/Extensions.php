@@ -70,7 +70,13 @@ final class Extensions
 
     private static function add(array &$out, string $file, string $source, array $package = []): void
     {
-        $m = require $file;
+        try {
+            $m = require $file;
+        } catch (\Throwable $e) {
+            // Kein stilles Überspringen: Fehler mit Name und Datei melden (Core\ExtensionError), dann weiterwerfen
+            $name = preg_match('~[\'"]name[\'"]\s*=>\s*[\'"]([a-z][a-z0-9_-]{1,40})[\'"]~', (string) @file_get_contents($file), $nm) ? $nm[1] : basename(dirname($file));
+            throw self::failed($name, dirname($file), 'manifest', $e);
+        }
         if (!is_array($m) || !preg_match('~^[a-z][a-z0-9_-]{1,40}$~', (string) ($m['name'] ?? ''))) return;
         $out[$m['name']] = $m + ['label' => $m['name'], 'version' => '', 'description' => '', 'dir' => dirname($file), 'source' => $source, 'package' => $package];
     }
@@ -134,6 +140,8 @@ final class Extensions
     /** Aktive Erweiterungen dieser Website starten (nach Theme, vor dem Routing) */
     public static function boot(): void
     {
+        // Nur zur Fehlersuche, ausdrücklich: KLXM_NO_EXTENSIONS=1 php bin/console … startet keine Erweiterung (extensions:check setzt es selbst)
+        if (PHP_SAPI === 'cli' && getenv('KLXM_NO_EXTENSIONS')) return;
         foreach (self::enabled() as $name) self::start($name);
     }
 
@@ -157,15 +165,87 @@ final class Extensions
         }
         $x = new Extension($m['name'], $m['dir'], $m);
         self::$active[$name] = $x;
-        if (is_callable($m['boot'] ?? null)) ($m['boot'])($x);
-        $x->ensureTables();
-        $x->runMigrations();
-        // Einrichtung einmalig je Website (Manifest 'install'), nach den Datenbank-Schritten
-        if (is_callable($m['install'] ?? null) && isset(app()->settings) && !app()->settings->get('ext.' . $name . '.installed')) {
-            ($m['install'])(app()->db);
-            app()->settings->set('ext.' . $name . '.installed', now());
+        // Fehler bleiben Fehler (kein Überspringen) – aber mit Erweiterung, Phase und schuldiger Datei (Core\ExtensionError)
+        $phase = 'boot';
+        try {
+            if (is_callable($m['boot'] ?? null)) ($m['boot'])($x);
+            $phase = 'migrate';
+            $x->ensureTables();
+            $x->runMigrations();
+            // Einrichtung einmalig je Website (Manifest 'install'), nach den Datenbank-Schritten
+            $phase = 'install';
+            if (is_callable($m['install'] ?? null) && isset(app()->settings) && !app()->settings->get('ext.' . $name . '.installed')) {
+                ($m['install'])(app()->db);
+                app()->settings->set('ext.' . $name . '.installed', now());
+            }
+        } catch (\Throwable $e) {
+            unset(self::$active[$name]);
+            throw self::failed($name, (string) $m['dir'], $phase, $e);
         }
         return $x;
+    }
+
+    /**
+     * Fehler einer Erweiterung festhalten: eine Zeile ins Fehlerprotokoll, letzter Fehler je Erweiterung für die Verwaltung
+     * (Extensions::failures) – und als Core\ExtensionError zurückgeben (der Aufrufer wirft ihn).
+     */
+    public static function failed(string $name, string $dir, string $phase, \Throwable $e): ExtensionError
+    {
+        $err = ExtensionError::wrap($name, $dir, $phase, $e);
+        static $logged = [];
+        if (!isset($logged[$err->getMessage()])) {
+            $logged[$err->getMessage()] = true;
+            error_log('[Erweiterung] ' . $err->getMessage() . ' (' . get_class($err->getPrevious() ?? $err) . ')');
+            self::remember($err);
+        }
+        return $err;
+    }
+
+    /** Datei mit dem letzten Fehler je Erweiterung (je Website) */
+    private static function failureFile(): ?string
+    {
+        try {
+            return site()->storage('logs/extension-errors.json');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private static function remember(ExtensionError $err): void
+    {
+        $f = self::failureFile();
+        if (!$f) return;
+        try {
+            if (!is_dir(dirname($f))) @mkdir(dirname($f), 0775, true);
+            $all = self::failures();
+            $all[$err->extension] = ['at' => date('c'), 'phase' => $err->phase, 'file' => $err->culprit,
+                'message' => ExtensionError::clean((string) $err->getPrevious()?->getMessage()), 'type' => get_class($err->getPrevious() ?? $err)];
+            @file_put_contents($f, json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        } catch (\Throwable) {
+        }
+    }
+
+    /**
+     * Letzter Fehler je Erweiterung dieser Website (Start oder Laufzeit), jünger als 14 Tage:
+     * [name => ['at' => ISO-Zeit, 'phase' => manifest|boot|migrate|install|runtime, 'file' => 'datei:zeile', 'message' => …, 'type' => Klasse]]
+     */
+    public static function failures(): array
+    {
+        $f = self::failureFile();
+        if (!$f || !is_file($f)) return [];
+        $all = (array) json_decode((string) @file_get_contents($f), true);
+        return array_filter($all, fn($r) => is_array($r) && strtotime((string) ($r['at'] ?? '')) > time() - 14 * 86400);
+    }
+
+    /** Gemerkten Fehler verwerfen (nach erfolgreichem Einschalten in der Verwaltung) */
+    public static function forgetFailure(string $name): void
+    {
+        $f = self::failureFile();
+        if (!$f || !is_file($f)) return;
+        $all = (array) json_decode((string) @file_get_contents($f), true);
+        if (!isset($all[$name])) return;
+        unset($all[$name]);
+        @file_put_contents($f, json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
     }
 
     /**
@@ -185,9 +265,9 @@ final class Extensions
         } catch (\Throwable $e) {
             unset(self::$active[$name]);
             app()->settings->set(self::UI_KEY, $prev);
-            error_log('[Erweiterung ' . $name . '] Start: ' . $e->getMessage());
-            throw new \RuntimeException(__('„{name}“ ließ sich nicht starten und bleibt aus: {msg}', ['name' => (string) $m['label'], 'msg' => $e->getMessage()]));
+            throw new \RuntimeException(__('„{name}“ ließ sich nicht starten und bleibt aus: {msg}', ['name' => (string) $m['label'], 'msg' => $e->getMessage()]), 0, $e);
         }
+        self::forgetFailure($name);
         Features::flush();
         return array_values(array_diff(array_keys(Features::catalog()), $before));
     }

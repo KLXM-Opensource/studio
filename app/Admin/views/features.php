@@ -138,6 +138,13 @@ $sw = function (bool $on, bool $disabled, string $label) {
         <?php if ($x['risk'] !== ''): ?><span class="adm-badge adm-badge--draft"><?= icon('warning') ?> <?= e(__('sicherheitsrelevant')) ?></span><?php endif; ?>
       </h3>
       <p class="ft-row__desc"><?= e($x['description']) ?></p>
+      <?php if ($f = $x['failure']): // letzter Fehler (Core\ExtensionError): wer, welche Datei, wann ?>
+      <div class="adm-flash adm-flash--error ft-ext__error" role="alert">
+        <strong><?= e(__('Letzter Fehler am {date}', ['date' => fmt()->datetime((string) $f['at'])])) ?> (<?= e(['manifest' => __('Manifest laden'), 'boot' => __('Start'), 'migrate' => __('Datenbank-Schritte'), 'install' => __('Einrichtung'), 'runtime' => __('Laufzeit')][$f['phase']] ?? (string) $f['phase']) ?>)</strong>
+        <p><?= e((string) $f['message']) ?></p>
+        <p><?= e(__('Datei')) ?>: <code><?= e((string) $f['file']) ?></code> · <?= e((string) $f['type']) ?></p>
+      </div>
+      <?php endif; ?>
       <p class="ft-ext__meta">
         <?= e(implode(' · ', array_filter([$x['version'] !== '' ? 'v' . $x['version'] : '', $x['author'], $x['license'] !== '' ? __('Lizenz {l}', ['l' => $x['license']]) : '',
           $x['package'] !== '' ? $x['package'] : $x['dir'], $x['requires'] !== '' ? __('Core {r}', ['r' => $x['requires']]) : '', $x['php'] !== '' ? 'PHP ' . $x['php'] : '']))) ?>

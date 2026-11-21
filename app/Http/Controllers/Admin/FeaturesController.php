@@ -53,10 +53,11 @@ final class FeaturesController extends AdminController
             ] + $info;
         }
         $exts = [];
+        $failures = Extensions::failures();   // letzter Fehler je Erweiterung (Start oder Laufzeit, Core\ExtensionError)
         foreach (Extensions::available() as $name => $m) {
             $exts[$name] = Extensions::meta($name) + ['active' => Extensions::isActive($name), 'enabled' => in_array($name, Extensions::enabled(), true),
                 'lock' => Extensions::lock($name), 'requirements' => Extensions::requirements($name), 'health' => Extensions::healthOf($name),
-                'contrib' => Extensions::contributions($name), 'usage' => Extensions::usage($name)];
+                'contrib' => Extensions::contributions($name), 'usage' => Extensions::usage($name), 'failure' => $failures[$name] ?? null];
         }
         return $this->view('features', ['title' => __('Funktionen & Erweiterungen'), 'rows' => $rows, 'exts' => $exts,
             'canManage' => Features::canManage(), 'networked' => Features::networked(), 'delegated' => Features::delegated(),

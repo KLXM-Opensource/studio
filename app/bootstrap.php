@@ -56,4 +56,10 @@ ini_set('display_errors', $config->get('debug') ? '1' : '0');
 ini_set('log_errors', '1');
 ini_set('error_log', ROOT . '/storage/logs/php-error.log');
 
-return App::boot($config, new Site($siteKey, Sites::all()[$siteKey]));
+try {
+    return App::boot($config, new Site($siteKey, Sites::all()[$siteKey]));
+} catch (Core\ExtensionError $e) {
+    // Start scheitert an einer Erweiterung (Manifest, boot, Datenbank-Schritte, install): klare Meldung statt anonymer 500 –
+    // Details auf der Seite nur mit 'debug' bzw. in der Umgebung development, sonst im Fehlerprotokoll (Core\ExtensionError)
+    $e->render((bool) $config->get('debug') || (string) $config->get('environment', 'production') === 'development');
+}
