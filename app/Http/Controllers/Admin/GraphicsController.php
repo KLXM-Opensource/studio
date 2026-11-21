@@ -134,7 +134,7 @@ final class GraphicsController extends AdminController
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
-                'clean' => url('/admin/api/grafik/clean'),
+                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'),
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
                 'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'), 'partUpdate' => url('/admin/api/grafik/part/update'), 'partsImport' => url('/admin/api/grafik/parts/import'),
             ],
@@ -179,6 +179,22 @@ final class GraphicsController extends AdminController
             $this->changed();
             return Response::json(['ok' => true, 'item' => ['id' => (int) $m['id'], 'url' => Media::originalUrl($m), 'name' => Media::displayName($m)],
                 'versions' => Graphics::versions('media:' . (int) $m['id'])]);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+    }
+
+    /**
+     * Animiertes SVG (eigenständig, CSS in der Datei) für den Export: POST {svg (Arbeitsfassung), web (Web-Fassung)} → {svg}.
+     * Beide Fassungen laufen durch die Bereinigung – das Ergebnis enthält nur bereinigtes SVG plus erzeugtes CSS.
+     */
+    public function motionSvg(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        try {
+            $work = Svg::clean((string) ($r->post['svg'] ?? ''), ['editor' => true])['svg'];
+            $web = Svg::clean((string) ($r->post['web'] ?? ''), ['keep_ids' => true])['svg'];
+            return Response::json(['ok' => true, 'svg' => \Core\Graphics\Motion::standalone($web, $work)]);
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }

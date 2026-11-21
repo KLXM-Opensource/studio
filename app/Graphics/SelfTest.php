@@ -60,6 +60,7 @@ final class SelfTest
             self::rights();
             self::library();
             self::themed($files);
+            self::motion($files);
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -122,6 +123,64 @@ final class SelfTest
         $html = Media::pictureOf($m);
         self::t(str_contains($html, basename($v['light'])) && (Themed::darkActive() ? str_contains($html, 'media="(prefers-color-scheme: dark)"') && str_contains($html, 'cms-scheme-img') : !str_contains($html, '<source')), '<picture> mit heller Fassung und <source> für dunkel');
         self::t(str_contains(Themed::inject('<html><body>' . $html . '</body></html>'), 'data-cms-graphic-scheme') === Themed::darkActive() && Themed::inject('<body></body>') === '<body></body>', 'Skript nur auf Seiten mit solchen Grafiken');
+    }
+
+    /**
+     * Ausbaustufe 4 – Bewegung und Interaktion (Core\Graphics\Motion): Modell übersteht die Bereinigung nur in der Arbeitsfassung,
+     * unsichere Werte fallen weg; Ausgabe inline ohne style-Attribut/<style>, ids mit Präfix, Hülle, Links/Tooltips/Hotspots,
+     * Endzustand bei reduzierter Bewegung; Mediathek: inline statt <img>, Skript nur bei Bedarf; Grafik ohne Bewegung bleibt <img>.
+     */
+    private static function motion(array &$files): void
+    {
+        $b = fn(array $o) => base64_encode((string) json_encode($o));
+        $work = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200" data-ge-motion="d=2;dl=0.5;it=0;dir=alternate;tr=view">'
+            . '<title>Bewegt</title><style>.f{fill:#123456}#r2{stroke:#000}</style>'
+            . '<rect id="r1" class="f" width="80" height="80" style="opacity:.9" data-ge-anim="' . $b(['p' => [40, 40], 'k' => ['pos' => [[0, -50, 0, 'out'], [1, 0, 0, [0.2, 0.1, 0.3, 1]]], 'o' => [[0, 0, 'linear'], [0.5, 1, 'linear']], 'f' => [[0, '#ff0000', 'smooth', '#00ff00'], [2, '#0000ff', 'smooth']]]]) . '" data-ge-link="https://example.org/a" data-ge-linklabel="Mehr" data-ge-tip="Tipp" data-ge-tipbox="10 10 60 20"/>'
+            . '<rect id="r2" x="100" width="40" height="40" data-ge-link="javascript:alert(1)"/>'
+            . '<path id="p1" d="M0 150H300" stroke="#000" data-ge-anim="' . $b(['k' => ['w' => [[0, 0, 'smooth'], [2, 1, 'smooth']]], 'on' => 'h1']) . '"/>'
+            . '<circle id="h1" cx="350" cy="50" r="20" data-ge-hot="1" data-ge-tip="Schalter"/>'
+            . '<text id="z" x="10" y="190" data-ge-anim="' . $b(['k' => [], 'n' => ['a' => 0, 'b' => 1250, 'd' => 0, 'g' => '.', 'p' => ',', 't0' => 0, 't1' => 1, 'e' => 'out']]) . '">1.250</text>'
+            . '<rect id="bad" width="1" height="1" data-ge-anim="!!kein-base64"/></svg>';
+        $w = Svg::clean($work, ['editor' => true])['svg'];
+        self::t(str_contains($w, 'data-ge-anim="') && str_contains($w, 'data-ge-motion=') && !str_contains($w, '!!kein-base64'), 'Bewegung bleibt in der Arbeitsfassung, nur Base64');
+        $model = Motion::model($w);
+        self::t($model !== null && $model['scene']['d'] === 2.0 && $model['scene']['it'] === 0 && $model['scene']['dir'] === 'alternate', 'Szene gelesen (Dauer, endlos, hin und zurück)');
+        self::t(($model['items']['r2']['link'] ?? '') === '' && !str_contains($w, 'javascript'), 'Link „javascript:“ entfällt schon beim Bereinigen');
+        self::t(!isset(Motion::model($work)['items']['r2']), 'Link „javascript:“ auch ohne Bereinigung verworfen (Modell)');
+        self::t(($model['items']['p1']['anim']['on'] ?? '') === 'h1', 'Start bei Klick auf Hotspot bleibt');
+        self::t(($model['items']['r1']['anim']['k']['pos'][1][3] ?? '') === 'cubic-bezier(0.2,0.1,0.3,1)', 'eigene Kurve als cubic-bezier');
+        $web = (string) preg_replace('~ data-(ge|name)[\w-]*="[^"]*"~', '', str_replace('<svg ', '<svg class="ge-anim" ', $work));
+        $web = Svg::clean($web, ['keep_ids' => true])['svg'];
+        self::t(Motion::isAnimated($web) && !Motion::isAnimated(self::SAMPLE), 'Kennzeichen ge-anim an der Web-Fassung');
+        $o = Motion::build($web, null, (array) $model, 'gmtest', ['w' => 400, 'h' => 200]);
+        $svg = $o['svg'];
+        self::t(!preg_match('~\sstyle="~', $svg) && !str_contains($svg, '<style'), 'inline: kein style-Attribut, kein <style> (CSP)');
+        self::t(str_contains($o['css'], '.gmtest .gmtest-f{fill:#123456}') && str_contains($o['css'], '.gmtest .gmtest-i-r2{stroke:#000}') && str_contains($o['css'], '{opacity:.9}'), '<style> und style-Attribute als Regeln in der CSS-Datei');
+        self::t(str_contains($svg, 'id="__GM__-r1"') && !preg_match('~\sid="(?!__GM__-)~', $svg), 'ids mit Präfix je Einbindung');
+        self::t(str_contains($svg, '<g class="gm-a gm-a1">') && str_contains($o['css'], 'transform-origin:40px 40px') && str_contains($o['css'], 'animation-timing-function:ease-out'), 'Hülle mit Drehpunkt und Verlauf je Abschnitt');
+        self::t(str_contains($svg, '<a href="__GMHREF0__" class="gm-l') && $o['links'] === ['https://example.org/a'] && str_contains($svg, 'aria-label="Mehr"'), 'Link-Bereich als <a> mit Namen');
+        self::t(str_contains($svg, '<title>Tipp</title>') && str_contains($svg, 'class="gm-tip gm-tip1"'), 'Tooltip als <title> und sichtbares Schild');
+        self::t(str_contains($svg, 'role="button" tabindex="0" aria-pressed="false" data-gm-hot="1"'), 'Hotspot als Schalter');
+        self::t(str_contains($svg, 'pathLength="1"') && str_contains($svg, 'data-gm-count="0 1250 0 . , 0 1 ease-out"'), 'Linie zeichnen (pathLength) und Zählen');
+        self::t(str_contains($o['css'], '@media (prefers-reduced-motion:reduce)') && str_contains($o['css'], 'infinite alternate both') && str_contains($o['css'], 'animation-play-state:paused'), 'reduzierte Bewegung, Schleife, Anhalten');
+        self::t($o['js'] && $o['interactive'], 'Skript nötig (sichtbar, Schleife, Hotspot, Zählen)');
+        $alone = Motion::standalone($web, $w);
+        self::t(str_contains($alone, '<style><![CDATA[') && str_contains($alone, 'href="https://example.org/a"') && !str_contains($alone, '__GM'), 'eigenständiges animiertes SVG mit CSS');
+        // Mediathek: inline statt <img>
+        [$m, $err] = Graphics::saveMedia($web, ['name' => 'selbsttest-motion', 'alt' => 'Selbsttest Bewegung'], null, $w);
+        self::t($m !== null, 'bewegte Grafik gespeichert' . ($err ? " ($err)" : ''));
+        if (!$m) return;
+        $files[] = Media::path($m);
+        Motion::forget();
+        $html = Media::pictureOf($m);
+        foreach (glob(Graphics::dir() . '/m/gm-' . (int) $m['id'] . '-*.css') ?: [] as $f) $files[] = $f;
+        foreach (glob(site()->storage('cache/grafik-motion') . '/gm-' . (int) $m['id'] . '-*.json') ?: [] as $f) $files[] = $f;
+        self::t(str_contains($html, '<svg') && !str_contains($html, '<img') && str_contains($html, 'data-gm-css') && str_contains($html, 'aria-label="Selbsttest Bewegung"'), 'Mediathek: bewegte Grafik inline mit CSS-Datei');
+        self::t(str_contains($html, 'href="https://example.org/a"') && !str_contains($html, '__GM'), 'Platzhalter ersetzt (Links, ids)');
+        self::t(str_contains(Motion::inject('<body>' . $html . '</body>'), 'graphic-motion.js') && Motion::inject('<body></body>') === '<body></body>', 'Skript nur auf Seiten mit bewegten Grafiken');
+        self::t(str_contains(Media::pictureOf($m, '100vw', ['static' => true]), '<img'), '„static“ erzwingt das Bild');
+        [$m2] = Graphics::saveMedia(self::SAMPLE, ['name' => 'selbsttest-still', 'alt' => 'Still']);
+        if ($m2) { $files[] = Media::path($m2); self::t(str_contains(Media::pictureOf($m2), '<img'), 'Grafik ohne Bewegung bleibt ein Bild'); }
     }
 
     private static function sanitize(): void

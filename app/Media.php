@@ -1067,6 +1067,9 @@ final class Media
         $fit = ($opt['fit'] ?? true) !== false ? ImageFit::resolve($m, $ratio, isset($opt['path']) ? (string) $opt['path'] : null) : null;
         $src = self::sources($m, $fit ? null : $ratio);
         $alt = $opt['alt'] ?? self::alt($m);
+        // Infografik mit Bewegung oder Links (Grafik-Editor, Persona Motion): inline mit erzeugter CSS-Datei (Core\Graphics\Motion) –
+        // Grafiken ohne Bewegung bleiben ein <img>; 'static' => true erzwingt das Bild
+        if ($m['mime'] === Svg::MIME && ($inline = Graphics\Motion::inline($m, (string) $alt, $opt)) !== null) return $inline;
         // Bild anpassen (Core\ImageFx): Einbindung im Block vor globaler Einstellung – als Klassen (CSP, keine Inline-Styles)
         $classes = trim(($opt['class'] ?? '') . ' ' . ($src['cropped'] || $fit ? '' : self::focusClass($m)) . ' ' . ImageFx::classFor($m));
         $class = $classes !== '' ? ' class="' . e($classes) . '"' : '';

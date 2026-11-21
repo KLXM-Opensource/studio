@@ -1,6 +1,7 @@
 /*
  * Infografiken mit Design-Farben (Core\Graphics\Themed): <picture class="cms-scheme-img"> trägt eine helle und eine dunkle
- * Fassung. Ohne Skript entscheidet die Einstellung des Geräts (<source media="(prefers-color-scheme: dark)">). Dieses Skript
+ * Fassung (bewegte Grafiken inline: <svg class="cms-scheme-img"> mit is-dark/is-light). Ohne Skript entscheidet die
+ * Einstellung des Geräts (<source media="(prefers-color-scheme: dark)">). Dieses Skript
  * folgt dem, was die Website an der Stelle tatsächlich zeigt – Hell/Dunkel-Schalter (scheme-dark/scheme-light, data-theme),
  * dunkle Abschnitte auf heller Seite: wie bei Karten und Diagrammen gilt helle Schrift als dunkler Grund. Nur auf Seiten mit
  * solchen Bildern geladen. MIT
@@ -19,6 +20,12 @@ const sync = () => {
     const l = lum(pic);
     const want = l === null ? '(prefers-color-scheme: dark)' : l > 0.4 ? 'all' : 'not all';
     if (src.media !== want) src.media = want;
+  }
+  // Inline-Grafiken mit Bewegung (Core\Graphics\Motion): Klassen statt <source> – ohne Angabe entscheidet das Gerät (CSS)
+  for (const svg of document.querySelectorAll('svg.cms-scheme-img')) {
+    const l = lum(svg);
+    svg.classList.toggle('is-dark', l !== null && l > 0.4);
+    svg.classList.toggle('is-light', l !== null && l <= 0.4);
   }
 };
 let queued = false;

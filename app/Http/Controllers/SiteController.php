@@ -266,6 +266,8 @@ final class SiteController
         if (!$app->editing) $html = \Core\PdfLinks::inject($html);
         // Infografiken mit Design-Farben: Hell/Dunkel-Schalter und dunkle Abschnitte (Core\Graphics\Themed) – auch beim Bearbeiten
         $html = \Core\Graphics\Themed::inject($html);
+        // Bewegte Grafiken: Skript nur bei Auslöser „sobald sichtbar“, Klick, Hotspots, Zählen oder Schleifen (Core\Graphics\Motion)
+        $html = \Core\Graphics\Motion::inject($html);
         // Herunterladen unter dem Originalnamen: Links auf Medien der Website mit „download“ ohne Wert (Kits, Rich-Text)
         if (!$app->editing) $html = \Core\Media::downloadNames($html);
         // RSS-Feed der Tabelle (Detailseite bzw. Seite unter der URL-Basis) im Kopf verlinken (Core\Data\Feed)
