@@ -14,7 +14,9 @@
   .nv-cta--band .btn--secondary { border-color: currentColor; color: var(--f-a-on); background: transparent; }
   /* Band auf einem schon farbigen Abschnitt (Akzent, zweite Farbe, dunkel): keine zweite Farbfläche */
   :is(.bg-accent, .bg-secondary, .bg-dark) .nv-cta--band { background: transparent; color: inherit; --ncss-tile-padding-inline: 0; }
-  :is(.bg-accent, .bg-secondary, .bg-dark) .nv-cta--band :is(.nv-cta__title, .nv-cta__lead) { color: inherit; }
+  /* … Texte und Zweit-Knopf in der Schriftfarbe des Abschnitts (--f-fg). --f-a-on gehört zur Akzentfläche – im dunklen Schema
+     mit getönten Abschnitten (dsec-toned) ist das dunkle Navy auf dunklem Grund (vorher 1,55:1) */
+  :is(.bg-accent, .bg-secondary, .bg-dark) .nv-cta--band :is(.nv-cta__title, .nv-cta__lead, .btn--secondary) { color: inherit; }
   .nv-cta--box { background: var(--f-surface); }
   .nv-cta--box .nv-cta__title { color: var(--f-ink); }
   .nv-cta__lead { max-inline-size: 42em; }
