@@ -53,6 +53,7 @@ return [
                 'help' => 'Durchsucht die Textfelder der Tabelle.'],
             ['name' => 'az_index', 'label' => 'A–Z-Sprungleiste (alphabetisch gruppiert)', 'type' => 'bool', 'default' => false, 'width' => 'half',
                 'help' => 'Sortiert nach dem Titel und gruppiert nach Anfangsbuchstaben – nur ohne seitenweises Blättern.'],
+            ...\Core\Blocks\ListFilter::fields(),   // „Filter erst ab … Einträgen“, nur Optionen mit Treffern
             ...\Core\Data\Shared::blockFields(true),
             ['type' => 'heading', 'label' => 'Links'],
             ['name' => 'link_detail', 'label' => 'Einträge verlinken (Detailseite)', 'type' => 'bool', 'default' => true],
@@ -180,6 +181,7 @@ return [
             ...\Core\Data\Shared::blockFields(),
             ['name' => 'visitor_filter', 'label' => 'Besucher können nach Kategorie filtern', 'type' => 'bool', 'default' => false, 'width' => 'half',
                 'help' => 'Links je Kategorie (Kategorie-Feld des Kalenders).'],
+            ...\Core\Blocks\ListFilter::fields(),   // gezählt werden die kommenden Termine
             ['name' => 'subscribe', 'label' => '„Abonnieren“-Link zeigen (iCal)', 'type' => 'bool', 'default' => true],
             ['name' => 'link_detail', 'label' => 'Termine verlinken (Detailseite)', 'type' => 'bool', 'default' => true],
             ['name' => 'empty_text', 'label' => 'Text, wenn keine Termine', 'type' => 'text', 'default' => 'In diesem Monat sind keine Termine eingetragen.'],

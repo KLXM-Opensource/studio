@@ -16,6 +16,8 @@ use Core\Block;
  * Umstellung alter Reihen (layout:migrate-rows) samt Aufheben bei nicht verschachtelbaren Blöcken und Wiederholbarkeit.
  * Beispiel-Blöcke (Core\Blocks\Demos): Format, Prüfung ohne Fehler/Hinweise, CSS begrenzt, Ausgabe mit Beispieldaten
  * (Besucher und Bearbeiten-Modus, gleich wie Kit-Export), keine Inline-Styles/Skripte.
+ * Besucher-Filter in Listen (Core\Blocks\ListFilter, Entries::facets): ab … Einträgen, nur Optionen mit Treffern, ab zwei Knöpfen,
+ * Auswahl aus der Adresse, Kit-Vorgabe, Ausgabe der Datenliste.
  */
 final class SelfTest
 {
@@ -44,6 +46,7 @@ final class SelfTest
             $t->picker();
             $t->peopleSource();
             $t->subpages();
+            $t->listFilter();
         } finally {
             app()->editing = $prev;
         }
@@ -477,6 +480,77 @@ final class SelfTest
             $this->assert(false, 'Unterseiten: ' . $e->getMessage());
         } finally {
             foreach ($made as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
+        }
+    }
+
+    /** Besucher-Filter in Listen (Core\Blocks\ListFilter): Regeln, Kit-Vorgabe, Zählung (Entries::facets) und Ausgabe der Datenliste */
+    private function listFilter(): void
+    {
+        $L = ListFilter::class;
+        $opts = ['a' => 'A', 'b' => 'B', 'c' => 'C', 'leer' => 'Leer'];
+        $this->assert($L::config([], [])['min'] === $L::MIN_ENTRIES && $L::config(['filter_min' => 0], [])['min'] === 0 && $L::config(['filter_min' => '3'], [])['min'] === 3
+            && $L::config([], ['min' => 0])['min'] === 0 && $L::config(['filter_min' => 5], ['min' => 0])['min'] === 5, 'ListFilter: Mindestzahl (Standard, 0, Block vor Kit)');
+        $this->assert(!$L::config([], [])['all'] && $L::config(['filter_options' => 'all'], [])['all'] && $L::config([], ['options' => 'all'])['all']
+            && $L::config([], ['min_buttons' => 1])['buttons'] === 1, 'ListFilter: Optionen und Mindestzahl an Knöpfen (Kit-Vorgabe)');
+        $d = ['filter_min' => 8];
+        $this->assert(!$L::enough($d, 7, []) && $L::enough($d, 8, []) && $L::enough(['filter_min' => 0], 0, []), 'ListFilter: Regel 1 – erst ab … Einträgen, 0 = immer');
+        $this->assert(array_keys($L::buttons($opts, ['a' => 3, 'c' => 1], $d, null, [])) === ['a', 'c'], 'ListFilter: Regel 2 – nur Optionen mit Treffern, Reihenfolge der Optionen');
+        $this->assert(array_keys($L::buttons($opts, ['a' => 3], ['filter_options' => 'all'] + $d, null, [])) === ['a', 'b', 'c', 'leer'], 'ListFilter: „auch leere Optionen“');
+        $this->assert($L::buttons($opts, ['a' => 9], $d, null, []) === [] && $L::buttons($opts, ['a' => 9], $d, 'a', []) === [], 'ListFilter: Regel 3 – unter zwei Knöpfen keine Leiste (auch mit Auswahl)');
+        $this->assert(array_keys($L::buttons($opts, ['a' => 3, 'c' => 1], $d, 'leer', [])) === ['a', 'c', 'leer'] && array_keys($L::buttons($opts, ['a' => 3, 'c' => 1], $d, 'zz', [])) === ['a', 'c'],
+            'ListFilter: Regel 4 – gewählte Option ohne Treffer bleibt sichtbar, unbekannte nicht');
+        $this->assert($L::enoughButtons(2, [], []) && !$L::enoughButtons(1, [], []), 'ListFilter: A–Z/Karten erst ab zwei Gruppen');
+        $this->assert(array_keys($L::buttons(['a' => 'A', 'b' => 'B'], ['a' => 1], [], null, ['min' => 0, 'options' => 'all', 'min_buttons' => 1])) === ['a', 'b']
+            && $L::enough([], 0, ['min' => 0]), 'ListFilter: Kit-Vorgabe wie bisher (praxis): alle Optionen, immer');
+        $byName = array_column(array_filter((require ROOT . '/app/Blocks/blocks.php')['data_list']['fields'], fn($f) => isset($f['name'])), null, 'name');
+        $cal = array_column(array_filter((require ROOT . '/app/Blocks/blocks.php')['calendar']['fields'], fn($f) => isset($f['name'])), null, 'name');
+        $this->assert(isset($byName['filter_min'], $byName['filter_options'], $cal['filter_min'], $cal['filter_options']) && !isset($byName['filter_min']['default'])
+            && ($byName['filter_options']['default'] ?? null) === '', 'ListFilter: Felder in Datenliste und Kalender, Standard aus Kit/Regel');
+
+        $h = 'qa_lf_' . bin2hex(random_bytes(3));
+        $prevReq = app()->request;
+        try {
+            [$def, $err] = \Core\Data\Tables::validate(['name' => 'QA Filter', 'singular' => 'QA Filter', 'handle' => $h, 'fields' => [
+                ['label' => 'Name', 'name' => 'name', 'type' => 'text', 'required' => 1],
+                ['label' => 'Kategorie', 'name' => 'kat', 'type' => 'select', 'options' => "a=Alpha\nb=Beta\nc=Gamma\nleer=Ohne Einträge"],
+                ['label' => 'Themen', 'name' => 'themen', 'type' => 'multiselect', 'options' => "x=Iks\ny=Ypsilon"],
+            ]]);
+            $this->assert($err === [], 'ListFilter: Testtabelle gültig');
+            if ($err) return;
+            \Core\Data\Tables::create($def);
+            \Core\Data\Tables::flush();
+            $t = \Core\Data\Tables::find($h);
+            $add = function (string $n, string $k, array $th, string $st = 'published') use ($t): void {
+                \Core\Data\Entries::save($t, null, ['name' => $n, 'kat' => $k, 'themen' => $th, 'status' => $st]);
+            };
+            foreach ([['Anton', 'a', ['x']], ['Berta', 'a', ['x', 'y']], ['Cäsar', 'b', []]] as [$n, $k, $th]) $add($n, $k, $th);
+            $add('Entwurf', 'c', ['y'], 'draft');
+            $f = \Core\Data\Entries::facets($t, ['kat', 'themen', 'name'], ['status' => 'published', 'limit' => 1]);
+            $this->assert($f['total'] === 3 && $f['counts']['kat'] === ['a' => 2, 'b' => 1] && $f['counts']['themen'] === ['x' => 2, 'y' => 1] && !isset($f['counts']['name']),
+                'ListFilter: Entries::facets zählt veröffentlichte je Option (Auswahl, Mehrfachauswahl), ohne limit: ' . json_encode($f));
+            $th = app()->theme;
+            if ($th->block('data_list') && !$th->files('blocks/data_list.php') && empty($th->def['list_filter'])) {   // Kits mit eigener Vorgabe (praxis) zeigen das frühere Verhalten
+                $render = function (array $data, array $query = []) use ($th, $h): string {
+                    app()->request = new \Core\Http\Request('GET', '/qa', $query, [], [], []);
+                    $blk = \Core\Pages::sanitizeBlocks([['id' => 'qalf', 'type' => 'data_list', 'data' => ['table' => $h, 'layout' => 'compact', 'limit' => 0,
+                        'visitor_filter' => "$h.kat", 'visitor_search' => true, 'link_detail' => false] + $data]]);
+                    return $blk ? (string) $th->renderInner($th->makeBlock($blk[0])) : '';
+                };
+                $few = $render([]);
+                $this->assert(str_contains($few, 'Anton') && !str_contains($few, 'dl-filter') && !str_contains($few, 'dl-search'), 'ListFilter: Datenliste mit wenigen Einträgen ohne Filter und Suche');
+                $many = $render(['filter_min' => 2]);
+                $this->assert(str_contains($many, 'dl-filter') && str_contains($many, 'dl-search') && str_contains($many, '>Alpha<') && str_contains($many, '>Beta<')
+                    && !str_contains($many, '>Gamma<') && !str_contains($many, 'Ohne Einträge'), 'ListFilter: Datenliste ab Mindestzahl – nur Kategorien mit Einträgen');
+                $sel = $render(['filter_min' => 2], ['kat' => 'leer']);
+                $this->assert(str_contains($sel, 'Ohne Einträge') && str_contains($sel, 'dl-empty') && !str_contains($sel, 'Anton'), 'ListFilter: gewählte leere Kategorie bleibt sichtbar, Liste meldet „keine Einträge“');
+                $ign = $render([], ['kat' => 'b']);
+                $this->assert(str_contains($ign, 'Anton') && str_contains($ign, 'Cäsar') && !str_contains($ign, 'dl-filter'), 'ListFilter: ausgeblendeter Filter ignoriert die Auswahl aus der Adresse');
+            }
+        } catch (\Throwable $e) {
+            $this->assert(false, 'ListFilter: ' . $e->getMessage());
+        } finally {
+            app()->request = $prevReq;
+            if ($x = \Core\Data\Tables::find($h)) \Core\Data\Tables::delete($x);
         }
     }
 

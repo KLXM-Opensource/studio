@@ -72,15 +72,24 @@ if (str_starts_with((string) ($d['filter_field'] ?? ''), $pfx)) {
 $navField = str_starts_with((string) ($d['filter_nav'] ?? ''), $pfx) ? Tables::field($t, substr($d['filter_nav'], strlen($pfx))) : null;
 $navField = $navField && in_array($navField['type'], ['select', 'multiselect'], true) ? $navField : null;
 $active = null;
-if ($navField && is_string($query['rubrik'] ?? null) && array_key_exists($query['rubrik'], (array) ($navField['options'] ?? []))) {
-    $active = $query['rubrik'];
-    $o['where'][] = [$navField['name'], $navField['type'] === 'multiselect' ? 'contains' : '=', $active];
+if (!empty($d['exclude_current']) && $ctx && $ctx['table']['handle'] === $t['handle']) $o['exclude'] = $ctx['entry']['id'];
+if (!empty($d['source'])) $o['source'] = (string) $d['source'];
+// Rubrik-Leiste nach der gemeinsamen Regel (Core\Blocks\ListFilter): erst ab genug Einträgen, nur Rubriken mit Einträgen, ab
+// zwei Schaltflächen – gezählt wie die Liste (eine Abfrage); ausgeblendet wird ?rubrik ignoriert
+$navButtons = [];
+if ($navField) {
+    $facets = Entries::facets($t, [$navField['name']], $o);
+    $want = is_string($query['rubrik'] ?? null) ? $query['rubrik'] : null;
+    $navButtons = \Core\Blocks\ListFilter::enough($d, max(0, $facets['total'] - $skip))
+        ? \Core\Blocks\ListFilter::buttons((array) ($navField['options'] ?? []), $facets['counts'][$navField['name']] ?? [], $d, $want) : [];
+    if ($want !== null && isset($navButtons[$want])) {
+        $active = $want;
+        $o['where'][] = [$navField['name'], $navField['type'] === 'multiselect' ? 'contains' : '=', $active];
+    }
 }
 if (!$o['where']) unset($o['where']);
-if (!empty($d['exclude_current']) && $ctx && $ctx['table']['handle'] === $t['handle']) $o['exclude'] = $ctx['entry']['id'];
 if (str_starts_with((string) ($d['sort_field'] ?? ''), $pfx)) $o['sort'] = substr($d['sort_field'], strlen($pfx));
 if (!empty($d['sort_dir'])) $o['dir'] = $d['sort_dir'];
-if (!empty($d['source'])) $o['source'] = (string) $d['source'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
 $rows = Entries::query($t, $o);
 if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, (string) ($d['title'] ?? ''));   // schema.org ItemList
@@ -159,11 +168,11 @@ $teaser = function (array $e, int $i, string $variant, ?string $tag = null) use 
   </header>
   <?php endif; ?>
 
-  <?php if ($navField): ?>
+  <?php if ($navButtons): ?>
   <nav class="chips" aria-label="<?= e(lt('Nach {name} filtern', ['name' => Tables::label($navField)])) ?>">
     <ul class="chips__list">
       <li><a class="chip" href="<?= e($qs([])) ?>" rel="nofollow"<?= $active === null ? ' aria-current="true"' : '' ?>><?= e(lt('Alle')) ?></a></li>
-      <?php foreach ((array) ($navField['options'] ?? []) as $k => $l): ?>
+      <?php foreach ($navButtons as $k => $l): ?>
       <li><a class="chip" href="<?= e($qs(['rubrik' => (string) $k])) ?>" rel="nofollow"<?= $active === (string) $k ? ' aria-current="true"' : '' ?>><?= e(Tables::optionLabel($navField, (string) $k)) ?></a></li>
       <?php endforeach; ?>
     </ul>

@@ -60,27 +60,46 @@ if (!empty($d['source'])) $o['source'] = (string) $d['source'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
 // Besucher-Filter: Schaltflächen je Auswahlfeld, Suche, A–Z (Verzeichnis, Mitglieder, Partner …)
 $query = (array) (app()->request?->query ?? []);
-$vfilters = [];   // [name => ['field' => …, 'options' => [key => label], 'sel' => ?string]]
+$layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table', 'directory'], true) ? $d['layout'] : 'cards';
+// A–Z: nur ohne Blättern (Sprungmarken auf dieser Seite) und nicht als Tabelle; sortiert nach dem Titel
+$az = !empty($d['az_index']) && empty($d['paginate']) && $layout !== 'table';
+$vcands = [];   // eingestellte Filterfelder [name => Feld]
 foreach (['visitor_filter', 'visitor_filter2'] as $k) {
     if (!str_starts_with((string) ($d[$k] ?? ''), $pfx)) continue;
     $vn = substr($d[$k], strlen($pfx));
     $vfd = Tables::field($t, $vn);
-    if (!$vfd || !in_array($vfd['type'], ['select', 'multiselect'], true) || isset($vfilters[$vn]) || in_array($vn, ['q', 'seite'], true)) continue;
-    $vopts = (array) ($vfd['options'] ?? []);
-    $sel = is_string($query[$vn] ?? null) && array_key_exists($query[$vn], $vopts) ? $query[$vn] : null;
-    $vfilters[$vn] = ['field' => $vfd, 'options' => $vopts, 'sel' => $sel];
-    if ($sel !== null) $o['where'] = array_merge((array) ($o['where'] ?? []), [[$vn, '=', $sel]]);
+    if (!$vfd || !in_array($vfd['type'], ['select', 'multiselect'], true) || isset($vcands[$vn]) || in_array($vn, ['q', 'seite'], true)) continue;
+    $vcands[$vn] = $vfd;
 }
-$vq = !empty($d['visitor_search']) && is_string($query['q'] ?? null) ? trim(mb_substr($query['q'], 0, 80)) : '';
+// Erweiterungen (Extension::filter 'data_list.query'): Abfrage ändern, z. B. zusätzliche Bedingung
+$extend = function (array $q) use ($t, $d): array {
+    $q2 = \Core\Extensions::filter('data_list.query', $q, ['table' => $t, 'block' => $d]);
+    return is_array($q2) ? $q2 : $q;
+};
+// Gemeinsame Regel (Core\Blocks\ListFilter): Filter, Suche und A–Z erst ab genug Einträgen; nur Optionen mit Treffern, ab zwei
+// Schaltflächen – gezählt mit derselben Abfrage wie die Liste (ohne Besucher-Auswahl), in einer Abfrage (Entries::facets)
+$vfilters = [];   // [name => ['field' => …, 'options' => [key => label], 'sel' => ?string]]
+$vsearch = false;
+if ($vcands || !empty($d['visitor_search']) || $az) {
+    $facets = Entries::facets($t, array_keys($vcands), $extend($o));
+    $enough = \Core\Blocks\ListFilter::enough($d, $facets['total']);
+    $vsearch = $enough && !empty($d['visitor_search']);
+    $az = $az && $enough;
+    foreach ($enough ? $vcands : [] as $vn => $vfd) {
+        $vopts = (array) ($vfd['options'] ?? []);
+        $want = is_string($query[$vn] ?? null) && array_key_exists($query[$vn], $vopts) ? $query[$vn] : null;
+        $buttons = \Core\Blocks\ListFilter::buttons($vopts, $facets['counts'][$vn] ?? [], $d, $want);
+        if (!$buttons) continue;   // ausgeblendete Leiste: Auswahl aus der Adresse wird ignoriert
+        $sel = $want !== null && isset($buttons[$want]) ? $want : null;
+        $vfilters[$vn] = ['field' => $vfd, 'options' => $buttons, 'sel' => $sel];
+        if ($sel !== null) $o['where'] = array_merge((array) ($o['where'] ?? []), [[$vn, '=', $sel]]);
+    }
+}
+$vq = $vsearch && is_string($query['q'] ?? null) ? trim(mb_substr($query['q'], 0, 80)) : '';
 if ($vq !== '') $o['q'] = $vq;
 $filtering = $vq !== '' || array_filter(array_column($vfilters, 'sel'), fn($v) => $v !== null);
-$layout = in_array($d['layout'] ?? '', ['cards', 'list', 'compact', 'table', 'directory'], true) ? $d['layout'] : 'cards';
-// A–Z: nur ohne Blättern (Sprungmarken auf dieser Seite) und nicht als Tabelle; sortiert nach dem Titel
-$az = !empty($d['az_index']) && empty($d['paginate']) && $layout !== 'table';
 if ($az && ($tf = (string) ($t['settings']['title_field'] ?? '')) !== '') { $o['sort'] = $tf; $o['dir'] = 'asc'; }
-// Erweiterungen (Extension::filter 'data_list.query'): Abfrage ändern, z. B. zusätzliche Bedingung
-$o2 = \Core\Extensions::filter('data_list.query', $o, ['table' => $t, 'block' => $d]);
-if (is_array($o2)) $o = $o2;
+$o = $extend($o);
 $rows = Entries::query($t, $o);   // Stellenangebote: abgelaufene fehlen schon hier (Core\Data\Jobs, Entries::where)
 // „Abschnitt ausblenden, wenn nichts da ist“: für Besucher keine Ausgabe – die Hülle (partials/section) entfällt dann
 if (!$rows && !empty($d['hide_empty']) && !is_editing() && !$filtering) return;
@@ -89,8 +108,6 @@ if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, strip_e
 $pages = !empty($d['paginate']) && $limit ? (int) ceil(Entries::count($t, $o) / $limit) : 1;
 $link = fn(array $e) => !empty($d['link_detail']) ? Entries::href($t, $e) : null;
 $hTag = !empty($d['title']) ? 'h3' : 'h2';
-$azTag = $hTag;   // Buchstaben-Überschriften der A–Z-Gruppen; Namen der Einträge eine Stufe darunter
-if ($az) $hTag = !empty($d['title']) ? 'h4' : 'h3';
 // Bilder einpassen (Logos auf einer Kachel) statt füllen: Standard im Verzeichnis
 $fit = (string) ($d['image_fit'] ?? '');
 $contain = $fit === 'contain' || ($fit === '' && $layout === 'directory');
@@ -121,7 +138,11 @@ if ($az && $rows) {
     $groups = [];
     foreach ($rows as $e) $groups[$letterOf(Entries::title($t, $e))][] = $e;
     uksort($groups, fn($a, $b2) => $a === '#' ? 1 : ($b2 === '#' ? -1 : strcmp($a, $b2)));
+    // Regel wie bei Filtern (Core\Blocks\ListFilter): Sprungleiste erst ab zwei Buchstaben – sonst einfache Liste
+    if (!\Core\Blocks\ListFilter::enoughButtons(count($groups), $d)) { $az = false; $groups = ['' => $rows]; }
 }
+$azTag = $hTag;   // Buchstaben-Überschriften der A–Z-Gruppen; Namen der Einträge eine Stufe darunter
+if ($az) $hTag = !empty($d['title']) ? 'h4' : 'h3';
 $titleClamp = Clamp::titleClass($d);   // Textlänge/Titel kürzen (Karten und Listen; Texte über Clamp::text)
 // Spaltenköpfe der Tabelle: Titel-Feld, Sonderfelder „_when“ (Termin) und „published_at“ wie im Block „Datensatz-Felder“
 $colLabel = fn(string $f) => match (true) {
@@ -133,7 +154,7 @@ $colLabel = fn(string $f) => match (true) {
 };
 ?>
 <?php // Filtern, Suche, Blättern ohne Seitenwechsel (Core\Live::region – Links/Formulare mit data-live-nav, ohne JS normale Links)
-$reload = ($pages > 1 || $vfilters || !empty($d['visitor_search'])) ? \Core\Live::region($b) : ''; ?>
+$reload = ($pages > 1 || $vfilters || $vsearch) ? \Core\Live::region($b) : ''; ?>
 <div class="<?= e($wrap) ?> dl dl--<?= e($layout) ?>"<?= $reload ?>>
   <?php if (!empty($d['eyebrow']) || !empty($d['title']) || !empty($d['intro'])): ?>
   <header class="dl-head">
@@ -143,9 +164,9 @@ $reload = ($pages > 1 || $vfilters || !empty($d['visitor_search'])) ? \Core\Live
   </header>
   <?php endif; ?>
 
-  <?php if ($vfilters || !empty($d['visitor_search'])): $qid = $b->domId() . '-q'; ?>
+  <?php if ($vfilters || $vsearch): $qid = $b->domId() . '-q'; ?>
   <div class="dl-tools">
-    <?php if (!empty($d['visitor_search'])): ?>
+    <?php if ($vsearch): ?>
     <form class="dl-search" role="search" method="get" data-live-nav action="<?= e($here . '#' . $b->domId()) ?>">
       <label class="dl-search__label" for="<?= e($qid) ?>"><?= e(lt('In der Liste suchen')) ?></label>
       <span class="dl-search__row"><input class="dl-search__input" id="<?= e($qid) ?>" type="search" name="q" value="<?= e($vq) ?>" maxlength="80" autocomplete="off" enterkeyhint="search" data-live-input><?php foreach ($vfilters as $vn => $vf): if ($vf['sel'] === null) continue; ?><input type="hidden" name="<?= e($vn) ?>" value="<?= e($vf['sel']) ?>"><?php endforeach; ?><button class="dl-search__btn" type="submit"><?= e(lt('Suchen')) ?></button></span>

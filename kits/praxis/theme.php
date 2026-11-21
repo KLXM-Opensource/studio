@@ -79,6 +79,9 @@ return [
 
     // Link-Sonderwerte (aufgelöst in praxis_link): nutzen die Praxisdaten
     'link_keywords' => ['doctolib', 'telefon', 'rezept', 'ueberweisung'],
+    // Besucher-Filter in Datenliste/Kalender (Core\Blocks\ListFilter): Blöcke ohne eigene Angabe verhalten sich wie bisher –
+    // Filter immer, alle Optionen, Leiste schon ab einer Option (Live-Kundenseiten bleiben optisch unverändert)
+    'list_filter' => ['min' => 0, 'options' => 'all', 'min_buttons' => 1],
     // Projekt: sichtbare Begriffe und branchenspezifische Funktionen (der Core ist neutral)
     'project' => [
         // Karten (Core\Maps): welche Einstellungen Standort, Beschriftung, Adresse und Routenlink liefern

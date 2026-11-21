@@ -27,7 +27,23 @@ $view = ($d['view'] ?? 'month') === 'agenda' ? 'agenda' : 'month';
 // Raster: Montag vor dem Monatsersten bis Sonntag nach dem Monatsletzten
 $gridStart = $first->modify('-' . ((int) $first->format('N') - 1) . ' days');
 $gridEnd = $next->modify('+' . ((8 - (int) $next->format('N')) % 7) . ' days');
-[$where, $cat] = Calendar::blockWhere($t, $d, $query);
+$catField = $c['category'] !== '' ? Tables::field($t, $c['category']) : null;
+// Besucher-Filter nach Kategorie – gemeinsame Regel (Core\Blocks\ListFilter): erst ab genug kommenden Terminen, nur Kategorien
+// mit kommenden Terminen (eine Abfrage über die nächsten zwölf Monate), ab zwei Schaltflächen; sonst wird ?kategorie ignoriert
+$catButtons = [];
+if (!empty($d['visitor_filter']) && $catField) {
+    [$baseWhere] = Calendar::blockWhere($t, $d);
+    $soon = Calendar::upcoming($t, Calendar::MAX_OCCURRENCES, 0, ['where' => $baseWhere, 'source' => (string) ($d['source'] ?? '')]);
+    if (\Core\Blocks\ListFilter::enough($d, count($soon))) {
+        $counts = [];
+        foreach ($soon as $o) {
+            foreach (array_unique(array_map('strval', (array) ($o['entry'][$catField['name']] ?? []))) as $k) $counts[$k] = ($counts[$k] ?? 0) + 1;
+        }
+        $want = is_string($query['kategorie'] ?? null) ? $query['kategorie'] : null;
+        $catButtons = \Core\Blocks\ListFilter::buttons((array) ($catField['options'] ?? []), $counts, $d, $want);
+    }
+}
+[$where, $cat] = Calendar::blockWhere($t, $d, $catButtons ? $query : []);
 $occ = Calendar::occurrences($t, $view === 'month' ? $gridStart : $first, $view === 'month' ? $gridEnd : $next, ['where' => $where, 'source' => (string) ($d['source'] ?? '')]);
 \Core\StructuredData::events($t, array_values(array_filter($occ, fn($o) => $o['start'] >= new DateTimeImmutable('today', Calendar::tz()))));   // schema.org Event (anstehende)
 
@@ -46,7 +62,6 @@ $dTag = $hTag === 'h3' ? 'h4' : 'h3';
 $qs = fn(string $mon, ?string $k = null) => '?' . http_build_query(array_filter(['monat' => $mon, 'kategorie' => $k ?? $cat], fn($v) => $v !== null && $v !== '')) . '#' . $b->domId();
 $link = fn(array $o) => !empty($d['link_detail']) ? Entries::href($t, $o['entry']) : null;
 $monthId = $b->domId() . '-monat';
-$catField = $c['category'] !== '' ? Tables::field($t, $c['category']) : null;
 $event = function (array $o, bool $withLoc) use ($t, $c, $link) {
     $url = $link($o);
     $title = e(Entries::title($t, $o['entry']));
@@ -76,10 +91,10 @@ $event = function (array $o, bool $withLoc) use ($t, $c, $link) {
     </nav>
   </div>
 
-  <?php if (!empty($d['visitor_filter']) && $catField): ?>
+  <?php if ($catButtons): ?>
   <nav class="cal-filter" aria-label="<?= e(lt('Nach Kategorie filtern')) ?>">
     <a class="cal-chip" href="<?= e('?' . http_build_query(['monat' => $month]) . '#' . $b->domId()) ?>" rel="nofollow"<?= $cat === null ? ' aria-current="true"' : '' ?>><?= e(lt('Alle')) ?></a>
-    <?php foreach ((array) ($catField['options'] ?? []) as $k => $l): ?>
+    <?php foreach ($catButtons as $k => $l): ?>
     <a class="cal-chip" href="<?= e($qs($month, (string) $k)) ?>" rel="nofollow"<?= $cat === (string) $k ? ' aria-current="true"' : '' ?>><?= e(Tables::optionLabel($catField, (string) $k)) ?></a>
     <?php endforeach; ?>
   </nav>

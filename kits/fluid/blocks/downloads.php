@@ -33,22 +33,26 @@ $fileIcon = fn(string $mime) => match (true) {
 <div class="wrap">
   <?= fluid_head($b) ?>
   <?php if ($rows && $list):
-    // Schlagworte der gezeigten Dateien für den Filter – nur sinnvoll ab zwei verschiedenen
+    // Gemeinsame Regel für Besucher-Filter (Core\Blocks\ListFilter): Suche und Schlagworte erst ab genug Dateien
+    // („Filter erst ab … Einträgen“), nur Schlagworte mit Dateien, ab zwei Schaltflächen
+    $enough = \Core\Blocks\ListFilter::enough($d, count($rows));
     $tagsOf = fn(array $r) => $r['m'] ? Media::tagList($r['m']['tags'] ?? '') : [];
     $allTags = [];
-    if (!empty($d['tag_filter'])) {
-        foreach ($rows as $r) foreach ($tagsOf($r) as $t) $allTags[$t] = ($allTags[$t] ?? 0) + 1;
-        ksort($allTags, SORT_NATURAL | SORT_FLAG_CASE);
+    if (!empty($d['tag_filter']) && $enough) {
+        $counts = [];
+        foreach ($rows as $r) foreach ($tagsOf($r) as $t) $counts[$t] = ($counts[$t] ?? 0) + 1;
+        ksort($counts, SORT_NATURAL | SORT_FLAG_CASE);
         // Nur diese Schlagworte als Filter (in dieser Reihenfolge) – interne Schlagworte der Mediathek bleiben so verborgen
         $chosen = array_values(array_filter(array_map(fn($t) => mb_strtolower(trim($t)), explode(',', (string) ($d['filter_tags'] ?? '')))));
-        if ($chosen) $allTags = array_filter(array_replace(array_fill_keys($chosen, 0), array_intersect_key($allTags, array_flip($chosen))));
-        if (count($allTags) < 2) $allTags = [];
+        $opts = $chosen ? array_fill_keys($chosen, true) : array_fill_keys(array_keys($counts), true);
+        foreach (\Core\Blocks\ListFilter::buttons($opts, $counts, $d) as $t => $_) $allTags[(string) $t] = (int) ($counts[$t] ?? 0);
     }
-    $tools = ($d['tools'] ?? true) !== false && count($rows) > 2;
+    $views = ($d['tools'] ?? true) !== false && count($rows) > 2;   // Umschalter Liste/Kacheln: ab drei Dateien
+    $tools = $views && $enough;                                     // Suche: nach der gemeinsamen Regel
     $tiles = ($d['view'] ?? 'list') === 'tiles';
     $uid = 'dl-' . substr(md5($b->id), 0, 8); ?>
   <div class="dlbox" data-downloads data-view="<?= $tiles ? 'tiles' : 'list' ?>">
-    <?php if ($tools || $allTags): ?>
+    <?php if ($views || $allTags): ?>
     <div class="dlbar" hidden>
       <?php if ($tools): ?>
       <label class="dlbar__search">
@@ -56,6 +60,8 @@ $fileIcon = fn(string $mime) => match (true) {
         <?= icon('magnifying-glass') ?>
         <input type="search" placeholder="<?= e(lt('Downloads durchsuchen …')) ?>" autocomplete="off" aria-controls="<?= $uid ?>" data-dl-search>
       </label>
+      <?php endif; ?>
+      <?php if ($views): ?>
       <div class="dlbar__views" role="group" aria-label="<?= e(lt('Darstellung')) ?>">
         <button type="button" class="dlbar__view" data-dl-view="list" aria-pressed="<?= $tiles ? 'false' : 'true' ?>"><?= icon('list') ?><span><?= e(lt('Liste')) ?></span></button>
         <button type="button" class="dlbar__view" data-dl-view="tiles" aria-pressed="<?= $tiles ? 'true' : 'false' ?>"><?= icon('squares-four') ?><span><?= e(lt('Kacheln')) ?></span></button>
