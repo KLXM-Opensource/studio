@@ -8233,6 +8233,8 @@ return [
     'Für eine saubere Gliederung: eine Ebene unter der Überschrift davor.' => 'For a clean outline: one level below the preceding heading.',
     'Bild zeigen (Karten)' => 'Show image (cards)',
     'Beschreibung zeigen' => 'Show description',
+    'Leer = die Elternseite der Unterseiten. Sinnvoll zusammen mit „Höchstens“, z. B. auf der Startseite.' => 'Empty = the parent page of the subpages. Useful together with “At most”, e.g. on the home page.',
+    'z. B. Alle Themen' => 'e.g. All topics',
     'Text am Pfeil (Kacheln)' => 'Text next to the arrow (tiles)',
     // Erweiterungen: Startfehler mit Name und Datei (Core\ExtensionError)
     'Abschalten, bis der Fehler behoben ist: in der Konfiguration der Website \'extensions\' => [\'{name}\' => false] – bzw. Administration → Funktionen & Erweiterungen. Optionale Pakete prüft php bin/console extensions:check.' => 'Switch it off until the error is fixed: in the website configuration \'extensions\' => [\'{name}\' => false] – or Administration → Features & extensions. php bin/console extensions:check checks optional packages.',

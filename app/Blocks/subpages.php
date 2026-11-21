@@ -3,7 +3,7 @@
  * Unterseiten (Kern-Block, vom Kit überschreibbar: kits/{name}/blocks/subpages.php). Die Kinder einer Seite – Standard: die
  * aufgerufene Seite, sonst die per Linkauswahl gewählte (page:ID) – als Karten, Liste oder Kacheln, automatisch aus dem Seitenbaum
  * (Core\Blocks\SubpageList): Titel, Beschreibung, Bild des Seitenkopfs bzw. Vorschaubild. Jede Karte ist ein Link (Titel), die
- * Liste bleibt eine echte Liste mit Links. Aussehen: resources/css/subpages.css (--kit-*, Variablen --sp-*).
+ * Liste bleibt eine echte Liste mit Links. Optional ein Button unter der Liste (button_label, button_link; leer = Elternseite). Aussehen: resources/css/subpages.css (--kit-*, Variablen --sp-*).
  * @var \Core\Block $b  @var array $d
  */
 use Core\Blocks\SubpageList;
@@ -16,7 +16,10 @@ $tag = in_array($d['heading'] ?? '', ['h2', 'h3', 'h4'], true) ? (string) $d['he
 $showImage = $layout === 'cards' && ($d['show_image'] ?? true);
 $showText = (bool) ($d['show_text'] ?? true);
 $more = trim((string) ($d['more_label'] ?? '')) ?: lt('Mehr erfahren');
-$items = SubpageList::items($d);
+$parent = SubpageList::parent($d);
+$items = SubpageList::items($d, $parent);
+$btnLabel = trim((string) ($d['button_label'] ?? ''));
+$btnHref = $btnLabel === '' ? '' : (!empty($d['button_link']) ? link_href((string) $d['button_link']) : ($parent ? SubpageList::item($parent)['href'] : ''));
 $sizes = ['2' => '(min-width: 1080px) 520px, (min-width: 640px) 45vw, 90vw', '3' => '(min-width: 1080px) 360px, (min-width: 640px) 45vw, 90vw',
     '4' => '(min-width: 1080px) 270px, (min-width: 640px) 45vw, 90vw'][$cols];
 ?>
@@ -41,5 +44,6 @@ $sizes = ['2' => '(min-width: 1080px) 520px, (min-width: 640px) 45vw, 90vw', '3'
     </li>
     <?php endforeach; ?>
   </ul>
+  <?php if ($btnHref !== ''): ?><p class="cms-subpages__more"><a class="<?= e(app()->theme->def['button_class'] ?? 'btn btn--primary') ?>" href="<?= e($btnHref) ?>"<?= $b->edit('button_label') ?>><?= e($btnLabel) ?></a></p><?php endif; ?>
   <?php elseif (is_editing()): ?><p class="empty-hint"><?= e(__('Keine veröffentlichten Unterseiten – legen Sie unter dieser Seite Seiten an oder wählen Sie eine andere Elternseite.')) ?></p><?php endif; ?>
 </div>

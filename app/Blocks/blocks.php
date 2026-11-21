@@ -473,6 +473,9 @@ return [
             ['name' => 'show_image', 'label' => 'Bild zeigen (Karten)', 'type' => 'bool', 'default' => true, 'width' => 'half'],
             ['name' => 'show_text', 'label' => 'Beschreibung zeigen', 'type' => 'bool', 'default' => true, 'width' => 'half'],
             ['name' => 'more_label', 'label' => 'Text am Pfeil (Kacheln)', 'type' => 'text', 'max' => 40, 'width' => 'half', 'placeholder' => 'Mehr erfahren'],
+            ['name' => 'button_label', 'label' => 'Button unter der Liste', 'type' => 'text', 'width' => 'half', 'placeholder' => 'z. B. Alle Themen'],
+            ['name' => 'button_link', 'label' => 'Button-Link', 'type' => 'link', 'width' => 'half',
+                'help' => 'Leer = die Elternseite der Unterseiten. Sinnvoll zusammen mit „Höchstens“, z. B. auf der Startseite.'],
         ],
     ],
     'partners' => [
