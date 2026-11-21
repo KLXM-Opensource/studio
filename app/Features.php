@@ -57,6 +57,8 @@ final class Features
             'languages' => ['Mehrsprachigkeit', []],
             'maps' => ['Karten', []],
             'calendar' => ['Kalender (Termine, Wiederholungen, iCal)', []],
+            // Abonnieren per App mit Token (Core\Data\Subscriptions): Kalender/Kontakte auch mit internen Einträgen – Standard aus
+            'subscriptions' => ['Kalender und Kontakte per App abonnieren (Abo-Tokens, auch interne Einträge)', []],
             'pwa' => ['App-Icon & installierbare Web-App', []],
             'theme_switch' => ['Kit in den Grundeinstellungen wechseln', []],
             'design' => ['Design anpassen (Style-Editor)', ['design.edit']],
@@ -94,7 +96,7 @@ final class Features
     }
 
     /** Funktionen, die ohne ausdrückliche Freigabe in der Konfiguration aus sind (Besucher-Texte gehen an einen KI-Anbieter) */
-    public const OFF_BY_DEFAULT = ['chat.visitor', 'glossary', 'push'];
+    public const OFF_BY_DEFAULT = ['chat.visitor', 'glossary', 'push', 'subscriptions'];
 
     /** UI-Schalter je Website (nur ausdrücklich gesetzte Werte): ['api' => false, 'mcp' => true] */
     public const UI_KEY = 'sys.features_ui';
@@ -105,7 +107,7 @@ final class Features
     /** Hart voneinander abhängige Funktionen: Funktion => Voraussetzung (ohne sie wirkungslos) */
     public const REQUIRES = [
         'data.schema' => 'data', 'data.shared' => 'data', 'calendar' => 'data', 'forms.data' => 'data', 'sources' => 'data',
-        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media', 'requests.mail' => 'requests', 'glossary' => 'data',
+        'chat.visitor' => 'ai', 'chat.assistant' => 'ai', 'media.svg' => 'media', 'requests.mail' => 'requests', 'glossary' => 'data', 'subscriptions' => 'data',
     ];
 
     /** Voreinstellungen für typische Projekte */
@@ -158,6 +160,8 @@ final class Features
         if (!$state['data']) $state['sources'] = false;
         // Glossar: Begriffe stehen in einer Datentabelle
         if (!$state['data']) $state['glossary'] = false;
+        // Abo-Tokens gelten für Datentabellen
+        if (!$state['data']) $state['subscriptions'] = false;
         return self::$state = $state;
     }
 

@@ -84,4 +84,6 @@ return [
     'Keine Organisation ausgeben' => 'Do not output an organisation',
     'Gilt, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Leer: Name der Organisation aus den Website-Einstellungen.' => 'Applies when no “Company (ORG)” field is mapped. Empty: organisation name from the website settings.',
     'Adressbuch: Die Felder gehen ohne Zuordnung an die Apps – Telefon, E-Mail, Adresse und Web mit ihren Beschriftungen, Listen als Gruppen. Felder, die nur für die Website freigegeben sind, gehen nie an Apps.' => 'Address book: the fields go to the apps without any mapping – phone, email, address and web with their labels, lists as groups. Fields released only for the website never go to apps.',
+    'CardDAV (Adressbuch-Apps)' => 'CardDAV (address book apps)',
+    'In der Adressbuch-App ein CardDAV-Konto anlegen: Server-Adresse, Benutzername „abo“, Passwort = Abo-Token. Nur lesen – Änderungen nur im CMS.' => 'Create a CardDAV account in the address book app: server address, user name “abo”, password = subscription token. Read only – changes only in the CMS.',
 ];

@@ -30,6 +30,7 @@ final class Filters
         'admin.brand' => ['array{0: string, 1: string} Zeile 1 und 2', 'site', 'Marke oben in der Seitenleiste der Verwaltung (Standard: project.brand bzw. Website-Name), z. B. „Verbands-CMS“ für einen Verbund.'],
         'media.usages' => ['list<array{label: string, url: ?string, graphic?: int}> „Verwendet auf“ einer Datei', 'media (ID)', 'Verwendungen einer Datei der Mediathek ergänzen oder Adressen setzen (z. B. Bearbeiten im Grafik-Editor). Einträge ohne label fallen weg.'],
         'presence.object' => ['array{allowed: bool, last: ?array{user_id: ?int, created_at: string}}', 'type, id (z. B. graphic, media:12)', 'Eigene Arten für „Wer arbeitet gerade wo“ (Core\\Http\\Controllers\\Admin\\PresenceController): darf die Person das Objekt bearbeiten, wer hat zuletzt gespeichert. Kern-Arten page und entry laufen nicht durch den Filter.'],
+        'subscriptions.apps' => ['list<array{key, label, url, user, password, help}> weitere Zugänge eines Abos', 'table, scope (public|internal), token (Klartext nur direkt nach dem Anlegen, sonst null)', 'Seite „Abonnieren“ einer Tabelle: weitere Zugänge für Apps nennen (z. B. CardDAV der Erweiterung dav mit dem Abo-Token als Passwort).'],
         'data_list.query' => ['array $options für Entries::query (where, order, limit, q …)', 'table, block (Daten des Blocks)', 'Abfrage des Blocks „Datenliste“ ändern (z. B. zusätzliche Bedingung).'],
     ];
 

@@ -14,10 +14,15 @@ use DateTimeZone;
  */
 final class ICal
 {
-    /** Kompletter Kalender (VCALENDAR) mit allen übergebenen Einträgen – öffentliche Ausgabe: ohne „Nie öffentlich“-Felder (Exposure) */
+    /**
+     * Kompletter Kalender (VCALENDAR) mit allen übergebenen Einträgen – öffentliche Ausgabe: ohne „Nie öffentlich“-Felder (Exposure).
+     * $o['internal'] = true (Abo-Token mit Umfang „intern“, Core\Data\Subscriptions): wie CalDAV alles außer „Nur Website“-Feldern.
+     */
     public static function calendar(array $table, array $entries, array $o = []): string
     {
-        $entries = Exposure::publicRows($table, $entries, 'ics');   // Freigabe für das Ziel „ics“ (öffentliche Kalender-Datei)
+        $entries = !empty($o['internal'])
+            ? array_map(fn($e) => Exposure::forApps($table, $e, 'ics'), $entries)
+            : Exposure::publicRows($table, $entries, 'ics');   // Freigabe für das Ziel „ics“ (öffentliche Kalender-Datei)
         $tz = Calendar::tz();
         $events = [];
         $years = [];

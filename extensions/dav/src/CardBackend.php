@@ -35,7 +35,7 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
     private function table(mixed $id): array
     {
         $t = Tables::find((int) $id);
-        if (!$t || !Dav::tableSettings($t)['addressbook'] || !Dav::canSee($t)) throw new NotFound('Adressbuch nicht gefunden.');
+        if (!$t || !(Dav::tableSettings($t)['addressbook'] || Dav::aboTable($t)) || !Dav::canSee($t)) throw new NotFound('Adressbuch nicht gefunden.');
         return $t;
     }
 
@@ -73,7 +73,7 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         foreach (Entries::query($t, ['status' => 'all', 'lang' => Lang::default(), 'limit' => 5000]) as $e) {
             $o = $objs[$e['id']] ?? null;
             if ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft') continue;
-            if (!Dav::visible($s, $e)) continue;
+            if (!Dav::visible($s, $e) || !Dav::aboAllows($t, $e)) continue;
             $out[] = [$e, $o];
         }
         return $out;
@@ -81,7 +81,7 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
 
     private function row(array $t, array $e, ?array $o): array
     {
-        $data = self::render($t, $e, $o);
+        $data = self::render($t, Dav::aboEntry($t, $e), $o);   // Abo-Token „nur öffentlich“: nur freigegebene Angaben
         return ['id' => (int) $e['id'], 'uri' => $o['uri'] ?? 'cms-' . (int) $e['id'] . '.vcf', 'lastmodified' => strtotime((string) $e['updated_at']) ?: time(),
             'etag' => Dav::etag($data), 'size' => strlen($data), 'carddata' => $data];
     }
@@ -101,7 +101,7 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         if ($e && !\Core\Data\Shared::visibleAll($t, $e)) $e = null;
         if (!$e || ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft')) return [null, $o];
         // „Nur veröffentlichte Einträge“: Entwürfe sind für Apps nicht vorhanden (Abruf/Ändern → 404, Löschen → nichts zu tun)
-        if (!Dav::visible(Dav::tableSettings($t), $e)) return [null, $o];
+        if (!Dav::visible(Dav::tableSettings($t), $e) || !Dav::aboAllows($t, $e)) return [null, $o];
         return [$e, $o ?: (Dav::objects('card', $t['handle'])[$id] ?? null)];
     }
 

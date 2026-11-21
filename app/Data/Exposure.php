@@ -293,6 +293,7 @@ final class Exposure
     {
         $r = app()->request;
         if (!$r || $r->isAdminPath()) return false;
+        if (Subscriptions::inInternal()) return false;   // Abo-Token mit Umfang „intern“ (Core\Data\Subscriptions)
         $p = (string) $r->path;
         foreach (['/api/', '/mcp', '/dav', '/.well-known/'] as $pre) if ($p === rtrim($pre, '/') || str_starts_with($p, $pre)) return false;
         return true;

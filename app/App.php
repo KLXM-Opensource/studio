@@ -136,7 +136,9 @@ final class App
             // Ohne Staging-Passwort nur die per Schlüssel angemeldeten Schnittstellen (öffentliche /api/live, /api/chat … bleiben geschützt)
             || str_starts_with($request->path, '/api/v1/') || $request->path === '/mcp' || $request->path === '/health'
             // WebDAV-Erweiterungen (CalDAV/CardDAV) melden sich selbst per HTTP Basic an
-            || $request->path === '/dav' || str_starts_with($request->path, '/dav/') || str_starts_with($request->path, '/.well-known/')) {
+            || $request->path === '/dav' || str_starts_with($request->path, '/dav/') || str_starts_with($request->path, '/.well-known/')
+            // Abo-Tokens für Kalender/Kontakte (Core\Data\Subscriptions) sind selbst die Anmeldung
+            || (bool) preg_match('~^/(kalender|vcard)/[^/]+/abo/[^/]+\.(ics|vcf)$~', $request->path)) {
             return null;
         }
         $user = $request->server['PHP_AUTH_USER'] ?? null;

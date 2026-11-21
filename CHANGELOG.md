@@ -10,6 +10,23 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Kalender und Kontakte per App abonnieren
+- **Seite „Abonnieren“** je Kalender- und Kontakte-Tabelle (Daten → Tabelle → Abonnieren, Recht „Einträge bearbeiten“): öffentliche
+  webcal-Adresse des Kalender-Feeds bzw. öffentliche **.vcf-Sammeldatei** der freigegebenen Kontakte (`/vcard/{tabelle}.vcf`, nur
+  Tabellen für die Website), QR-Code (lokal erzeugt) und Anleitung für iPhone/iPad, macOS, Android (ICSx⁵/DAVx⁵), Outlook und
+  Thunderbird – auch im Handbuch.
+- **Abo-Tokens** (`Core\Data\Subscriptions`, Funktion `subscriptions`, Standard **aus**): benannt, an eine Tabelle gebunden, Umfang
+  „nur öffentlich“ oder „inklusive interner Einträge und Angaben“ (Entwürfe, nicht freigegebene Kontakte, private Nummern – Felder
+  „Nur Website“ nie), nur lesen, optional ablaufend, widerrufbar, „zuletzt genutzt“. Gespeichert nur als SHA-256, Klartext einmal im
+  Dialog. Adressen mit Token im Pfad (`/kalender/{tabelle}/abo/{token}.ics`, `/vcard/{tabelle}/abo/{token}.vcf`) – sicher gegen Caches,
+  die Query-Strings ignorieren; Antworten `private, no-store`, `noindex`, `no-referrer`. Gültig nur, solange das anlegende Konto
+  besteht und die Tabelle bearbeiten darf.
+- **Schutz:** Rate-Limit je Token (120 in 15 min) und je IP bei Fehlversuchen (20 in 15 min); Sicherheitsprotokoll `abo-access`
+  (Info) und `abo-token-invalid` (fail2ban-Filter); Tokens erscheinen nie im 404- oder Sicherheitsprotokoll (gekürzt), nie in
+  Fehlermeldungen oder Stacktraces. Token-Adressen brauchen auf Staging-Websites kein Staging-Passwort.
+- **CardDAV mit Abo-Token** (Erweiterung dav 1.5.0): Token als Passwort, nur lesen, nur die gebundene Kontakte-Tabelle; neuer Filter
+  `subscriptions.apps` für weitere Zugänge auf der Seite „Abonnieren“. Selbsttest `subscriptions:selftest`.
+
 ### Adressbuch (Tabellenart „contacts“) und Freigabe je Feld und Ziel
 - **Tabellenart Adressbuch** (`settings.kind = contacts`, `Core\Data\Kinds`): eine normale Inhaltstabelle (Route, Detailseiten,
   Revisionen, Workflow, geteilte Tabellen, Suche, API, Blöcke) mit festem, versioniertem Grundschema (`settings.kind_version`, nur

@@ -15,15 +15,17 @@ namespace Core;
  * reset-limited (Passwort vergessen zu oft), api-key-invalid, oidc-failed (Anmeldung per OpenID Connect abgewiesen: state, Token,
  * Konto), monitor-denied (Status-Abfrage mit ungültiger Signatur, Core\Monitoring), probe (typische Angriffsadresse wie /wp-login.php, /.env – nur
  * wenn keine Weiterleitung greift). Nur zur Nachvollziehbarkeit (kein Treffer für fail2ban, INFO): oidc-account (Konto bei der
- * ersten Anmeldung über einen OpenID-Connect-Anbieter angelegt, Core\Oidc\Accounts – die Integritätsprüfung zeigt es als Info).
+ * ersten Anmeldung über einen OpenID-Connect-Anbieter angelegt, Core\Oidc\Accounts – die Integritätsprüfung zeigt es als Info),
+ * abo-access (Abruf eines Kalender-/Kontakte-Abos mit Token). abo-token-invalid (sperrbar): unbekanntes oder fremdes Abo-Token
+ * (Core\Data\Subscriptions). Abo-Tokens im Pfad werden gekürzt (abo-k7m2...).
  * Keine E-Mail-Adressen, keine Passwörter. Größer als 5 MB → security.log.1 (eine Vorgängerdatei).
  * Filter und Jails für fail2ban: deploy/fail2ban/ (Entwicklerhandbuch → Sicherheit → fail2ban).
  */
 final class SecurityLog
 {
-    public const EVENTS = ['auth-failed', 'auth-limited', '2fa-failed', 'passkey-failed', 'reset-limited', 'api-key-invalid', 'oidc-failed', 'monitor-denied', 'probe'];
+    public const EVENTS = ['auth-failed', 'auth-limited', '2fa-failed', 'passkey-failed', 'reset-limited', 'api-key-invalid', 'oidc-failed', 'monitor-denied', 'abo-token-invalid', 'probe'];
     /** Ereignisse ohne Sperre (die Filter in deploy/fail2ban kennen sie nicht) */
-    public const INFO = ['oidc-account'];
+    public const INFO = ['oidc-account', 'abo-access'];
     private const MAX_BYTES = 5_000_000;
     /** Adressen, die eine Website mit KLXM Studio nie hat – wer sie abfragt, sucht Lücken anderer Systeme */
     private const PROBE = '~^/(?:wp-login\.php|wp-admin(?:/|$)|wp-config|xmlrpc\.php|\.env|\.git/|\.svn/|\.aws/|\.ssh/|\.htpasswd|phpmyadmin|pma(?:/|$)|myadmin|'
@@ -96,7 +98,7 @@ final class SecurityLog
             $ip = $ip !== null && filter_var($ip, FILTER_VALIDATE_IP) ? $ip : self::clientIp();
             $site = function_exists('site') ? (string) site()->key : '-';
             $path = (string) (app()->request->path ?? '-');
-            $path = preg_replace('~[^\x21-\x7E]~', '?', mb_substr($path, 0, 200)) ?: '-';
+            $path = preg_replace('~[^\x21-\x7E]~', '?', mb_substr(Data\Subscriptions::redact($path), 0, 200)) ?: '-';
             @file_put_contents($f, date('c') . " klxm-studio $event ip=$ip site=$site path=$path\n", FILE_APPEND | LOCK_EX);
         } catch (\Throwable) {
         }

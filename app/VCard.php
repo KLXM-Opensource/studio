@@ -145,11 +145,14 @@ final class VCard
         return $t && StructuredData::typeOf($t) === 'Person' ? $t : null;
     }
 
-    /** vCard einer Person aus einem veröffentlichten Eintrag */
-    public static function person(array $table, array $e): string
+    /**
+     * vCard einer Person aus einem veröffentlichten Eintrag. $internal (Abo-Token mit Umfang „intern“, Core\Data\Subscriptions):
+     * alle Angaben wie für die Adressbuch-Apps der Redaktion (Exposure::forApps) – „Nur Website“-Felder auch dann nie.
+     */
+    public static function person(array $table, array $e, bool $internal = false): string
     {
         // „Nie öffentlich“, nicht freigegebene Angaben und „Nur Website“-Felder: nie in der Visitenkarte
-        $e = Data\Exposure::publicEntry($table, $e, 'vcard');
+        $e = $internal ? Data\Exposure::forApps($table, $e, 'vcard') : Data\Exposure::publicEntry($table, $e, 'vcard');
         if (Data\Kinds::isContacts($table)) return self::contact($table, $e);
         $find = fn(array $types, array $names = []) => StructuredData::field($table, $e, $types, $names);
         $img = Tables::imageField($table);

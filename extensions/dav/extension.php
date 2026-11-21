@@ -16,7 +16,7 @@ spl_autoload_register(function (string $class): void {
 return [
     'name' => 'dav',
     'label' => 'CalDAV/CardDAV',
-    'version' => '1.4.0',
+    'version' => '1.5.0',
     'requires' => '>=1.0.0',
     'description' => 'Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵). Anmeldung mit App-Passwörtern.',
     'author' => 'KLXM Crossmedia GmbH and contributors',
@@ -34,6 +34,10 @@ return [
         $x->account(fn(array $user) => Klxm\Dav\Dav::accountCard($user), 'dav.use');
         // Konto gelöscht: seine App-Passwörter entfernen
         $x->on(Core\Events\UserDeleted::class, fn(Core\Events\UserDeleted $e) => app()->db->query('DELETE FROM dav_passwords WHERE user_id = ?', [$e->id]));
+        // Seite „Abonnieren“ (Core\Data\Subscriptions): Kontakte per CardDAV mit dem Abo-Token als Passwort (nur lesen)
+        $x->filter('subscriptions.apps', fn(array $apps, array $c) => Klxm\Dav\Dav::enabled() && Core\Data\Subscriptions::kind($c['table']) === 'contacts'
+            ? [...$apps, ['key' => 'carddav', 'label' => __('CardDAV (Adressbuch-Apps)'), 'url' => absolute_url('/dav/'), 'user' => 'abo', 'password' => $c['token'] ?? null,
+                'help' => __('In der Adressbuch-App ein CardDAV-Konto anlegen: Server-Adresse, Benutzername „abo“, Passwort = Abo-Token. Nur lesen – Änderungen nur im CMS.')]] : null);
         $x->adminPage(['href' => '/admin/dav', 'label' => 'Kalender & Kontakte in Apps', 'kind' => 'settings', 'icon' => 'dav',
             'perm' => 'data.schema', 'feature' => 'dav', 'visible' => fn(): bool => can('dav.use') && Klxm\Dav\Dav::enabled(),
             'description' => 'Tabellen als Kalender bzw. Adressbuch für Apps bereitstellen, App-Passwörter']);
