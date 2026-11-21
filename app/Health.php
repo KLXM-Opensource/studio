@@ -77,6 +77,7 @@ final class Health
         $add(\Core\Fonts::health(), self::SETUP);            // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)
         $add(\Core\Mail\Accounts::health(), self::SETUP);    // E-Mail-Konten: Netzwerk-Konto, Zwecke mit fehlendem Konto
         $add(\Core\Mail\Imprint::health(), self::SETUP);     // Impressum für E-Mails: weder Text noch Impressum-Seite
+        $add(\Core\RoleCleanup::health(), self::SETUP);     // Rollen mit unbekannten Rechten (entfernt nur roles:clean)
         return array_values($out);
     }
 
