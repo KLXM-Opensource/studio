@@ -7,6 +7,8 @@ $__cmds = [
         ['user:email <alt> <neu>', 'E-Mail-Adresse eines Kontos direkt ändern – ohne Bestätigung, Hinweis-E-Mail an beide Adressen, Sitzungen enden (auth_ver), offene Änderungen verfallen. Netzwerk-Konten nur auf der Netzwerk-Website (Schatten-Konten werden nachgezogen)'],
         ['account:selftest', 'Selbsttest der Anmeldedaten und von „Passwort vergessen“: Tokens, Ablauf, einmalig, Abbrechen, vergebene/unbekannte Adresse (keine Rückschlüsse), auth_ver, 2FA bleibt Pflicht – in einer Transaktion, zurückgerollt (Exit-Code 1 bei Fehlern)'],
         ['user:invite <email> [rolle] [--name="…"] [--lang=de|en]', 'Person einladen: E-Mail mit Link (einmalig, invite_days Tage gültig); ohne zugestellte E-Mail wird der Link ausgegeben. Rolle nie „network“'],
+        ['roles:clean [--dry-run] [--all]', 'Rollen: Rechte entfernen, die weder der Kern noch der Code einer installierten Erweiterung kennt (z. B. einer entfernten Erweiterung); --dry-run zeigt nur, was entfernt würde. migrate entfernt nichts – Health zeigt einen Hinweis'],
+        ['roles:selftest', 'Selbsttest der Rollen-Bereinigung: unbekannte Rechte, Probelauf, Entfernen, Erhalt beim Speichern einer Rolle (Exit-Code 1 bei Fehlern)'],
         ['invites:selftest', 'Selbsttest der Einladungen (Token, Hash, Rollenprüfung; Netzwerk-Admins einladen: nur Netzwerk-Website und Netzwerk-Konten, Liste, Annehmen, Ablauf – zurückgerollt; Exit-Code 1 bei Fehlern)'],
         ['install', 'Erstinstallation ohne Rückfragen (läuft nach composer create-project): Ordner, Datenbank, config.local.php; zeigt Setup-Token und nächste Schritte – wiederholbar'],
         ['setup:token', 'Setup-Token für /admin/setup anzeigen'],
