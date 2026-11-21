@@ -415,6 +415,12 @@ return [
     // Dunkle Werte bei „Dunkles Farbschema“ (Klasse has-dark) und Geräte-Einstellung; Vorschau im Editor setzt is-dark
     'dark' => ['media' => '(prefers-color-scheme: dark)', 'scope' => 'html.has-dark', 'force' => 'is-dark', 'manual' => ['dark' => 'scheme-dark', 'light' => 'scheme-light']],
 
+    // Linkfarbe (Dachzeilen, Links, Häkchen …) im Abschnitt „Akzent hell“: die Fläche mischt das Kit selbst (14 % Farbton im
+    // Hintergrund, _base.css .bg-tint, bei „Farbenfroh“ je Abschnitt ein anderer Farbton). Besteht der Akzent darauf, bleibt er
+    // unverändert; sonst etwas Richtung Überschriftenfarbe (Core\Design::derived). t1 = Akzent, t2 … t5 = Farbtöne „Farbenfroh“.
+    'derive' => array_map(fn($i, $tone) => ['var' => '--f-link-t' . $i, 'fg' => 'accent', 'bg' => ['mix', $tone, 'background', 14], 'toward' => 'ink', 'min' => 4.5],
+        [1, 2, 3, 4, 5], ['accent', 'secondary', 'color3', 'color4', 'color5']),
+
     // Musterseite für die Vorschau im Editor (Showcase, siehe tools/demo.php)
     'sample' => 'showcase',
 ];

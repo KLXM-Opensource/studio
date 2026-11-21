@@ -214,6 +214,9 @@ final class Design
             if (!empty($t['dark_var']) && isset($values[$n . '@dark'])) $light[] = $t['dark_var'] . ':' . $values[$n . '@dark'];
             if ($var !== '' && isset($values[$n . '@dark'])) $dark[] = $var . ':' . $values[$n . '@dark'];
         }
+        // Abgeleitete Schriftfarben mit Kontrastschutz ('derive'): nur Variablen, deren Wert das Kit selbst verwendet
+        foreach (self::derived($values, false) as $var => $c) $light[] = $var . ':' . $c;
+        if ($dark) foreach (self::derived($values, true) as $var => $c) $dark[] = $var . ':' . $c;
         $out = ':root{' . implode(';', $light) . '}';
         $d = (array) (self::def()['dark'] ?? []);
         if ($dark && !empty($d['scope'])) {
@@ -226,6 +229,57 @@ final class Design
             if ($forced !== '') $out .= "\n" . $d['scope'] . '.' . $forced . '{' . implode(';', $dark) . '}';
         }
         return $out . "\n";
+    }
+
+    /**
+     * Abgeleitete Schriftfarben mit Kontrastschutz. Ein Kit setzt eine Farbe oft auf eine Fläche, die es selbst mischt
+     * (z. B. Akzent als Linkfarbe auf „Akzent hell“ = 14 % Akzent im Hintergrund) – die Design-Prüfung sieht nur die
+     * gewählten Paare. 'derive' im Design des Kits:
+     *   ['var' => '--f-link-tint', 'fg' => 'accent', 'bg' => ['mix', 'accent', 'background', 14], 'toward' => 'ink', 'min' => 4.5]
+     * fg/bg/toward: Token-Name, #RRGGBB oder ['mix', a, b, Prozent von a] (wie color-mix in srgb).
+     * Besteht fg auf bg, bleibt die Farbe exakt gleich (Website unverändert); sonst wird fg schrittweise Richtung 'toward'
+     * gemischt, bis min (+ kleiner Puffer gegen Rundung im Browser) erreicht ist.
+     * @return array<string, string> Variable => #RRGGBB
+     */
+    public static function derived(array $values, bool $dark): array
+    {
+        $tokens = self::tokens();
+        $resolve = function (mixed $ref) use (&$resolve, $values, $tokens, $dark): ?string {
+            if (is_array($ref)) {
+                [$a, $b] = [$resolve($ref[1] ?? null), $resolve($ref[2] ?? null)];
+                return $a && $b ? Contrast::mix($a, $b, (float) ($ref[3] ?? 50)) : null;
+            }
+            $ref = (string) $ref;
+            if (isset($tokens[$ref])) {
+                $v = $dark ? ($values[$ref . '@dark'] ?? $values[$ref] ?? null) : ($values[$ref] ?? null);
+                return self::color($v ?? ($dark ? ($tokens[$ref]['dark'] ?? $tokens[$ref]['default'] ?? null) : ($tokens[$ref]['default'] ?? null)));
+            }
+            return self::color($ref);
+        };
+        $out = [];
+        foreach ((array) (self::def()['derive'] ?? []) as $r) {
+            $var = (string) ($r['var'] ?? '');
+            if (!preg_match('~^--[a-z0-9_-]+$~i', $var)) continue;
+            [$fg, $bg, $to] = [$resolve($r['fg'] ?? null), $resolve($r['bg'] ?? null), $resolve($r['toward'] ?? null)];
+            if (!$fg || !$bg) continue;
+            $out[$var] = self::readable($fg, $bg, (float) ($r['min'] ?? 4.5), $to);
+        }
+        return $out;
+    }
+
+    /** $fg unverändert, wenn es auf $bg $min erreicht; sonst die kleinste Mischung Richtung $toward (Standard: Schwarz/Weiß), die genügt */
+    public static function readable(string $fg, string $bg, float $min = 4.5, ?string $toward = null): string
+    {
+        if (Contrast::ratio($fg, $bg) >= $min) return $fg;
+        $ends = $toward !== null ? [$toward] : [];
+        $ends[] = Contrast::luminance($bg) > 0.18 ? '#000000' : '#FFFFFF';
+        foreach ($ends as $end) {
+            for ($p = 1; $p <= 100; $p++) {
+                $c = Contrast::mix($end, $fg, $p);
+                if (Contrast::ratio($c, $bg) >= $min + 0.05) return $c;
+            }
+        }
+        return end($ends);
     }
 
     /** Klassen für <html> aus choice-/bool-Werten mit 'class' ($values: andere Werte statt der gespeicherten, z. B. Live-Vorschau) */
