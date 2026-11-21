@@ -74,7 +74,11 @@ final class Status
         $keys = array_values(array_filter(array_map(fn($k) => Signature::parseKey($k['key']), $s['keys'])));
         $uri = (string) ($r->server['REQUEST_URI'] ?? '/');
         $limiter = new RateLimiter(app()->db);
-        return Signature::verify($h, (string) ($r->server['REQUEST_METHOD'] ?? 'GET'), strtolower($r->host()), $uri, $keys,
+        // Host normalisiert wie beim Dienst (Signature::hostOf) und nur, wenn er zu dieser Installation gehört – eine für eine fremde
+        // Installation signierte Anfrage (gleicher Hub-Schlüssel) lässt sich hier nicht mit deren Host-Header wiederholen
+        $host = Signature::normalizeHost($r->host(), $r->isSecure());
+        if (!\Core\InstanceInfo::known($host) && !\Core\InstanceInfo::known((string) preg_replace('~:\d+$~', '', $host))) return 'host';
+        return Signature::verify($h, (string) ($r->server['REQUEST_METHOD'] ?? 'GET'), $host, $uri, $keys,
             function (string $kid, string $nonce) use ($limiter): bool {
                 $key = 'mon-nonce:' . $kid . ':' . $nonce;
                 if ($limiter->count($key, Signature::NONCE_TTL) > 0) return true;
@@ -83,7 +87,10 @@ final class Status
             }, $now);
     }
 
-    /** Status nach status-v1 (Pflichtfelder: protocol, system, system_version, php, generated_at, health) */
+    /**
+     * Status nach status-v1 (Pflichtfelder: protocol, system, system_version, php, generated_at, health, nonce). nonce ist Pflicht:
+     * das Echo des X-Status-Nonce der Anfrage – der Dienst verwirft Antworten ohne passendes nonce (keine alte, zwischengespeicherte Antwort).
+     */
     public static function collect(string $nonce = ''): array
     {
         $file = site()->storage('cache/monitoring-status.json');

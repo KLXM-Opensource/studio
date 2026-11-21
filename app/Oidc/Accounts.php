@@ -81,18 +81,39 @@ final class Accounts
     }
 
     /**
+     * Rolle für diese Anmeldung → [Rolle, aus dem Claim?]. Steht der Rollen-Claim (role_claim, Standard „roles“) im Token, entscheidet
+     * er – „admin“ → Rolle des Anbieters, „redaktion“ → editor_role, sonst abgewiesen (keine Rechte aus unbekannten Werten); sonst
+     * die Rolle des Anbieters. Ohne diese Zuordnung bekäme eine Freigabe „redaktion“ im Hub hier die volle Administration.
+     * @return array{0: string, 1: bool}
+     * @throws OidcException
+     */
+    public static function roleFor(array $p, array $c): array
+    {
+        $claim = (string) ($p['role_claim'] ?? '');
+        if ($claim === '' || !array_key_exists($claim, $c)) return [(string) $p['role'], false];
+        $v = $c[$claim];
+        $vals = is_array($v) ? array_values(array_filter($v, 'is_string')) : (is_string($v) ? (preg_split('~[\s,]+~', $v) ?: []) : []);
+        $vals = array_map(fn($x) => strtolower(trim($x)), $vals);
+        if (in_array('admin', $vals, true)) return [(string) $p['role'], true];
+        if (in_array('redaktion', $vals, true)) return [Providers::editorRole((string) ($p['editor_role'] ?? 'editor')), true];
+        throw new OidcException(__('Ihr Konto beim Anbieter ist für diese Website nicht freigegeben.'));
+    }
+
+    /**
      * Konto zur Identität finden bzw. anlegen. @return array Zeile aus users (Netzwerk-Datenbank bei Rolle network)
      * @throws OidcException
      */
     public static function resolve(array $p, array $c): array
     {
         $email = self::admissible($p, $c);
-        $network = $p['role'] === 'network';
+        [$role, $fromClaim] = self::roleFor($p, $c);
+        $network = $role === 'network';
         $db = $network ? Network::db() : app()->db;
         self::ensureTable($db);
         $iss = $p['issuer'];
         $sub = (string) $c['sub'];
-        $name = mb_substr(trim((string) ($c['name'] ?? trim(($c['given_name'] ?? '') . ' ' . ($c['family_name'] ?? '')))), 0, 120);
+        $str = fn(string $k) => is_string($c[$k] ?? null) ? $c[$k] : '';   // nur Texte (verschachtelte Werte sind kein Name)
+        $name = mb_substr(trim(isset($c['name']) ? $str('name') : $str('given_name') . ' ' . $str('family_name')), 0, 120);
         $link = $db->fetch('SELECT * FROM ' . self::TABLE . ' WHERE issuer = ? AND subject = ?', [$iss, $sub]);
         $row = $link ? $db->fetch('SELECT * FROM users WHERE id = ?', [(int) $link['user_id']]) : null;
         if ($link && !$row) {
@@ -104,15 +125,17 @@ final class Accounts
             if ($byMail) {
                 $linked = (int) $db->fetchValue('SELECT COUNT(*) FROM ' . self::TABLE . ' WHERE user_id = ?', [(int) $byMail['id']]);
                 // Nur ein vorab freigegebenes Konto desselben Anbieters ohne Verknüpfung – nie ein Konto mit eigenem Passwort
+                // Verknüpfen per E-Mail nur mit ausdrücklich bestätigter Adresse (fehlendes email_verified reicht nicht)
+                $verified = ($c['email_verified'] ?? null) === true || ($c['email_verified'] ?? null) === 'true';
                 if ((string) ($byMail['idp'] ?? '') !== $p['id'] || $linked || (string) $byMail['password_hash'] !== self::NO_PASSWORD
-                    || ($network && $byMail['role'] !== 'network')) {
+                    || ($network && $byMail['role'] !== 'network') || !$verified) {
                     throw new OidcException(__('Für diese E-Mail-Adresse gibt es hier bereits ein Konto mit eigener Anmeldung. Bitte melden Sie sich damit an oder bitten Sie die Administration, es zu entfernen.'));
                 }
                 $row = $byMail;
             } elseif (!$p['jit']) {
                 throw new OidcException(__('Für Ihr Konto ist hier noch kein Zugang freigegeben.'));
             } else {
-                $id = $db->insert('users', ['email' => $email, 'name' => $name, 'password_hash' => self::NO_PASSWORD, 'role' => $p['role'],
+                $id = $db->insert('users', ['email' => $email, 'name' => $name, 'password_hash' => self::NO_PASSWORD, 'role' => $role,
                     'idp' => $p['id'], 'created_at' => now()]);
                 $row = $db->fetch('SELECT * FROM users WHERE id = ?', [$id]);
                 \Core\SecurityLog::write('oidc-account');   // Nachvollziehbarkeit; Integritätsprüfung zeigt das Konto als Info (Core\Integrity::oidcAccount)
@@ -123,11 +146,19 @@ final class Accounts
         }
         if (!$row) throw new OidcException(__('Das Konto konnte nicht angelegt werden.'));
         if ((int) ($row['disabled'] ?? 0)) throw new OidcException(__('Dieses Konto ist gesperrt.'));
-        if (!self::managed($row) || ($network && $row['role'] !== 'network')) {
+        if (!self::managed($row)) {
+            throw new OidcException(__('Dieses Konto wird hier lokal verwaltet und kann sich nicht über den Anbieter anmelden.'));
+        }
+        $upd = [];
+        // Rolle aus dem Claim folgt dem Anbieter bei jeder Anmeldung (Herabstufen im Hub wirkt sofort; bestehende Sitzungen enden)
+        if ($fromClaim && (string) $row['role'] !== $role) {
+            $upd['role'] = $role;
+            $db->query('UPDATE users SET auth_ver = auth_ver + 1 WHERE id = ?', [(int) $row['id']]);
+            $row['auth_ver'] = (int) ($row['auth_ver'] ?? 0) + 1;
+        } elseif ($network && $row['role'] !== 'network') {
             throw new OidcException(__('Dieses Konto wird hier lokal verwaltet und kann sich nicht über den Anbieter anmelden.'));
         }
         // Name und Adresse folgen dem Anbieter (Adresse nur, wenn sie hier frei ist)
-        $upd = [];
         if ($name !== '' && $name !== (string) $row['name']) $upd['name'] = $name;
         if ($email !== strtolower((string) $row['email']) && !$db->fetchValue('SELECT COUNT(*) FROM users WHERE LOWER(email) = ? AND id != ?', [$email, (int) $row['id']])) $upd['email'] = $email;
         if ($upd) $db->update('users', $upd, 'id = :id', ['id' => (int) $row['id']]);

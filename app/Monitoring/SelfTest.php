@@ -27,6 +27,10 @@ final class SelfTest
         $url = 'https://www.example.org/api/monitoring/status';
         $path = '/api/monitoring/status';
         $eq('Host ohne Standard-Port', [Signature::hostOf($url), Signature::hostOf('http://Example.org:8153/x')], ['www.example.org', 'example.org:8153']);
+        $eq('Host-Header normalisiert wie hostOf', [Signature::normalizeHost('WWW.Example.org:443', true), Signature::normalizeHost('www.example.org.', true),
+            Signature::normalizeHost('example.org:80', false), Signature::normalizeHost('example.org:8153', true), Signature::normalizeHost('[::1]:8080', false)],
+            ['www.example.org', 'www.example.org', 'example.org', 'example.org:8153', '[::1]:8080']);
+        $eq('Nonce länger gemerkt als das ganze Zeitfenster (2 × 300 s + 60 s)', Signature::NONCE_TTL, 660);
         $seenSet = [];
         $seen = function (string $kid, string $nonce) use (&$seenSet): bool {
             if (isset($seenSet["$kid|$nonce"])) return true;

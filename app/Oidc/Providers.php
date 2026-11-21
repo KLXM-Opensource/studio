@@ -35,6 +35,11 @@ final class Providers
         'account_label' => '',          // Kennzeichnung der Konten (leer = „Agentur-Konto“)
         'jit' => true,                  // Konto bei der ersten Anmeldung anlegen
         'mfa' => 'amr',                 // amr = Token muss einen zweiten Faktor belegen | trust = Anbieter erzwingt ihn selbst
+        // Rolle aus dem Claim (z. B. Agentur-Hub: „roles“ = ["admin"] | ["redaktion"]): steht er im Token, gilt „admin“ → Rolle oben,
+        // „redaktion“ → editor_role, jeder andere Wert → abgewiesen; die Rolle folgt dann bei jeder Anmeldung dem Anbieter.
+        // Fehlt der Claim im Token: Rolle oben (Anbieter ohne Rollen). '' = Claim nicht auswerten.
+        'role_claim' => 'roles',
+        'editor_role' => 'editor',      // Rolle für „redaktion“ (nie network)
         'claim' => '',                  // optional: Claim, der einen der Werte enthalten muss (z. B. roles)
         'claim_values' => [],
         'domains' => [],                // optional: erlaubte Domains der E-Mail-Adresse
@@ -69,6 +74,8 @@ final class Providers
             $p['claim_values'] = array_values(array_filter(array_map('trim', (array) $p['claim_values']), fn($v) => $v !== ''));
             $p['domains'] = array_values(array_filter(array_map(fn($d) => strtolower(trim((string) $d)), (array) $p['domains']), fn($v) => $v !== ''));
             $p['role'] = self::effectiveRole((string) $p['role'], $site);
+            $p['role_claim'] = (string) preg_replace('~[^\w.:-]~', '', (string) $p['role_claim']);
+            $p['editor_role'] = self::editorRole((string) $p['editor_role']);
             $out[(string) $id] = $p;
         }
         return $out;
@@ -94,6 +101,12 @@ final class Providers
         if ($role === 'auto') return $isNet && \Core\Sites::multi() ? 'network' : 'admin';
         if ($role === 'network') return $isNet ? 'network' : 'admin';
         return Permissions::role($role) ? $role : 'editor';
+    }
+
+    /** Rolle für „redaktion“: vorhandene Rolle der Website außer network; sonst editor */
+    public static function editorRole(string $role): string
+    {
+        return $role !== 'network' && $role !== 'auto' && Permissions::role($role) ? $role : 'editor';
     }
 
     public static function ready(array $p): bool
@@ -197,6 +210,8 @@ final class Providers
             'auth' => ($in['auth'] ?? '') === 'client_secret_post' ? 'client_secret_post' : 'client_secret_basic',
             'scopes' => 'openid email profile', 'role' => $role, 'account_label' => mb_substr(trim((string) ($in['account_label'] ?? '')), 0, 40),
             'jit' => !empty($in['jit']), 'mfa' => ($in['mfa'] ?? '') === 'trust' ? 'trust' : 'amr',
+            'role_claim' => (string) preg_replace('~[^\w.:-]~', '', (string) ($in['role_claim'] ?? ($prev['role_claim'] ?? 'roles'))),
+            'editor_role' => self::editorRole((string) ($in['editor_role'] ?? ($prev['editor_role'] ?? 'editor'))),
             'claim' => preg_replace('~[^\w.:-]~', '', (string) ($in['claim'] ?? '')), 'claim_values' => $list('claim_values'),
             'domains' => array_map('strtolower', $list('domains')), 'logout' => !empty($in['logout']),
             'logo_media' => max(0, (int) ($in['logo_media'] ?? 0)),

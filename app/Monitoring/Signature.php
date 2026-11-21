@@ -24,7 +24,20 @@ final class Signature
 {
     public const PROTOCOL = 'status-v1';
     public const SKEW = 300;
-    public const NONCE_TTL = 600;
+    /** Länger als das ganze Zeitfenster (2 × SKEW) plus Puffer – sonst ließe sich eine Anfrage genau an der Grenze wiederholen */
+    public const NONCE_TTL = 2 * self::SKEW + 60;
+
+    /** Host für die Basiszeichenkette aus dem Host-Header: klein, ohne abschließenden Punkt, Standard-Port (80/443) entfällt */
+    public static function normalizeHost(string $host, bool $secure): string
+    {
+        $h = rtrim(strtolower(trim($host)), '.');
+        if (preg_match('~^(.*?)(?::(\d+))?$~', $h, $m) && isset($m[2])) {
+            $h = rtrim($m[1], '.');
+            $port = (int) $m[2];
+            if (!(($secure && $port === 443) || (!$secure && $port === 80))) $h .= ':' . $port;
+        }
+        return $h;
+    }
 
     public static function base(string $method, string $host, string $pathQuery, int $ts, string $nonce): string
     {

@@ -186,7 +186,10 @@ Userinfo-Anfragen ab.
   erzwingt, darf der Client darauf verzichten (KLXM Studio: Einstellung „der Anbieter erzwingt ihn selbst“). Der Agentur Hub lässt
   ohnehin nur Sitzungen mit zweitem Faktor oder Passkey zu.
 - **Rollen:** Wertet der Client `roles` aus, dann nur bekannte Werte (`admin`, `redaktion`) auf eigene Rollen abbilden; ohne
-  passende Rolle keine Anmeldung. Rechte bei jeder Anmeldung neu abgleichen.
+  passende Rolle keine Anmeldung. Rechte bei jeder Anmeldung neu abgleichen. Ein Client, der `roles` nicht auswertet, gibt jeder
+  Freigabe – auch `redaktion` – dieselbe Rolle; das ist nur vertretbar, wenn er ausschließlich Administration vergibt und der
+  Hub nur `admin`-Freigaben erteilt. KLXM Studio wertet `roles` aus (Einstellung „Rolle aus dem Claim“, `Accounts::roleFor`):
+  `admin` → eingestellte Rolle, `redaktion` → Redaktionsrolle, sonst abgewiesen.
 - **Exakte `redirect_uri`:** Die Adresse, die der Client sendet, MUSS Zeichen für Zeichen der beim Hub registrierten
   entsprechen (Schema, Host, Port, Pfad, Query). Sie SOLL aus einer fest eingestellten Basis-Adresse entstehen, nicht aus dem
   `Host`-Kopf der Anfrage.

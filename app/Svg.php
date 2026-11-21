@@ -474,6 +474,8 @@ final class Svg
     {
         $x = strtolower(preg_replace('~[\s\x00-\x1f]+~', '', $v));
         if (preg_match('~(javascript|vbscript|livescript):|expression\(|-moz-binding|behavior:|@import|data:~', $x)) return true;
+        // Bildfunktionen mit Adresse als Zeichenkette – laden ohne url(…) nach (mask:image-set("//…" 1x), -webkit-image-set, src(), image(), cross-fade())
+        if (preg_match('~(image-set|image|src|cross-fade|element|paint)\(~', $x)) return true;
         if (str_contains($x, 'url(')) {
             preg_match_all('~url\(([^)]*)\)~', $x, $m);
             if (substr_count($x, 'url(') !== count($m[1])) return true;
@@ -770,6 +772,7 @@ final class Svg
             ['foreignObject mit HTML', $hdr . $box . '<foreignObject width="100" height="100"><html xmlns="http://www.w3.org/1999/xhtml"><body><iframe src="https://evil.example"></iframe><script>alert(1)</script></body></html></foreignObject></svg>', 'clean'],
             ['<style>@import url(…)', $hdr . '<style>@import url(https://evil.example/x.css);@import "//evil.example/y.css";.a{fill:red}</style><rect class="a" width="100" height="100"/></svg>', 'clean'],
             ['CSS url(http…)', $hdr . '<style>.a{fill:url(https://evil.example/p.svg#g);stroke:red}rect{background:url("http://evil.example/x.png")}</style><rect class="a" width="100" height="100" style="fill:url(http://evil.example/a#b);filter:url(https://evil.example/f.svg#f)"/><circle r="5" fill="url(https://evil.example/g#x)"/></svg>', 'clean'],
+            ['CSS image-set()/src() ohne url(…)', $hdr . '<style>rect{mask:-webkit-image-set("//evil.example/a.png" 1x)}.b{mask:src("https://evil.example/b.png")}.c{mask:cross-fade(url(#a),"//evil.example/c.png")}</style><rect class="b" width="100" height="100" style="mask:image-set(\'https://evil.example/d.png\' 1x)" mask="image-set(\'//evil.example/e.png\' 1x)"/></svg>', 'clean'],
             ['CSS expression/behavior/-moz-binding', $hdr . '<style>rect{width:expression(alert(1));behavior:url(x.htc);-moz-binding:url(x.xml#x)}</style>' . $box . '</svg>', 'clean'],
             ['Entity-Bombe (Billion Laughs)', $bomb, 'clean'],
             ['Externe Entity (XXE)', '<?xml version="1.0"?><!DOCTYPE svg [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>' . $hdr . $box . '<text x="1" y="9">&xxe;</text></svg>', 'clean'],

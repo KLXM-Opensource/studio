@@ -52,6 +52,14 @@ final class SelfTest
         $eq('Ed25519-JWK → 32 Byte', strlen((string) Jwk::ed25519($edJwk)), 32);
         $small = openssl_pkey_new(['private_key_bits' => 1024, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
         $eq('RSA unter 2048 Bit abgewiesen', Jwk::rsaPem(Jwk::fromRsa(openssl_pkey_get_details($small)['key'])), null);
+        // 2047 Bit (256 Byte, erstes Bit 0) und Exponent 1/gerade: abgewiesen
+        $eq('RSA mit 2047 Bit abgewiesen', Jwk::rsaPem(['kty' => 'RSA', 'n' => Jwk::b64u("\x7f" . str_repeat("\xff", 255)), 'e' => 'AQAB']), null);
+        $eq('RSA-Exponent 1 abgewiesen', Jwk::rsaPem(['n' => $rsaJwk['n'], 'e' => Jwk::b64u("\x01"), 'kty' => 'RSA']), null);
+        $eq('RSA-Exponent gerade abgewiesen', Jwk::rsaPem(['n' => $rsaJwk['n'], 'e' => Jwk::b64u("\x01\x00\x00"), 'kty' => 'RSA']), null);
+        // Abrufe nur für erlaubte Hosts: Prüfung vor jedem Abruf (ohne Netz, da vor der Namensauflösung)
+        $throws('Fetch: fremder Host vor dem Abruf abgewiesen', fn() => \Core\Http\Fetch::get('https://fremd.example.net/x', ['hosts' => ['example.org']]), 'Fremder Host');
+        // Selbstauskunft: nur bekannte Hosts werden zwischengespeichert (sonst Vergiftung über den Host-Header)
+        $eq('Selbstauskunft: fremder Host gilt nicht als bekannt', \Core\InstanceInfo::known('angreifer-' . bin2hex(random_bytes(3)) . '.example.net'), false);
         $eq('Fingerabdruck RFC 7638 (Beispiel)', Jwk::thumbprint(['kty' => 'RSA', 'e' => 'AQAB', 'n' => '0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw']), 'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs');
 
         $jwks = ['keys' => [$rsaJwk, $edJwk]];
@@ -87,7 +95,8 @@ final class SelfTest
             if ($method === 'GET' && $url === self::ISS . '/.well-known/openid-configuration') {
                 return $j(['issuer' => $idp['issuer'], 'authorization_endpoint' => self::ISS . '/authorize', 'token_endpoint' => self::ISS . '/token',
                     'jwks_uri' => self::ISS . '/jwks', 'end_session_endpoint' => self::ISS . '/logout', 'code_challenge_methods_supported' => ['S256'],
-                    'id_token_signing_alg_values_supported' => ['RS256', 'EdDSA']]);
+                    'id_token_signing_alg_values_supported' => ['RS256', 'EdDSA'], 'scopes_supported' => ['openid', 'email', 'profile', 'roles'],
+                    'authorization_response_iss_parameter_supported' => true]);
             }
             if ($method === 'GET' && $url === self::ISS . '/jwks') return $j(['keys' => $idp['keys']]);
             if ($method === 'POST' && $url === self::ISS . '/token') {
@@ -125,6 +134,8 @@ final class SelfTest
             [$q, $code] = $authorize();
             $eq('Anfrage: Code-Flow mit PKCE S256', [$q['response_type'], $q['code_challenge_method'], strlen($q['state']) >= 43, strlen($q['nonce']) >= 43],
                 ['code', 'S256', true, true]);
+            $eq('Anfrage: Scope „roles“, wenn angeboten', in_array('roles', explode(' ', (string) $q['scope']), true), true);
+            $eq('RFC 9207: iss Pflicht, wenn angekündigt', Client::issRequired($prov), true);
             $pend = Client::takeState($q['state']);
             $res = Client::finish($prov, (array) $pend, $code);
             $eq('Ablauf: Anmeldung gültig', [$res['claims']['sub'], $res['alg']], ['staff-1', 'RS256']);
@@ -190,6 +201,14 @@ final class SelfTest
             $eq('Anbieter erzwingt zweiten Faktor (trust)', Accounts::admissible(['mfa' => 'trust'] + $prov, ['amr' => ['pwd']] + $c), 'erika@example.org');
             $throws('Claim fehlt', fn() => Accounts::admissible(['claim' => 'roles', 'claim_values' => ['admin']] + $prov, ['roles' => ['redaktion']] + $c), 'nicht freigegeben');
             $eq('Claim mit erlaubtem Wert', Accounts::admissible(['claim' => 'roles', 'claim_values' => ['admin']] + $prov, ['roles' => ['admin']] + $c), 'erika@example.org');
+            // Rolle aus dem Claim „roles“ (Hub: admin | redaktion)
+            $eq('Rolle: ohne Claim = Rolle des Anbieters', Accounts::roleFor(['role' => 'admin'] + $prov, $c), ['admin', false]);
+            $eq('Rolle: admin aus dem Claim', Accounts::roleFor(['role' => 'admin'] + $prov, ['roles' => ['admin']] + $c), ['admin', true]);
+            $eq('Rolle: redaktion → Redaktionsrolle (keine Administration)', Accounts::roleFor(['role' => 'admin'] + $prov, ['roles' => ['redaktion']] + $c), ['editor', true]);
+            $eq('Rolle: redaktion bei Netzwerk-Anbieter → keine Netzwerk-Rolle', Accounts::roleFor(['role' => 'network', 'editor_role' => 'network'] + $prov, ['roles' => 'redaktion'] + $c), ['editor', true]);
+            $throws('Rolle: unbekannter Wert abgewiesen', fn() => Accounts::roleFor(['role' => 'admin'] + $prov, ['roles' => ['superuser']] + $c), 'nicht freigegeben');
+            $throws('Rolle: verschachtelter Wert abgewiesen', fn() => Accounts::roleFor(['role' => 'admin'] + $prov, ['roles' => [['admin']]] + $c), 'nicht freigegeben');
+            $eq('Rolle: Auswertung abschaltbar', Accounts::roleFor(['role' => 'admin', 'role_claim' => ''] + $prov, ['roles' => ['redaktion']] + $c), ['admin', false]);
             $throws('Domain nicht erlaubt', fn() => Accounts::admissible(['domains' => ['example.net']] + $prov, $c), 'nicht zugelassen');
             $throws('E-Mail nicht bestätigt', fn() => Accounts::admissible($prov, ['email_verified' => false] + $c), 'nicht bestätigt');
 
@@ -207,7 +226,19 @@ final class SelfTest
                 $throws('Lokales Konto mit gleicher E-Mail wird nicht übernommen', fn() => Accounts::resolve($prov, ['sub' => 'st-2', 'email' => $local] + $c), 'bereits ein Konto');
                 $throws('Ohne Just-in-time kein neues Konto', fn() => Accounts::resolve(['jit' => false] + $prov, ['sub' => 'st-3', 'email' => 'neu-' . $mail] + $c), 'noch kein Zugang');
                 $pre = Accounts::allow($prov, 'vorab-' . $mail);
+                $pre2 = Accounts::allow($prov, 'vorab2-' . $mail);
+                $cNoVer = $c;
+                unset($cNoVer['email_verified']);
+                $throws('Vorab freigegebenes Konto: ohne email_verified nicht verknüpft', fn() => Accounts::resolve(['jit' => false] + $prov, ['sub' => 'st-5', 'email' => 'vorab2-' . $mail] + $cNoVer), 'bereits ein Konto');
+                $eq('Vorab freigegebenes Konto (2) bleibt unverknüpft', (int) $db->fetchValue('SELECT COUNT(*) FROM ' . Accounts::TABLE . ' WHERE user_id = ?', [$pre2]), 0);
                 $eq('Vorab freigegebenes Konto wird verknüpft', (int) Accounts::resolve(['jit' => false] + $prov, ['sub' => 'st-4', 'email' => 'vorab-' . $mail] + $c)['id'], $pre);
+                // Rolle folgt dem Claim bei jeder Anmeldung: admin → redaktion stuft herab und beendet Sitzungen (auth_ver)
+                $pa = ['role' => 'admin'] + $prov;
+                $ra = Accounts::resolve($pa, ['sub' => 'st-6', 'email' => 'rolle-' . $mail, 'roles' => ['admin']] + $c);
+                $ver = (int) $db->fetchValue('SELECT auth_ver FROM users WHERE id = ?', [(int) $ra['id']]);
+                $rr = Accounts::resolve($pa, ['sub' => 'st-6', 'email' => 'rolle-' . $mail, 'roles' => ['redaktion']] + $c);
+                $eq('Herabstufen im Hub wirkt (Rolle, Sitzungen beendet)', [$ra['role'], $rr['role'], (int) $db->fetchValue('SELECT auth_ver FROM users WHERE id = ?', [(int) $ra['id']]) > $ver],
+                    ['admin', 'editor', true]);
                 Accounts::revoke($db, (int) $u['id']);
                 $throws('Entzogenes Konto abgewiesen', fn() => Accounts::resolve(['jit' => false] + $prov, ['sub' => 'st-1', 'email' => $mail] + $c), 'gesperrt');
                 $db->update('users', ['disabled' => 1], 'id = :id', ['id' => $pre]);
@@ -254,6 +285,9 @@ final class SelfTest
         $eq('Logo: Skript, on…-Attribut, <style>, <image> und title entfernt', [str_contains($svg, 'script'), str_contains($svg, 'onload'), str_contains($svg, '<style'), str_contains($svg, '<image'), str_contains($svg, '<title')], [false, false, false, false, false]);
         $eq('Logo: dekorativ (aria-hidden), currentColor bleibt', [str_contains($svg, 'aria-hidden="true"'), str_contains($svg, 'role='), str_contains($svg, 'currentColor')], [true, false, true]);
         $eq('Logo: ids mit Präfix samt Verweis', [str_contains($svg, 'id="oidc-logo-g"'), str_contains($svg, 'url(#oidc-logo-g)')], [true, true]);
+        // Kein Überdecken der Anmeldeseite: Wurzel ohne style/overflow (Größe kommt nur aus dem CSS)
+        $big = (string) (Logo::prepare('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" overflow="visible" style="width:100vw;height:100vh"><path d="M0 0h10v10z"/><text x="0" y="5">Bitte anrufen</text></svg>')['data'] ?? '');
+        $eq('Logo: Wurzel ohne style/overflow', [(bool) preg_match('~^<svg[^>]*\sstyle=~', $big), (bool) preg_match('~^<svg[^>]*\soverflow=~', $big)], [false, false]);
         $html = Logo::html(['issuer' => $iss, 'site' => site()->key, 'logo_media' => 0]);
         $eq('Logo: Ausgabe lokal eingebettet, kein Verweis auf den Anbieter', [str_starts_with($html, '<svg'), str_contains($html, 'hub.example.org'), str_contains($html, 'tracker.example.net'), (bool) preg_match('~(href|src)="https?:~', $html)], [true, false, false, false]);
         Logo::sync($iss, ['logo_uri' => $src]);
