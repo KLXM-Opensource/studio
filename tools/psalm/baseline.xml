@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="6.21.1@ecd8c23829dd6527337f0f72790c7f894a1a3d0e">
+  <file src="../../app/Oidc/Logo.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
   <file src="../../app/AI/Ai.php">
     <TaintedFile>
       <code><![CDATA[$path]]></code>

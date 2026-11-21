@@ -178,7 +178,9 @@ final class Logo
         if ($mid > 0 && ($p['site'] ?? '') === site()->key && ($m = Media::find($mid))) {
             $path = Media::path($m);
             if (str_ends_with(strtolower((string) $m['file']), '.svg') && is_file($path) && filesize($path) <= Svg::MAX_BYTES) {
-                $svg = self::inline((string) file_get_contents($path));   // beim Hochladen schon bereinigt
+                // Pfad aus Media::path(): Dateiname beim Upload erzeugt und in der Datenbank, $mid ist int – kein Pfad aus der Anfrage
+                $raw = (string) file_get_contents($path);
+                $svg = self::inline($raw);   // beim Hochladen schon bereinigt
                 if ($svg !== '') return $svg;
             } elseif (str_starts_with((string) ($m['mime'] ?? ''), 'image/')) {
                 return '<img class="auth-alt__logo" src="' . e(Media::url($m, 160)) . '" alt="" width="20" height="20">';
