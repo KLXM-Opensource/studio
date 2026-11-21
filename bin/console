@@ -1451,6 +1451,31 @@ switch ($cmd) {
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
 
+    case 'data:convert':
+        // Tabelle an Ort und Stelle in eine Tabellenart mit Grundschema umwandeln (Core\Data\Convert) – Standard: Probelauf
+        $handle = (string) ($args[0] ?? '');
+        if ($handle === '' || str_starts_with($handle, '--')) {
+            fwrite(STDERR, "Aufruf: data:convert <tabelle> --kind=contacts [--map=quelle:ziel[beschriftung+|-],quelle:-] [--apply] | --revert | --drop-legacy\n"); exit(1);
+        }
+        $t = Core\Data\Tables::find($handle) ?? (fwrite(STDERR, "Tabelle „{$handle}“ gibt es nicht.\n") && exit(1));
+        try {
+            if (in_array('--revert', $args, true)) { foreach (Core\Data\Convert::revert($t) as $l) echo "$l\n"; break; }
+            if (in_array('--drop-legacy', $args, true)) { foreach (Core\Data\Convert::dropLegacy($t) as $l) echo "$l\n"; break; }
+            $kind = 'contacts';
+            $map = [];
+            foreach ($args as $a) {
+                if (str_starts_with($a, '--kind=')) $kind = substr($a, 7);
+                if (str_starts_with($a, '--map=')) $map = Core\Data\Convert::parseMap(substr($a, 6));
+            }
+            $plan = Core\Data\Convert::plan($t, $kind, $map);
+            foreach (Core\Data\Convert::report($plan, $t) as $l) echo "$l\n";
+            if (!$plan['ok']) exit(1);
+            if (!in_array('--apply', $args, true)) { echo "\nProbelauf – nichts geändert. Mit --apply umwandeln.\n"; break; }
+            echo "\n";
+            foreach (Core\Data\Convert::apply($t, $plan) as $l) echo "$l\n";
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        break;
+
     case 'data:template':
         // Tabelle aus Vorlage (Core\Data\Templates::install) – vorhandene Tabelle bleibt, fehlende Teile werden ergänzt
         $preset = (string) ($args[0] ?? '');
