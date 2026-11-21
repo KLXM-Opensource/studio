@@ -45,6 +45,7 @@ if (!empty($d['visitor_filter']) && $catField) {
 }
 [$where, $cat] = Calendar::blockWhere($t, $d, $catButtons ? $query : []);
 $occ = Calendar::occurrences($t, $view === 'month' ? $gridStart : $first, $view === 'month' ? $gridEnd : $next, ['where' => $where, 'source' => (string) ($d['source'] ?? '')]);
+$occ = array_map(fn($o) => ['entry' => \Core\Data\Exposure::publicEntry($t, $o['entry'])] + $o, $occ);   // ohne „Nie öffentlich“-Felder
 \Core\StructuredData::events($t, array_values(array_filter($occ, fn($o) => $o['start'] >= new DateTimeImmutable('today', Calendar::tz()))));   // schema.org Event (anstehende)
 
 // Termine je Tag (mehrtägige an jedem Tag)

@@ -174,7 +174,9 @@ final class Entries
         }
         $q = trim((string) ($o['q'] ?? ''));
         if ($q !== '') {
-            $cols = array_column(array_filter($table['fields'], fn($f) => !empty($f['searchable']) || in_array($f['type'], ['text', 'mediatext', 'person', 'faq', 'address', 'downloads'], true)), 'name');
+            // q_public (Besucher-Suche in Blöcken): „Nie öffentlich“-Felder (Core\Data\Exposure) nicht durchsuchen – sonst verriete ein Treffer den Wert
+            $cols = array_column(array_filter($table['fields'], fn($f) => (!empty($f['searchable']) || in_array($f['type'], ['text', 'mediatext', 'person', 'faq', 'address', 'downloads'], true))
+                && (empty($o['q_public']) || !Exposure::isPrivate($f))), 'name');
             $cols[] = 'slug';
             $or = array_map(fn($c) => "$c LIKE ?", $cols);
             array_push($params, ...array_fill(0, count($cols), '%' . $q . '%'));

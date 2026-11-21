@@ -34,7 +34,7 @@ final class Feed
         $list = $site . url(\Core\Lang::prefix(\Core\Lang::current()) . '/' . $t['settings']['route']);
         $descField = (string) ($t['settings']['description_field'] ?? '');
         $items = '';
-        foreach (Entries::query($t, ['limit' => self::LIMIT]) as $e) {
+        foreach (Exposure::publicRows($t, Entries::query($t, ['limit' => self::LIMIT])) as $e) {   // ohne „Nie öffentlich“-Felder
             $link = Entries::absUrl($t, $e);
             if ($link === null) continue;
             $date = (string) (($e['published_at'] ?? '') ?: ($e['created_at'] ?? ''));

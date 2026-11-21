@@ -91,7 +91,7 @@ if (!$o['where']) unset($o['where']);
 if (str_starts_with((string) ($d['sort_field'] ?? ''), $pfx)) $o['sort'] = substr($d['sort_field'], strlen($pfx));
 if (!empty($d['sort_dir'])) $o['dir'] = $d['sort_dir'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
-$rows = Entries::query($t, $o);
+$rows = \Core\Data\Exposure::publicRows($t, Entries::query($t, $o));   // ohne „Nie öffentlich“-Felder
 if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, (string) ($d['title'] ?? ''));   // schema.org ItemList
 $pages = !empty($d['paginate']) && $limit ? (int) ceil(max(0, Entries::count($t, $o) - $skip) / $limit) : 1;
 

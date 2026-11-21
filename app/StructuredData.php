@@ -127,6 +127,7 @@ final class StructuredData
     private static function event(array $table, array $e, \DateTimeInterface $start, ?\DateTimeInterface $end, bool $allDay): array
     {
         $c = Calendar::config($table);
+        $e = Data\Exposure::publicEntry($table, $e);
         $n = ['@type' => 'Event', 'name' => Entries::title($table, $e),
             'startDate' => $allDay ? $start->format('Y-m-d') : $start->format('c'),
             'eventStatus' => 'https://schema.org/EventScheduled', 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
@@ -278,6 +279,7 @@ final class StructuredData
     {
         $type = self::typeOf($table);
         if (!$type) return null;
+        $e = Data\Exposure::publicEntry($table, $e);                // private Felder nie in strukturierten Daten
         if ($type === 'Event' && Calendar::enabled($table) && ($span = Calendar::span($table, $e))) {
             // Wiederkehrende Termine: nächster Termin ab heute
             $next = Calendar::occurrences($table, new \DateTimeImmutable('today'), new \DateTimeImmutable('+1 year'), ['ids' => [(int) $e['id']], 'limit' => 1, 'status' => $e['status'] === 'published' ? 'published' : 'all'])[0] ?? null;
@@ -349,7 +351,7 @@ final class StructuredData
     public static function field(array $table, array $e, array $types, array $names = []): mixed
     {
         foreach ($table['fields'] as $f) {
-            if (!in_array($f['type'], $types, true)) continue;
+            if (!in_array($f['type'], $types, true) || Data\Exposure::isPrivate($f)) continue;   // „Nie öffentlich“: nie in JSON-LD, Visitenkarte, Personen-Block
             if ($names && !preg_match('~' . implode('|', array_map('preg_quote', $names)) . '~i', $f['name'] . ' ' . $f['label'])) continue;
             $v = $e[$f['name']] ?? null;
             if ($v === null || $v === '' || $v === []) continue;

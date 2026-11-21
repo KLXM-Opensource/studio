@@ -1005,6 +1005,7 @@ final class CmsService
                 'labels' => $f['labels'] ?? null, 'options_i18n' => $f['options_i18n'] ?? null,
                 // IBAN: Ausgabe maskiert; Bedingungen (Core\Data\Rules) – ausgeblendete Felder werden beim Speichern geleert
                 'mask' => $f['type'] === 'iban' ? ($f['mask'] ?? true) : null,
+                'private' => !empty($f['private']) ? true : null,   // „Nie öffentlich“ (Core\Data\Exposure): API sieht den Wert, die Website nie
                 'visible_if' => $f['visible_if'] ?? null, 'required_if' => $f['required_if'] ?? null, 'compare' => $f['compare'] ?? null,
                 'group' => self::groupInfo($f),
             ], fn($v) => $v !== null), $t['fields']),

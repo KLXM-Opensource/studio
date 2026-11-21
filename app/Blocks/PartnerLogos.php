@@ -113,7 +113,7 @@ final class PartnerLogos
         if ($limit) $o['limit'] = $limit;
 
         $out = [];
-        foreach (Entries::query($t, $o) as $e) {
+        foreach (\Core\Data\Exposure::publicRows($t, Entries::query($t, $o)) as $e) {   // ohne „Nie öffentlich“-Felder
             $m = $fLogo && !empty($e[$fLogo]) && (Tables::field($t, $fLogo)['type'] ?? '') === 'media' ? Media::find((int) $e[$fLogo]) : null;
             if ($m && !str_starts_with((string) $m['mime'], 'image/')) $m = null;
             $name = $fName === '_title' || !$fName ? Entries::title($t, $e) : Entries::text($t, $e, $fName);

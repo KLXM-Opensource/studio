@@ -389,6 +389,8 @@ final class Tables
                 'help' => trim(mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 200)),
                 'width' => ($f['width'] ?? '') === 'half' ? 'half' : '',
             ];
+            // Nie öffentlich (Core\Data\Exposure): erscheint in keiner Website-Ausgabe, nur in Verwaltung, API und CardDAV
+            if (!$inbox && !empty($f['private'])) $def['private'] = true;
             if (in_array($type, ['select', 'multiselect'], true)) {
                 $opts = [];
                 foreach (preg_split('~\R~', (string) ($f['options'] ?? '')) as $line) {

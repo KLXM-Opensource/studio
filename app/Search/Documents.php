@@ -5,6 +5,7 @@ namespace Core\Search;
 
 use Core\Data\Calendar;
 use Core\Data\Entries;
+use Core\Data\Exposure;
 use Core\Data\Shared;
 use Core\Data\Tables;
 use Core\Lang;
@@ -199,7 +200,8 @@ final class Documents
             $badge = TableSearch::label($t, $cfg);
             foreach ($rows as $e) {
                 if ($next !== null && !isset($next[$e['id']])) continue;
-                if ($cfg['exclude'] && self::matches($t, $e, $cfg['exclude'])) continue;
+                if ($cfg['exclude'] && self::matches($t, $e, $cfg['exclude'])) continue;   // Ausschluss prüft den vollen Eintrag
+                $e = Exposure::publicEntry($t, $e);              // „Nie öffentlich“: weder Text, Auszug, Facetten noch Bild
                 $url = Entries::href($t, $e);
                 if (!$url) continue;
                 foreach (Media::idsInEntry($t, $e) as $mid) self::$used[$mid] = true;

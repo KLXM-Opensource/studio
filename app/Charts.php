@@ -208,7 +208,7 @@ final class Charts
         $skip = array_map('mb_strtolower', self::lines((string) ($d['exclude'] ?? '')));
         $labels = [];
         $data = array_fill_keys($nums, []);
-        foreach (Data\Entries::query($t, $o) as $e) {
+        foreach (Data\Exposure::publicRows($t, Data\Entries::query($t, $o)) as $e) {   // ohne „Nie öffentlich“-Felder
             $label = $lf !== null ? Data\Entries::text($t, $e, $lf) : Data\Entries::title($t, $e);
             if (in_array(mb_strtolower(trim($label)), $skip, true)) continue;
             $labels[] = $label;

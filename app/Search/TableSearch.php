@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Core\Search;
 
 use Core\Data\Calendar;
+use Core\Data\Exposure;
 use Core\Data\Tables;
 use Core\Lang;
 
@@ -14,7 +15,8 @@ use Core\Lang;
  *
  *   enabled   null = automatisch (an mit Detailseite, sonst aus; Eingangs-Tabellen nie)
  *   fields    [feld => high|normal|low|off]   Standard: Titel hoch, Text normal, Auswahl/Verknüpfung niedrig,
- *                                              E-Mail/Telefon aus (nur ausdrücklich), IBAN nie; Gruppen als Text (ohne IBAN/E-Mail/Telefon)
+ *                                              E-Mail/Telefon aus (nur ausdrücklich), Textfelder wie Mobil/Handy/privat/Geburt aus,
+ *                                              IBAN und „Nie öffentlich“ (Core\Data\Exposure) nie; Gruppen als Text (ohne IBAN/E-Mail/Telefon)
  *   facets    [feld, …]                       Auswahl-/Verknüpfungsfelder als Filter auf der Ergebnisseite
  *   title, summary, image, date               Anzeige im Treffer (Standard: Titelfeld, Auszug mit Treffern, Bildfeld, Termin/erstes Datum)
  *   label, labels[lang]                       Art im Treffer, z. B. „Termin“ (Standard: Einzahl der Tabelle)
@@ -39,9 +41,9 @@ final class TableSearch
     public static function defaultWeight(array $table, array $f): string
     {
         $type = (string) ($f['type'] ?? '');
-        if (!self::eligible($f) || in_array($type, self::OPT_IN, true)) return 'off';
+        if (!self::eligible($f) || in_array($type, self::OPT_IN, true) || Exposure::isPrivate($f)) return 'off';
         if (($f['name'] ?? '') === ($table['settings']['title_field'] ?? '')) return 'high';
-        if (in_array($type, ['text', 'textarea'], true) && preg_match('~(mail|telefon|phone|tel$|fax|iban|konto|geburt|birth)~i', (string) $f['name'])) return 'off';
+        if (in_array($type, ['text', 'textarea'], true) && preg_match('~(mail|telefon|phone|tel$|fax|mobil|handy|privat|iban|konto|geburt|birth)~i', (string) $f['name'])) return 'off';
         return match ($type) {
             'select', 'multiselect', 'relation', 'relations' => 'low',
             default => 'normal',
@@ -57,7 +59,8 @@ final class TableSearch
         foreach ($table['fields'] as $f) {
             if (!self::eligible($f)) continue;
             $w = (string) ($s['fields'][$f['name']] ?? '');
-            $fields[$f['name']] = isset(self::WEIGHTS[$w]) ? $w : self::defaultWeight($table, $f);
+            // „Nie öffentlich“ (Core\Data\Exposure): nie im Suchindex, auch wenn früher eine Gewichtung gespeichert wurde
+            $fields[$f['name']] = Exposure::isPrivate($f) ? 'off' : (isset(self::WEIGHTS[$w]) ? $w : self::defaultWeight($table, $f));
         }
         $names = array_column($table['fields'], 'type', 'name');
         $pick = fn(string $k, array $types) => isset($s[$k], $names[$s[$k]]) && in_array($names[$s[$k]], $types, true) ? (string) $s[$k] : '';

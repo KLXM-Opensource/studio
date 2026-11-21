@@ -8,6 +8,7 @@
  * @var \Core\Block $b  @var array $d
  */
 use Core\Data\Entries;
+use Core\Data\Exposure;
 use Core\Data\Tables;
 
 $wrap = app()->theme->def['container_class'] ?? 'wrap';
@@ -27,9 +28,12 @@ foreach ((array) ($d['fields'] ?? []) as $v) {
     if (str_starts_with((string) $v, $t['handle'] . '.')) $fields[] = substr((string) $v, strlen($t['handle']) + 1);
 }
 $layout = $d['layout'] ?? 'prose';
+// „Nie öffentlich“ (Core\Data\Exposure): weder ausgewählt noch im Standard ohne Auswahl, Werte im Eintrag leer – auch in der Vorschau
+$fields = Exposure::publicNames($t, $fields);
+$e = Exposure::publicEntry($t, $e);
 if (!$fields) {
     $fields = $layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
-        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks'), 'name'), fn($n) => $n !== $t['settings']['title_field']));   // Inhaltsblöcke: eigener Block entry_blocks
+        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks' && !Exposure::isPrivate($f)), 'name'), fn($n) => $n !== $t['settings']['title_field']));   // Inhaltsblöcke: eigener Block entry_blocks
 }
 $label = fn(string $f) => $f === '_title' ? lt('Titel') : ($f === '_when' ? lt('Termin') : ($f === 'published_at' ? lt('Veröffentlicht') : Tables::label(Tables::field($t, $f) ?? ['label' => $f])));
 $type = fn(string $f) => Tables::field($t, $f)['type'] ?? ($f === '_title' ? 'title' : 'date');
