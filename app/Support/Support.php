@@ -239,7 +239,8 @@ final class Support
     /** Absolute Adresse auf einer bestimmten Website (für E-Mails) */
     public static function urlOn(string $site, string $path): string
     {
-        if ($site === site()->key) return absolute_url($path);
+        if ($site === site()->key) return \Core\AdminPath::isInternal($path) ? admin_url_abs($path) : absolute_url($path);
+        if (\Core\AdminPath::isInternal($path) && \Core\NetworkHost::active($site)) return \Core\Network\Network::siteLink($site, $path);   // Netzwerk-Domain
         $host = (string) ((Sites::all()[$site]['hosts'] ?? [])[0] ?? '');
         if ($host === '') return absolute_url($path);
         $scheme = (app()->request && app()->request->isSecure()) || !str_contains($host, 'localhost') ? 'https://' : 'http://';

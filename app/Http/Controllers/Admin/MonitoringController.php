@@ -47,6 +47,7 @@ final class MonitoringController extends AdminController
         if (!Csrf::valid($r)) return $this->back('/admin/system/ueberwachung', 'error', __('Sitzung abgelaufen – bitte erneut versuchen.'));
         if (Status::settings()['from_config']) return $this->back('/admin/system/ueberwachung', 'error', __('Die Überwachung ist in der Konfiguration der Website festgelegt.'));
         $err = Status::save(!empty($r->post['enabled']), (string) ($r->post['keys'] ?? ''));
+        \Core\InstanceInfo::flush();   // Selbstauskunft für den Hub (/.well-known/klxm-studio)
         return $this->back('/admin/system/ueberwachung', $err ? 'error' : 'success', $err ?? __('Überwachung gespeichert.'));
     }
 }

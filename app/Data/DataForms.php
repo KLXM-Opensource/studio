@@ -749,7 +749,7 @@ final class DataForms
             Mailer::send('Neue Anfrage: ' . $t['name'],
                 "Guten Tag,\n\nüber die Website ist eine neue Anfrage in „{$t['name']}“ eingegangen.\n"
                 . 'Die Inhalte sind verschlüsselt gespeichert und können nur im Verwaltungsbereich mit dem ' . term('key') . " gelesen werden:\n\n"
-                . absolute_url('/admin/requests?table=' . $t['handle']) . "\n\nDiese E-Mail enthält aus Datenschutzgründen keine Inhalte.\n", $to);
+                . admin_url_abs('/admin/requests?table=' . $t['handle']) . "\n\nDiese E-Mail enthält aus Datenschutzgründen keine Inhalte.\n", $to);
             return ['ok' => true, 'message' => $success, 'id' => (int) $id];
         }
         // Obergrenze: nach der Prüfung, damit Eingaben nicht verloren gehen, wenn gerade der letzte Platz vergeben wurde
@@ -794,7 +794,7 @@ final class DataForms
         Mailer::send('Neuer Eintrag in ' . $t['name'],
             "Guten Tag,\n\nüber das Formular auf der Website ist ein neuer Eintrag in „{$t['name']}“ eingegangen"
             . ($values['status'] === 'draft' ? " (Entwurf – bitte prüfen und freigeben)" : '') . ":\n\n"
-            . absolute_url('/admin/data/' . $t['handle'] . '/' . $id) . "\n\nDiese E-Mail enthält aus Datenschutzgründen keine Inhalte.\n", $to);
+            . admin_url_abs('/admin/data/' . $t['handle'] . '/' . $id) . "\n\nDiese E-Mail enthält aus Datenschutzgründen keine Inhalte.\n", $to);
         return ['ok' => true, 'message' => $success, 'id' => (int) $id];
     }
 

@@ -28,6 +28,7 @@ final class Health
             'network_key gesetzt (Netzwerk-Anmeldung)' => !\Core\Sites::multi() || strlen((string) (\Core\Network\Network::install()['network_key'] ?? '')) >= 32,
             'Kit kompatibel' => app()->theme->compatible(),
         ] + ['Verwaltung unter ' . \Core\AdminPath::prefix() . (\Core\AdminPath::custom() ? ' (eigene Adresse)' : '') => true]
+          + \Core\NetworkHost::health()   // Netzwerk-Domain: führt sie (noch) zur Netzwerk-Website?
           + \Core\Data\Shared::health() + \Core\Search\Search::health() + \Core\AI\Ai::health() + \Core\Sources\Sources::health() + \Core\Push\Push::health()
             + \Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
             + \Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)

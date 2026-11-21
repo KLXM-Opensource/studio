@@ -19,6 +19,13 @@ if (!$pkPol['passkey'] && !$pkList) return;
   <p class="adm-muted"><?= e(__('Anmelden mit Fingerabdruck, Gesicht oder Geräte-PIN statt mit einem Code – sicher gegen Phishing. Der Passkey bleibt auf Ihrem Gerät bzw. in Ihrem Passwortmanager; die Website speichert nur einen öffentlichen Schlüssel.')) ?>
     <?php if ($pkPol['passwordless']): ?><?= e(__('Mit einem Passkey können Sie sich auch ganz ohne Passwort anmelden.')) ?><?php endif; ?></p>
   <?php if ($pkNet): ?><p class="f-help"><?= e(__('Netzwerk-Konto: Passkeys gelten je Domain. Hier eingerichtete Passkeys gelten für {host}; über die Netzwerk-Übersicht („Öffnen“) brauchen Sie keinen.', ['host' => $pkRp])) ?></p><?php endif; ?>
+  <?php // Netzwerk-Domain (Core\NetworkHost): Anmeldung zentral dort – Passkeys anderer Domains bleiben gültig, helfen dort aber nicht
+  $pkNh = \Core\NetworkHost::active() ? (string) \Core\NetworkHost::get() : '';
+  $pkNhRp = $pkNh !== '' ? \Core\HostHandover::rp($pkNh) : '';
+  if ($pkNh !== '' && $pkPol['passkey']): $pkNhHas = (bool) array_filter(\Core\Passkeys::list($pkDb, $pkUid), fn($p) => $p['rp_id'] === $pkNhRp); ?>
+  <p class="f-help"><?= e(__('Die Anmeldung läuft über die Netzwerk-Domain {host} – Passkeys für diese Domain legen Sie hier an.', ['host' => $pkNh])) ?></p>
+  <?php if ($pkList && !$pkNhHas): ?><p class="adm-flash adm-flash--info" role="status"><?= icon('warning') ?> <?= e(__('Sie haben noch keinen Passkey für {host}. Ihre bisherigen Passkeys gelten nur für andere Domains – legen Sie hier einen neuen an.', ['host' => $pkNh])) ?></p><?php endif; ?>
+  <?php endif; ?>
   <?php if (!$pkPol['passkey']): ?><p class="adm-flash adm-flash--error"><?= e(__('Passkeys sind auf dieser Website abgeschaltet. Vorhandene Passkeys können Sie löschen.')) ?></p><?php endif; ?>
   <?php if ($pkReq === 'passkey'): ?><p class="f-help"><?= e(__('Für Ihr Konto ist ein Passkey vorgeschrieben.')) ?></p><?php endif; ?>
   <?php if ($pkList): ?>
@@ -43,6 +50,17 @@ if (!$pkPol['passkey'] && !$pkList) return;
   <?php // Domainwechsel (Core\HostHandover): Passkeys gelten je Domain – auf den anderen Domains dieser Website anmelden und dort anlegen
   $pkTargets = $pkPol['passkey'] && $pkAvail ? \Core\HostHandover::targets() : [];
   if ($pkTargets): $pkHosts = \Core\HostHandover::passkeyHosts($user); ?>
+  <?php if ($pkNh !== '' && \Core\NetworkHost::isCurrent()): // Netzwerk-Domain: andere Domains nur noch zum Bearbeiten auf der Website ?>
+  <h3 class="pk-h3"><?= e(__('Auf der Website bearbeiten')) ?></h3>
+  <p class="adm-muted"><?= e(__('Die Verwaltung liegt unter {host}. Um direkt auf einer Domain der Website zu bearbeiten, melden Sie sich dort mit einem Klick an – ein Passkey ist dafür nicht nötig.', ['host' => $pkNh])) ?></p>
+  <ul class="pk-hosts">
+    <?php foreach ($pkTargets as $h): ?>
+    <li><code><?= e($h) ?></code>
+      <form method="post" action="<?= e(url('/admin/account/domain')) ?>" class="tf-inline"><?= csrf_field() ?><input type="hidden" name="host" value="<?= e($h) ?>"><input type="hidden" name="path" value="/">
+        <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Dort anmelden')) ?><span class="adm-sr"> – <?= e($h) ?></span></button></form></li>
+    <?php endforeach; ?>
+  </ul>
+  <?php else: ?>
   <h3 class="pk-h3"><?= e(__('Weitere Domains dieser Website')) ?></h3>
   <p class="adm-muted"><?= e(__('Ein Passkey gilt nur für die Domain, auf der er angelegt wurde. Vor einem Domainwechsel melden Sie sich hier auf der neuen Domain an und legen dort einen Passkey an – danach erst die Hauptadresse umstellen.')) ?></p>
   <ul class="pk-hosts">
@@ -52,6 +70,7 @@ if (!$pkPol['passkey'] && !$pkList) return;
         <button class="adm-btn adm-btn--small" type="submit"><?= e($has ? __('Dort anmelden') : __('Dort anmelden und Passkey anlegen')) ?><span class="adm-sr"> – <?= e($h) ?></span></button></form></li>
     <?php endforeach; ?>
   </ul>
+  <?php endif; ?>
   <?php endif; ?>
   <?php if ($pkList && !$pkNet && !(int) ($pkRow['totp_enabled'] ?? 0)): $left = count(json_decode((string) ($pkRow['totp_recovery'] ?? ''), true) ?: []); ?>
   <h3 class="pk-h3"><?= e(__('Wiederherstellungscodes')) ?></h3>

@@ -189,15 +189,18 @@ $openForm = function (string $k, string $label, string $path = '', string $cls =
         <ul class="net-domains__list">
         <?php foreach (array_merge($hosts, $landingHosts) as $h): ?>
           <?php // Netzwerk-Website: dort meldet sich die Netzwerk-Administration direkt an – Passkey gilt je Domain (andere Websites: „Öffnen“ ohne Passkey)
-          if (!empty($s['network']) && in_array($h, $hosts, true) && \Core\HostHandover::rp($h) !== \Core\HostHandover::rp((string) app()->request?->host()) && \Core\HostHandover::missing($me, $h, $pkHosts)): ?>
+          if (!empty($s['network']) && in_array($h, $hosts, true) && !\Core\NetworkHost::active($k) && \Core\HostHandover::rp($h) !== \Core\HostHandover::rp((string) app()->request?->host()) && \Core\HostHandover::missing($me, $h, $pkHosts)): ?>
           <li class="net-pk"><form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><input type="hidden" name="site" value="<?= e($k) ?>"><input type="hidden" name="host" value="<?= e($h) ?>"><input type="hidden" name="path" value="/admin/account">
             <span><?= icon('warning') ?> <?= e(__('Ihr Passkey gilt auf {host} noch nicht.', ['host' => $h])) ?></span>
             <button type="submit" class="adm-btn adm-btn--small"><?= e(__('Dort anmelden und Passkey anlegen')) ?></button></form></li>
           <?php endif; ?>
-          <li><form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" data-confirm="<?= e(__('Domain {host} von {site} entfernen?', ['host' => $h, 'site' => $name])) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="remove"><input type="hidden" name="host" value="<?= e($h) ?>"><code><?= e($h) ?></code><?= $h === $primary ? ' <span class="net-tag net-tag--muted">' . e(__('Hauptadresse')) . '</span>' : '' ?><?= in_array($h, $landingHosts, true) ? ' <span class="net-tag net-tag--muted">' . e(__('Landing')) . '</span>' : '' ?>
+          <li><form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" data-confirm="<?= e(__('Domain {host} von {site} entfernen?', ['host' => $h, 'site' => $name])) ?>"><?= csrf_field() ?><input type="hidden" name="op" value="remove"><input type="hidden" name="host" value="<?= e($h) ?>"><code><?= e($h) ?></code><?= $h === $primary ? ' <span class="net-tag net-tag--muted">' . e(__('Hauptadresse')) . '</span>' : '' ?><?= in_array($h, $landingHosts, true) ? ' <span class="net-tag net-tag--muted">' . e(__('Landing')) . '</span>' : '' ?><?= !empty($s['network']) && \Core\NetworkHost::is($h) ? ' <span class="net-tag">' . e(__('Netzwerk-Domain')) . '</span>' : '' ?>
             <?php if ($h !== $primary && in_array($h, $hosts, true) && !\Core\Domains::isLocal($h)): ?><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost" formaction="<?= e($actionUrl($k, 'hosts')) ?>" name="op" value="primary" formnovalidate data-confirm="<?= e(__('{host} als Hauptadresse von {site} festlegen? Links, Canonical und Sitemap zeigen danach auf diese Domain.', ['host' => $h, 'site' => $name])) ?>"><?= e(__('Als Hauptadresse')) ?><span class="adm-sr"> <?= e($h) ?></span></button><?php endif; ?>
             <button type="submit" class="adm-btn adm-btn--small adm-btn--ghost adm-btn--danger-text"><?= e(__('Entfernen')) ?><span class="adm-sr"> <?= e($h) ?></span></button></form></li>
         <?php endforeach; ?>
+        <?php if (!empty($s['network']) && ($nhH = \Core\NetworkHost::get()) !== null && !in_array($nhH, array_merge($hosts, $landingHosts), true)): // Netzwerk-Domain über fallback_site ?>
+          <li><code><?= e($nhH) ?></code> <span class="net-tag"><?= e(__('Netzwerk-Domain')) ?></span> <span class="adm-muted"><?= e(__('über fallback_site')) ?></span></li>
+        <?php endif; ?>
         </ul>
         <form method="post" action="<?= e($actionUrl($k, 'hosts')) ?>" class="net-domains__add"><?= csrf_field() ?><input type="hidden" name="op" value="add">
           <label for="net-host-<?= e($k) ?>"><?= e(__('Weitere Domain (z. B. für eine Landingpage)')) ?></label>

@@ -360,7 +360,7 @@ final class SupportController extends AdminController
             [$site, $uid] = explode(':', (string) $q['author_key']) + ['', '0'];
             if ($site === site()->key && ($mail = app()->db->fetchValue('SELECT email FROM users WHERE id = ?', [(int) $uid]))) {
                 Support::mail([(string) $mail], __('Neue Antwort auf Ihre Frage: {title}', ['title' => $q['title']]),
-                    \Core\Support\Markdown::plain($body, 1200) . "\n\n" . absolute_url('/admin/support/fragen/' . $q['id'] . '#a' . $aid));
+                    \Core\Support\Markdown::plain($body, 1200) . "\n\n" . admin_url_abs('/admin/support/fragen/' . $q['id'] . '#a' . $aid));
             }
         }
         return $this->back('/admin/support/fragen/' . $q['id'] . '#a' . $aid, 'success', __('Danke für Ihre Antwort!'));

@@ -333,7 +333,7 @@ final class Queue
 
     public static function adminUrl(int $id): string
     {
-        return absolute_url('/admin/ai/eingereicht/' . $id);
+        return admin_url_abs('/admin/ai/eingereicht/' . $id);
     }
 
     /** Antwort bei Einreichung (REST 202, MCP) */
@@ -518,7 +518,7 @@ final class Queue
             $n = self::pendingCount();
             \Core\Mailer::send(__('{n} Änderungen warten auf Freigabe', ['n' => $n]) . ' · ' . site_name(),
                 __('Über API, MCP oder KI wurden Änderungen eingereicht, die erst nach Ihrer Prüfung auf die Website gehen.') . "\n\n"
-                . __('Offen: {n}', ['n' => $n]) . "\n" . absolute_url('/admin/ai/eingereicht') . "\n\n—\n"
+                . __('Offen: {n}', ['n' => $n]) . "\n" . admin_url_abs('/admin/ai/eingereicht') . "\n\n—\n"
                 . __('Diese Nachricht kommt höchstens alle 15 Minuten. Abschalten: Verwaltung → Eingereicht → Einstellungen.'), $to);
         } catch (\Throwable $e) {
             error_log('[review] notify: ' . $e->getMessage());

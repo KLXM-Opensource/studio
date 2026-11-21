@@ -23,12 +23,13 @@ final class HandoverController extends AdminController
         $user = $this->auth($r);
         $host = \Core\Sites::normalizeHost($r->str('host')) ?? '';
         $back = $r->str('back') === 'domain' ? '/admin/system/domain' : '/admin/account#passkeys';
+        $path = HostHandover::safePath($r->str('path'));   // optional: Ziel auf der anderen Domain (z. B. „/“ zum Bearbeiten auf der Website)
         if (!in_array($host, HostHandover::targets(), true)) return $this->back($back, 'error', __('Diese Domain gehört nicht zu dieser Website.'));
         $limiter = new RateLimiter(app()->db);
         $lk = 'handover:' . (int) $user['id'];
         if ($limiter->tooMany($lk, 10, 600)) return $this->back($back, 'error', __('Zu viele Anmeldungen in kurzer Zeit. Bitte warten Sie einige Minuten.'));
         $limiter->hit($lk);
-        $token = HostHandover::issue((int) $user['id'], $host, (string) ($r->server['HTTP_USER_AGENT'] ?? ''));
+        $token = HostHandover::issue((int) $user['id'], $host, (string) ($r->server['HTTP_USER_AGENT'] ?? ''), $path);
         Network::log('handover.issue', site()->key, (string) $user['email'], strtolower($r->host()) . ' → ' . $host);
         return self::secure(HostHandover::page(HostHandover::link($host, HostHandover::PATH) . '?t=' . rawurlencode($token), $host));
     }
@@ -45,10 +46,20 @@ final class HandoverController extends AdminController
             $limiter->hit($ipKey);
             return $fail($res);
         }
-        app()->auth->login($res);
-        $email = (string) (app()->db->fetchValue('SELECT email FROM users WHERE id = ?', [$res]) ?? '');
+        app()->auth->login($res['uid'], ['amr' => $res['amr']]);
+        $email = (string) (app()->db->fetchValue('SELECT email FROM users WHERE id = ?', [$res['uid']]) ?? '');
         Network::log('handover.login', site()->key, $email, strtolower($r->host()));
-        app()->session->flash('success', __('Sie sind jetzt auf {host} angemeldet. Legen Sie hier einen Passkey für diese Domain an.', ['host' => strtolower($r->host())]));
-        return Response::redirect(url(HostHandover::TARGET . '#passkeys'))->header('Referrer-Policy', 'no-referrer');
+        $to = $res['path'];
+        if ($to === '') {
+            // Netzwerk-Domain gesetzt (Core\NetworkHost) und hier eine andere Domain: Die Verwaltung liegt dort – hier geht es zur Website
+            // (Bearbeiten auf der Website mit eigener Sitzung dieser Domain). Sonst wie bisher: Passkey für diese Domain anlegen.
+            if (\Core\NetworkHost::active() && !\Core\NetworkHost::isCurrent()) {
+                $to = '/';
+            } else {
+                app()->session->flash('success', __('Sie sind jetzt auf {host} angemeldet. Legen Sie hier einen Passkey für diese Domain an.', ['host' => strtolower($r->host())]));
+                $to = HostHandover::TARGET . '#passkeys';
+            }
+        }
+        return Response::redirect(url($to))->header('Referrer-Policy', 'no-referrer')->header('Cache-Control', 'no-store');
     }
 }

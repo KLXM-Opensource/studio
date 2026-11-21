@@ -1518,6 +1518,6 @@ final class CmsService
         if ($r['errors']) throw new ApiError(422, implode(' ', array_map('strval', $r['errors'])));
         $t = $r['table'];
         return ['handle' => $t['handle'], 'id' => $t['handle'], 'name' => $t['name'], 'kind' => \Core\Data\Tables::isInbox($t) ? 'inbox' : 'content',
-            'admin' => site_url() . url('/admin/data/' . $t['handle'] . '/schema')] + self::tableExtras($t);
+            'admin' => admin_url_abs('/admin/data/' . $t['handle'] . '/schema')] + self::tableExtras($t);
     }
 }

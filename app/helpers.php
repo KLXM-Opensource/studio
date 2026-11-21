@@ -189,6 +189,15 @@ function absolute_url(string $path = '/'): string
     return site_url() . url($path);
 }
 
+/**
+ * Absolute Adresse der Verwaltung (Links in E-Mails, OIDC, Hinweise): auf der Netzwerk-Website mit Netzwerk-Domain
+ * (config 'network_host', Core\NetworkHost) dort, sonst wie absolute_url(). Statt absolute_url('/admin…') verwenden.
+ */
+function admin_url_abs(string $path = '/admin'): string
+{
+    return \Core\NetworkHost::adminUrl($path);
+}
+
 /** Relative Adresse absolut machen (bereits absolute Adressen – z. B. Links einer Landing-Domain zur Hauptdomain – bleiben) */
 function abs_url(string $href): string
 {

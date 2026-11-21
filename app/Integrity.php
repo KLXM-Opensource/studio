@@ -516,7 +516,7 @@ final class Integrity
         $text = __('Die Integritätsprüfung von {host} hat Unerwartetes gefunden:', ['host' => $host]) . "\n\n" . implode("\n", $lines)
             . (count($new) > 30 ? "\n" . __('… und {n} weitere.', ['n' => count($new) - 30]) : '')
             . "\n\n" . __('Bitte prüfen: Verwaltung → Grundeinstellungen → Integrität. War es eine gewollte Änderung (Update, neue Erweiterung, neues Konto), dort „Als bekannt übernehmen“.')
-            . "\n\n" . absolute_url('/admin/system/integritaet');
+            . "\n\n" . admin_url_abs('/admin/system/integritaet');
         Mailer::send(__('Sicherheitshinweis: unerwartete Änderungen auf {host}', ['host' => $host]), $text, $to);
         return count($new);
     }

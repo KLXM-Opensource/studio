@@ -29,7 +29,7 @@ final class Api
         return ['query' => $q, 'articles' => array_values(array_map(fn($a) => [
             'id' => (int) $a['id'], 'title' => $a['title'], 'tags' => Support::tagList((string) $a['tags']),
             'excerpt' => Markdown::plain($a['body'], 240), 'body' => $a['body'], 'body_format' => 'markdown-lite',
-            'updated_at' => $a['updated_at'], 'url' => absolute_url('/admin/support/wissen/' . $a['id']),
+            'updated_at' => $a['updated_at'], 'url' => admin_url_abs('/admin/support/wissen/' . $a['id']),
         ], array_filter($rows, fn($a) => $a['status'] === 'published')))];
     }
 
@@ -52,7 +52,7 @@ final class Api
             'priority' => ($args['priority'] ?? '') === 'dringend' ? 'dringend' : 'normal',
         ], [], ['site' => site()->key . ' (' . Support::siteLabel(site()->key) . ')', 'cms' => CMS_NAME . ' ' . CMS_VERSION,
             'browser' => 'API/MCP-Token „' . ($token['name'] ?? '') . '“', 'environment' => environment()], $user);
-        return ['id' => $res['id'], 'status' => 'neu', 'url' => absolute_url('/admin/support/meldung/' . $res['id']),
+        return ['id' => $res['id'], 'status' => 'neu', 'url' => admin_url_abs('/admin/support/meldung/' . $res['id']),
             'hint' => 'Das Support-Team antwortet in der Verwaltung unter Support › Meine Meldungen und per E-Mail.'];
     }
 }

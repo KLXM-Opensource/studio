@@ -286,7 +286,7 @@ use Core\Fields;
     <p class="set-page__lead"><?= e(__('Unter dieser Adresse melden Sie sich an. Standard ist /admin. Optional eine eigene Adresse: Sie hält automatische Login-Scanner fern – ersetzt aber keine starken Passwörter und keinen zweiten Faktor.')) ?></p>
     <section class="set-group">
       <div class="set-list">
-        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Aktuell')) ?></span><code class="set-row__sub" id="ap-current"><?= e(absolute_url('/admin')) ?></code></div>
+        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Aktuell')) ?></span><code class="set-row__sub" id="ap-current"><?= e(admin_url_abs('/admin')) ?></code></div>
           <div class="set-row__ctl"><?= $apCustom ? '<span class="adm-badge">' . e(__('eigene Adresse')) . '</span>' : '<span class="adm-badge adm-badge--muted">' . e(__('Standard')) . '</span>' ?>
             <button type="button" class="adm-btn adm-btn--small" data-copy="#ap-current"><?= e(__('Kopieren')) ?></button></div></div>
         <?php if (\Core\Sites::multi()): ?><div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Gilt für')) ?></span></div><div class="set-row__ctl"><?= e(__('alle Websites dieser Installation')) ?></div></div><?php endif; ?>
@@ -301,7 +301,7 @@ use Core\Fields;
       <h3 class="set-group__title"><?= e(__('Adresse ändern')) ?></h3>
       <div class="set-list">
         <div class="f"><label for="ap-path"><?= e(__('Neue Adresse')) ?></label>
-          <div class="adm-prefix ap-input"><span aria-hidden="true"><?= e(preg_replace('~^https?://~', '', site_url()) . '/') ?></span><input id="ap-path" name="admin_path" form="adminpath" autocomplete="off" spellcheck="false" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{4,39}" value="<?= e($apCustom ? ltrim(\Core\AdminPath::prefix(), '/') : '') ?>" placeholder="<?= e($apSuggest) ?>" aria-describedby="ap-help"></div>
+          <div class="adm-prefix ap-input"><span aria-hidden="true"><?= e(preg_replace('~^https?://~', '', rtrim(admin_url_abs('/'), '/')) . '/') ?></span><input id="ap-path" name="admin_path" form="adminpath" autocomplete="off" spellcheck="false" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{4,39}" value="<?= e($apCustom ? ltrim(\Core\AdminPath::prefix(), '/') : '') ?>" placeholder="<?= e($apSuggest) ?>" aria-describedby="ap-help"></div>
           <p class="f-help ap-hint" id="ap-help"><?= e(__('5–40 Zeichen: Kleinbuchstaben, Ziffern, Bindestriche. Nicht erlaubt sind übliche Adressen wie admin, login, wp-admin, backend oder verwaltung.')) ?> <?= e(__('Vorschlag:')) ?> <code><?= e($apSuggest) ?></code></p></div>
         <?php if ($apHasPw && !\Core\Mfa::recentAuth()): // kürzlich angemeldet/bestätigt: kein Passwort nötig ?><div class="f f--inline"><label for="ap-pw"><?= e(__('Ihr Passwort zur Bestätigung')) ?></label><input id="ap-pw" name="password" type="password" form="adminpath" autocomplete="current-password" required></div><?php endif; ?>
       </div>
@@ -312,6 +312,7 @@ use Core\Fields;
       </div>
     </section>
     <?php endif; ?>
+    <?php $nhForm = 'networkhost'; $nhBack = 'system'; include __DIR__ . '/system/_network_host.php'; // Netzwerk- bzw. Verwaltungs-Domain (Core\NetworkHost) ?>
   </section>
 
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-info" aria-labelledby="tab-info" data-nosave hidden>
@@ -364,6 +365,7 @@ use Core\Fields;
 <form id="proxy-clear" method="post" action="<?= e(url('/admin/system/proxy-clear')) ?>"><?= csrf_field() ?></form>
 <form id="environment" method="post" action="<?= e(url('/admin/system/environment')) ?>"><?= csrf_field() ?></form>
 <?php if (\Core\AdminPath::canManage()): ?><form id="adminpath" method="post" action="<?= e(url('/admin/system/admin-path')) ?>"><?= csrf_field() ?></form><?php endif; ?>
+<?php if (\Core\NetworkHost::canManage()): ?><form id="networkhost" method="post" action="<?= e(url('/admin/system/network-host')) ?>"><?= csrf_field() ?></form><?php endif; ?>
 <?php if (\Core\MediaPools::canManage()): ?>
 <form id="pool-new" method="post" action="<?= e(url('/admin/system/pools')) ?>"><?= csrf_field() ?></form>
 <?php foreach (\Core\MediaPools::all() as $pk => $pl): ?>

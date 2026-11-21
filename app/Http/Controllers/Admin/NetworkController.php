@@ -179,7 +179,8 @@ final class NetworkController extends AdminController
                         // Netzwerk-Website: nur, wenn der eigene Passkey dort gilt (sonst sperrt man sich aus)
                         $h = (string) Sites::normalizeHost($r->str('host'));
                         if ($h === '' || \Core\Domains::isLocal($h)) throw new \InvalidArgumentException(__('Eine lokale Adresse kann nicht Hauptadresse werden.'));
-                        if ($key === Network::siteKey() && \Core\HostHandover::missing($user, $h))
+                        // Mit Netzwerk-Domain (Core\NetworkHost) meldet man sich dort an – die Hauptadresse sperrt dann niemanden aus
+                        if ($key === Network::siteKey() && !\Core\NetworkHost::active($key) && \Core\HostHandover::missing($user, $h))
                             throw new \InvalidArgumentException(__('Ihr Passkey gilt auf {host} noch nicht. Bitte dort zuerst anmelden und einen Passkey anlegen.', ['host' => $h]));
                         Sites::setPrimary($key, $h);
                         Network::log('hosts.primary', $key, (string) $user['email'], $h);
@@ -187,6 +188,15 @@ final class NetworkController extends AdminController
                         break;
                     }
                     $op = $r->str('op') === 'remove' ? 'remove' : 'add';
+                    // Netzwerk-Domain (Core\NetworkHost): nie als Landing-Domain, nicht entfernen, wenn sie sonst ins Leere führt
+                    if (\Core\NetworkHost::is($r->str('host'))) {
+                        if ($op === 'add' && $r->str('landing') === '1') throw new \InvalidArgumentException(__('Die Netzwerk-Domain kann keine Landing-Domain sein.'));
+                        if ($op === 'remove' && $key === Network::siteKey() && \Core\NetworkHost::servedBy((string) \Core\NetworkHost::get()) === $key) {
+                            $inst = Network::install();
+                            $fb = array_key_exists('fallback_site', $inst) ? $inst['fallback_site'] : \Core\Site::DEFAULT;
+                            if ($fb !== $key) throw new \InvalidArgumentException(__('{host} ist die Netzwerk-Domain – bitte zuerst die Netzwerk-Domain ändern oder entfernen (Netzwerk → Administratoren).', ['host' => (string) \Core\NetworkHost::get()]));
+                        }
+                    }
                     Sites::setHosts($key, $op, $r->str('host'), $r->str('landing') === '1');
                     $h = (string) Sites::normalizeHost($r->str('host'));
                     Network::log('hosts.' . $op, $key, (string) $user['email'], $h);

@@ -86,7 +86,9 @@ final class PasswordReset
     public static function url(string $token): ?string
     {
         $b = self::base();
-        return $b === null ? null : $b . url('/admin/passwort/' . $token);
+        if ($b === null) return null;
+        // Netzwerk-Domain (Core\NetworkHost): Link zur zentralen Anmeldeadresse der Netzwerk-Website
+        return \Core\NetworkHost::active() ? admin_url_abs('/admin/passwort/' . $token) : $b . url('/admin/passwort/' . $token);
     }
 
     // ================================================================= Anfrage

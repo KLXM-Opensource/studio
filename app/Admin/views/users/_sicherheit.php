@@ -32,6 +32,7 @@ $pol = $policy ?? \Core\Mfa::policy(); ?>
       <p class="f-help" id="us-grace-h"><?= e(__('0 = bei der nächsten Anmeldung einrichten. Sonst erinnert die Anmeldung bis zum Ablauf der Frist daran; danach geht es erst nach der Einrichtung weiter.')) ?></p></div>
   </div>
   <p class="set-group__note"><?= e(__('„Nur Passkey“ ist phishing-resistent: Code-Apps genügen dann nicht.')) ?></p>
+  <?php if (\Core\NetworkHost::active()): ?><p class="set-group__note"><?= icon('info') ?> <?= e(__('Passkeys gelten je Domain. Angemeldet wird über die Netzwerk-Domain {host} – Passkeys für andere Domains bleiben gespeichert, zählen bei der Anmeldung dort aber nicht. In der Liste oben sehen Sie, wem noch ein Passkey für {host} fehlt.', ['host' => (string) \Core\NetworkHost::get()])) ?></p><?php endif; ?>
   <div class="set-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Speichern')) ?></button></div>
 </form>
 <?php // Anmeldung über einen Identitätsanbieter (OpenID Connect, Core\Oidc) – Standard aus
@@ -80,7 +81,7 @@ $ocDis = $ocLocked ? ' disabled' : ''; ?>
   <dl class="acc-facts">
     <div><dt><?= e(__('Redirect-URI')) ?></dt><dd><code><?= e(\Core\Oidc\Providers::redirectUri()) ?></code></dd></div>
     <div><dt><?= e(__('Einstieg für die Anmeldung (initiate_login_uri)')) ?></dt><dd><code><?= e(\Core\Oidc\Providers::initiateUri()) ?></code></dd></div>
-    <div><dt><?= e(__('Nach dem Abmelden')) ?></dt><dd><code><?= e(absolute_url('/admin/login')) ?></code></dd></div>
+    <div><dt><?= e(__('Nach dem Abmelden')) ?></dt><dd><code><?= e(admin_url_abs('/admin/login')) ?></code></dd></div>
   </dl>
   <?php if (!$ocLocked): ?><div class="set-actions"><button class="adm-btn adm-btn--primary" type="submit"><?= e(__('Speichern')) ?></button></div><?php endif; ?>
 </form>

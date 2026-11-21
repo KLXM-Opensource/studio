@@ -643,8 +643,8 @@ final class Delivery
         Mailer::send($subject . ': ' . $t['name'],
             __('Guten Tag,') . "\n\n" . __('eine Anfrage in „{table}“ (Vorgangsnummer {ref}) konnte nicht per E-Mail zugestellt werden.', ['table' => $t['name'], 'ref' => $ref]) . "\n"
             . __('Grund: {reason}', ['reason' => $reason]) . "\n\n"
-            . ($stored ? __('Die Anfrage wurde stattdessen verschlüsselt im System gesichert und ist unter „Anfragen“ mit dem Schlüssel lesbar:') . "\n" . absolute_url('/admin/requests?table=' . $t['handle'])
-                : __('Die Anfrage konnte auch nicht gesichert werden. Bitte die Einstellungen prüfen:') . "\n" . absolute_url('/admin/data/' . $t['handle'] . '/schema'))
+            . ($stored ? __('Die Anfrage wurde stattdessen verschlüsselt im System gesichert und ist unter „Anfragen“ mit dem Schlüssel lesbar:') . "\n" . admin_url_abs('/admin/requests?table=' . $t['handle'])
+                : __('Die Anfrage konnte auch nicht gesichert werden. Bitte die Einstellungen prüfen:') . "\n" . admin_url_abs('/admin/data/' . $t['handle'] . '/schema'))
             . "\n\n" . __('Diese E-Mail enthält aus Datenschutzgründen keine Inhalte.') . "\n", $to);
     }
 
