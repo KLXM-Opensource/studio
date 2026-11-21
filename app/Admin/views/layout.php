@@ -110,9 +110,9 @@ if ($user && ($req = app()->request)) {
 <script type="application/json" id="cms-i18n"><?= json_encode(\Core\I18n::dictionary(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <?= $user ? \Core\AI\Assist::clientScript() /* KI-Assistent (resources/js/_ai.js) – leer ohne Recht/KI */ : '' ?>
 <?= $user ? \Core\AI\Assistant::clientScript() /* Assistent-Chat der Redaktion (resources/js/_assistant.js → assistant.mjs) – leer ohne Recht/KI */ : '' ?>
-<?= $user ? \Core\Chat\Chat::head() /* Chat zwischen Benutzern (resources/js/userchat.js, css/userchat.css) – leer ohne Recht */ : '' ?>
 <?= $user ? \Core\RichText::clientScript() /* Formatierungsleiste: Stile und Farben des Kits (resources/js/_rte.js) */ : '' ?>
 <script src="<?= e(asset('js/admin.js')) ?>" defer></script>
+<?= $user ? \Core\Chat\Chat::head() /* Chat zwischen Benutzern (resources/js/userchat.js, css/userchat.css) – leer ohne Recht; nach admin.js (Symbol-Index) */ : '' ?>
 <?php if ($user): // Diagramme (Core\Charts): Lader immer – nachgeladene Karten bringen keine eigenen Skripte mit; die Engine lädt erst bei Bedarf ?><script type="module" src="<?= e(asset('js/charts.mjs')) ?>"></script><?php \Core\Charts::loaderPrinted(); endif; ?>
 <?php if ($user && \Core\Http\Controllers\Admin\PresenceController::on()): // Präsenz der Redaktion (eigenständiges Modul) ?><script type="module" src="<?= e(asset('js/presence.mjs')) ?>"></script><?php endif; ?>
 <?= $user ? \Core\Extensions::adminHead((string) ($view ?? '')) /* CSS/JS aktiver Erweiterungen für diese Ansicht (Extension::adminAssets) – nach admin.js */ : '' ?>
