@@ -146,14 +146,14 @@ export function fontPicker(ed, opts = {}) {
       ><span class="ge-fp__name" style="font-family:${esc(it.key)};font-weight:${s.w};font-style:${s.i ? 'italic' : 'normal'}">${esc(styleLabel(s))}</span><span class="ge-fp__meta">${s.w}</span></div>`).join('');
   }
 
-  function markActive(preview = true) {
+  function markActive(preview = true, scroll = true) {
     if (!pop) return;
     pop.querySelectorAll('.ge-fp__fams [role=option]').forEach(o => o.setAttribute('aria-selected', String(o.id === active)));
     renderStyles();
     const node = col === 'sty' ? pop.querySelector(`#${id}-s${styleActive}`) : active && pop.querySelector('#' + active);
     // Nur die Liste selbst scrollen: scrollIntoView verschob auch Seite/Editor – die Liste rutschte unter dem Zeiger weg, der Klick
     // traf daneben und nahm die Vorschau zurück (Klick auf eine Schrift wirkte nach dem Zeigen auf andere Schriften nicht)
-    if (node) { input.setAttribute('aria-activedescendant', node.id); scrollInto(node); } else input.removeAttribute('aria-activedescendant');
+    if (node) { input.setAttribute('aria-activedescendant', node.id); if (scroll) scrollInto(node); } else input.removeAttribute('aria-activedescendant');
     pop.querySelector('.ge-fp__fams').classList.toggle('is-dim', col === 'sty');
     if (preview) doPreview();
   }
@@ -207,8 +207,8 @@ export function fontPicker(ed, opts = {}) {
     pop.addEventListener('pointermove', e => {
       const o = e.target.closest('[role=option]');
       if (!o) return;
-      if (o.classList.contains('ge-fp__sty')) { if (col !== 'sty' || styleActive !== +o.dataset.i) { col = 'sty'; styleActive = +o.dataset.i; markActive(); } }
-      else if (o.id !== active || col !== 'fam') { col = 'fam'; active = o.id; styleActive = 0; markActive(); }
+      if (o.classList.contains('ge-fp__sty')) { if (col !== 'sty' || styleActive !== +o.dataset.i) { col = 'sty'; styleActive = +o.dataset.i; markActive(true, false); } }
+      else if (o.id !== active || col !== 'fam') { col = 'fam'; active = o.id; styleActive = 0; markActive(true, false); }
     });
     pop.addEventListener('pointerleave', () => { revert(); });
     pop.addEventListener('click', e => {
