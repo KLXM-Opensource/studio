@@ -444,6 +444,13 @@ export class Connectors {
       for (const k of kids(n)) { place(k, d + 1, cur); cur += k.__span + gap; }
     };
     place(rootEl, 0, startMain);
+    // Baum ragt links bzw. oben über die Zeichenfläche: als Ganzes hereinschieben (der Abstand zum Rand = halber Abstand)
+    const vb = this.ed.vb;
+    const all = [...seen];
+    const bs = all.map(n => docBounds(n, root)).filter(Boolean);
+    const minX = Math.min(...bs.map(b => b.x)), minY = Math.min(...bs.map(b => b.y));
+    const dx = minX < vb.x ? vb.x + gap / 2 - minX : 0, dy = minY < vb.y ? vb.y + gap / 2 - minY : 0;
+    if (dx || dy) for (const n of all) { this.ed.moveBy(n, dx, dy); if (!moved.includes(n)) moved.push(n); }
     // Verbinder im Baum: Seiten passend zur Richtung
     for (const c of root.querySelectorAll('path[data-ge-conn]')) {
       const o = parseConn(c);

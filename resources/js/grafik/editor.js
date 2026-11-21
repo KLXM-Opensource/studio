@@ -159,7 +159,7 @@ export class GraphicEditor {
     this.paper = this.$('.ge-paper');
     this.ov = this.$('.ge-ov');
     this.shadow = this.paper.attachShadow({ mode: 'open' });
-    this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible}</style>';
+    this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
