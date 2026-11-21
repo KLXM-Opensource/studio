@@ -217,7 +217,7 @@ export async function offsetArea(ed, el, dist, join = 'round') {
 }
 
 /** Pfad im Dokumentraum als Element mit dem Stil von src (im Raum des Elternelements von src) */
-export function pathLike(src, root, pathData) { return makePath(src, src, root, pathData); }
+export function pathLike(src, root, pathData, place = src) { return makePath(src, place, root, pathData); }
 
 // ================================================================= Zusammengesetzte Form (zerstörungsfrei)
 /*

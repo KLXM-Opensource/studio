@@ -77,7 +77,8 @@
       <code>export.js</code> (Web-Optimierung, Desktop-SVG, PDF).
       Ausbaustufe 3a: <code>fontpicker.js</code> (Schriftauswahl), <code>typo.js</code> (OpenType, Absatz-Einstellungen, Silbentrennung),
       <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).
-      Ausbaustufe 3b: <code>scheme.js</code> (Design-Farben, Hell/Dunkel, Ansicht), <code>check.js</code> (Prüfen).</li>
+      Ausbaustufe 3b: <code>scheme.js</code> (Design-Farben, Hell/Dunkel, Ansicht), <code>check.js</code> (Prüfen), <code>builder.js</code> (Formgitter),
+      <code>repeat.js</code> (Wiederholen), <code>fx.js</code> (Ebeneneffekte).</li>
     <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
       <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
       <table class="doc-table">
@@ -206,6 +207,23 @@
           <code>data-theme</code>) und dunklen Abschnitten einer hellen Seite, auch ohne Neuladen (MutationObserver). Design speichern leert den
           Seiten-Cache; neue Werte ergeben neue Dateinamen.</li>
       </ul></li>
+    <li id="grafik-builder-technik"><b>Formgitter</b> (<code>builder.js</code>): zerlegt die Auswahl wie „Teilen“ mit Paper.js in Bereiche (Inseln einer
+      zusammengesetzten Fläche einzeln, Treffer über <code>item.contains()</code> im Dokumentraum), Überlagerung <code>.ge-ov__piece</code>. Ergebnis:
+      alle Bereiche als Pfade im Raum der untersten Form (<code>pathLike(src, root, d, place)</code>, Stil und Design-Farben des Ursprungs), vereinte
+      mit dem Stil des ersten Bereichs; ein Schritt im Protokoll.</li>
+    <li id="grafik-repeat-technik"><b>Wiederholen</b> (<code>repeat.js</code>): <code>duplicateAgain()</code> merkt <code>ed.lastDup = {src, copies, T}</code>;
+      ⌘D auf die letzte Kopie berechnet einmal den Schritt (Versatz der Mitten, Drehung/Skalierung aus <code>getCTM()</code> – nur was als
+      <code>transform</code> am Element steht) und wiederholt ihn. Pfeiltasten-Schritte werden vor jedem anderen Befehl abgeschlossen
+      (<code>flushNudge()</code> in Tastatur und Zeiger). Dialog: Kopien mit <code>applyTransform(c, T, root)</code> (Dokumentraum) als Vorschau im DOM,
+      Abbrechen entfernt sie, OK fasst zur Gruppe „Wiederholung“ zusammen.</li>
+    <li id="grafik-fx-technik"><b>Ebeneneffekte</b> (<code>fx.js</code>): Modell am Filter <code>data-ge-fx="ds:dx=4,dy=6,b=6,c=#000000,o=0.25;!og:b=8,c=…,o=…"</code>
+      (<code>!</code> = aus; Arten <code>ds is og ig ol co bl</code>), daraus <code>writeFilter()</code>: nur Schlagschatten → ein <code>feDropShadow</code> (wie
+      bisher, ältere Grafiken werden so gelesen); sonst ein Graph aus <code>feGaussianBlur</code>, <code>feOffset</code>, <code>feFlood</code>,
+      <code>feComposite</code>, <code>feMorphology</code> (Kontur außen), <code>feComponentTransfer</code> (umgekehrte Alpha für innere Effekte) und
+      <code>feMerge</code> in der Reihenfolge Schatten · Leuchten · Kontur · Objekt (bzw. weichgezeichnet) · Farbüberlagerung · innerer Schatten · inneres
+      Leuchten, <code>color-interpolation-filters="sRGB"</code>, Filterbereich ±50 %. Alles erlaubt <code>Core\Svg</code> schon – keine Änderung an der
+      Bereinigung. Geteilte Filter werden beim Ändern kopiert, fremde Filter (aus Dateien) nicht angefasst. Verlaufsüberlagerung fehlt bewusst
+      (bräuchte <code>feImage</code>, das als Pixelbild entfernt wird) – dafür Füllung mit Verlauf.</li>
     <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
       <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
       und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +

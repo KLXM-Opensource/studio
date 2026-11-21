@@ -48,7 +48,14 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 - **Prüfen** (Reiter, läuft auch beim Speichern, blockiert nicht): Titel, Beschreibung, Alt-Text (mit Vorschlag aus Titel und Texten), Kontrast von
   Text (4,5:1/3:1) und wichtigen Linien (3:1) in Hell und Dunkel, „verschwindet im Dunkeln“, Schrift unter 12 px in der vorgesehenen Breite
   (Dokument → „Breite auf der Website“), Lesereihenfolge von Diagrammen und Texten; Klick springt zum Element, Markierungen auf der Fläche.
-- `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Design-Farben, Hell und Dunkel; Prüfen), Entwicklerhandbuch → Medien → Grafik-Editor.
+- **Formgitter** (Werkzeug M, wie Shape Builder): Überlappungen der Auswahl als Bereiche, Klick/Ziehen vereint, ⌥ entfernt.
+- **Wiederholen:** ⌘D wiederholt den Versatz (und die Drehung) der letzten Kopie; Objekt → Wiederholen … (⌥⌘D) mit Versatz, Kreis um einen
+  Mittelpunkt und Raster, Vorschau auf der Fläche, ein Schritt im Protokoll. Pfeiltasten-Schritt wird vor dem nächsten Befehl abgeschlossen
+  (vorher landete z. B. ⌘D direkt nach Pfeiltasten im Schritt „Verschieben“).
+- **Ebeneneffekte** im Bereich Darstellung: Schlagschatten, innerer Schatten, äußeres/inneres Leuchten, Kontur außen, Farbüberlagerung,
+  Weichzeichnen – mehrere je Ebene, an/aus, Einstellungen mit Vorschau; als SVG-Filter aus den Primitiven, die die Bereinigung schon erlaubt.
+- `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Design-Farben, Hell und Dunkel; Prüfen; Formgitter, Wiederholen,
+  Ebeneneffekte), Entwicklerhandbuch → Medien → Grafik-Editor.
 
 ### Grafik-Editor: Prüfung mit echten SVGs und Bedienung wie in Grafikprogrammen
 - **Zeichenfläche erbt nichts mehr von der Verwaltung:** Text ohne eigene Schrift erscheint wie in der Mediathek und auf der Website

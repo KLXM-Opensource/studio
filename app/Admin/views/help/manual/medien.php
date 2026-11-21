@@ -143,6 +143,7 @@
     <tr><td>Verbinder</td><td><kbd>C</kbd></td><td>Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten und folgen, wenn Formen sich bewegen (siehe <a href="#grafik-diagramme">Diagramme</a>).</td></tr>
     <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet. <kbd>⌘</kbd><kbd>Z</kbd> nimmt beim Tippen Schritt für Schritt zurück – auch Formatierung wie Fett oder Farbe.</td></tr>
     <tr><td>Verlauf</td><td><kbd>F</kbd></td><td>Auf einem Objekt ziehen = linearen Verlauf anlegen bzw. neu ausrichten. Anfang/Ende (radial: Mitte/Radius) und Farbstopps auf der Fläche ziehen, Doppelklick auf die Linie = neuer Stopp, <kbd>⌫</kbd> löscht den gewählten.</td></tr>
+    <tr><td>Formgitter</td><td><kbd>M</kbd></td><td>Mindestens zwei sich überlappende Formen auswählen. Der Zeiger zeigt die einzelnen Bereiche; Klick oder Ziehen über mehrere Bereiche vereint sie zu einer Form, mit <kbd>⌥</kbd> werden die Bereiche entfernt (siehe <a href="#grafik-wiederholen">Formgitter, Wiederholen, Effekte</a>).</td></tr>
     <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
   </table>
   <ul>
@@ -217,6 +218,22 @@
       <b>Dokument → Breite auf der Website</b> ein (leer = so breit wie die Zeichenfläche).</li>
     <li><b>Lesereihenfolge</b>: Diagramme mit Verbindern brauchen den Ablauf in der Beschreibung (ein Klick fügt ihn ein); Texte, deren
       Reihenfolge in den Ebenen nicht der sichtbaren entspricht, werden genannt.</li>
+  </ul>
+  <h4 id="grafik-wiederholen">Formgitter, Wiederholen, Ebeneneffekte</h4>
+  <ul>
+    <li><b>Formgitter</b> (<kbd>M</kbd>, wie der Shape Builder in Illustrator/Affinity): Formen auswählen, Werkzeug wählen – die Überlappungen
+      erscheinen als einzelne Bereiche (gestrichelt). Über einen Bereich fahren hebt ihn hervor, Klick oder Ziehen über mehrere vereint sie,
+      <kbd>⌥</kbd>-Klick bzw. <kbd>⌥</kbd>-Ziehen entfernt sie. Alle übrigen Bereiche bleiben als eigene Formen erhalten; jeder Schritt lässt sich mit
+      <kbd>⌘</kbd><kbd>Z</kbd> zurücknehmen.</li>
+    <li><b>Wiederholen:</b> <kbd>⌘</kbd><kbd>D</kbd> dupliziert; verschieben (oder drehen) Sie die Kopie und drücken erneut <kbd>⌘</kbd><kbd>D</kbd>,
+      bekommt jede weitere Kopie denselben Versatz – wie „Erneut transformieren“. <b>Objekt → Wiederholen …</b> (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>D</kbd>)
+      erzeugt viele Kopien auf einmal: <b>Versatz</b> (Anzahl, X/Y, Drehung und Skalierung je Kopie), <b>Kreis</b> (um einen Mittelpunkt, z. B. für
+      Zifferblätter und Strahlen; Objekte mitdrehen oder nicht) oder <b>Raster</b> (Spalten × Zeilen mit Abstand). Die Vorschau erscheint sofort auf der
+      Fläche; das Ergebnis ist eine Gruppe und ein Schritt im Protokoll.</li>
+    <li><b>Ebeneneffekte</b> (Bereich Darstellung): Schlagschatten, innerer Schatten, äußeres und inneres Leuchten, Kontur außen, Farbüberlagerung und
+      Weichzeichnen – mehrere je Ebene, jeweils mit Haken an/aus (die Einstellungen bleiben gemerkt) und „…“ für Größe, Versatz, Farbe und Deckkraft.
+      Die Fläche zeigt das Ergebnis sofort. Große Weichzeichner kosten Rechenzeit beim Anzeigen; im PDF fehlen Effekte, in SVG für
+      Desktop-Programme bleiben sie erhalten.</li>
   </ul>
   <h4 id="grafik-geometrie">Formen kombinieren, ausstanzen, umwandeln</h4>
   <p>Zwei oder mehr Objekte wählen, dann in der Kontextleiste bzw. im Menü <b>Objekt</b>. Gerechnet wird mit den echten Kurven

@@ -39,6 +39,8 @@ import { GradientHandles } from './gradhandles.js';
 import { optimizeSvg, checkSame, desktopSvg, pdfBlob } from './export.js';
 import { SchemeView, suggestDark, paintedElements, bakeScheme } from './scheme.js';
 import { checkOverlay, suggestAlt } from './check.js';
+import { ShapeBuilder } from './builder.js';
+import { duplicateAgain, repeatDialog } from './repeat.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -63,6 +65,7 @@ const TOOLS = [
   { id: 'connector', icon: 'flow-arrow', key: 'C', label: () => t('Verbinder') },
   { id: 'text', icon: 'text-t', key: 'T', label: () => t('Text') },
   { id: 'gradient', icon: 'gradient', key: 'F', label: () => t('Verlauf') },
+  { id: 'builder', icon: 'selection-plus', key: 'M', label: () => t('Formgitter') },
   { id: 'eyedropper', icon: 'eyedropper', key: 'I', label: () => t('Pipette') },
   { id: 'hand', icon: 'hand', key: 'H', label: () => t('Hand') },
   { id: 'zoom', icon: 'magnifying-glass-plus', key: 'Z', label: () => t('Zoom') },
@@ -80,6 +83,7 @@ const HINTS = {
   text: () => t('Klick = Text an dieser Stelle, Klick in eine Form = Text in der Form (zentriert, umbrochen). Esc oder Klick daneben beendet die Eingabe.'),
   connector: () => t('Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten (Seiten, Mitte = automatisch, Knoten). Verbinder folgen, wenn Formen sich bewegen. Doppelklick auf einen Verbinder = Beschriftung.'),
   eyedropper: () => t('Klick auf ein Objekt übernimmt seine Füllung und Kontur für die Auswahl.'),
+  builder: () => t('Formgitter: überlappende Formen auswählen, dann Bereich anklicken oder mehrere überstreichen = vereinen, ⌥ = Bereiche entfernen.'),
   gradient: () => t('Ziehen auf einem Objekt = Verlauf anlegen bzw. neu ausrichten. Griffe ziehen, Doppelklick auf die Linie = Farbstopp, ⌫ = Stopp löschen. X = Füllung/Kontur.'),
   hand: () => t('Ziehen = Ansicht verschieben (auch mit gedrückter Leertaste in jedem Werkzeug).'),
   zoom: () => t('Klick = vergrößern, ⌥-Klick = verkleinern. ⌘0 = einpassen, ⌘1 = 100 %.'),
@@ -178,6 +182,7 @@ export class GraphicEditor {
     if (!secs.some(s => s.id === 'paper')) this.boot.sections = [{ id: 'paper', label: t('Weiß (neutral)'), light: '#FFFFFF', dark: secs[0]?.dark || '#111318' }, ...secs];
     this.sectionId = 'paper';
     this.sv = new SchemeView(this);
+    this.builder = new ShapeBuilder(this);
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -264,6 +269,8 @@ export class GraphicEditor {
     this.el.dataset.tool = id;
     this.$('.ge-tools').querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === id)));
     if (id !== 'node') this.nodeSel.clear();
+    this.builder?.reset();
+    if (id === 'builder') this.builder.prepare().then(() => this.draw()).catch(e => console.error(e));
     this.hint();
     this.renderCtx();
     this.draw();
@@ -506,6 +513,7 @@ export class GraphicEditor {
     }
     // Hinweise der Prüfung (check.js) für die gezeigte Fassung
     out.push(checkOverlay(this));
+    if (this.tool === 'builder') out.push(this.builder.overlay());
     if (this.tool === 'gradient') out.push(this.grad.overlay());
     else if (this.tool === 'node') out.push(this.drawNodes());
     else if (this.sel.length && !this.textEl && this.sel.every(isConn)) out.push(this.drawConnSel(this.tool === 'select'));
@@ -587,6 +595,7 @@ export class GraphicEditor {
         if (hit !== this.hover) { this.hover = hit; this.draw(); }
       }
       if (this.pen) { this.pen.cursor = this.snapPoint(p); this.draw(); }
+      if (this.tool === 'builder') this.builder.hover(e);
     });
     st.addEventListener('pointerleave', () => { if (this.hover) { this.hover = null; this.draw(); } });
     st.addEventListener('dblclick', e => this.dbl(e));
@@ -630,6 +639,7 @@ export class GraphicEditor {
   }
 
   down(e) {
+    this.flushNudge();
     if (e.button === 1 || this.space || this.tool === 'hand') return this.panDrag(e);
     if (e.button !== 0) return;
     if (e.target.closest?.('.ge-textedit')) return;
@@ -651,6 +661,7 @@ export class GraphicEditor {
       case 'connector': return this.connDown(e, p);
       case 'eyedropper': return this.eyedrop(e);
       case 'gradient': return this.grad.stageDown(e, p);
+      case 'builder': return this.builder.down(e);
       case 'zoom': { const r = this.stage.getBoundingClientRect(); return this.setZoom(this.zoom * (e.altKey ? 0.5 : 2), e.clientX - r.left, e.clientY - r.top); }
     }
   }
@@ -1701,6 +1712,8 @@ export class GraphicEditor {
       { label: t('Zusammengesetzt: Abziehen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('subtract') },
       { label: t('Zusammengesetzt: Vereinen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('unite') },
       { sep: true },
+      { label: t('Wiederholen …'), key: ALT + MOD + 'D', disabled: !n, run: () => repeatDialog(this) },
+      { sep: true },
       { label: t('Kontur in Fläche umwandeln'), disabled: !shapes.some(el => (getProp(el, 'stroke') || 'none') !== 'none'), run: () => this.strokeToFill() },
       { label: t('Pfad versetzen …'), disabled: !n, run: () => this.offsetPath() },
       { sep: true },
@@ -2031,7 +2044,8 @@ export class GraphicEditor {
   duplicate() {
     if (!this.sel.length) return;
     const off = this.format === 'icon' ? 1 : 10;
-    const clones = this.sel.map(el => { const c = el.cloneNode(true); el.after(c); this.freshIds(c); applyTransform(c, new DOMMatrix().translate(off, off), this.root); return c; });
+    // ⌘D auf die letzte Kopie wiederholt deren Versatz/Drehung (repeat.js) – sonst Kopie um 10 versetzt
+    const { copies: clones, again } = duplicateAgain(this, off);
     // Text in einer Form: Kopie gehört zur Kopie der Form
     this.sel.forEach((el, i) => {
       if (!el.id || isConn(el)) return;
@@ -2044,7 +2058,8 @@ export class GraphicEditor {
       clones[i].after(ti);
     });
     this.sel = clones;
-    this.commit(t('Dupliziert'));
+    this.lastDup.copies = clones;
+    this.commit(again ? t('Dupliziert (Schritt wiederholt)') : t('Dupliziert'));
   }
 
   remove() {
@@ -2268,8 +2283,11 @@ export class GraphicEditor {
       if (mod && k === 's') { e.preventDefault(); this.save(e.shiftKey); return; }
       if (inField) return;
       if (e.target.closest?.('.ge-textedit')) return;
+      // Pfeiltasten-Schritt abschließen, bevor ein anderer Befehl das Dokument ändert (sonst landete dessen Änderung im Schritt „Verschieben“)
+      if (!/^Arrow|^(Shift|Alt|Meta|Control)$/.test(e.key)) this.flushNudge();
       if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? this.redo() : this.undo(); return; }
       if (mod && k === 'y') { e.preventDefault(); this.redo(); return; }
+      if (mod && e.altKey && (k === 'd' || e.code === 'KeyD')) { e.preventDefault(); repeatDialog(this); return; }
       if (mod && k === 'd') { e.preventDefault(); this.duplicate(); return; }
       if (mod && k === 'g') { e.preventDefault(); e.shiftKey ? this.ungroup() : this.group(); return; }
       if (mod && k === 'a') { e.preventDefault(); this.selectAll(); return; }
@@ -2841,7 +2859,7 @@ export class GraphicEditor {
   shortcuts() {
     const rows = [
       [t('Werkzeuge'), TOOLS.map(x => `${x.key} ${x.label()}`).join(' · ')],
-      [MOD + 'Z / ' + SHIFT + MOD + 'Z', t('Rückgängig / Wiederholen')], [MOD + 'S', t('Speichern')], [MOD + 'D', t('Duplizieren')],
+      [MOD + 'Z / ' + SHIFT + MOD + 'Z', t('Rückgängig / Wiederholen')], [MOD + 'S', t('Speichern')], [MOD + 'D', t('Duplizieren')], [ALT + MOD + 'D', t('Wiederholen …')],
       [MOD + 'G / ' + SHIFT + MOD + 'G', t('Gruppieren / Gruppierung aufheben')], [MOD + 'C / X / V', t('Kopieren / Ausschneiden / Einfügen')],
       [MOD + '[ / ]', t('Eine Ebene nach hinten / vorn (mit ⇧ ganz)')], ['⌫', t('Löschen')], [t('Pfeiltasten'), t('Verschieben um 1 (mit ⇧ um 10)')],
       ['Tab', t('Nächstes Objekt auswählen')], ['↵ / Esc', t('Gruppe betreten bzw. Text bearbeiten / verlassen')], [t('Leertaste + Ziehen'), t('Ansicht verschieben')],

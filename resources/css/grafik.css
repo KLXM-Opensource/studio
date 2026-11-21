@@ -471,3 +471,22 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-ov__issue--error circle { fill: #B91C1C }
 .ge-ov__issue--info circle { fill: #475569 }
 .ge-ov__issue path { fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round }
+
+/* ---------------------------------------------------------------- Formgitter (builder.js) */
+.ge-ov__piece { fill: transparent; stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7 }
+.ge-ov__piece.is-hot { fill: color-mix(in srgb, var(--adm-a) 22%, transparent); stroke-dasharray: none; opacity: 1 }
+.ge-ov__piece.is-on { fill: color-mix(in srgb, var(--adm-a) 40%, transparent); stroke-dasharray: none; stroke-width: 2; opacity: 1 }
+.ge-ov__piece.is-remove { fill: rgba(185, 28, 28, .35); stroke: #B91C1C; stroke-dasharray: none; stroke-width: 2; opacity: 1 }
+.ge[data-tool=builder] .ge-stage { cursor: cell }
+
+/* ---------------------------------------------------------------- Ebeneneffekte (fx.js) */
+.ge-fx { display: grid; gap: 2px }
+.ge-fx__it { border-radius: 8px }
+.ge-fx__it.is-on { background: var(--adm-fill) }
+.ge-fx__row { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 32px; padding: 0 4px 0 6px }
+.ge-fx__row .ge-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--adm-ink) }
+.ge-fx__more { min-width: 28px; height: 28px; font-weight: 800 }
+.ge-fx__opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; padding: 4px 8px 10px }
+.ge-fx__opts .ge-lbl { display: flex; align-items: center; justify-content: space-between; gap: 6px }
+.ge-fx__color { width: 44px; height: 26px; padding: 0; border: 1px solid var(--adm-line); border-radius: 6px; background: none }
+.ge-row3 { display: flex; flex-wrap: wrap; gap: 6px 16px }

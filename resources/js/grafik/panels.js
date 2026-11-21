@@ -21,6 +21,7 @@ import { buildTextPanel } from './textpanel.js';
 import { layoutText } from './text.js';
 import { paintIn, darkState, setDark, propOf, swatchMap, paintedElements, invertLightness, tokensToVars, DARK_ATTR, TOKEN_ATTR } from './scheme.js';
 import { buildCheckPanel, backgroundIn } from './check.js';
+import { buildFx } from './fx.js';
 
 const BLEND = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
 const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), screen: t('Negativ multiplizieren'), overlay: t('Ineinanderkopieren'), darken: t('Abdunkeln'), lighten: t('Aufhellen'),
@@ -478,12 +479,9 @@ export function buildPanels(ed) {
   </div>`;
   lookPanel.innerHTML = lookHtml('') + `<div class="ge-form">
     <label class="ge-lbl" data-radiusrow>${esc(t('Eckenradius'))} <input type="number" class="ge-in ge-in--s" data-radius min="0" max="9999" step="1"></label>
-    <label class="ge-lbl ge-chk"><input type="checkbox" data-shadow> ${esc(t('Schatten'))}</label>
-    <div class="ge-row4" data-shadowopts>
-      <label>X <input type="number" class="ge-in ge-in--s" data-sh="dx" step="1"></label><label>Y <input type="number" class="ge-in ge-in--s" data-sh="dy" step="1"></label>
-      <label>${esc(t('Weich'))} <input type="number" class="ge-in ge-in--s" data-sh="stdDeviation" min="0" step="0.5"></label>
-      <label>${esc(t('Deckkraft'))} <input type="number" class="ge-in ge-in--s" data-sh="flood-opacity" min="0" max="1" step="0.05"></label></div>
-  </div>`;
+  </div><div data-fxbox></div>`;
+  // Ebeneneffekte (fx.js): Schlagschatten, innerer Schatten, Leuchten, Weichzeichnen, Kontur außen, Farbüberlagerung
+  const fx = buildFx(ed, lookPanel.querySelector('[data-fxbox]'), { sel, commit });
   function bindLook(box) {
     box.querySelector('[data-op]').addEventListener('input', e => { box.querySelector('[data-opo]').textContent = e.target.value + ' %'; for (const el of sel()) setProp(el, 'opacity', +e.target.value >= 100 ? null : num(+e.target.value / 100, 2)); ed.draw(); });
     box.querySelector('[data-op]').addEventListener('change', () => commit(t('Deckkraft')));
@@ -494,25 +492,6 @@ export function buildPanels(ed) {
     for (const el of sel()) if (el.localName === 'rect') { const v = Math.max(0, +e.target.value || 0); el.setAttribute('rx', num(v)); el.removeAttribute('ry'); if (!v) el.removeAttribute('rx'); }
     commit(t('Eckenradius'));
   });
-  const shadowOf = el => { const f = refOf(ed.root, getProp(el, 'filter', false)); return f?.querySelector('feDropShadow') ? f : null; };
-  lookPanel.querySelector('[data-shadow]').addEventListener('change', e => {
-    for (const el of sel()) {
-      if (!e.target.checked) { setProp(el, 'filter', null); continue; }
-      const f = document.createElementNS(NS, 'filter');
-      f.id = uid(ed.root, 'schatten-');
-      Object.entries({ x: '-50%', y: '-50%', width: '200%', height: '200%' }).forEach(([k, v]) => f.setAttribute(k, v));
-      const ds = document.createElementNS(NS, 'feDropShadow');
-      const s = ed.format === 'info' ? 1 : 0.25;
-      Object.entries({ dx: num(4 * s), dy: num(6 * s), stdDeviation: num(6 * s), 'flood-color': '#000000', 'flood-opacity': '0.25' }).forEach(([k, v]) => ds.setAttribute(k, v));
-      f.append(ds); defs(ed.root).append(f);
-      setProp(el, 'filter', `url(#${f.id})`);
-    }
-    commit(t('Schatten'));
-  });
-  lookPanel.querySelectorAll('[data-sh]').forEach(i => i.addEventListener('change', () => {
-    for (const el of sel()) { const f = shadowOf(el); if (f) f.querySelector('feDropShadow').setAttribute(i.dataset.sh, num(+i.value || 0, 3)); }
-    commit(t('Schatten'));
-  }));
   function refreshLook(box) {
     const el = first();
     box.querySelectorAll('input,select').forEach(i => { i.disabled = !el; });
@@ -523,10 +502,7 @@ export function buildPanels(ed) {
     const rr = box.querySelector('[data-radiusrow]');
     rr.hidden = !(el && el.localName === 'rect');
     if (!rr.hidden) box.querySelector('[data-radius]').value = num(parseFloat(el.getAttribute('rx') || el.getAttribute('ry') || '0'), 2);
-    const f = el ? shadowOf(el) : null;
-    box.querySelector('[data-shadow]').checked = !!f;
-    box.querySelector('[data-shadowopts]').hidden = !f;
-    if (f) { const ds = f.querySelector('feDropShadow'); box.querySelectorAll('[data-sh]').forEach(i => { i.value = ds.getAttribute(i.dataset.sh) ?? ''; }); }
+    fx.render();
   }
 
   // ================================================================= Ebenen
