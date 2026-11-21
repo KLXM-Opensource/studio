@@ -210,7 +210,8 @@ const btn = (cmd, label, title, o = {}) => `<button type="button" data-cmd="${cm
   + `${o.pressed ? ' aria-pressed="false"' : ''}${o.aria ? ` aria-keyshortcuts="${o.aria}"` : ''}${o.cls ? ` class="${o.cls}"` : ''}>${label}</button>`;
 const item = (cmd, label, o = {}) => `<button type="button" role="${o.radio ? 'menuitemradio' : 'menuitem'}" tabindex="-1" data-cmd="${cmd}"${o.radio ? ' aria-checked="false"' : ''}${o.cls ? ` class="${o.cls}"` : ''}>`
   + `${o.pre || ''}<span class="rte-mi__t">${esc(t(label))}</span>${o.hint ? `<small class="rte-mi__h">${esc(t(o.hint))}</small>` : ''}${o.post || ''}</button>`;
-const menuBtn = (name, label, title, extra = '') => `<button type="button" class="rte-mbtn rte-mbtn--${name}" data-menu="${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="" aria-label="${esc(t(title))}" title="${esc(t(title))}">${label}${icon('chevron', 'rte-icon rte-caret')}</button>${extra}`;
+// aria: eigener zugänglicher Name – muss den sichtbaren Text enthalten (WCAG 2.5.3), z. B. „Normal (Absatzstil)“
+const menuBtn = (name, label, title, extra = '', aria = '') => `<button type="button" class="rte-mbtn rte-mbtn--${name}" data-menu="${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="" aria-label="${esc(aria || t(title))}" title="${esc(t(title))}">${label}${icon('chevron', 'rte-icon rte-caret')}</button>${extra}`;
 
 let uid = 0;
 function barHtml(mode) {
@@ -234,7 +235,7 @@ function barHtml(mode) {
       + item('markdown', 'Markdown einfügen …', { pre: `<span class="rte-mi__i">${icon('markdown')}</span>`, hint: 'Text mit # Überschriften, - Listen, **fett** umwandeln' }))
     + '</span></span>';
   if (mode === 'inline') return inl + more('') + aiBarHtml();
-  const style = `<span class="rte-group"><span class="rte-mwrap">${menuBtn('style', `<span class="rte-style-l">${esc(t('Normal'))}</span>`, 'Absatzstil')}`
+  const style = `<span class="rte-group"><span class="rte-mwrap">${menuBtn('style', `<span class="rte-style-l">${esc(t('Normal'))}</span>`, 'Absatzstil', '', `${t('Normal')} (${t('Absatzstil')})`)}`
     + menu('style', 'Absatzstil', STYLES.map(([v, label, , hint]) => item('style:' + v, label, { radio: 1, hint, cls: 'rte-mi rte-mi--' + v })).join('')) + '</span></span>';
   const listGroup = `<span class="rte-group rte-wide">${lists.map(([c, l, ti]) => btn(c, l, ti, { pressed: 1 })).join('')}</span>`;
   const listItems = `<span class="rte-narrow">${lists.map(([c, , ti]) => item(c, ti, { radio: 1, pre: `<span class="rte-mi__i">${icon(c === 'checklist' ? 'check' : c === 'insertOrderedList' ? 'ordered' : 'bullet')}</span>` })).join('')}</span>`
@@ -519,7 +520,9 @@ const Rich = {
       const st = STYLES.find(x => x[0] === style);
       const short = list ? t('Liste') : t(st[2]);
       sb.querySelector('.rte-style-l').textContent = short;
-      sb.setAttribute('aria-label', t('Absatzstil') + ': ' + (list ? t('Liste') : t(st[1])));
+      // sichtbarer Kurztext zuerst (WCAG 2.5.3 Label in Name), dann Stilname
+      const long = list ? t('Liste') : t(st[1]);
+      sb.setAttribute('aria-label', short + ' (' + t('Absatzstil') + (long !== short ? ': ' + long : '') + ')');
     }
     const cb = bar.querySelector('[data-menu=color]');
     if (cb) {
