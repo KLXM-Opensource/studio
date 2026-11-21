@@ -301,6 +301,7 @@ final class Bind
             if ($def['a'] === 'count') return self::$memo[$key] = (float) Entries::count($t, $o);
             $f = $def['f'];
             if ($f === '' || (!Tables::field($t, $f) && !in_array($f, Tables::SYSTEM, true))) return self::$memo[$key] = null;
+            if (\Core\Data\Exposure::isPrivate(Tables::field($t, $f))) return self::$memo[$key] = null;   // „Nie öffentlich“: kein Wert in Grafiken
             if ($def['a'] === 'latest') {
                 $e = Entries::query($t, $o + ['sort' => 'id', 'dir' => 'desc', 'limit' => 1])[0] ?? null;
                 if (!$e) return self::$memo[$key] = null;

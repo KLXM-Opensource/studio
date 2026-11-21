@@ -5,7 +5,7 @@ namespace Klxm\Dav;
 
 /**
  * php bin/console dav:selftest – Abbildung ohne Datenbank: Namen (FN → N und zurück), feste Organisation (ORG), Rich-Text als reiner
- * Text (NOTE, X-MYCMS-*), Rückweg aus der App (unverändert/geändert), „Nur veröffentlichte Einträge“ und Standardwerte.
+ * Text (NOTE, X-MYCMS-*), Rückweg aus der App (unverändert/geändert), „Nur veröffentlichte Einträge“, Status neuer Kontakte und Standardwerte.
  * Arbeitet mit einer erfundenen Tabelle im Speicher und übergibt die Einstellungen direkt – nichts wird gespeichert.
  */
 final class SelfTest
@@ -102,6 +102,15 @@ final class SelfTest
         $eq('fehlende Einstellung = aus', Dav::visible([], ['status' => 'draft']), true);
         $eq('fester Text', Dav::fixedOrg(['org' => ' Muster GmbH ']), 'Muster GmbH');
         $eq('org null = Standard', Dav::fixedOrg(['org' => null]), trim(strip_tags(org_name())));
+
+
+        echo "Neue Kontakte aus Apps (Datenschutz)\n";
+        $eq('ohne Detailseite: sofort online (wie bisher)', Dav::statusPreset($t), 'published');
+        $td = $t;
+        $td['settings'] += ['route' => 'team', 'detail_page_id' => 999999];
+        $eq('mit Detailseite: als Entwurf', Dav::statusPreset($td), 'draft');
+        $eq('nur URL-Basis ohne Vorlage: sofort online', Dav::statusPreset(['settings' => ['route' => 'team', 'detail_page_id' => null] + $t['settings']] + $t), 'published');
+        $eq('Standardwert der Einstellungen folgt dem Vorschlag', Dav::tableSettings($td)['status'], 'draft');
 
         echo $fail ? "\n$fail Prüfungen fehlgeschlagen\n" : "\nAlle Prüfungen bestanden\n";
         return $fail ? 1 : 0;

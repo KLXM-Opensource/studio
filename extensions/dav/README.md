@@ -53,7 +53,7 @@ Website-Einstellung `ext.dav.tables` (je Tabelle ein Eintrag, Kurzname der Tabel
 ```php
 'mitarbeitende' => [
     'addressbook' => true,          // Adressbuch (CardDAV); Kalender-Tabellen: 'caldav' => true (Standard)
-    'status' => 'published',        // neue Einträge aus Apps: published | draft
+    'status' => 'published',        // neue Einträge aus Apps: published | draft (ohne Angabe: draft bei Adressbüchern mit Detailseite)
     'on_delete' => 'draft',         // in der App gelöscht: draft | delete (mit Recht data.delete)
     'published_only' => true,       // nur veröffentlichte Einträge an Apps (Standard false = bisheriges Verhalten)
     'org' => true,                  // ORG ohne Feld „Firma“: true = org_name(), 'Text' = fest, false = kein ORG
@@ -105,8 +105,10 @@ Bei der Ausgabe werden die abgebildeten Eigenschaften aus dem Eintrag gesetzt, a
 Teilnehmer, X-Eigenschaften, Social-Profile …) aus den Rohdaten übernommen. ETag = Hash der Ausgabe → ändert sich bei
 jeder Änderung im CMS (updated_at); ctag je Sammlung aus Anzahl/letzter Änderung.
 
-**Neu / Löschen:** Neue Objekte aus Apps werden Einträge mit dem je Tabelle eingestellten Status (Standard: online;
-ohne `data.publish` Entwurf, wenn die Tabelle den Freigabe-Workflow nutzt). Löschen in der App setzt standardmäßig **Entwurf** (sicher; der Eintrag bleibt im
+**Neu / Löschen:** Neue Objekte aus Apps werden Einträge mit dem je Tabelle eingestellten Status (Standard: online, bei
+Adressbüchern mit Detailseite **Entwurf** – Datenschutz, damit ein Kontakt aus der App nicht von selbst auf der Website erscheint;
+gespeicherte Einstellungen gelten unverändert; ohne `data.publish` Entwurf, wenn die Tabelle den Freigabe-Workflow nutzt).
+Felder mit „Nie öffentlich“ (Core) gibt DAV weiter an Apps – es ist ein interner Zugang. Löschen in der App setzt standardmäßig **Entwurf** (sicher; der Eintrag bleibt im
 CMS und verschwindet aus der App, bis er wieder veröffentlicht wird). „Endgültig löschen“ je Tabelle einstellbar,
 wirkt nur mit `data.delete`.
 

@@ -148,6 +148,7 @@ final class VCard
     /** vCard einer Person aus einem veröffentlichten Eintrag */
     public static function person(array $table, array $e): string
     {
+        $e = Data\Exposure::publicEntry($table, $e);               // „Nie öffentlich“: nie in der Visitenkarte
         $find = fn(array $types, array $names = []) => StructuredData::field($table, $e, $types, $names);
         $img = Tables::imageField($table);
         $tel = $find(['tel']);

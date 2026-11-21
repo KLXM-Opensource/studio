@@ -56,7 +56,8 @@ final class SiteController
             // Geteilte Tabellen: nur Einträge, die diese Website zeigt (eigene + gewählte Quellen)
             $entry = Entries::bySlug($t, $m[2], !app()->auth->check(), Lang::current(), 'site');
             if ($tpl && $entry) {
-                app()->entry = ['table' => $t, 'entry' => $entry];
+                // Website-Ausgabe: „Nie öffentlich“-Felder sind für Vorlage, Blöcke und Kopfdaten leer (Core\Data\Exposure)
+                app()->entry = ['table' => $t, 'entry' => \Core\Data\Exposure::publicEntry($t, $entry)];
                 return $this->render($r, $tpl);
             }
         }

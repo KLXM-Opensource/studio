@@ -1,5 +1,13 @@
 # Changelog – Erweiterung „dav“
 
+## 1.3.1 (2026-11-21)
+
+- **Datenschutz: neue Kontakte aus Apps bei Tabellen mit Detailseiten als Entwurf.** Ohne gespeicherte Einstellung schlägt die
+  Verwaltung für Adressbücher (keine Kalender) mit Detailseite „als Entwurf“ vor (`Dav::statusPreset()`) – ein in der App
+  angelegter Kontakt erscheint so nicht von selbst auf der Website. Gespeicherte Einstellungen (`ext.dav.tables.<tabelle>.status`)
+  bleiben unverändert, Tabellen ohne Detailseite und Kalender wie bisher „sofort online“; die Einstellung bleibt änderbar.
+- Felder mit „Nie öffentlich“ (Core) sehen Adressbuch- und Kalender-Apps weiter – DAV ist ein interner Zugang.
+
 ## 1.3.0 (2026-11-21)
 
 - **Nur veröffentlichte Einträge** je Tabelle (`published_only`, Website-Einstellung `ext.dav.tables.<tabelle>.published_only`,

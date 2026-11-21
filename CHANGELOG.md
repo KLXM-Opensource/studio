@@ -10,6 +10,24 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Datenschutz: Felder „Nie öffentlich“
+- **Neue Feld-Option „Nie öffentlich“** (`private`) im Tabellen-Designer für Inhaltstabellen. Ein solches Feld erscheint in
+  keiner Website-Ausgabe – zentral über `Core\Data\Exposure::publicEntry()`: Block „Personen“ (früher rückte bei leerem „Telefon“
+  das nächste Telefonfeld, z. B. „Mobil“, nach), Datenliste (auch bei Auswahl, auch Besucher-Suche), Datensatz-Felder (auch der
+  Standard ohne Auswahl), Detailseite samt Vorlage und Platzhaltern (`app()->entry` ist bereinigt), Visitenkarte
+  `/vcard/{tabelle}/{slug}.vcf`, JSON-LD (`telephone`, `email` …), Suchindex (damit Besucher-Chat und KI-Antwort), RSS- und
+  iCal-Feeds, Kalender-, Diagramm- und Grafik-Ausgaben, geteilte Tabellen auf allen Websites. Verwaltung, API/MCP mit Token und
+  CardDAV sehen weiter alles.
+- **Nichts stellt sich still um:** Tabellen ohne die Option verhalten sich wie bisher. Felder, die nach Mobil/Handy/privat/Geburtstag
+  aussehen, markiert der Designer mit einem Hinweis; Health (Kategorie Redaktion) meldet öffentliche Tabellen mit Detailseite oder
+  Schema-Typ „Person“, in denen ein solches Feld noch öffentlich ist.
+- **Suche:** Textfelder mit `mobil`, `handy` oder `privat` im Namen sind standardmäßig „nicht durchsuchen“ (wie Telefon/IBAN);
+  private Felder immer.
+- **dav 1.3.1:** Neue Kontakte aus Apps werden bei Adressbüchern mit Detailseite standardmäßig **Entwurf**; gespeicherte
+  Einstellungen bleiben unverändert, die Einstellung ist änderbar.
+- Selbsttest „private Nummer nirgends“ in `data:selftest` (Block, Liste, Detailseite, JSON-LD, vCard, Suchindex, Feeds). Handbuch
+  → Daten → „Private Angaben“, Entwicklerhandbuch → Daten → „Nie öffentlich“.
+
 ### Kalender: Datum im Seitentitel der Detailseiten
 - **Termine gleichen Namens haben verschiedene `<title>`:** Auf Detailseiten von Kalender-Tabellen ergänzt `Seo::forEntry()` den
   Titel um das Datum (`Calendar::titleWithDate()`/`titleFor()`, über `fmt()` in der Sprache des Eintrags): „Schießtraining am

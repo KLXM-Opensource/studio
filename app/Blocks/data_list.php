@@ -24,6 +24,7 @@ $fields = [];
 foreach ((array) ($d['fields'] ?? []) as $v) {
     if (str_starts_with((string) $v, $t['handle'] . '.')) $fields[] = substr((string) $v, strlen($t['handle']) + 1);
 }
+$fields = \Core\Data\Exposure::publicNames($t, $fields);   // „Nie öffentlich“ nie in der Liste
 if (!$fields) {
     $fields = array_values(array_filter(['_title', Tables::imageField($t), $t['settings']['description_field']]));
 }
@@ -96,11 +97,11 @@ if ($vcands || !empty($d['visitor_search']) || $az) {
     }
 }
 $vq = $vsearch && is_string($query['q'] ?? null) ? trim(mb_substr($query['q'], 0, 80)) : '';
-if ($vq !== '') $o['q'] = $vq;
+if ($vq !== '') { $o['q'] = $vq; $o['q_public'] = true; }   // Besucher-Suche: nie in „Nie öffentlich“-Feldern
 $filtering = $vq !== '' || array_filter(array_column($vfilters, 'sel'), fn($v) => $v !== null);
 if ($az && ($tf = (string) ($t['settings']['title_field'] ?? '')) !== '') { $o['sort'] = $tf; $o['dir'] = 'asc'; }
 $o = $extend($o);
-$rows = Entries::query($t, $o);   // Stellenangebote: abgelaufene fehlen schon hier (Core\Data\Jobs, Entries::where)
+$rows = \Core\Data\Exposure::publicRows($t, Entries::query($t, $o));   // Stellenangebote: abgelaufene fehlen schon hier (Core\Data\Jobs, Entries::where)
 // „Abschnitt ausblenden, wenn nichts da ist“: für Besucher keine Ausgabe – die Hülle (partials/section) entfällt dann
 if (!$rows && !empty($d['hide_empty']) && !is_editing() && !$filtering) return;
 $jobs = \Core\Data\Jobs::is($t);

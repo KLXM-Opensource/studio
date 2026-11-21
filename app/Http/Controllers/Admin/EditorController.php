@@ -143,7 +143,8 @@ final class EditorController extends AdminController
         $e = (array) ($r->post['entry'] ?? []);
         $t = !empty($e['table']) ? \Core\Data\Tables::findContent((string) $e['table']) : null;
         $entry = $t ? \Core\Data\Entries::find($t, (int) ($e['id'] ?? 0)) : null;
-        return app()->entry = $t && $entry ? ['table' => $t, 'entry' => $entry] : null;
+        // Vorschau wie auf der Website: „Nie öffentlich“-Felder leer (Core\Data\Exposure)
+        return app()->entry = $t && $entry ? ['table' => $t, 'entry' => \Core\Data\Exposure::publicEntry($t, $entry)] : null;
     }
 
     /**

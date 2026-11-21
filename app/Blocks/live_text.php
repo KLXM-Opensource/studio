@@ -27,7 +27,7 @@ if ($source === 'table') {
         $tf = (string) ($d['text_field'] ?? '');
         $textField = str_starts_with($tf, $t['handle'] . '.') ? substr($tf, strlen($t['handle']) + 1) : (string) ($t['settings']['description_field'] ?? '');
         if ($textField !== '' && !Tables::field($t, $textField)) $textField = '';
-        foreach (Entries::query($t, $o) as $e) {
+        foreach (\Core\Data\Exposure::publicRows($t, Entries::query($t, $o)) as $e) {   // ohne „Nie öffentlich“-Felder
             $rows[] = [
                 'id' => (int) $e['id'] . '-' . substr(md5((string) ($e['updated_at'] ?? '')), 0, 6),
                 'title' => Entries::title($t, $e), 'html' => $textField !== '' ? Entries::html($t, $e, $textField) : '',

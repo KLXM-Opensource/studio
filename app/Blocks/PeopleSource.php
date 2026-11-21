@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Core\Blocks;
 
 use Core\Data\Entries;
+use Core\Data\Exposure;
 use Core\Data\Tables;
 use Core\Fields;
 
@@ -29,15 +30,16 @@ final class PeopleSource
      */
     public static function rows(array $t, array $d, bool $editing = false): array
     {
+        // Website-Ausgabe: Einträge ohne „Nie öffentlich“-Felder (Core\Data\Exposure)
         if (($d['source'] ?? 'manual') === 'filter') {
-            return array_map(fn(array $e) => ['i' => null, 'entry' => $e, 'item' => []], self::filtered($t, $d));
+            return array_map(fn(array $e) => ['i' => null, 'entry' => Exposure::publicEntry($t, $e), 'item' => []], self::filtered($t, $d));
         }
         $out = [];
         foreach ((array) ($d['items'] ?? []) as $i => $it) {
             if (!preg_match('~^entry:([a-z][a-z0-9_]*):(\d+)$~', (string) ($it['person'] ?? ''), $m) || $m[1] !== $t['handle']) continue;
             $e = Entries::find($t, (int) $m[2]);
             if (!$e || (($e['status'] ?? 'published') !== 'published' && !$editing)) continue;
-            $out[] = ['i' => (int) $i, 'entry' => $e, 'item' => (array) $it];
+            $out[] = ['i' => (int) $i, 'entry' => Exposure::publicEntry($t, $e), 'item' => (array) $it];
         }
         return $out;
     }

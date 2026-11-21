@@ -59,7 +59,7 @@ if (str_starts_with((string) ($d['sort_field'] ?? ''), $pfx)) $o['sort'] = subst
 if (!empty($d['sort_dir'])) $o['dir'] = $d['sort_dir'];
 if (!empty($d['source'])) $o['source'] = (string) $d['source'];
 if (!empty($d['featured_first'])) $o['featured_first'] = true;
-$rows = Entries::query($t, $o);
+$rows = \Core\Data\Exposure::publicRows($t, Entries::query($t, $o));   // ohne „Nie öffentlich“-Felder
 if (!$rows && !empty($d['hide_empty']) && !is_editing()) return;
 if (!empty($d['link_detail'])) \Core\StructuredData::itemList($t, $rows, strip_emphasis((string) ($d['title'] ?? '')));
 $pages = !empty($d['paginate']) && $limit ? (int) ceil(Entries::count($t, $o) / $limit) : 1;

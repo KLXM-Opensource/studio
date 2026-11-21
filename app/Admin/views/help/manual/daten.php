@@ -116,6 +116,16 @@
   <h3 id="iban">Bankverbindung (IBAN)</h3>
   <p>Der Feldtyp <b>IBAN</b> prüft Ländercode, Länge und Prüfziffer – Tippfehler fallen sofort auf. Die Eingabe wird automatisch in Vierergruppen gegliedert. Mit „In Listen maskieren“ (Standard) zeigen Liste und Website nur z. B. <code>DE89 **** **** **** **** 00</code>; die vollständige IBAN sehen Sie im Eintrag.</p>
 
+  <h3 id="nie-oeffentlich">Private Angaben: „Nie öffentlich“</h3>
+  <p>Manche Angaben brauchen Sie in der Verwaltung, sie gehören aber nicht auf die Website – etwa die private Mobilnummer, die Privatadresse oder der Geburtstag des Vorstands. Setzen Sie dafür im Tabellen-Designer am Feld den Haken <b>„Nie öffentlich“</b>. Ein solches Feld erscheint <b>nirgends auf der Website</b>:</p>
+  <ul>
+    <li>nicht im Block „Personen“ (auch nicht, wenn „Telefon“ leer ist – früher rückte dann die nächste Nummer nach), nicht in Datenlisten, Kalendern und „Datensatz-Felder“ – auch dann nicht, wenn es dort ausgewählt ist oder der Block ohne Auswahl alle Felder zeigt,</li>
+    <li>nicht auf der Detailseite (auch nicht über Platzhalter wie <code>{{mobil}}</code>), nicht in der Visitenkarte („Kontakt speichern“), nicht in den strukturierten Daten für Suchmaschinen,</li>
+    <li>nicht in der Website-Suche (auch nicht im Suchfeld einer Datenliste), damit auch nicht im KI-Chat für Besucher, und nicht in RSS- und Kalender-Feeds,</li>
+    <li>bei geteilten Tabellen auf keiner der beteiligten Websites.</li>
+  </ul>
+  <p>In der Verwaltung, über die Schnittstelle (mit Zugangsschlüssel) und in Adressbuch-Apps sehen Berechtigte die Angabe weiter. Nichts wird automatisch umgestellt: Felder wie „Mobil“, „Handy“, „privat“ oder „Geburtstag“ markiert der Designer mit einem Hinweis, und die Systemprüfung (Health) meldet öffentliche Tabellen mit Detailseite oder Personen, in denen ein solches Feld noch nicht „Nie öffentlich“ ist. Textfelder mit diesen Namen durchsucht die Website-Suche von sich aus nicht.</p>
+
   <h3 id="gruppe">Mehrere gleichartige Angaben (Wiederholbare Gruppe)</h3>
   <p>Der Feldtyp <b>Wiederholbare Gruppe</b> fasst mehrere Unterfelder zu einer Zeile zusammen, die sich im Formular beliebig oft hinzufügen lässt – z. B. mehrere Medikamente mit Stärke und Packungsgröße oder mehrere Ansprechpersonen. Im Tabellen-Designer legen Sie die Unterfelder (Text, Zahl, Auswahl, Datum, E-Mail, Telefon, Ja/Nein, IBAN …), die Mindest- und Höchstzahl sowie die Beschriftungen („Medikament“, „+ Weiteres Medikament“) fest. Leere Zeilen werden beim Speichern ignoriert; in der Liste steht eine Kurzfassung wie „Ibuprofen, Paracetamol +1“.</p>
 
@@ -174,7 +184,7 @@
     <li><b>Kontakt speichern:</b> Jede Person hat eine Visitenkarte (vCard mit Foto, Funktion, Telefon, E-Mail und Anschrift) – im Block und auf der Profilseite.</li>
     <li><b>Profilseite:</b> Block „Datensatz-Felder“ in der Darstellung <b>„Porträt-Seite“</b> – großes Bild links (bleibt beim Scrollen stehen), rechts Etiketten, Name, Funktion, Kontakt-Knöpfe (E-Mail, Telefon, Website, „Kontakt speichern“), Fakten wie Ort oder Gruppe und der Profiltext. Welches Feld wohin kommt, ergibt sich aus dem Feldtyp. Passt auch für Gruppen, Standorte oder Projekte.</li>
   </ul>
-  <p>Ändert sich etwas (neue Telefonnummer, anderes Foto), pflegen Sie es einmal in der Tabelle – alle Stellen zeigen es sofort.</p>
+  <p>Ändert sich etwas (neue Telefonnummer, anderes Foto), pflegen Sie es einmal in der Tabelle – alle Stellen zeigen es sofort. Private Nummern (Mobil, Handy) markieren Sie als <a href="#nie-oeffentlich">„Nie öffentlich“</a> – dann zeigen Block, Profilseite und Visitenkarte nur die Dienstnummer, auch wenn diese leer ist.</p>
 
   <h3 id="ort">Orte auf der Karte</h3>
   <p>Der Feldtyp <b>Ort (Karte)</b> speichert einen Standort: Adresse suchen oder in die Karte klicken. Auf Detailseiten lässt sich der Block <b>Karte</b> per Kette <?= icon('link', ['label' => 'Kette']) ?> an dieses Feld binden; in Kalender-Tabellen dient es als Veranstaltungsort.</p>
@@ -216,6 +226,7 @@
   <h3 id="apps">Termine und Kontakte in Kalender-Apps</h3>
   <p>Unter <b>Konto → Kalender &amp; Kontakte in Apps</b> erzeugen Sie ein <b>App-Passwort</b> (nur einmal sichtbar, „Lesen und ändern“ oder „Nur lesen“). Damit verbinden Sie Apple Kalender/Kontakte, Thunderbird oder DAVx⁵ (Android) mit der Website: Kalender-Tabellen erscheinen als Kalender, freigegebene Tabellen als Adressbuch. Benutzername ist Ihre E-Mail-Adresse, Server die Adresse der Website. Was Sie in der App ändern, landet im CMS – und umgekehrt. Löschen in der App setzt einen Eintrag normalerweise nur auf Entwurf.</p>
   <p>Je Tabelle (Administration → Einstellungen → „Kalender &amp; Kontakte in Apps“): <b>Nur veröffentlichte Einträge</b> hält Entwürfe und geplante Einträge aus den Apps heraus – sie erscheinen dort erst, wenn sie online sind. Bei Adressbüchern ohne Feld „Firma“ steht der Name Ihrer Organisation aus den Website-Einstellungen als Firma in jedem Kontakt; Sie können einen anderen Namen eintragen oder die Angabe abschalten. Ist nur der ganze Name zugeordnet, trennt das CMS Vor- und Nachname selbst (Titel wie „Dr.“ und Namenszusätze wie „von“ werden erkannt), damit die App richtig sortiert. Formatierte Texte kommen in der App als einfacher Text an, Redaktionsnotizen bleiben im CMS.</p>
+  <p><b>Neue Kontakte aus Apps:</b> Bei Adressbüchern mit Detailseite schlägt die Einstellung „Neue Einträge aus Apps“ <b>als Entwurf</b> vor – so erscheint ein Kontakt, den jemand am Telefon anlegt, nicht von selbst auf der Website. Wer das will, stellt „sofort online“ ein; einmal gespeicherte Einstellungen bleiben, wie sie sind. Felder mit „Nie öffentlich“ sind in den Apps sichtbar.</p>
   <?php endif; ?>
 
   <h3 id="geteilt">Geteilte Tabellen (mehrere Websites)</h3>

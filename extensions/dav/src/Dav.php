@@ -145,9 +145,23 @@ final class Dav
         $all = (array) app()->settings->get('ext.dav.tables', []);
         // Eingangs-Tabellen (verschlüsselte Anfragen) nie über CalDAV/CardDAV
         if (Tables::isInbox($table)) return ['caldav' => false, 'addressbook' => false] + self::TABLE_DEFAULTS;
-        $s = (array) ($all[$table['handle']] ?? []) + self::TABLE_DEFAULTS;
+        $raw = (array) ($all[$table['handle']] ?? []);
+        $s = $raw + ['status' => self::statusPreset($table)] + self::TABLE_DEFAULTS;
         if ($s['addressbook'] && !$s['map']) $s['map'] = self::guessMap($table);
         return $s;
+    }
+
+    /**
+     * Status neuer Kontakte aus Apps ohne gespeicherte Einstellung: Adressbücher (keine Kalender) mit Detailseiten → Entwurf
+     * (Datenschutz: ein in der App angelegter Kontakt erscheint nicht von selbst auf der Website), sonst sofort online wie bisher.
+     * Gespeicherte Einstellungen bleiben unverändert – die Einstellung ist in der Verwaltung jederzeit änderbar.
+     */
+    public static function statusPreset(array $table): string
+    {
+        $raw = self::storedSettings((string) $table['handle']);
+        if (isset($raw['status'])) return $raw['status'] === 'draft' ? 'draft' : 'published';
+        $detail = ($table['settings']['route'] ?? '') !== '' && !empty($table['settings']['detail_page_id']);
+        return !Calendar::enabled($table) && $detail ? 'draft' : 'published';
     }
 
     /** Gespeicherte Einstellungen einer Tabelle ohne Standardwerte (leer = nie eingestellt) */
