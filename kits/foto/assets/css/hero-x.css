@@ -16,6 +16,10 @@
 .hero-bleed .eb-pill .eyebrow,.eb-pill .hero-bleed .eyebrow{background:var(--f-a-soft);color:var(--f-fg)}
 .hero-bleed__pause{position:absolute;inset:auto 0 var(--f-s-l) auto;display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;padding:0 1rem;border:1px solid var(--f-line-strong);border-radius:999px;background:color-mix(in srgb,var(--f-dark) 50%,transparent);color:var(--f-fg);font-size:.875rem;cursor:pointer}
 .hero-bleed__pause[hidden]{display:none}
+/* Steuerknopf des Videos überdeckt nie Text oder Knöpfe: unten Platz für ihn reservieren (auf großen Flächen reicht der Abstand
+   ohnehin); auf schmalen Flächen nur das Symbol – der zugängliche Name bleibt (Text unsichtbar), Zielgröße 44 px */
+.hero-bleed__inner:has(.hero-bleed__pause){padding-bottom:max(var(--f-sec),calc(var(--f-s-l) + 2.75rem + var(--f-s-s)))}
+@container (max-width:40rem){.hero-bleed__pause{justify-content:center;width:2.75rem;padding:0;gap:0}.hero-bleed__pause>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.hero-bleed__pause svg{width:1.4rem;height:1.4rem}}
 
 /* ---------------------------------------------------------------- Mit gestapelten Karten: Bild mit überlappenden Karten.
    Container-Query: Karten schweben erst über dem Bild, wenn der Bildbereich ≥ 26 rem breit ist, sonst stehen sie darunter. */

@@ -550,6 +550,8 @@ return [
     'Größe der Menüpunkte' => 'Size of menu items',
     'Kompakt – kleinere Schrift, engere Abstände' => 'Compact – smaller type, tighter spacing',
     'Für viele Menüpunkte: Mit „Kompakt“ passt das Menü öfter in die Leiste, statt hinter der Schaltfläche „Menü“ zu verschwinden.' => 'For many menu items: with “Compact” the menu fits into the bar more often instead of disappearing behind the “Menu” button.',
+    'Groß – größere Schrift und Zielflächen (für wenige Menüpunkte)' => 'Large – bigger type and touch targets (for few menu items)',
+    'Für viele Menüpunkte: Mit „Kompakt“ passt das Menü öfter in die Leiste, statt hinter der Schaltfläche „Menü“ zu verschwinden. „Groß“ passt zu wenigen Hauptpunkten und großer Grundschrift; wird es eng, erscheint wie gewohnt die Schaltfläche „Menü“.' => 'For many menu items: with “Compact” the menu fits into the bar more often instead of disappearing behind the “Menu” button. “Large” suits a few main items and a large base font size; when space runs short, the “Menu” button appears as usual.',
     'Markierung des aktiven Menüpunkts' => 'Marker of the active menu item',
     'Automatisch (Akzentfarbe, im farbigen Kopf Schriftfarbe)' => 'Automatic (accent colour, text colour in a coloured header)',
     'Hervorhebungsfarbe' => 'Highlight colour',

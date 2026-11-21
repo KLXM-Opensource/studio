@@ -172,7 +172,7 @@ return [
         'css/opt-progress.css' => ['progress' => true],
         'css/opt-totop.css' => ['totop' => true],
         'css/opt-logo_over.css' => ['logo_over' => true],
-        'css/opt-nav_size.css' => ['nav_size' => ['compact']],
+        'css/opt-nav_size.css' => ['nav_size' => ['compact', 'large']],
         'css/opt-nav_mark.css' => ['nav_mark' => ['highlight', 'secondary']],
         'css/opt-back_nav.css' => ['back_nav' => ['smart']],
         'css/opt-nav_split.css' => ['nav_split' => ['apart']],
