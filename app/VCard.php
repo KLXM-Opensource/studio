@@ -471,7 +471,8 @@ final class VCard
         }
         foreach (Tables::content() as $t) {
             if (StructuredData::typeOf($t) !== 'Person') continue;
-            $e = Entries::query($t, ['status' => 'published', 'limit' => 1, 'source' => 'own'])[0] ?? null;
+            // Erster Eintrag, der öffentlich erscheinen darf (Adressbuch: nur mit „Auf der Website zeigen“)
+            $e = Data\Exposure::publicRows($t, Entries::query($t, ['status' => 'published', 'limit' => 20, 'source' => 'own']))[0] ?? null;
             if (!$e) continue;
             $check('Person ' . $t['handle'], self::person($t, $e));
             $eq('Person ' . $t['handle'] . ': Adresse', (bool) self::personUrl($t, $e), !empty($e['slug']));
