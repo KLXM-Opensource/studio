@@ -42,6 +42,30 @@ function native_prefs_fonts(): bool
 }
 
 /**
+ * Schwelle der Kopfleiste für NativeCSS (data-ncss-nav-fit, ab 1.3): geschätzte Breite der Zeile in rem, ab der Marke, Hauptmenü
+ * und Werkzeuge in EINE Zeile passen. Darunter zeigt die Container Query von NativeCSS die Menü-Schaltfläche – schon ohne
+ * JavaScript und vor dem ersten Zeichnen; js/nav.js misst danach genau nach. Formel wie im Handbuch von NativeCSS (Navigation →
+ * „Schwelle schätzen“), Werte dieser Kopfleiste: Menüpunkte mit .45rem Innenabstand, Marke 1.125rem fett, Werkzeuge aus
+ * Core\HeaderActions (wie fluid_nav_fit()), Sprachen, Hell/Dunkel, Darstellung, Lücken der Zeile. Lieber etwas zu groß.
+ * null: kein Menü. Über 120: immer Menü-Schaltfläche (Rückgabe 0 → Klasse ncss-nav--compact im Template).
+ */
+function native_nav_fit(array $menu, array $langs, bool $prefs): ?int
+{
+    if (!$menu) return null;
+    $em = static fn(string $s, float $size = 1.0): float => mb_strlen($s) * .57 * $size;
+    $nav = 0.0;
+    foreach ($menu as $m) $nav += $em((string) $m['label']) + .9 + ($m['children'] ? 1.3 : 0);
+    $brand = (int) setting('logo') ? 11.5 : 2.1 + .6 + $em(fluid_name(true), 1.25);
+    $tools = \Core\HeaderActions::widthRem()
+        + ($langs ? (count($langs) >= 3 ? 4.5 : count($langs) * 2.4 + .6) : 0)
+        + (fluid_scheme_toggle() ? 3.5 : 0)
+        + ($prefs ? 9 : 0);
+    $gaps = 3 * 1.5;                                                        // Marke | Menü | Werkzeuge (+ Puffer)
+    $step = (int) (ceil(($brand + $nav + $tools + $gaps) / 4) * 4);
+    return $step > 120 ? 0 : max(24, $step);
+}
+
+/**
  * Darstellungs-Knopf für Besucher: <ncss-preferences> aus fluid_prefs() (Kit fluid – Schalter, Texte in Sie-Form, Farbschema
  * nur ohne Hell/Dunkel-Schalter), hier um die Lese-Schrift ergänzt (nach „Schriftgröße“). '' wenn aus.
  */

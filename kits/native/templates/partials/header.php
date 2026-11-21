@@ -1,7 +1,8 @@
 <?php
 /**
  * Kopfleiste „NativeCSS“ (.ncss-topbar): Marke, Hauptmenü (.ncss-nav) und Werkzeuge in EINER Zeile. Passt das Menü nicht
- * hinein, öffnet die Menü-Schaltfläche (NativeCSS js/nav.js misst – kein fester Breakpoint, ohne Skript 64rem)
+ * hinein, öffnet die Menü-Schaltfläche (NativeCSS: Container Query mit der Schwelle aus native_nav_fit() – schon ohne Skript –,
+ * js/nav.js misst nach)
  * dasselbe Markup als Off-Canvas-<dialog> (command="show-modal" – ohne Skript in aktuellen Browsern, js/native.js ergänzt den
  * Ersatz, „Klick daneben schließt“ und das Schließen nach einem Link); Untermenüs als <details> mit „Übersicht“ als erstem
  * Eintrag (Muster von NativeCSS). Escape schließt den Dialog, der Fokus kehrt zur Schaltfläche zurück (Browser).
@@ -38,7 +39,8 @@ $item = static function (array $m) use ($cur, $sub): string {
     <?= app()->theme->partial('brand', ['href' => $brandHref, 'class' => 'ncss-topbar-brand nv-brand']) ?>
     <?= header_actions('center') ?>
     <?php if ($menu): ?>
-    <nav class="ncss-nav nv-nav" aria-label="<?= e(lt('Hauptnavigation')) ?>">
+    <?php $fit = native_nav_fit($menu, $langs, $prefs); ?>
+    <nav class="ncss-nav nv-nav<?= $fit === 0 ? ' ncss-nav--compact' : '' ?>" aria-label="<?= e(lt('Hauptnavigation')) ?>"<?= $fit ? ' data-ncss-nav-fit="' . $fit . '"' : '' ?>>
       <button type="button" class="ncss-nav-toggle nv-nav__toggle" command="show-modal" commandfor="nv-menu" aria-haspopup="dialog"><?= icon('list') ?><span class="sr-only"><?= e(lt('Menü')) ?></span></button>
       <dialog id="nv-menu" class="ncss-nav-panel ncss-offcanvas ncss-offcanvas--start" aria-label="<?= e(lt('Menü')) ?>">
         <button type="button" class="ncss-dialog-close nv-nav__close" command="close" commandfor="nv-menu"><?= icon('x') ?><span class="sr-only"><?= e(lt('Menü schließen')) ?></span></button>

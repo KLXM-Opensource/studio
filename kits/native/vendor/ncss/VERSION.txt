@@ -1,3 +1,3 @@
-NativeCSS 1.2.2 (2026-11-20) – https://github.com/skerbis/nativecss
-Übernommen mit kits/native/tools/ncss-update.php am 2026-11-20 aus https://github.com/skerbis/nativecss (v1.2.2)
+NativeCSS 1.3.0 (2026-11-21) – https://github.com/skerbis/nativecss
+Übernommen mit kits/native/tools/ncss-update.php am 2026-11-21 aus https://github.com/skerbis/nativecss (v1.3.0)
 Nur die Dateien, die das Kit verwendet (NCSS_FILES in tools/ncss-update.php), unverändert.
