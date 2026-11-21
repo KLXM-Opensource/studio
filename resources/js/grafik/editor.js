@@ -37,6 +37,8 @@ import { outlineAll } from './outline.js';
 import { Guides, readGrid } from './guides.js';
 import { GradientHandles } from './gradhandles.js';
 import { optimizeSvg, checkSame, desktopSvg, pdfBlob } from './export.js';
+import { SchemeView, suggestDark, paintedElements, bakeScheme } from './scheme.js';
+import { checkOverlay, suggestAlt } from './check.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -138,6 +140,8 @@ export class GraphicEditor {
     this.el = h(`<div class="ge" data-format="${esc(this.format)}" data-tool="select">
       <header class="ge-top">
         <div class="ge-personas" role="radiogroup" aria-label="${esc(t('Persona'))}"></div>
+        <div class="ge-scheme" role="radiogroup" aria-label="${esc(t('Hell oder Dunkel'))}"><button type="button" role="radio" data-scheme="light" aria-checked="true" tabindex="0">${ico('sun')}<span>${esc(t('Hell'))}</span></button><button type="button" role="radio" data-scheme="dark" aria-checked="false" tabindex="-1">${ico('moon')}<span>${esc(t('Dunkel'))}</span></button><button type="button" role="radio" data-scheme="side" aria-checked="false" tabindex="-1">${ico('circle-half')}<span>${esc(t('Nebeneinander'))}</span></button></div>
+        <button type="button" class="ge-zoombtn ge-bgbtn" data-act="schememenu" aria-haspopup="menu" aria-expanded="false" title="${esc(t('Hintergrund der Vorschau und Hilfen für Dunkel'))}"><span class="ge-bgbtn__sw" data-bgsw></span><span data-bglbl></span>${ico('caret-down')}</button>
         <div class="ge-doctitle"><strong data-name></strong><span class="ge-fmt">${esc(fmtLabel)}</span><span class="ge-dirty" data-dirty hidden>${esc(t('Ungespeichert'))}</span></div>
         <div class="ge-top__grow"></div>
         <div class="ge-top__group">${iconBtn('arrow-u-up-left', t('Rückgängig'), 'data-act="undo"', MOD + 'Z')}${iconBtn('arrow-u-up-right', t('Wiederholen'), 'data-act="redo"', SHIFT + MOD + 'Z')}</div>
@@ -168,6 +172,12 @@ export class GraphicEditor {
     // sehen aus wie in der Mediathek bzw. auf der Website; currentColor = Tinte (wie das Farbfeld „Schriftfarbe“).
     // Eigene Eigenschaften (var(--token) der Design-Farben) erben weiter – all betrifft sie nicht.
     this.shadow.innerHTML = '<style>:host{all:initial;display:block;color:#1F2430}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
+    // Hell | Dunkel | Nebeneinander (scheme.js): eine Ansicht, keine Persona – das Dokument bleibt die helle Fassung mit Dunkel-Angaben
+    // Hintergründe der Vorschau: zuerst neutral weiß (wie bisher), dann die Abschnitts-Hintergründe des Kits
+    const secs = this.boot.sections || [];
+    if (!secs.some(s => s.id === 'paper')) this.boot.sections = [{ id: 'paper', label: t('Weiß (neutral)'), light: '#FFFFFF', dark: secs[0]?.dark || '#111318' }, ...secs];
+    this.sectionId = 'paper';
+    this.sv = new SchemeView(this);
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -367,6 +377,9 @@ export class GraphicEditor {
     this.$('[data-size]').textContent = `${num(vb.w, 2)} × ${num(vb.h, 2)}`;
     this.renderCtx();
     this.paintFs();
+    if (this.sv?.mode !== 'light') this.sv?.refresh();
+    // Prüfung nachziehen, solange der Bereich offen ist oder Hinweise markiert sind
+    if (this.panels && (this.panels.checkOpen() || this.checkIssues?.length)) this.panels.check.soon();
     this.panels?.refresh();
     this.draw();
     if (emit) this.emit('change', this);
@@ -398,6 +411,7 @@ export class GraphicEditor {
     const vb = this.vb;
     Object.assign(this.paper.style, { left: this.panX + 'px', top: this.panY + 'px', width: vb.w * this.zoom + 'px', height: vb.h * this.zoom + 'px' });
     this.$('[data-zoom]').textContent = Math.round(this.zoom * 100) + ' %';
+    this.sv?.fitTwin();
     this.draw();
   }
 
@@ -472,6 +486,9 @@ export class GraphicEditor {
   draw() {
     if (!this.root || !this.ov) return;
     this.conn?.update();
+    // Dunkel-Ansicht: neue Dunkel-Farben beim Ziehen eines Reglers sofort zeigen; Nebeneinander: Kopie rechts nachziehen
+    if (this.sv?.mode === 'dark') this.sv.live();
+    else if (this.sv?.mode === 'side') this.sv.updateTwin();
     const ov = this.ov, out = [];
     const r = this.stage.getBoundingClientRect();
     ov.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
@@ -487,6 +504,8 @@ export class GraphicEditor {
       const c = corners(this.hover, this.root);
       if (c) out.push(`<polygon class="ge-ov__hover" points="${c.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`);
     }
+    // Hinweise der Prüfung (check.js) für die gezeigte Fassung
+    out.push(checkOverlay(this));
     if (this.tool === 'gradient') out.push(this.grad.overlay());
     else if (this.tool === 'node') out.push(this.drawNodes());
     else if (this.sel.length && !this.textEl && this.sel.every(isConn)) out.push(this.drawConnSel(this.tool === 'select'));
@@ -2545,10 +2564,32 @@ export class GraphicEditor {
       { label: t('Vergrößern'), key: MOD + '+', run: () => this.setZoom(this.zoom * 1.25) },
       { label: t('Verkleinern'), key: MOD + '−', run: () => this.setZoom(this.zoom / 1.25) },
     ]));
+    // Hell | Dunkel | Nebeneinander – Optionsfeld mit Pfeiltasten (WAI-ARIA radiogroup, ein Tabstopp)
+    const sg = this.el.querySelector('.ge-scheme');
+    sg.querySelectorAll('[data-scheme]').forEach(b => b.addEventListener('click', () => this.sv.set(b.dataset.scheme)));
+    sg.addEventListener('keydown', e => {
+      const list = [...sg.querySelectorAll('[data-scheme]')], i = list.indexOf(document.activeElement);
+      const d = ['ArrowRight', 'ArrowDown'].includes(e.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(e.key) ? -1 : 0;
+      if (!d || i < 0) return;
+      e.preventDefault(); e.stopPropagation();
+      const n = list[(i + d + list.length) % list.length];
+      n.focus(); this.sv.set(n.dataset.scheme);
+    });
+    const sm = this.el.querySelector('[data-act=schememenu]');
+    sm.addEventListener('click', () => menu(sm, [
+      ...(this.boot.sections || []).map(s => ({ label: t('Hintergrund: {name}', { name: s.label }), checked: s.id === this.sectionId, run: () => { this.sectionId = s.id; this.sv.refresh(); this.renderScheme(); this.panels.refresh(); } })),
+      { sep: true },
+      { label: t('Dunkel-Fassung vorschlagen'), run: () => this.suggestDark() },
+      { label: t('Eigene Dunkel-Farben entfernen'), run: () => this.clearDark() },
+      { sep: true },
+      { label: t('Grafik prüfen (Kontrast, Barrierefreiheit) …'), run: () => this.panels.showCheck(true) },
+    ]));
+    this.renderScheme();
     const ex = this.el.querySelector('[data-act=export]');
     ex.addEventListener('click', () => menu(ex, [
       { label: t('SVG für das Web (optimiert)'), run: () => this.download('web') },
       { label: t('SVG für Desktop-Programme (Affinity, Illustrator, Inkscape, Figma)'), run: () => this.download('desktop') },
+      ...(this.root.querySelector('[data-ge-ftoken],[data-ge-stoken],[data-ge-ctoken],[data-ge-fdark],[data-ge-sdark],[data-ge-cdark]') ? [{ label: t('SVG für Desktop-Programme – Dunkel-Fassung'), run: () => this.download('desktop-dark') }] : []),
       { label: t('PDF (Vektor)'), run: () => this.download('pdf') },
       { sep: true },
       { label: t('SVG-Datei importieren …'), run: () => this.importFile() },
@@ -2573,8 +2614,9 @@ export class GraphicEditor {
         const w = await this.webSvg();
         blob = new Blob([w.svg], { type: 'image/svg+xml' });
         toast(t('Für das Web optimiert: {a} → {b}', { a: kb(w.before), b: kb(w.after) }));
-      } else if (kind === 'desktop') {
-        blob = new Blob([desktopSvg(this.getSvg())], { type: 'image/svg+xml' });
+      } else if (kind === 'desktop' || kind === 'desktop-dark') {
+        // Design-Farben sind schon feste Farben (Hex) – die Dunkel-Fassung setzt die Dunkel-Werte ein
+        blob = new Blob([desktopSvg(kind === 'desktop-dark' ? bakeScheme(this, this.getSvg(), 'dark') : this.getSvg())], { type: 'image/svg+xml' });
       } else {
         ext = 'pdf';
         const svg = await this.outlinedCopy(this.getSvg(), true);
@@ -2587,7 +2629,7 @@ export class GraphicEditor {
     } finally { this.busy(false); }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : '') + '.' + ext;
+    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : kind === 'desktop-dark' ? '-desktop-dunkel' : '') + '.' + ext;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
@@ -2710,6 +2752,39 @@ export class GraphicEditor {
     if (tt) this.root.prepend(tt);
   }
 
+  // ================================================================= Hell / Dunkel (scheme.js)
+  /** Umschalter und Knopf „Hintergrund“ auf den Stand bringen */
+  renderScheme() {
+    const m = this.sv.mode;
+    this.el.querySelectorAll('.ge-scheme [data-scheme]').forEach(b => { const on = b.dataset.scheme === m; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    const s = (this.boot.sections || []).find(x => x.id === this.sectionId) || (this.boot.sections || [])[0];
+    const lbl = this.el.querySelector('[data-bglbl]'), sw = this.el.querySelector('[data-bgsw]');
+    if (lbl) lbl.textContent = s ? s.label : t('Hintergrund');
+    sw?.style.setProperty('--c', s ? (m === 'dark' ? s.dark : s.light) : '#fff');
+    sw?.style.setProperty('--c2', s ? s.dark : '#111');
+    this.el.querySelector('[data-act=schememenu]')?.setAttribute('aria-label', t('Hintergrund der Vorschau: {name}', { name: s ? s.label : '' }));
+  }
+
+  /** „Dunkel-Fassung vorschlagen“ – für die Auswahl, ohne Auswahl für die ganze Grafik; ein Schritt im Protokoll */
+  suggestDark() {
+    const els = this.sel.length ? this.sel.flatMap(el => [el, ...el.querySelectorAll('*')]) : paintedElements(this.root);
+    const n = suggestDark(this, els);
+    if (!n) { toast(t('Die Dunkel-Fassung passt schon – nichts zu ändern.'), 'info'); return; }
+    this.commit(t('Dunkel-Fassung vorgeschlagen'));
+    if (this.sv.mode === 'light') this.sv.set('side'); else this.sv.refresh();
+    toast(t('Dunkel-Fassung vorgeschlagen: {n} Farben angepasst. Design-Farben folgen dem Design.', { n }));
+  }
+
+  /** Eigene Dunkel-Farben entfernen (Auswahl bzw. ganze Grafik) */
+  clearDark() {
+    const els = this.sel.length ? this.sel.flatMap(el => [el, ...el.querySelectorAll('*')]) : [...this.root.querySelectorAll('*')];
+    let n = 0;
+    for (const el of els) for (const a of ['data-ge-fdark', 'data-ge-sdark', 'data-ge-cdark']) if (el.hasAttribute(a)) { el.removeAttribute(a); n++; }
+    if (!n) { toast(t('Keine eigenen Dunkel-Farben vorhanden.'), 'info'); return; }
+    this.commit(t('Eigene Dunkel-Farben entfernt'));
+    this.sv.refresh();
+  }
+
   async docSettings() {
     const vb = this.vb, f = this.format;
     const title = [...this.root.children].find(c => c.localName === 'title')?.textContent || '';
@@ -2719,7 +2794,8 @@ export class GraphicEditor {
       title: t('Dokument'), ok: t('Übernehmen'),
       body: `${f === 'info' ? `<div class="ge-row2"><label class="f">${esc(t('Breite'))}<input type="number" name="w" min="1" max="10000" step="1" value="${esc(num(vb.w, 2))}" required></label>
           <label class="f">${esc(t('Höhe'))}<input type="number" name="h" min="1" max="10000" step="1" value="${esc(num(vb.h, 2))}" required></label></div>
-          <label class="f-check"><input type="checkbox" name="scale"> ${esc(t('Inhalt mit skalieren'))}</label>`
+          <label class="f-check"><input type="checkbox" name="scale"> ${esc(t('Inhalt mit skalieren'))}</label>
+          <label class="f">${esc(t('Breite auf der Website (px)'))}<input type="number" name="dispw" min="16" max="4000" step="1" placeholder="${esc(num(vb.w))}" value="${esc(this.root.getAttribute('data-ge-dispw') || '')}"><span class="f-help">${esc(t('Für die Prüfung der Schriftgröße (mindestens 12 px). Leer = so breit wie die Zeichenfläche.'))}</span></label>`
         : `<p class="f-help">${esc(t('Feste Größe: {w} × {h}', { w: num(vb.w), h: num(vb.h) }))}</p>`}
         <div class="ge-row2"><label class="f">${esc(t('Raster: Abstand'))}<input type="number" name="gs" min="0.1" max="1000" step="0.1" value="${esc(num(readGrid(this.root, f).size, 2))}"></label>
           <label class="f">${esc(t('Unterteilungen'))}<input type="number" name="gsub" min="1" max="20" step="1" value="${esc(readGrid(this.root, f).sub)}"></label></div>
@@ -2752,6 +2828,8 @@ export class GraphicEditor {
         this.root.setAttribute('width', num(w)); this.root.setAttribute('height', num(hh));
         this.fitted = false; this.fit();
       }
+      const dw = Math.round(+r.dispw || 0);
+      if (dw >= 16 && dw <= 4000) this.root.setAttribute('data-ge-dispw', String(dw)); else this.root.removeAttribute('data-ge-dispw');
     }
     this.setA11y(r.title.trim(), r.desc.trim());
     const gs = Math.max(0.1, Math.min(1000, +r.gs || 10)), gsub = Math.max(1, Math.min(20, Math.round(+r.gsub || 1)));
@@ -2842,13 +2920,20 @@ export class GraphicEditor {
         ? `<label class="f">${esc(t('Dateiname'))}<input name="name" maxlength="120" value="${esc(d.name || this.fileBase())}" required></label>
            <label class="f">${esc(t('Titel'))}<input name="title" maxlength="180" value="${esc(title)}"></label>
            <label class="f">${esc(t('Alt-Text (Bildbeschreibung)'))}<textarea name="alt" rows="2" maxlength="250" data-alt>${esc(d.alt || '')}</textarea><span class="f-help">${esc(t('Pflicht für Grafiken mit Inhalt: Was zeigt die Grafik? Bei Infografiken die Kernaussage.'))}</span></label>
+           ${suggestAlt(this) ? `<button type="button" class="adm-btn adm-btn--small" data-altsug title="${esc(suggestAlt(this))}">${ico('sparkle')} ${esc(t('Vorschlag aus Titel und Texten'))}</button>` : ''}
            <label class="f-check"><input type="checkbox" name="decorative" data-deco> ${esc(t('Rein dekorativ (kein Alt-Text nötig)'))}</label>`
         : `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" value="${esc(d.name || '')}" required></label>
            ${d.kind === 'preview' || this.format === 'preview' ? `<label class="f">${esc(t('Block'))}<select name="block"><option value="">${esc(t('– keinem Block zuordnen –'))}</option>${Object.entries({ ...(d.block && !(this.boot.blocks || {})[d.block] ? { [d.block]: d.name || d.block } : {}), ...(this.boot.blocks || {}) }).map(([k, v]) => `<option value="${esc(k)}"${k === d.block ? ' selected' : ''}>${esc(v)} (${esc(k)})</option>`).join('')}</select></label>
              <label class="f-check"><input type="checkbox" name="assign" checked> ${esc(t('In der Blockauswahl dieser Website verwenden'))}</label>` : ''}`;
       const r = await modal(this.el, {
         title: asNew ? t('Speichern unter') : isMedia ? t('In der Mediathek speichern') : t('Grafik speichern'), ok: t('Speichern'), body: body + webBox,
-        onOpen: dlg => { const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]'); if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); } bindWeb(dlg); },
+        onOpen: dlg => {
+          const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]');
+          if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); }
+          // Alt-Text-Vorschlag: Titel (aus dem Feld darüber) und Texte der Grafik in Lesereihenfolge
+          dlg.querySelector('[data-altsug]')?.addEventListener('click', () => { const tt = dlg.querySelector('[name=title]')?.value.trim(); const s = suggestAlt(this); alt.value = tt && !s.startsWith(tt) ? tt + ': ' + s : s; alt.focus(); });
+          bindWeb(dlg);
+        },
       });
       if (!r) return null;
       meta = r;
@@ -2859,18 +2944,26 @@ export class GraphicEditor {
     try { if (!web) web = await this.webSvg(prefs); } catch (e) { console.error(e); web = null; }
     const body = { svg: this.getSvg(), web: web?.svg || '', target: isMedia ? 'media' : 'graphics' };
     if (isMedia) Object.assign(body, first ? meta : {}, { mediaId: first ? null : d.mediaId });
+    // Alt-Text aus „Prüfen“ (beim Ersetzen einer vorhandenen Grafik)
+    if (isMedia && !first && d.altDirty) body.alt = d.alt;
     else Object.assign(body, { kind: d.kind || this.format, id: first ? null : d.id, name: meta.name ?? d.name, block: meta.block ?? d.block, assign: meta.assign ?? false });
     const btn = this.el.querySelector('[data-act=save]');
     btn.disabled = true;
     const res = await this.api('POST', this.boot.urls.save, body);
     btn.disabled = false;
     if (!res) return null;
-    if (isMedia) { d.mediaId = res.item.id; d.ref = 'media:' + res.item.id; d.shared = false; if (first) { d.name = meta.name; d.title = meta.title; d.alt = meta.alt; } }
+    if (isMedia) { d.mediaId = res.item.id; d.ref = 'media:' + res.item.id; d.shared = false; if (first) { d.name = meta.name; d.title = meta.title; d.alt = meta.alt; d.decorative = !!meta.decorative; } }
     else { d.id = res.item.id; d.ref = 'graphic:' + res.item.id; d.name = res.item.name; d.block = res.item.block; }
     d.versions = res.versions || [];
     this.savedAt = this.hi;
     this.changed(false);
-    toast((isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert')) + (web ? ' · ' + t('Web-Fassung {a} → {b}', { a: kb(web.before), b: kb(web.after) }) : ''));
+    d.altDirty = false;
+    // Prüfung beim Speichern (blockiert nicht): Hinweise im Bereich „Prüfen“, Sprung zum Element
+    let hints = 0;
+    try { hints = this.panels.check.run().filter(i => i.sev !== 'info').length; } catch (e) { console.error(e); }
+    if (hints) this.panels.showCheck(false);
+    toast((isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert')) + (web ? ' · ' + t('Web-Fassung {a} → {b}', { a: kb(web.before), b: kb(web.after) }) : '')
+      + (hints ? ' · ' + t('{n} Hinweise zur Barrierefreiheit (Bereich „Prüfen“)', { n: hints }) : ''));
     const result = { target: body.target, item: res.item, svg: body.svg, format: this.format };
     this.opts.onSave?.(result);
     this.emit('save', result);

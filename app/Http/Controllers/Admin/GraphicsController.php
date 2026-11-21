@@ -121,6 +121,9 @@ final class GraphicsController extends AdminController
             // eigene Bausteine speichern (Bibliothek der Website) nur mit Recht „blocks.build“
             'canParts' => Graphics::canKind('part'),
             'swatches' => Graphics::swatches(),
+            // Hell/Dunkel im Editor: Abschnitts-Hintergründe des Kits, gilt ein dunkles Farbschema auf der Website?
+            'sections' => Graphics::sections(),
+            'darkSite' => \Core\Graphics\Themed::darkActive(),
             'fonts' => Graphics::fonts(),
             'fontFiles' => Graphics::fontFiles(),
             // Bibliotheken auf Abruf (nur beim ersten Gebrauch): Geometrie, Text in Kurven, PDF-Export

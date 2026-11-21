@@ -264,6 +264,8 @@ final class SiteController
         if (!$app->editing) $html = \Core\Push\Visitor::inject($html);
         // PDF-Links: Auswahl „Anzeigen | Herunterladen“ (Core\PdfLinks) – Skript nur, wenn die Seite solche Links hat
         if (!$app->editing) $html = \Core\PdfLinks::inject($html);
+        // Infografiken mit Design-Farben: Hell/Dunkel-Schalter und dunkle Abschnitte (Core\Graphics\Themed) – auch beim Bearbeiten
+        $html = \Core\Graphics\Themed::inject($html);
         // Herunterladen unter dem Originalnamen: Links auf Medien der Website mit „download“ ohne Wert (Kits, Rich-Text)
         if (!$app->editing) $html = \Core\Media::downloadNames($html);
         // RSS-Feed der Tabelle (Detailseite bzw. Seite unter der URL-Basis) im Kopf verlinken (Core\Data\Feed)

@@ -186,6 +186,38 @@
       der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
       Gerät vorhanden sind – deshalb wandelt das Speichern Texte in Schriften der Website auf Wunsch in Kurven um (siehe unten); im Editor bleiben sie Text.</li>
   </ul>
+  <h4 id="grafik-dunkel">Design-Farben, Hell und Dunkel</h4>
+  <p>Wählen Sie eine Farbe unter <b>Farbfelder → Design der Website</b> (z. B. „Akzent“), merkt sich die Grafik die <b>Design-Farbe</b>, nicht nur
+    den Farbwert: Ändern Sie später unter <b>Design</b> den Akzent, zeigt die Website die Grafik in der neuen Farbe – ohne sie neu zu speichern.
+    Hat die Website ein dunkles Farbschema, erscheint die Grafik dort automatisch mit den Dunkel-Werten des Designs.</p>
+  <ul>
+    <li><b>Hell | Dunkel | Nebeneinander</b> oben neben den Personas schaltet die Ansicht um – das ist keine eigene Grafik, sondern dieselbe
+      Grafik in zwei Fassungen. „Nebeneinander“ zeigt rechts die dunkle Fassung, während Sie links bearbeiten. Der Knopf daneben wählt den
+      <b>Hintergrund</b> der Vorschau: neutral weiß oder einer der Abschnitts-Hintergründe der Website (Standard, Getönt, Akzent, Dunkel …), jeweils hell und dunkel.</li>
+    <li>In der Ansicht <b>Dunkel</b> wirkt eine neue Farbe sofort nur in der dunklen Fassung; beim Übernehmen fragt der Editor:
+      <b>Nur für Dunkel</b> oder <b>Für Hell und Dunkel</b> – wahlweise für <b>alle gleichen Farben</b> der Grafik. „Nicht mehr fragen“ gilt, bis Sie den Editor schließen.</li>
+    <li>Im Bereich <b>Farbe</b> zeigt <b>Im Dunkeln</b>, was mit der gewählten Farbe passiert: <b>Folgt Design</b> (nur Design-Farben: ihr Dunkel-Wert),
+      <b>Eigene Farbe</b> (eine feste Farbe nur für Dunkel – der Editor wechselt dafür in die dunkle Ansicht) oder <b>Gleich in beiden</b>.</li>
+    <li><b>Dunkel-Fassung vorschlagen</b> (Menü am Hintergrund-Knopf; mit Auswahl nur für diese): Design-Farben folgen dem Design, eigene Farben
+      bekommen die umgekehrte Helligkeit bei gleichem Farbton (Schwarz wird hell, Weiß dunkel, mittlere Töne bleiben). Danach zeigt der Editor beide
+      Fassungen nebeneinander; <kbd>⌘</kbd><kbd>Z</kbd> nimmt den Vorschlag in einem Schritt zurück. <b>Eigene Dunkel-Farben entfernen</b> setzt zurück.</li>
+    <li><b>Exportieren → SVG für Desktop-Programme</b> enthält feste Farben (die hellen); dazu gibt es die <b>Dunkel-Fassung</b> als eigene Datei.
+      Bausteine, die Sie in der Bibliothek speichern, behalten ihre Design-Farben und übernehmen auf einer anderen Website deren Farben.</li>
+  </ul>
+  <h4 id="grafik-pruefen">Prüfen: Kontrast und Barrierefreiheit</h4>
+  <p>Der Reiter <b>Prüfen</b> (rechts unten, auch über das Menü am Hintergrund-Knopf) listet Hinweise – beim Speichern läuft die Prüfung
+    automatisch, hält das Speichern aber nicht auf. Ein Klick auf einen Hinweis wählt das Element, holt es ins Bild und zeigt die Fassung
+    (hell oder dunkel), in der das Problem auftritt; kleine Markierungen auf der Fläche zeigen dieselben Stellen.</p>
+  <ul>
+    <li><b>Titel, Beschreibung, Alt-Text</b> fehlen – mit Knöpfen zum Ergänzen; der Alt-Text-Vorschlag stammt aus Titel und Texten der Grafik
+      (auch im Speichern-Dialog: „Vorschlag aus Titel und Texten“).</li>
+    <li><b>Kontrast</b> von Text zur Fläche darunter (4,5:1, große Schrift 3:1) und von wichtigen Linien und Konturen (3:1) – in Hell und Dunkel,
+      auf dem gewählten Hintergrund. <b>Verschwindet im Dunkeln</b> meldet z. B. eine schwarze Kontur, die auf dunklem Grund nicht mehr zu sehen ist.</li>
+    <li><b>Schrift zu klein</b>: unter 12 px in der vorgesehenen Größe. Wie breit die Grafik auf der Website erscheint, stellen Sie unter
+      <b>Dokument → Breite auf der Website</b> ein (leer = so breit wie die Zeichenfläche).</li>
+    <li><b>Lesereihenfolge</b>: Diagramme mit Verbindern brauchen den Ablauf in der Beschreibung (ein Klick fügt ihn ein); Texte, deren
+      Reihenfolge in den Ebenen nicht der sichtbaren entspricht, werden genannt.</li>
+  </ul>
   <h4 id="grafik-geometrie">Formen kombinieren, ausstanzen, umwandeln</h4>
   <p>Zwei oder mehr Objekte wählen, dann in der Kontextleiste bzw. im Menü <b>Objekt</b>. Gerechnet wird mit den echten Kurven
     (Kreise bleiben rund); Konturen zählen nicht zur Fläche.</p>

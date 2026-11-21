@@ -20,6 +20,7 @@
  */
 import { NS, num, parsePath, transformPath } from './geom.js';
 import { t } from '../_i18n.js';
+import { themeClasses } from './scheme.js';
 
 const XLINK = 'http://www.w3.org/1999/xlink';
 const INK = 'http://www.inkscape.org/namespaces/inkscape';
@@ -208,7 +209,11 @@ export function optimizeSvg(svg, opts = {}) {
   const vbA = (root.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
   const vb = vbA.length === 4 && vbA[2] ? { w: vbA[2], h: vbA[3] } : { w: parseFloat(root.getAttribute('width')) || 800, h: parseFloat(root.getAttribute('height')) || 500 };
   const dec = opts.decimals && opts.decimals !== 'auto' ? Math.max(0, Math.min(6, +opts.decimals)) : autoDecimals(vb);
-  // Editor-Daten
+  // Design-Farben und Dunkel-Angaben als Klassen (Core\Graphics\Themed erzeugt daraus die Fassungen je Website), danach Editor-Daten weg
+  for (const el of all(root)) {
+    const cls = themeClasses(el);
+    if (cls.length) el.setAttribute('class', [...(el.getAttribute('class') || '').split(/\s+/).filter(c => c && !/^ge-[td][fsc]-/.test(c)), ...cls].join(' '));
+  }
   for (const el of all(root)) for (const a of [...el.attributes]) if (a.name === 'data-name' || a.name === 'data-locked' || a.name.startsWith('data-ge-')) el.removeAttribute(a.name);
   if (opts.safe) return ser(root);
   const refs = references(root);

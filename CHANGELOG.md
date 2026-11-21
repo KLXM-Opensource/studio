@@ -33,6 +33,23 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
 
+### Grafik-Editor: Design-Farben, Hell und Dunkel, Prüfen (Ausbaustufe 3b)
+- **Design-Farben als Variablen:** Eine Grafik mit „Akzent“ (Farbfelder → Design der Website) folgt dem Design der Website – Akzent im
+  Design ändern, die Grafik auf der Website zieht mit, ohne neu zu speichern. Mit dunklem Farbschema erscheint sie mit den Dunkel-Werten.
+  Auslieferung: Fassungen je Website als Dateien (`Core\Graphics\Themed`, `{Medienordner}/grafik/t/`), `<picture>` mit
+  `<source media="(prefers-color-scheme: dark)">`; `js/graphic-scheme.js` (≈ 0,8 KB, nur auf Seiten mit solchen Grafiken) folgt dem
+  Hell/Dunkel-Schalter und dunklen Abschnitten. Kein Inline-SVG (CSP, Cache). Web-Fassung trägt Klassen `ge-tf-…`/`ge-df-…`, Hex bleibt als Rückfall;
+  Grafiken ohne Design-Farben bleiben bytegleich. Bausteine der Bibliothek behalten Design-Farben (`var(--token, #hex)`) und nehmen auf einer
+  anderen Website deren Farben an.
+- **Hell | Dunkel | Nebeneinander** oben im Editor (keine Persona): in Dunkel fragt eine Farbänderung „nur für Dunkel“ oder „für Hell und Dunkel“
+  (auch für alle gleichen Farben), Bereich Farbe zeigt „Im Dunkeln: Folgt Design | Eigene Farbe | Gleich in beiden“, **Dunkel-Fassung vorschlagen**
+  (OKLCH: Helligkeit umkehren, Farbton bleibt), Vorschau auf den Abschnitts-Hintergründen der Website (Standard, Getönt, Akzent, Dunkel …),
+  Export „SVG für Desktop-Programme – Dunkel-Fassung“.
+- **Prüfen** (Reiter, läuft auch beim Speichern, blockiert nicht): Titel, Beschreibung, Alt-Text (mit Vorschlag aus Titel und Texten), Kontrast von
+  Text (4,5:1/3:1) und wichtigen Linien (3:1) in Hell und Dunkel, „verschwindet im Dunkeln“, Schrift unter 12 px in der vorgesehenen Breite
+  (Dokument → „Breite auf der Website“), Lesereihenfolge von Diagrammen und Texten; Klick springt zum Element, Markierungen auf der Fläche.
+- `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Design-Farben, Hell und Dunkel; Prüfen), Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Grafik-Editor: Prüfung mit echten SVGs und Bedienung wie in Grafikprogrammen
 - **Zeichenfläche erbt nichts mehr von der Verwaltung:** Text ohne eigene Schrift erscheint wie in der Mediathek und auf der Website
   (vorher Lato 13 px), `currentColor` bleibt im dunklen Modus Tinte (vorher fast unsichtbar hellgrau auf Weiß).

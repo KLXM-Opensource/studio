@@ -76,7 +76,8 @@
       <code>clip.js</code> (Beschneiden, Masken, Ausstanzen per Maske), <code>gradhandles.js</code> (Verlaufswerkzeug),
       <code>export.js</code> (Web-Optimierung, Desktop-SVG, PDF).
       Ausbaustufe 3a: <code>fontpicker.js</code> (Schriftauswahl), <code>typo.js</code> (OpenType, Absatz-Einstellungen, Silbentrennung),
-      <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).</li>
+      <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).
+      Ausbaustufe 3b: <code>scheme.js</code> (Design-Farben, Hell/Dunkel, Ansicht), <code>check.js</code> (Prüfen).</li>
     <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
       <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
       <table class="doc-table">
@@ -167,8 +168,52 @@
       (Ausbaustufe 3b): Farbangabe als Objekt <code>{kind: 'value'|'token', value, token, alpha}</code> (<code>paintValue()</code>,
       <code>ed.panels.paintValue(which)</code>, <code>setPaintValue(which, v)</code>); Farbfelder des Designs tragen <code>token</code>
       (<code>Graphics::swatches()</code>), angewendet wird Hex und der Token am Element gemerkt (<code>data-ge-ftoken</code>,
-      <code>data-ge-stoken</code>, Bausteine mit „Farben der Website“ <code>data-ge-ctoken</code>); jede andere Farbe entfernt ihn.
-      3b kann daraus CSS-Variablen und eine Hell/Dunkel-Fassung erzeugen.</li>
+      <code>data-ge-stoken</code>, Bausteine mit „Farben der Website“ <code>data-ge-ctoken</code>; bei <code>&lt;stop&gt;</code> gilt
+      <code>-ftoken</code> für <code>stop-color</code>); jede andere Farbe entfernt ihn. Daraus entstehen Hell/Dunkel und die Fassungen je
+      Website (nächster Punkt).</li>
+    <li id="grafik-dunkel-technik"><b>Design-Farben und Hell/Dunkel</b> (Ausbaustufe 3b, <code>scheme.js</code>, <code>Core\Graphics\Themed</code>):
+      <ul>
+        <li><b>Modell:</b> das SVG bleibt die helle Fassung. Dunkel steht als Editor-Daten am Element: <code>data-ge-fdark</code> /
+          <code>-sdark</code> / <code>-cdark</code> = <code>#RRGGBB</code>, <code>t:token</code> (Design-Farbe nur dunkel) oder <code>=</code>
+          (wie hell, auch bei Design-Farben). Ohne Angabe: Design-Farbe → ihr Dunkel-Wert (<code>Graphics::swatches()</code> liefert <code>dark</code>),
+          eigene Farbe → gleich. <code>paintIn(ed, el, which, mode)</code> löst Farbe, Vererbung und <code>currentColor</code> je Schema auf.</li>
+        <li><b>Ansicht</b> (<code>SchemeView</code>): Umschalter Hell | Dunkel | Nebeneinander (<code>ed.sv.set(mode)</code>, kein Schritt im Protokoll).
+          Dunkel = ein <code>&lt;style&gt;</code> im Shadow Root mit Attributselektoren und <code>!important</code> (<code>darkCss()</code>);
+          <code>setProp()</code> schaltet es für die Prüfung „gewinnt eine Klassenregel?“ kurz ab (<code>VIEW.sheet</code> in <code>doc.js</code>).
+          Nebeneinander: nicht bearbeitbare Kopie rechts (<code>.ge-twin</code>, gedrosselt neu gezeichnet). Hintergründe der Vorschau:
+          <code>Graphics::sections()</code> (Abschnitts-Hintergründe des Kits mit Farben aus üblichen Token-Namen, hell/dunkel) plus „Weiß (neutral)“.</li>
+        <li><b>Farbe in der Dunkel-Ansicht:</b> <code>setPaint()</code> schreibt die Dunkel-Angabe; <code>finishColor()</code> fragt beim Übernehmen
+          „nur Dunkel | beide“ (+ alle gleichen Farben; „nicht mehr fragen“ = <code>ed.darkScope</code>), Abbrechen stellt den Stand davor her.
+          <code>suggestDark()</code>: Helligkeit in OKLCH umkehren (L' = 1 − L, begrenzt auf 0,16–0,96), Farbton und Buntheit bleiben.</li>
+        <li><b>Web-Fassung:</b> <code>optimizeSvg()</code> schreibt <code>themeClasses()</code> als Klassen: <code>ge-tf-{token}</code>,
+          <code>ge-ts-…</code>, <code>ge-tc-…</code> (Design-Farbe), <code>ge-df-{rrggbb}</code>, <code>ge-df-t-{token}</code>, <code>ge-df-same</code>
+          (und <code>-ds-</code>, <code>-dc-</code>). Die Hex-Farben bleiben als Rückfall. Desktop-Export: feste Farben; „Dunkel-Fassung“ über
+          <code>bakeScheme()</code>. Bausteine: <code>tokensToVars()</code> schreibt <code>var(--token, #hex)</code>, <code>resolveTokens()</code> setzt
+          beim Einfügen die Farbe der Ziel-Website ein und merkt den Token wieder (auch <code>stop-color</code>, <code>color</code>, <code>style</code>).</li>
+        <li><b>Auslieferung – Entscheidung:</b> Fassungen je Website als Dateien statt CSS-Variablen. Ein SVG im <code>&lt;img&gt;</code> sieht die
+          Variablen der Seite nicht; inline eingebettet bräuchte es ein <code>&lt;style&gt;</code> in der Seite (CSP <code>style-src 'self'</code>),
+          <code>var()</code> in Darstellungsattributen ist nicht überall verlässlich, ids kollidieren, Browser-Cache und Lazy-Loading fielen weg.
+          <code>Themed::variants($m)</code> erzeugt beim ersten Ausgeben <code>{Medienordner}/grafik/t/gt-{id}-{hash}-l.svg</code> und <code>-d.svg</code>
+          (Hash über Datei und verwendete Design-Werte; ältere Fassungen derselben Grafik werden dabei gelöscht; Schutz durch <code>Svg::guard</code>
+          des Ordners <code>grafik</code>). <code>Themed::render()</code> ändert nur Farben in öffnenden Tags mit diesen Klassen (Attribut bzw. Eigenschaft
+          im <code>style</code>), alles andere bleibt bytegleich; unbekannte Tokens behalten die gespeicherte Farbe.</li>
+        <li><b>Ausgabe:</b> <code>Media::pictureOf()</code> setzt für solche SVGs die helle Fassung ins <code>&lt;img&gt;</code> und – nur wenn
+          <code>Themed::darkActive()</code> (Design mit <code>'dark' =&gt; ['scope' =&gt; …]</code>, alle Klassen des Bereichs am <code>&lt;html&gt;</code>, z. B.
+          „Dunkles Farbschema“ an) – <code>&lt;source media="(prefers-color-scheme: dark)" data-scheme="dark"&gt;</code> und die Klasse
+          <code>cms-scheme-img</code>. Ohne Skript entscheidet das Gerät. <code>Themed::inject()</code> (SiteController, vor dem Seiten-Cache)
+          bindet auf Seiten mit solchen Bildern <code>js/graphic-scheme.js</code> ein (≈ 0,8 KB): helle Schrift an der Stelle des Bildes = dunkler Grund
+          (wie Karten und Diagramme) – damit folgen die Bilder dem Hell/Dunkel-Schalter (<code>scheme-dark</code>/<code>scheme-light</code>,
+          <code>data-theme</code>) und dunklen Abschnitten einer hellen Seite, auch ohne Neuladen (MutationObserver). Design speichern leert den
+          Seiten-Cache; neue Werte ergeben neue Dateinamen.</li>
+      </ul></li>
+    <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
+      <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
+      und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +
+      Flächen davor mit Deckkraft), „verschwindet im Dunkeln“ (hell ≥ 3:1, dunkel &lt; 1,5:1), Schrift &lt; 12 px bei <code>data-ge-dispw</code>
+      (vorgesehene Breite, Dokument-Dialog), Lesereihenfolge (Verbinder ohne Ablauf in <code>&lt;desc&gt;</code>; Texte in anderer Reihenfolge als
+      sichtbar), dunkle Schatten. Höchstens 800 Elemente je Art. Läuft nach dem Speichern (blockiert nicht, Reiter „Prüfen“) und gedrosselt nach
+      Änderungen, solange der Reiter offen ist; <code>checkOverlay()</code> markiert die Stellen der gezeigten Fassung. Alt-Text aus „Prüfen“ geht beim
+      nächsten Speichern als <code>alt</code> mit (<code>Media::replace</code>).</li>
     <li><b>Verbinder</b> (<code>connect.js</code>): gewöhnlicher <code>&lt;path&gt;</code> mit Markern; Beziehung in
       <code>data-ge-conn="a=form-1@r;b=form-2@l;r=ortho;m=0.5;hs=none;he=triangle;s=4"</code> (Seite t/r/b/l, <code>a</code> = automatisch,
       <code>n3</code> = Knoten 3; freies Ende <code>@x,y</code>). <code>Connectors.update()</code> läuft vor jedem Zeichnen und jedem
@@ -229,7 +274,10 @@ ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed
       Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl (auch je Variante),
       Fassungen, Arbeitsfassung/Web-Fassung, Editor-Daten nur mit <code>editor</code>, Pixelbilder gezählt, Rechte je Art (403);
       Ausbaustufe 3a: Formatvorlagen nur als Base64, Typografie bleibt in beiden Fassungen, persönliche Einstellungen bereinigt,
-      Austauschdatei bereinigt bzw. abgelehnt, Ordner/Umbenennen, Formatvorlagen der Website bereinigt.</li>
+      Austauschdatei bereinigt bzw. abgelehnt, Ordner/Umbenennen, Formatvorlagen der Website bereinigt;
+      Ausbaustufe 3b: Klassen der Design-Farben überstehen die Bereinigung, <code>Themed::render()</code> hell/dunkel (Attribut, <code>style</code>,
+      eigene Dunkel-Farbe vor Token, „same“, unbekannter Token, Verlaufsstopp), bytegleich ohne Design-Farben, Fassungen je Website,
+      <code>&lt;picture&gt;</code> mit <code>&lt;source&gt;</code> nur bei dunklem Farbschema, Skript nur auf Seiten mit solchen Grafiken.</li>
   </ul>
 
   <h3 id="video-vorschau">Vorschaubilder für Videos (<code>Core\VideoThumbs</code>, <code>Core\Ffmpeg</code>)</h3>
