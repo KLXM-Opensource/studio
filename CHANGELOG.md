@@ -10,6 +10,9 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+
+### Design-Datei und Grafik-Fassungen bleiben einen Tag erhalten
+- Ändert sich das Design (oder eine Regel des Kits), bekommt die Design-Datei einen neuen Namen. Die alte wurde bisher sofort gelöscht – zwischengespeicherte Seiten (Seiten-Cache, Browser, Proxy) verwiesen dann auf eine fehlende Datei und zeigten die Website ohne ihr Design. Ältere Fassungen werden jetzt erst nach einem Tag entfernt; ebenso die hellen/dunklen Fassungen von Grafiken mit Design-Farben (`Core\Graphics\Themed`).
 ### Installation per Composer (Packagist)
 - Paket `klxm/studio` (Typ `project`): `composer create-project klxm/studio meine-website` lädt die Version mit allen Abhängigkeiten
   und führt danach `php bin/console install` aus – Ordner, Datenbank und `config/config.local.php` entstehen, Setup-Token und

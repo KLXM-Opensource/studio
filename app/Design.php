@@ -310,7 +310,11 @@ final class Design
         $dir = site()->mediaDir('design');
         if (!is_file("$dir/$name")) {
             @mkdir($dir, 0775, true);
-            foreach (glob("$dir/design-" . app()->theme->name . '-*.css') ?: [] as $old) @unlink($old);
+            // Ältere Fassungen erst nach einem Tag löschen: zwischengespeicherte Seiten (Seiten-Cache, Browser, Proxy) verweisen
+            // noch darauf – sofort gelöscht, stünde die Website bis zum Leeren des Caches ohne ihr Design da
+            foreach (glob("$dir/design-" . app()->theme->name . '-*.css') ?: [] as $old) {
+                if (filemtime($old) < time() - 86400) @unlink($old);
+            }
             @file_put_contents("$dir/$name", "/* Design-Werte (Verwaltung → Design) – automatisch erzeugt */\n" . $css, LOCK_EX);
         }
         return site()->mediaUrl('design/' . $name);

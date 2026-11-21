@@ -165,8 +165,11 @@ final class Themed
             if (!is_file($dir . '/' . $file)) {
                 if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) return self::$memo[$key] = null;
                 Svg::guard(Graphics::dir());
-                // ältere Fassungen dieser Grafik entfernen (anderes Design oder neue Datei)
-                foreach (glob($dir . '/gt-' . $id . '-*-' . $mode[0] . '.svg') ?: [] as $old) @unlink($old);
+                // ältere Fassungen dieser Grafik entfernen (anderes Design oder neue Datei) – erst nach einem Tag, weil
+                // zwischengespeicherte Seiten noch auf sie verweisen können (wie die Design-Datei, Core\Design::fileUrl)
+                foreach (glob($dir . '/gt-' . $id . '-*-' . $mode[0] . '.svg') ?: [] as $old) {
+                    if (filemtime($old) < time() - 86400) @unlink($old);
+                }
                 if (@file_put_contents($dir . '/' . $file, self::render($svg, $mode, $pal), LOCK_EX) === false) return self::$memo[$key] = null;
             }
             $out[$mode] = Graphics::url('t/' . $file);
