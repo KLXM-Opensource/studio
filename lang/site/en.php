@@ -433,4 +433,13 @@ return [
     'geöffnet' => 'open',
     'Öffnungsstatus' => 'Opening status',
     'Wochentag' => 'Weekday',
+    // Beschriftungen der Mehrfachfelder (Core\Combo::LABELS – Telefon, E-Mail, Adresse, Web)
+    'Mobil' => 'Mobile',
+    'Geschäftsstelle' => 'Office',
+    'Arbeit' => 'Work',
+    'Privat' => 'Home',
+    'Zentrale' => 'Main',
+    'Fax' => 'Fax',
+    'Sonstige' => 'Other',
+    'Website' => 'Website',
 ];

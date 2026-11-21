@@ -46,7 +46,7 @@ $type = $f['type'] ?? 'text';
     <?php if (!$inbox): // Freigabe je Feld (Core\Data\Exposure): Modus + Ziele (Website, öffentliche vCard, öffentliche Kalender-Datei)
       $xr = \Core\Data\Exposure::rule($f); ?>
     <div class="dt-field__row dt-field__expose" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
-      <label class="dt-in dt-in--expose"><span><?= icon('globe') ?> <?= e(__('Freigabe')) ?></span><select name="<?= $n ?>[exposure][mode]" data-expose-mode>
+      <label class="dt-in dt-in--expose"><span><?= icon('globe') ?> <?= e(__('Sichtbarkeit')) ?></span><select name="<?= $n ?>[exposure][mode]" data-expose-mode>
         <?php foreach (['always' => __('Immer öffentlich'), 'editor' => __('Redaktion entscheidet je Eintrag'), 'never' => __('Nie öffentlich')] as $k => $l): ?><option value="<?= $k ?>"<?= $xr['mode'] === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
       </select></label>
       <fieldset class="dt-expose__targets"><legend><?= e($xr['mode'] === 'editor' ? __('Standard für neue Einträge') : __('Erscheint in')) ?></legend>

@@ -185,7 +185,7 @@ final class Combo
                 ['name' => 'zip', 'label' => __('PLZ'), 'type' => 'text', 'max' => 20, 'width' => 'half'],
                 ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'max' => 120, 'width' => 'half'],
                 ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text', 'max' => 80],
-                ['name' => 'public', 'label' => __('Freigabe'), 'type' => 'select', 'options' => ['0' => __('Intern'), 'city' => __('Nur Ort öffentlich'), '1' => __('Öffentlich')], 'default' => '0'],
+                ['name' => 'public', 'label' => __('Sichtbarkeit'), 'type' => 'select', 'options' => ['0' => __('Intern'), 'city' => __('Nur Ort öffentlich'), '1' => __('Öffentlich')], 'default' => '0'],
                 $custom);
             return $fields;
         }
