@@ -291,6 +291,8 @@ final class Database
         Oidc\Accounts::ensureTable($this);
         // Einladungen neuer Konten (Core\Invites): Token nur als Hash, einmal verwendbar
         Invites::ensureTable($this);
+        // Abonnieren per App (Core\Data\Subscriptions): Abo-Tokens je Tabelle, nur als Hash
+        Data\Subscriptions::ensureTable($this);
         // Anmeldedaten selbst ändern (Core\EmailChange): offene Änderungen der E-Mail-Adresse, Tokens nur als Hash
         EmailChange::ensureTable($this);
         // „Passwort vergessen“ (Core\PasswordReset): Links nur als Hash, 60 Minuten, einmal verwendbar

@@ -121,6 +121,7 @@ final class PageAccess
         if (!$r || PHP_SAPI === 'cli' || !self::active() || app()->auth->check()) return 'all';
         // Nur die per Schlüssel angemeldeten Schnittstellen sehen alles – öffentliche Endpunkte (/api/live/block, /api/form …) wie Besucher
         if ($r->isAdminPath() || preg_match('~^/(api/v1|mcp)(/|$)~', $r->path)) return 'all';
+        if (Data\Subscriptions::inInternal()) return 'all';   // Abo-Token mit Umfang „intern“ (Konto mit data.edit, Core\Data\Subscriptions)
         if (!self::tableRestricted($table)) return 'all';
         $cur = app()->currentPage;
         if ($cur && !empty($cur['id']) && self::restricted($cur)) return 'members';

@@ -250,6 +250,10 @@ return function (Router $r): void {
     $r->post('/admin/data/{handle}/pick', [Admin\DataController::class, 'pick']);
     $r->get('/admin/data/{handle}/display', [Admin\DataController::class, 'display']);
     $r->post('/admin/data/{handle}/display', [Admin\DataController::class, 'displaySave']);
+    // Abonnieren per App: öffentliche Adressen, Abo-Tokens (Core\Data\Subscriptions)
+    $r->get('/admin/data/{handle}/abonnieren', [Admin\SubscriptionController::class, 'index']);
+    $r->post('/admin/data/{handle}/abonnieren', [Admin\SubscriptionController::class, 'store']);
+    $r->post('/admin/data/{handle}/abonnieren/{id}/widerrufen', [Admin\SubscriptionController::class, 'revoke']);
     $r->get('/admin/data/{handle}/new', [Admin\DataController::class, 'entryNew']);
     $r->post('/admin/data/{handle}/new', [Admin\DataController::class, 'entrySave']);
     $r->post('/admin/data/{handle}/{id}/delete', [Admin\DataController::class, 'entryDelete']);
@@ -726,6 +730,10 @@ return function (Router $r): void {
     });
     $r->get(\Core\VCard::ORG_PATH, [\Core\Http\Controllers\VCardController::class, 'org']);
     $r->get('/vcard/{handle}/{slug}.vcf', [\Core\Http\Controllers\VCardController::class, 'person']);
+    // Abonnieren per App (Core\Data\Subscriptions): Abo-Token im Pfad (Kalender/Kontakte), öffentliche Kontakte-Datei je Tabelle
+    $r->get('/kalender/{handle}/abo/{token}.ics', [\Core\Http\Controllers\SubscriptionController::class, 'calendar']);
+    $r->get('/vcard/{handle}/abo/{token}.vcf', [\Core\Http\Controllers\SubscriptionController::class, 'contacts']);
+    $r->get('/vcard/{handle}.vcf', [\Core\Http\Controllers\SubscriptionController::class, 'contactsPublic']);
     // Website-Suche (Funktion „search“, Core\Search): /suche, /en/search …, Vorschläge als JSON – Seiten mit gleichem Pfad haben Vorrang
     $r->get(\Core\Search\Search::routePattern(true), [\Core\Http\Controllers\SearchPageController::class, 'suggest']);
     $r->get(\Core\Search\Search::routePattern(), [\Core\Http\Controllers\SearchPageController::class, 'show']);
