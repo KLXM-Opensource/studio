@@ -37,6 +37,11 @@ import { outlineAll } from './outline.js';
 import { Guides, readGrid } from './guides.js';
 import { GradientHandles } from './gradhandles.js';
 import { optimizeSvg, checkSame, desktopSvg, pdfBlob } from './export.js';
+import { SchemeView, suggestDark, paintedElements, bakeScheme } from './scheme.js';
+import { checkOverlay, suggestAlt } from './check.js';
+import { ShapeBuilder } from './builder.js';
+import { duplicateAgain, repeatDialog } from './repeat.js';
+import { Warp } from './warp.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -61,6 +66,7 @@ const TOOLS = [
   { id: 'connector', icon: 'flow-arrow', key: 'C', label: () => t('Verbinder') },
   { id: 'text', icon: 'text-t', key: 'T', label: () => t('Text') },
   { id: 'gradient', icon: 'gradient', key: 'F', label: () => t('Verlauf') },
+  { id: 'builder', icon: 'selection-plus', key: 'M', label: () => t('Formgitter') },
   { id: 'eyedropper', icon: 'eyedropper', key: 'I', label: () => t('Pipette') },
   { id: 'hand', icon: 'hand', key: 'H', label: () => t('Hand') },
   { id: 'zoom', icon: 'magnifying-glass-plus', key: 'Z', label: () => t('Zoom') },
@@ -78,6 +84,7 @@ const HINTS = {
   text: () => t('Klick = Text an dieser Stelle, Klick in eine Form = Text in der Form (zentriert, umbrochen). Esc oder Klick daneben beendet die Eingabe.'),
   connector: () => t('Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten (Seiten, Mitte = automatisch, Knoten). Verbinder folgen, wenn Formen sich bewegen. Doppelklick auf einen Verbinder = Beschriftung.'),
   eyedropper: () => t('Klick auf ein Objekt übernimmt seine Füllung und Kontur für die Auswahl.'),
+  builder: () => t('Formgitter: überlappende Formen auswählen, dann Bereich anklicken oder mehrere überstreichen = vereinen, ⌥ = Bereiche entfernen.'),
   gradient: () => t('Ziehen auf einem Objekt = Verlauf anlegen bzw. neu ausrichten. Griffe ziehen, Doppelklick auf die Linie = Farbstopp, ⌫ = Stopp löschen. X = Füllung/Kontur.'),
   hand: () => t('Ziehen = Ansicht verschieben (auch mit gedrückter Leertaste in jedem Werkzeug).'),
   zoom: () => t('Klick = vergrößern, ⌥-Klick = verkleinern. ⌘0 = einpassen, ⌘1 = 100 %.'),
@@ -138,6 +145,8 @@ export class GraphicEditor {
     this.el = h(`<div class="ge" data-format="${esc(this.format)}" data-tool="select">
       <header class="ge-top">
         <div class="ge-personas" role="radiogroup" aria-label="${esc(t('Persona'))}"></div>
+        <div class="ge-scheme" role="radiogroup" aria-label="${esc(t('Hell oder Dunkel'))}"><button type="button" role="radio" data-scheme="light" aria-checked="true" tabindex="0">${ico('sun')}<span>${esc(t('Hell'))}</span></button><button type="button" role="radio" data-scheme="dark" aria-checked="false" tabindex="-1">${ico('moon')}<span>${esc(t('Dunkel'))}</span></button><button type="button" role="radio" data-scheme="side" aria-checked="false" tabindex="-1">${ico('circle-half')}<span>${esc(t('Nebeneinander'))}</span></button></div>
+        <button type="button" class="ge-zoombtn ge-bgbtn" data-act="schememenu" aria-haspopup="menu" aria-expanded="false" title="${esc(t('Hintergrund der Vorschau und Hilfen für Dunkel'))}"><span class="ge-bgbtn__sw" data-bgsw></span><span data-bglbl></span>${ico('caret-down')}</button>
         <div class="ge-doctitle"><strong data-name></strong><span class="ge-fmt">${esc(fmtLabel)}</span><span class="ge-dirty" data-dirty hidden>${esc(t('Ungespeichert'))}</span></div>
         <div class="ge-top__grow"></div>
         <div class="ge-top__group">${iconBtn('arrow-u-up-left', t('Rückgängig'), 'data-act="undo"', MOD + 'Z')}${iconBtn('arrow-u-up-right', t('Wiederholen'), 'data-act="redo"', SHIFT + MOD + 'Z')}</div>
@@ -168,6 +177,14 @@ export class GraphicEditor {
     // sehen aus wie in der Mediathek bzw. auf der Website; currentColor = Tinte (wie das Farbfeld „Schriftfarbe“).
     // Eigene Eigenschaften (var(--token) der Design-Farben) erben weiter – all betrifft sie nicht.
     this.shadow.innerHTML = '<style>:host{all:initial;display:block;color:#1F2430}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
+    // Hell | Dunkel | Nebeneinander (scheme.js): eine Ansicht, keine Persona – das Dokument bleibt die helle Fassung mit Dunkel-Angaben
+    // Hintergründe der Vorschau: zuerst neutral weiß (wie bisher), dann die Abschnitts-Hintergründe des Kits
+    const secs = this.boot.sections || [];
+    if (!secs.some(s => s.id === 'paper')) this.boot.sections = [{ id: 'paper', label: t('Weiß (neutral)'), light: '#FFFFFF', dark: secs[0]?.dark || '#111318' }, ...secs];
+    this.sectionId = 'paper';
+    this.sv = new SchemeView(this);
+    this.builder = new ShapeBuilder(this);
+    this.warp = new Warp(this);
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -248,12 +265,15 @@ export class GraphicEditor {
 
   setTool(id) {
     if (!TOOLS.some(x => x.id === id)) return;
+    this.warp?.commit();
     this.finishPen();
     this.endText();
     this.tool = id;
     this.el.dataset.tool = id;
     this.$('.ge-tools').querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === id)));
     if (id !== 'node') this.nodeSel.clear();
+    this.builder?.reset();
+    if (id === 'builder') this.builder.prepare().then(() => this.draw()).catch(e => console.error(e));
     this.hint();
     this.renderCtx();
     this.draw();
@@ -345,7 +365,7 @@ export class GraphicEditor {
     this.layout();
     this.changed();
   }
-  undo() { this.flushNudge(); this.goto(this.hi - 1); }
+  undo() { this.flushNudge(); if (this.warp?.active) { this.warp.cancel(); return; } this.goto(this.hi - 1); }
   redo() { this.flushNudge(); this.goto(this.hi + 1); }
   get dirty() { return this.hi !== this.savedAt; }
 
@@ -367,6 +387,9 @@ export class GraphicEditor {
     this.$('[data-size]').textContent = `${num(vb.w, 2)} × ${num(vb.h, 2)}`;
     this.renderCtx();
     this.paintFs();
+    if (this.sv?.mode !== 'light') this.sv?.refresh();
+    // Prüfung nachziehen, solange der Bereich offen ist oder Hinweise markiert sind
+    if (this.panels && (this.panels.checkOpen() || this.checkIssues?.length)) this.panels.check.soon();
     this.panels?.refresh();
     this.draw();
     if (emit) this.emit('change', this);
@@ -398,6 +421,7 @@ export class GraphicEditor {
     const vb = this.vb;
     Object.assign(this.paper.style, { left: this.panX + 'px', top: this.panY + 'px', width: vb.w * this.zoom + 'px', height: vb.h * this.zoom + 'px' });
     this.$('[data-zoom]').textContent = Math.round(this.zoom * 100) + ' %';
+    this.sv?.fitTwin();
     this.draw();
   }
 
@@ -472,6 +496,9 @@ export class GraphicEditor {
   draw() {
     if (!this.root || !this.ov) return;
     this.conn?.update();
+    // Dunkel-Ansicht: neue Dunkel-Farben beim Ziehen eines Reglers sofort zeigen; Nebeneinander: Kopie rechts nachziehen
+    if (this.sv?.mode === 'dark') this.sv.live();
+    else if (this.sv?.mode === 'side') this.sv.updateTwin();
     const ov = this.ov, out = [];
     const r = this.stage.getBoundingClientRect();
     ov.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
@@ -487,10 +514,14 @@ export class GraphicEditor {
       const c = corners(this.hover, this.root);
       if (c) out.push(`<polygon class="ge-ov__hover" points="${c.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`);
     }
+    // Hinweise der Prüfung (check.js) für die gezeigte Fassung
+    out.push(checkOverlay(this));
+    if (this.tool === 'builder') out.push(this.builder.overlay());
+    if (this.warp?.active) out.push(this.warp.overlay());
     if (this.tool === 'gradient') out.push(this.grad.overlay());
     else if (this.tool === 'node') out.push(this.drawNodes());
     else if (this.sel.length && !this.textEl && this.sel.every(isConn)) out.push(this.drawConnSel(this.tool === 'select'));
-    else if (this.sel.length && !this.textEl) out.push(this.drawSelection());
+    else if (this.sel.length && !this.textEl && !this.warp?.active) out.push(this.drawSelection());
     if (this.tool === 'connector' || this.connDrag) out.push(this.drawAnchors());
     if (this.guides?.length) for (const g of this.guides) {
       const a = this.toOv(g.a), b = this.toOv(g.b);
@@ -511,6 +542,7 @@ export class GraphicEditor {
     // nicht mehr an – deshalb zweiten Druck auf dasselbe Element erkennen
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.second('n' + el.dataset.node, e) ? this.nodeToggle(e, el.dataset.node) : this.nodeDown(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-gh]')) el.addEventListener('pointerdown', e => this.grad.down(e, el.dataset.gh));
+    for (const el of ov.querySelectorAll('[data-wh]')) el.addEventListener('pointerdown', e => this.warp.down(e, el.dataset.wh));
     for (const el of ov.querySelectorAll('[data-ch]')) el.addEventListener('pointerdown', e => this.connHandleDown(e, el.dataset.ch));
     for (const el of ov.querySelectorAll('[data-guide]')) {
       el.addEventListener('pointerdown', e => { if (e.button !== 0 || this.tool === 'hand' || this.space) return; e.stopPropagation(); e.preventDefault(); this.rulers.dragGuide(e, +el.dataset.guide); });
@@ -536,6 +568,8 @@ export class GraphicEditor {
     const P = (x, y) => this.toOv(pt(F, x, y));
     const c = [P(b.x, b.y), P(b.x + b.w, b.y), P(b.x + b.w, b.y + b.h), P(b.x, b.y + b.h)];
     let s = `<polygon class="ge-ov__sel" points="${c.map(p => p.x + ',' + p.y).join(' ')}"/>`;
+    // gesperrte Ebenen (im Ebenen-Bereich gewählt, wie in Affinity): Rahmen ohne Griffe – bearbeiten nur über die Bereiche
+    if (this.sel.some(isLocked)) return s.replace('ge-ov__sel"', 'ge-ov__sel ge-ov__sel--locked"');
     if (this.sel.length > 1) for (const el of this.sel) {
       const cc = corners(el, this.root);
       if (cc) s += `<polygon class="ge-ov__sub" points="${cc.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`;
@@ -568,6 +602,7 @@ export class GraphicEditor {
         if (hit !== this.hover) { this.hover = hit; this.draw(); }
       }
       if (this.pen) { this.pen.cursor = this.snapPoint(p); this.draw(); }
+      if (this.tool === 'builder') this.builder.hover(e);
     });
     st.addEventListener('pointerleave', () => { if (this.hover) { this.hover = null; this.draw(); } });
     st.addEventListener('dblclick', e => this.dbl(e));
@@ -611,6 +646,9 @@ export class GraphicEditor {
   }
 
   down(e) {
+    this.flushNudge();
+    // Verzerren: Klick neben die Griffe übernimmt
+    if (this.warp?.active && e.button === 0 && !this.space) { this.warp.commit(); return; }
     if (e.button === 1 || this.space || this.tool === 'hand') return this.panDrag(e);
     if (e.button !== 0) return;
     if (e.target.closest?.('.ge-textedit')) return;
@@ -632,6 +670,7 @@ export class GraphicEditor {
       case 'connector': return this.connDown(e, p);
       case 'eyedropper': return this.eyedrop(e);
       case 'gradient': return this.grad.stageDown(e, p);
+      case 'builder': return this.builder.down(e);
       case 'zoom': { const r = this.stage.getBoundingClientRect(); return this.setZoom(this.zoom * (e.altKey ? 0.5 : 2), e.clientX - r.left, e.clientY - r.top); }
     }
   }
@@ -660,6 +699,7 @@ export class GraphicEditor {
         const inside = drawnChildren(this.scope).filter(el => {
           if (isLocked(el) || isHidden(el)) return false;
           const bb = docBounds(el, this.root);
+          if (this.prefs.marquee === 'contain') return bb && bb.x >= a.x && bb.x + bb.w <= b.x && bb.y >= a.y && bb.y + bb.h <= b.y;
           return bb && bb.x < b.x && bb.x + bb.w > a.x && bb.y < b.y && bb.y + bb.h > a.y;
         });
         this.sel = [...new Set([...base, ...inside])];
@@ -712,6 +752,7 @@ export class GraphicEditor {
   /** Griffe: Größe (8) und Drehen */
   handleDown(e, k) {
     e.stopPropagation(); e.preventDefault();
+    if (this.sel.some(isLocked)) return;
     if (k === 'tfw') return this.frameWidthDrag(e);
     const f = this.frame();
     if (!f) return;
@@ -1682,6 +1723,11 @@ export class GraphicEditor {
       { label: t('Zusammengesetzt: Abziehen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('subtract') },
       { label: t('Zusammengesetzt: Vereinen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('unite') },
       { sep: true },
+      { label: t('Wiederholen …'), key: ALT + MOD + 'D', disabled: !n, run: () => repeatDialog(this) },
+      { label: t('Auf Zeichenfläche einpassen'), disabled: !n, run: () => this.fitToArtboard() },
+      { label: t('Perspektivisch verzerren'), disabled: !n, run: () => this.warp.start('persp') },
+      { label: t('Hülle verzerren'), disabled: !n, run: () => this.warp.start('env') },
+      { sep: true },
       { label: t('Kontur in Fläche umwandeln'), disabled: !shapes.some(el => (getProp(el, 'stroke') || 'none') !== 'none'), run: () => this.strokeToFill() },
       { label: t('Pfad versetzen …'), disabled: !n, run: () => this.offsetPath() },
       { sep: true },
@@ -2012,7 +2058,8 @@ export class GraphicEditor {
   duplicate() {
     if (!this.sel.length) return;
     const off = this.format === 'icon' ? 1 : 10;
-    const clones = this.sel.map(el => { const c = el.cloneNode(true); el.after(c); this.freshIds(c); applyTransform(c, new DOMMatrix().translate(off, off), this.root); return c; });
+    // ⌘D auf die letzte Kopie wiederholt deren Versatz/Drehung (repeat.js) – sonst Kopie um 10 versetzt
+    const { copies: clones, again } = duplicateAgain(this, off);
     // Text in einer Form: Kopie gehört zur Kopie der Form
     this.sel.forEach((el, i) => {
       if (!el.id || isConn(el)) return;
@@ -2025,7 +2072,8 @@ export class GraphicEditor {
       clones[i].after(ti);
     });
     this.sel = clones;
-    this.commit(t('Dupliziert'));
+    this.lastDup.copies = clones;
+    this.commit(again ? t('Dupliziert (Schritt wiederholt)') : t('Dupliziert'));
   }
 
   remove() {
@@ -2197,6 +2245,10 @@ export class GraphicEditor {
       for (let p = el.parentNode; p && p !== this.root && p.nodeType === 1; p = p.parentNode) {
         for (const a of INHERITED) { const v = getProp(p, a, false); if (v && !getProp(c, a, false)) c.setAttribute(a, v); }
       }
+      // Deckkraft der Gruppen gehört dazu (wird nicht vererbt, sondern multipliziert – sonst wäre die Kopie zu kräftig)
+      let op = 1;
+      for (let p = el.parentNode; p && p !== this.root && p.nodeType === 1; p = p.parentNode) { const o = parseFloat(getProp(p, 'opacity', false)); if (Number.isFinite(o)) op *= o; }
+      if (op < 1) { const own = parseFloat(getProp(c, 'opacity', false)); setProp(c, 'opacity', num((Number.isFinite(own) ? own : 1) * op, 3)); }
       const P = parentMatrix(el, this.root), m = [P.a, P.b, P.c, P.d, P.e, P.f].map(v => num(v, 6)).join(' ');
       if (m !== '1 0 0 1 0 0') { const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `matrix(${m})`); g.append(c); return new XMLSerializer().serializeToString(g); }
       return new XMLSerializer().serializeToString(c);
@@ -2249,8 +2301,17 @@ export class GraphicEditor {
       if (mod && k === 's') { e.preventDefault(); this.save(e.shiftKey); return; }
       if (inField) return;
       if (e.target.closest?.('.ge-textedit')) return;
+      // Pfeiltasten-Schritt abschließen, bevor ein anderer Befehl das Dokument ändert (sonst landete dessen Änderung im Schritt „Verschieben“)
+      if (!/^Arrow|^(Shift|Alt|Meta|Control)$/.test(e.key)) this.flushNudge();
+      // Verzerren: ↵ übernimmt, Esc bricht ab, alles andere übernimmt zuerst
+      if (this.warp?.active) {
+        if (e.key === 'Enter') { e.preventDefault(); this.warp.commit(); return; }
+        if (e.key === 'Escape') { e.preventDefault(); this.warp.cancel(); return; }
+        if (!/^(Shift|Alt|Meta|Control| )$/.test(e.key)) this.warp.commit();
+      }
       if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? this.redo() : this.undo(); return; }
       if (mod && k === 'y') { e.preventDefault(); this.redo(); return; }
+      if (mod && e.altKey && (k === 'd' || e.code === 'KeyD')) { e.preventDefault(); repeatDialog(this); return; }
       if (mod && k === 'd') { e.preventDefault(); this.duplicate(); return; }
       if (mod && k === 'g') { e.preventDefault(); e.shiftKey ? this.ungroup() : this.group(); return; }
       if (mod && k === 'a') { e.preventDefault(); this.selectAll(); return; }
@@ -2533,6 +2594,7 @@ export class GraphicEditor {
       { label: t('Hilfslinien'), key: MOD + ';', checked: this.rulers.showGuides, run: () => this.rulers.toggleGuides() },
       { label: t('Raster'), key: MOD + "'", checked: !!this.opt.grid, run: () => this.toggleGrid() },
       { label: t('Einrasten'), checked: !!this.opt.snap, run: () => { this.opt.snap = !this.opt.snap; this.snapCache = null; this.renderCtx(true); } },
+      { label: t('Auswahlrahmen: Objekte vollständig umschließen'), checked: this.prefs.marquee === 'contain', run: () => { this.setPref('marquee', this.prefs.marquee === 'contain' ? 'touch' : 'contain'); this.announce(this.prefs.marquee === 'contain' ? t('Auswahlrahmen wählt nur Objekte, die ganz darin liegen.') : t('Auswahlrahmen wählt alle Objekte, die er berührt.')); } },
       { label: t('Hilfslinien …'), run: () => this.rulers.dialog() },
       { sep: true },
       { label: t('Einpassen'), key: MOD + '0', run: () => this.fit() },
@@ -2545,10 +2607,32 @@ export class GraphicEditor {
       { label: t('Vergrößern'), key: MOD + '+', run: () => this.setZoom(this.zoom * 1.25) },
       { label: t('Verkleinern'), key: MOD + '−', run: () => this.setZoom(this.zoom / 1.25) },
     ]));
+    // Hell | Dunkel | Nebeneinander – Optionsfeld mit Pfeiltasten (WAI-ARIA radiogroup, ein Tabstopp)
+    const sg = this.el.querySelector('.ge-scheme');
+    sg.querySelectorAll('[data-scheme]').forEach(b => b.addEventListener('click', () => this.sv.set(b.dataset.scheme)));
+    sg.addEventListener('keydown', e => {
+      const list = [...sg.querySelectorAll('[data-scheme]')], i = list.indexOf(document.activeElement);
+      const d = ['ArrowRight', 'ArrowDown'].includes(e.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(e.key) ? -1 : 0;
+      if (!d || i < 0) return;
+      e.preventDefault(); e.stopPropagation();
+      const n = list[(i + d + list.length) % list.length];
+      n.focus(); this.sv.set(n.dataset.scheme);
+    });
+    const sm = this.el.querySelector('[data-act=schememenu]');
+    sm.addEventListener('click', () => menu(sm, [
+      ...(this.boot.sections || []).map(s => ({ label: t('Hintergrund: {name}', { name: s.label }), checked: s.id === this.sectionId, run: () => { this.sectionId = s.id; this.sv.refresh(); this.renderScheme(); this.panels.refresh(); } })),
+      { sep: true },
+      { label: t('Dunkel-Fassung vorschlagen'), run: () => this.suggestDark() },
+      { label: t('Eigene Dunkel-Farben entfernen'), run: () => this.clearDark() },
+      { sep: true },
+      { label: t('Grafik prüfen (Kontrast, Barrierefreiheit) …'), run: () => this.panels.showCheck(true) },
+    ]));
+    this.renderScheme();
     const ex = this.el.querySelector('[data-act=export]');
     ex.addEventListener('click', () => menu(ex, [
       { label: t('SVG für das Web (optimiert)'), run: () => this.download('web') },
       { label: t('SVG für Desktop-Programme (Affinity, Illustrator, Inkscape, Figma)'), run: () => this.download('desktop') },
+      ...(this.root.querySelector('[data-ge-ftoken],[data-ge-stoken],[data-ge-ctoken],[data-ge-fdark],[data-ge-sdark],[data-ge-cdark]') ? [{ label: t('SVG für Desktop-Programme – Dunkel-Fassung'), run: () => this.download('desktop-dark') }] : []),
       { label: t('PDF (Vektor)'), run: () => this.download('pdf') },
       { sep: true },
       { label: t('SVG-Datei importieren …'), run: () => this.importFile() },
@@ -2573,8 +2657,9 @@ export class GraphicEditor {
         const w = await this.webSvg();
         blob = new Blob([w.svg], { type: 'image/svg+xml' });
         toast(t('Für das Web optimiert: {a} → {b}', { a: kb(w.before), b: kb(w.after) }));
-      } else if (kind === 'desktop') {
-        blob = new Blob([desktopSvg(this.getSvg())], { type: 'image/svg+xml' });
+      } else if (kind === 'desktop' || kind === 'desktop-dark') {
+        // Design-Farben sind schon feste Farben (Hex) – die Dunkel-Fassung setzt die Dunkel-Werte ein
+        blob = new Blob([desktopSvg(kind === 'desktop-dark' ? bakeScheme(this, this.getSvg(), 'dark') : this.getSvg())], { type: 'image/svg+xml' });
       } else {
         ext = 'pdf';
         const svg = await this.outlinedCopy(this.getSvg(), true);
@@ -2587,7 +2672,7 @@ export class GraphicEditor {
     } finally { this.busy(false); }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : '') + '.' + ext;
+    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : kind === 'desktop-dark' ? '-desktop-dunkel' : '') + '.' + ext;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
@@ -2696,6 +2781,12 @@ export class GraphicEditor {
     }
     this.sel = [g];
     this.commit(t('Importiert'));
+    // kleines Symbol (z. B. 24 × 24) auf großer Fläche: Einpassen anbieten (Objekt → Auf Zeichenfläche einpassen)
+    const ib = docBounds(g, this.root), av = this.vb;
+    if (ib && this.format === "info" && ib.w < av.w * 0.15 && ib.h < av.h * 0.15) {
+      this.announce(t('Klein importiert – Objekt → „Auf Zeichenfläche einpassen“ vergrößert es ohne Qualitätsverlust.'));
+      toast(t('Klein importiert – Objekt → „Auf Zeichenfläche einpassen“ vergrößert es ohne Qualitätsverlust.'), 'info');
+    }
   }
 
   /** Titel und Beschreibung als <title>/<desc> in der Grafik (Barrierefreiheit) */
@@ -2710,6 +2801,51 @@ export class GraphicEditor {
     if (tt) this.root.prepend(tt);
   }
 
+  /** Auswahl auf die Zeichenfläche einpassen (Seitenverhältnis bleibt, 8 % Rand) – z. B. ein klein importiertes Symbol */
+  fitToArtboard() {
+    const list = this.sel.filter(el => !isLocked(el));
+    const b = this.selBounds(list), vb = this.vb;
+    if (!b || !b.w || !b.h) return;
+    const m = Math.min(vb.w, vb.h) * 0.08;
+    const s = Math.min((vb.w - 2 * m) / b.w, (vb.h - 2 * m) / b.h);
+    const T = new DOMMatrix().translate(vb.x + vb.w / 2, vb.y + vb.h / 2).scale(s).translate(-(b.x + b.w / 2), -(b.y + b.h / 2));
+    for (const el of list) applyTransform(el, T, this.root);
+    this.commit(t('Auf Zeichenfläche eingepasst'));
+  }
+
+  // ================================================================= Hell / Dunkel (scheme.js)
+  /** Umschalter und Knopf „Hintergrund“ auf den Stand bringen */
+  renderScheme() {
+    const m = this.sv.mode;
+    this.el.querySelectorAll('.ge-scheme [data-scheme]').forEach(b => { const on = b.dataset.scheme === m; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    const s = (this.boot.sections || []).find(x => x.id === this.sectionId) || (this.boot.sections || [])[0];
+    const lbl = this.el.querySelector('[data-bglbl]'), sw = this.el.querySelector('[data-bgsw]');
+    if (lbl) lbl.textContent = s ? s.label : t('Hintergrund');
+    sw?.style.setProperty('--c', s ? (m === 'dark' ? s.dark : s.light) : '#fff');
+    sw?.style.setProperty('--c2', s ? s.dark : '#111');
+    this.el.querySelector('[data-act=schememenu]')?.setAttribute('aria-label', t('Hintergrund der Vorschau: {name}', { name: s ? s.label : '' }));
+  }
+
+  /** „Dunkel-Fassung vorschlagen“ – für die Auswahl, ohne Auswahl für die ganze Grafik; ein Schritt im Protokoll */
+  suggestDark() {
+    const els = this.sel.length ? this.sel.flatMap(el => [el, ...el.querySelectorAll('*')]) : paintedElements(this.root);
+    const n = suggestDark(this, els);
+    if (!n) { toast(t('Die Dunkel-Fassung passt schon – nichts zu ändern.'), 'info'); return; }
+    this.commit(t('Dunkel-Fassung vorgeschlagen'));
+    if (this.sv.mode === 'light') this.sv.set('side'); else this.sv.refresh();
+    toast(t('Dunkel-Fassung vorgeschlagen: {n} Farben angepasst. Design-Farben folgen dem Design.', { n }));
+  }
+
+  /** Eigene Dunkel-Farben entfernen (Auswahl bzw. ganze Grafik) */
+  clearDark() {
+    const els = this.sel.length ? this.sel.flatMap(el => [el, ...el.querySelectorAll('*')]) : [...this.root.querySelectorAll('*')];
+    let n = 0;
+    for (const el of els) for (const a of ['data-ge-fdark', 'data-ge-sdark', 'data-ge-cdark']) if (el.hasAttribute(a)) { el.removeAttribute(a); n++; }
+    if (!n) { toast(t('Keine eigenen Dunkel-Farben vorhanden.'), 'info'); return; }
+    this.commit(t('Eigene Dunkel-Farben entfernt'));
+    this.sv.refresh();
+  }
+
   async docSettings() {
     const vb = this.vb, f = this.format;
     const title = [...this.root.children].find(c => c.localName === 'title')?.textContent || '';
@@ -2719,7 +2855,8 @@ export class GraphicEditor {
       title: t('Dokument'), ok: t('Übernehmen'),
       body: `${f === 'info' ? `<div class="ge-row2"><label class="f">${esc(t('Breite'))}<input type="number" name="w" min="1" max="10000" step="1" value="${esc(num(vb.w, 2))}" required></label>
           <label class="f">${esc(t('Höhe'))}<input type="number" name="h" min="1" max="10000" step="1" value="${esc(num(vb.h, 2))}" required></label></div>
-          <label class="f-check"><input type="checkbox" name="scale"> ${esc(t('Inhalt mit skalieren'))}</label>`
+          <label class="f-check"><input type="checkbox" name="scale"> ${esc(t('Inhalt mit skalieren'))}</label>
+          <label class="f">${esc(t('Breite auf der Website (px)'))}<input type="number" name="dispw" min="16" max="4000" step="1" placeholder="${esc(num(vb.w))}" value="${esc(this.root.getAttribute('data-ge-dispw') || '')}"><span class="f-help">${esc(t('Für die Prüfung der Schriftgröße (mindestens 12 px). Leer = so breit wie die Zeichenfläche.'))}</span></label>`
         : `<p class="f-help">${esc(t('Feste Größe: {w} × {h}', { w: num(vb.w), h: num(vb.h) }))}</p>`}
         <div class="ge-row2"><label class="f">${esc(t('Raster: Abstand'))}<input type="number" name="gs" min="0.1" max="1000" step="0.1" value="${esc(num(readGrid(this.root, f).size, 2))}"></label>
           <label class="f">${esc(t('Unterteilungen'))}<input type="number" name="gsub" min="1" max="20" step="1" value="${esc(readGrid(this.root, f).sub)}"></label></div>
@@ -2752,6 +2889,8 @@ export class GraphicEditor {
         this.root.setAttribute('width', num(w)); this.root.setAttribute('height', num(hh));
         this.fitted = false; this.fit();
       }
+      const dw = Math.round(+r.dispw || 0);
+      if (dw >= 16 && dw <= 4000) this.root.setAttribute('data-ge-dispw', String(dw)); else this.root.removeAttribute('data-ge-dispw');
     }
     this.setA11y(r.title.trim(), r.desc.trim());
     const gs = Math.max(0.1, Math.min(1000, +r.gs || 10)), gsub = Math.max(1, Math.min(20, Math.round(+r.gsub || 1)));
@@ -2763,7 +2902,7 @@ export class GraphicEditor {
   shortcuts() {
     const rows = [
       [t('Werkzeuge'), TOOLS.map(x => `${x.key} ${x.label()}`).join(' · ')],
-      [MOD + 'Z / ' + SHIFT + MOD + 'Z', t('Rückgängig / Wiederholen')], [MOD + 'S', t('Speichern')], [MOD + 'D', t('Duplizieren')],
+      [MOD + 'Z / ' + SHIFT + MOD + 'Z', t('Rückgängig / Wiederholen')], [MOD + 'S', t('Speichern')], [MOD + 'D', t('Duplizieren')], [ALT + MOD + 'D', t('Wiederholen …')],
       [MOD + 'G / ' + SHIFT + MOD + 'G', t('Gruppieren / Gruppierung aufheben')], [MOD + 'C / X / V', t('Kopieren / Ausschneiden / Einfügen')],
       [MOD + '[ / ]', t('Eine Ebene nach hinten / vorn (mit ⇧ ganz)')], ['⌫', t('Löschen')], [t('Pfeiltasten'), t('Verschieben um 1 (mit ⇧ um 10)')],
       ['Tab', t('Nächstes Objekt auswählen')], ['↵ / Esc', t('Gruppe betreten bzw. Text bearbeiten / verlassen')], [t('Leertaste + Ziehen'), t('Ansicht verschieben')],
@@ -2842,13 +2981,20 @@ export class GraphicEditor {
         ? `<label class="f">${esc(t('Dateiname'))}<input name="name" maxlength="120" value="${esc(d.name || this.fileBase())}" required></label>
            <label class="f">${esc(t('Titel'))}<input name="title" maxlength="180" value="${esc(title)}"></label>
            <label class="f">${esc(t('Alt-Text (Bildbeschreibung)'))}<textarea name="alt" rows="2" maxlength="250" data-alt>${esc(d.alt || '')}</textarea><span class="f-help">${esc(t('Pflicht für Grafiken mit Inhalt: Was zeigt die Grafik? Bei Infografiken die Kernaussage.'))}</span></label>
+           ${suggestAlt(this) ? `<button type="button" class="adm-btn adm-btn--small" data-altsug title="${esc(suggestAlt(this))}">${ico('sparkle')} ${esc(t('Vorschlag aus Titel und Texten'))}</button>` : ''}
            <label class="f-check"><input type="checkbox" name="decorative" data-deco> ${esc(t('Rein dekorativ (kein Alt-Text nötig)'))}</label>`
         : `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" value="${esc(d.name || '')}" required></label>
            ${d.kind === 'preview' || this.format === 'preview' ? `<label class="f">${esc(t('Block'))}<select name="block"><option value="">${esc(t('– keinem Block zuordnen –'))}</option>${Object.entries({ ...(d.block && !(this.boot.blocks || {})[d.block] ? { [d.block]: d.name || d.block } : {}), ...(this.boot.blocks || {}) }).map(([k, v]) => `<option value="${esc(k)}"${k === d.block ? ' selected' : ''}>${esc(v)} (${esc(k)})</option>`).join('')}</select></label>
              <label class="f-check"><input type="checkbox" name="assign" checked> ${esc(t('In der Blockauswahl dieser Website verwenden'))}</label>` : ''}`;
       const r = await modal(this.el, {
         title: asNew ? t('Speichern unter') : isMedia ? t('In der Mediathek speichern') : t('Grafik speichern'), ok: t('Speichern'), body: body + webBox,
-        onOpen: dlg => { const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]'); if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); } bindWeb(dlg); },
+        onOpen: dlg => {
+          const deco = dlg.querySelector('[data-deco]'), alt = dlg.querySelector('[data-alt]');
+          if (deco) { const s = () => { alt.required = !deco.checked; alt.disabled = deco.checked; }; deco.addEventListener('change', s); s(); }
+          // Alt-Text-Vorschlag: Titel (aus dem Feld darüber) und Texte der Grafik in Lesereihenfolge
+          dlg.querySelector('[data-altsug]')?.addEventListener('click', () => { const tt = dlg.querySelector('[name=title]')?.value.trim(); const s = suggestAlt(this); alt.value = tt && !s.startsWith(tt) ? tt + ': ' + s : s; alt.focus(); });
+          bindWeb(dlg);
+        },
       });
       if (!r) return null;
       meta = r;
@@ -2859,18 +3005,26 @@ export class GraphicEditor {
     try { if (!web) web = await this.webSvg(prefs); } catch (e) { console.error(e); web = null; }
     const body = { svg: this.getSvg(), web: web?.svg || '', target: isMedia ? 'media' : 'graphics' };
     if (isMedia) Object.assign(body, first ? meta : {}, { mediaId: first ? null : d.mediaId });
+    // Alt-Text aus „Prüfen“ (beim Ersetzen einer vorhandenen Grafik)
+    if (isMedia && !first && d.altDirty) body.alt = d.alt;
     else Object.assign(body, { kind: d.kind || this.format, id: first ? null : d.id, name: meta.name ?? d.name, block: meta.block ?? d.block, assign: meta.assign ?? false });
     const btn = this.el.querySelector('[data-act=save]');
     btn.disabled = true;
     const res = await this.api('POST', this.boot.urls.save, body);
     btn.disabled = false;
     if (!res) return null;
-    if (isMedia) { d.mediaId = res.item.id; d.ref = 'media:' + res.item.id; d.shared = false; if (first) { d.name = meta.name; d.title = meta.title; d.alt = meta.alt; } }
+    if (isMedia) { d.mediaId = res.item.id; d.ref = 'media:' + res.item.id; d.shared = false; if (first) { d.name = meta.name; d.title = meta.title; d.alt = meta.alt; d.decorative = !!meta.decorative; } }
     else { d.id = res.item.id; d.ref = 'graphic:' + res.item.id; d.name = res.item.name; d.block = res.item.block; }
     d.versions = res.versions || [];
     this.savedAt = this.hi;
     this.changed(false);
-    toast((isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert')) + (web ? ' · ' + t('Web-Fassung {a} → {b}', { a: kb(web.before), b: kb(web.after) }) : ''));
+    d.altDirty = false;
+    // Prüfung beim Speichern (blockiert nicht): Hinweise im Bereich „Prüfen“, Sprung zum Element
+    let hints = 0;
+    try { hints = this.panels.check.run().filter(i => i.sev !== 'info').length; } catch (e) { console.error(e); }
+    if (hints) this.panels.showCheck(false);
+    toast((isMedia ? t('In der Mediathek gespeichert') : t('Gespeichert')) + (web ? ' · ' + t('Web-Fassung {a} → {b}', { a: kb(web.before), b: kb(web.after) }) : '')
+      + (hints ? ' · ' + t('{n} Hinweise zur Barrierefreiheit (Bereich „Prüfen“)', { n: hints }) : ''));
     const result = { target: body.target, item: res.item, svg: body.svg, format: this.format };
     this.opts.onSave?.(result);
     this.emit('save', result);

@@ -59,6 +59,7 @@ final class SelfTest
             self::sources($files);
             self::rights();
             self::library();
+            self::themed($files);
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -72,6 +73,55 @@ final class SelfTest
     private static function t(bool $cond, string $label): void
     {
         $cond ? self::$ok++ : self::$fails[] = $label;
+    }
+
+    /**
+     * Ausbaustufe 3b – Design-Farben (Core\Graphics\Themed): Klassen überstehen die Bereinigung, Hell/Dunkel werden aus der
+     * Palette gesetzt (Attribut und style), eigene Dunkel-Farben gehen vor, „same“ = wie hell, unbekannte Tokens bleiben,
+     * Grafiken ohne Klassen bleiben bytegleich; Mediathek: zwei Dateien, <picture> mit <source> nur bei dunklem Farbschema.
+     */
+    private static function themed(array &$files): void
+    {
+        $pal = ['accent' => ['light' => '#4338CA', 'dark' => '#A5B4FC'], 'ink' => ['light' => '#0B0D17', 'dark' => '#F3F4F8']];
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50" width="100" height="50">'
+            . '<rect width="50" height="50" fill="#123456" class="ge-tf-accent"/>'
+            . '<rect x="50" width="50" height="50" style="fill:#123456;opacity:.5" class="x ge-tf-accent ge-df-112233"/>'
+            . '<path d="M0 0h10" stroke="#000000" class="ge-ds-eeeeee"/>'
+            . '<circle r="4" fill="#123456" class="ge-tf-ink ge-df-same"/>'
+            . '<circle r="3" fill="#ABCDEF" class="ge-tf-unbekannt"/>'
+            . '<linearGradient id="v"><stop offset="0" stop-color="#000000" class="ge-tf-accent"/></linearGradient></svg>';
+        $clean = Svg::clean($svg, ['keep_ids' => true])['svg'];
+        self::t(Themed::isThemed($clean) && str_contains($clean, 'ge-df-112233'), 'Klassen der Design-Farben überstehen die Bereinigung');
+        $l = Themed::render($svg, 'light', $pal);
+        $d = Themed::render($svg, 'dark', $pal);
+        self::t(str_contains($l, '<rect width="50" height="50" fill="#4338CA" class="ge-tf-accent"/>'), 'hell: Akzent der Website als Füllung');
+        self::t(str_contains($d, '<rect width="50" height="50" fill="#A5B4FC" class="ge-tf-accent"/>'), 'dunkel: Dunkel-Wert des Akzents');
+        self::t(str_contains($l, 'style="fill:#4338CA;opacity:.5"') && str_contains($d, 'style="fill:#112233;opacity:.5"'), 'style: Akzent hell, eigene Dunkel-Farbe geht vor');
+        self::t(str_contains($l, 'stroke="#000000"') && str_contains($d, 'stroke="#EEEEEE"'), 'eigene Dunkel-Farbe ohne Token (Kontur)');
+        self::t(str_contains($d, 'fill="#0B0D17" class="ge-tf-ink ge-df-same"'), '„gleich in beiden“: Hell-Wert auch im Dunkeln');
+        self::t(str_contains($d, 'fill="#ABCDEF" class="ge-tf-unbekannt"'), 'unbekannter Token behält die gespeicherte Farbe');
+        self::t(str_contains($d, 'stop-color="#A5B4FC"'), 'Verlaufsstopp: stop-color folgt dem Design');
+        $plain = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="5" height="5" fill="#123456" class="cls-1"/></svg>';
+        self::t(Themed::render($plain, 'dark', $pal) === $plain && !Themed::isThemed($plain), 'Grafik ohne Design-Farben bleibt bytegleich');
+        // Mediathek: Fassungen je Website
+        if (!Themed::palette()) { self::t(true, ''); return; }
+        $tok = (string) array_key_first(Themed::palette());
+        [$m, $err] = Graphics::saveMedia('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"><rect width="10" height="10" fill="#123456" class="ge-tf-' . $tok . '"/></svg>', ['name' => 'selbsttest-themed', 'alt' => 'Selbsttest Design-Farben']);
+        self::t($m !== null, 'Grafik mit Design-Farben gespeichert' . ($err ? " ($err)" : ''));
+        if (!$m) return;
+        $files[] = Media::path($m);
+        Themed::forget();
+        $v = Themed::variants($m);
+        self::t($v !== null && str_ends_with($v['light'], '-l.svg'), 'helle Fassung je Website erzeugt');
+        if (!$v) return;
+        $lf = Graphics::dir() . '/t/' . basename($v['light']);
+        $files[] = $lf;
+        if ($v['dark']) $files[] = Graphics::dir() . '/t/' . basename($v['dark']);
+        self::t(is_file($lf) && str_contains((string) file_get_contents($lf), Themed::palette()[$tok]['light']), 'helle Fassung trägt die Farbe des Designs');
+        self::t(($v['dark'] !== null) === Themed::darkActive(), 'dunkle Fassung nur bei dunklem Farbschema der Website');
+        $html = Media::pictureOf($m);
+        self::t(str_contains($html, basename($v['light'])) && (Themed::darkActive() ? str_contains($html, 'media="(prefers-color-scheme: dark)"') && str_contains($html, 'cms-scheme-img') : !str_contains($html, '<source')), '<picture> mit heller Fassung und <source> für dunkel');
+        self::t(str_contains(Themed::inject('<html><body>' . $html . '</body></html>'), 'data-cms-graphic-scheme') === Themed::darkActive() && Themed::inject('<body></body>') === '<body></body>', 'Skript nur auf Seiten mit solchen Grafiken');
     }
 
     private static function sanitize(): void

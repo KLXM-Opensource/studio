@@ -19,6 +19,9 @@ import { h, tabGroup, iconBtn, modal, menu } from './ui.js';
 import { clipOf } from './clip.js';
 import { buildTextPanel } from './textpanel.js';
 import { layoutText } from './text.js';
+import { paintIn, darkState, setDark, propOf, swatchMap, paintedElements, invertLightness, tokensToVars, DARK_ATTR, TOKEN_ATTR } from './scheme.js';
+import { buildCheckPanel, backgroundIn } from './check.js';
+import { buildFx } from './fx.js';
 
 const BLEND = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
 const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), screen: t('Negativ multiplizieren'), overlay: t('Ineinanderkopieren'), darken: t('Abdunkeln'), lighten: t('Aufhellen'),
@@ -28,12 +31,13 @@ const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), s
 export function buildPanels(ed) {
   const A = tabGroup(ed.uid + '-a', [{ id: 'color', label: t('Farbe') }, { id: 'swatches', label: t('Farbfelder') }, { id: 'stroke', label: t('Kontur') }, { id: 'look', label: t('Darstellung') }], () => api.refresh());
   const B = tabGroup(ed.uid + '-b', [{ id: 'layers', label: t('Ebenen') }, { id: 'lib', label: t('Bibliothek') }, { id: 'icons', label: t('Symbole') }], () => api.refresh());
-  const C = tabGroup(ed.uid + '-c', [{ id: 'transform', label: t('Transformieren') }, { id: 'history', label: t('Protokoll') }], () => api.refresh());
+  const C = tabGroup(ed.uid + '-c', [{ id: 'transform', label: t('Transformieren') }, { id: 'history', label: t('Protokoll') }, { id: 'check', label: t('Prüfen') }], () => api.refresh());
   const TP = buildTextPanel(ed);
   A.el.classList.add('ge-pg--color'); B.el.classList.add('ge-pg--layers'); C.el.classList.add('ge-pg--transform');
   let lock = false, anchor = 'c';
   const expanded = new Set();     // geöffnete Gruppen (Pfad als Text)
-  let stopIdx = 0;                // gewählter Verlaufs-Stopp
+  // gewählter Verlaufs-Stopp: einer für Fläche (gradhandles.js) und Bereich Farbe – Klick auf einen Stopp der Fläche färbt genau diesen
+  const gs = { get i() { return ed.grad?.stop ?? 0; }, set i(v) { if (ed.grad) ed.grad.stop = v; } };
   let libBuilt = false, iconsBuilt = false;
 
   // ------------------------------------------------------------------ Hilfen
@@ -50,8 +54,71 @@ export function buildPanels(ed) {
    * nur in der Arbeitsfassung (graphic_sources), die Web-Fassung enthält weiter die Hex-Farbe. Jede andere Farbe löscht es.
    */
   const tokenAttr = which => which === 'fill' ? 'data-ge-ftoken' : 'data-ge-stoken';
+  const darkView = () => ed.sv?.mode === 'dark';
+  /**
+   * Dunkel-Ansicht: eine Farbe gilt zunächst nur für Dunkel (sichtbar sofort); beim Übernehmen fragt finishColor(), ob sie nur
+   * für Dunkel oder für beide Fassungen gilt. pend merkt den Stand davor (Abbrechen stellt ihn her, „alle gleichen Farben“).
+   */
+  let pend = null;
+  function setDarkPaint(which, value, token) {
+    const shapes = [];
+    for (const el of sel()) eachShape(el, s => shapes.push(s));
+    if (!pend) pend = { which, shapes, old: shapes.map(s => s.getAttribute(DARK_ATTR[which])), oldDark: paintIn(ed, shapes[0], which, 'dark'), oldLight: hex(getProp(shapes[0], propOf(shapes[0], which), false)) };
+    const v = token ? 't:' + token : hex(value);
+    for (const s of shapes) setDark(s, which, v);
+    pend.value = value; pend.token = token;
+  }
+  /** Nach einer Farbänderung: in der Dunkel-Ansicht fragen (nur Dunkel | beide, alle gleichen Farben), dann ein Schritt im Protokoll */
+  async function finishColor(label) {
+    const p = pend;
+    pend = null;
+    if (!p) { commit(label); return; }
+    const W = p.which;
+    // gleiche Farben: im Dunkeln dieselbe wirksame Farbe bzw. hell dieselbe Farbe
+    const others = scope => paintedElements(ed.root).filter(el => !p.shapes.includes(el) && (scope === 'dark'
+      ? paintIn(ed, el, W, 'dark') === p.oldDark && getProp(el, propOf(el, W), false)
+      : hex(getProp(el, propOf(el, W), false)) === p.oldLight));
+    let choice = ed.darkScope;
+    if (!choice) {
+      const nd = others('dark').length, nb = others('both').length;
+      const r = await modal(ed.el, {
+        title: t('Farbe für Dunkel'), ok: t('Übernehmen'),
+        body: `<p>${esc(t('Sie bearbeiten die Dunkel-Fassung. Wofür gilt die neue Farbe?'))}</p>
+          <fieldset class="f"><legend class="ge-sr">${esc(t('Gilt für'))}</legend>
+            <label class="f-check"><input type="radio" name="scope" value="dark" checked> ${esc(t('Nur für Dunkel'))}</label>
+            <label class="f-check"><input type="radio" name="scope" value="both"> ${esc(t('Für Hell und Dunkel'))}</label></fieldset>
+          <label class="f-check"><input type="checkbox" name="same" data-same> <span data-samelbl>${esc(t('Auf alle gleichen Farben anwenden ({n} weitere)', { n: nd }))}</span></label>
+          <label class="f-check"><input type="checkbox" name="remember"> ${esc(t('Nicht mehr fragen, solange der Editor offen ist'))}</label>`,
+        onOpen: d => d.querySelectorAll('[name=scope]').forEach(r => r.addEventListener('change', () => { d.querySelector('[data-samelbl]').textContent = t('Auf alle gleichen Farben anwenden ({n} weitere)', { n: r.value === 'dark' ? nd : nb }); })),
+      });
+      if (!r) {
+        // Abbrechen: Dunkel-Angaben wie vorher, nichts im Protokoll
+        p.shapes.forEach((s, i) => setDark(s, W, p.old[i]));
+        ed.sv.refresh(); ed.draw(); api.refresh();
+        return;
+      }
+      choice = { scope: r.scope, same: !!r.same };
+      if (r.remember) ed.darkScope = choice;
+    }
+    const list = choice.same ? [...p.shapes, ...others(choice.scope === 'dark' ? 'dark' : 'both')] : p.shapes;
+    if (choice.scope === 'dark') {
+      const v = p.token ? 't:' + p.token : hex(p.value);
+      for (const s of list) setDark(s, W, v);
+    } else {
+      p.shapes.forEach((s, i) => setDark(s, W, p.old[i]));
+      for (const s of list) {
+        const prop = propOf(s, W);
+        setProp(s, prop, p.token ? (swatchMap(ed).get(p.token)?.light || p.value) : p.value);
+        if (p.token) s.setAttribute(TOKEN_ATTR[W], p.token); else s.removeAttribute(TOKEN_ATTR[W]);
+        s.removeAttribute(DARK_ATTR[W]);
+      }
+    }
+    commit(choice.scope === 'dark' ? t('{label} (nur Dunkel)', { label }) : label);
+  }
   function setPaint(which, value, alpha = 1, token = null) {
     if (!sel().length) { ed.style[which] = value; ed.style[which + 'Token'] = token; ed.paintFs(); return; }
+    // Dunkel-Ansicht: einfarbige Farbe → Dunkel-Angabe (Verläufe, „Keine“ und currentColor gelten für beide)
+    if (darkView() && value && value !== 'none' && !/^url|^currentcolor$/i.test(value)) { setDarkPaint(which, value, token); return; }
     // Text wird bearbeitet und ein Bereich ist markiert: Farbe nur für diese Zeichen
     if (which === 'fill' && ed.textEd && alpha >= 1 && !/^url/.test(value) && ed.textEd.format({ fill: value })) return;
     for (const el of sel()) eachShape(el, s => {
@@ -76,38 +143,23 @@ export function buildPanels(ed) {
     if (v === 'currentColor' || v === 'currentcolor') return { mode: 'solid', color: 'currentColor', alpha: 1 };
     const c = parseColor(v);
     const op = el ? parseFloat(getProp(el, which + '-opacity') || '1') : 1;
-    const token = el ? el.getAttribute(tokenAttr(which)) : ed.style[which + 'Token'] || null;
-    return c ? { mode: 'solid', color: toHex(c), alpha: (Number.isFinite(op) ? op : 1) * c.a, token } : { mode: 'none' };
+    let token = el ? el.getAttribute(tokenAttr(which)) : ed.style[which + 'Token'] || null;
+    if (c && el && darkView()) {
+      // Dunkel-Ansicht: die Farbe, die im Dunkeln gilt (eigene Dunkel-Farbe bzw. Dunkel-Wert der Design-Farbe)
+      const o = el.getAttribute(DARK_ATTR[which]);
+      if (o && o !== '=') token = o.startsWith('t:') ? o.slice(2) : null;
+      return { mode: 'solid', color: paintIn(ed, el, which, 'dark'), alpha: (Number.isFinite(op) ? op : 1) * c.a, token, dark: darkState(el, which) };
+    }
+    return c ? { mode: 'solid', color: toHex(c), alpha: (Number.isFinite(op) ? op : 1) * c.a, token, dark: el ? darkState(el, which) : null } : { mode: 'none' };
   }
 
-  /**
-   * Hintergrund hinter einem Element (für den Kontrast): Flächen davor in der Zeichenreihenfolge, die die Mitte des Elements
-   * bedecken, mit ihrer Deckkraft über Weiß (das Blatt). Verläufe und Muster zählen nicht (Mittelwert wäre geraten).
-   */
-  function backgroundOf(el) {
-    const b = docBounds(el, ed.root);
-    let bg = { r: 255, g: 255, b: 255 };
-    if (!b) return bg;
-    const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-    for (const s of ed.root.querySelectorAll('rect,circle,ellipse,path,polygon')) {
-      if (s === el || el.contains(s)) break;
-      if (!(s.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) break;
-      if (s.closest('defs,clipPath,mask,marker,symbol,pattern') || isHidden(s)) continue;
-      const sb = docBounds(s, ed.root);
-      if (!sb || cx < sb.x || cx > sb.x + sb.w || cy < sb.y || cy > sb.y + sb.h) continue;
-      const c = parseColor(getProp(s, 'fill'));
-      if (!c) continue;
-      const a = c.a * (parseFloat(getProp(s, 'fill-opacity') || '1') || 1) * (parseFloat(getProp(s, 'opacity') || '1') || 1);
-      bg = over(c, Math.max(0, Math.min(1, a)), bg);
-    }
-    return bg;
-  }
   /** Kontrast der Textfarbe zum Hintergrund (nur bei Text und Füllung) */
   function updateContrast() {
     const el = sel().find(x => x.localName === 'text') || (ed.textEl || null);
     const p = target() === 'fill' && el ? paintOf('fill') : null;
     if (!p || p.mode !== 'solid' || p.color === 'currentColor') { cp.contrast(null); return; }
-    const fg = parseColor(p.color), bg = backgroundOf(el);
+    // Hintergrund im gezeigten Schema (Abschnitts-Hintergrund der Vorschau + Flächen darunter, check.js)
+    const fg = parseColor(p.color), bg = backgroundIn(ed, el, darkView() ? 'dark' : 'light');
     const fs = parseFloat(getProp(el, 'font-size')) || 16, fw = parseInt(getProp(el, 'font-weight'), 10) || (getProp(el, 'font-weight') === 'bold' ? 700 : 400);
     // Größe im Bild (Transformation der Grafik bleibt außen vor: gemessen wird in Einheiten der Zeichenfläche)
     cp.contrast({ ratio: contrast(over(fg, p.alpha, bg), bg), bg: toHex(bg), fg: toHex(over(fg, p.alpha, bg)), large: fs >= 24 || (fs >= 18.66 && fw >= 700) });
@@ -154,20 +206,52 @@ export function buildPanels(ed) {
       </div>
       <div data-cp></div>
       <p class="ge-note" data-cnote hidden></p>
+      <div class="ge-darkrow" data-darkrow hidden>
+        <span class="ge-lbl" id="${ed.uid}-dsl">${esc(t('Im Dunkeln'))} <span class="ge-darkrow__sw" data-dsw aria-hidden="true"></span></span>
+        <div class="ge-seg ge-seg--wide" role="radiogroup" aria-labelledby="${ed.uid}-dsl" data-dstate>
+          <button type="button" role="radio" data-ds="design">${esc(t('Folgt Design'))}</button><button type="button" role="radio" data-ds="own">${esc(t('Eigene Farbe'))}</button><button type="button" role="radio" data-ds="same">${esc(t('Gleich in beiden'))}</button></div>
+      </div>
     </div>`;
   const cp = colorPicker(colorPanel.querySelector('[data-cp]'), {
     mode: ed.prefs?.colorMode || 'hex',
     onMode: m => ed.setPref('colorMode', m),
     onInput: (c, a) => { live(() => applyColor(c, a)); updateContrast(); },
-    onChange: (c, a) => { applyColor(c, a); rememberColor(c); commit(target() === 'fill' ? t('Füllung') : t('Kontur')); },
+    onChange: (c, a) => { applyColor(c, a); rememberColor(c); finishColor(target() === 'fill' ? t('Füllung') : t('Kontur')); },
+  });
+  // „Im Dunkeln“: folgt Design (nur Design-Farben) | eigene Farbe | gleich in beiden – für Füllung bzw. Kontur der Auswahl
+  colorPanel.querySelectorAll('[data-ds]').forEach(b => b.addEventListener('click', () => {
+    const W = target(), want = b.dataset.ds;
+    const shapes = [];
+    for (const el of sel()) eachShape(el, s => shapes.push(s));
+    if (!shapes.length) return;
+    for (const s of shapes) {
+      const tok = s.getAttribute(TOKEN_ATTR[W]);
+      if (want === 'design') { if (tok) s.removeAttribute(DARK_ATTR[W]); }
+      else if (want === 'same') { if (tok) setDark(s, W, '='); else s.removeAttribute(DARK_ATTR[W]); }
+      else if (darkState(s, W) !== 'own') {
+        // eigene Farbe: Ausgangspunkt ist, was im Dunkeln gerade gilt – bei „gleich“ ein Vorschlag mit umgekehrter Helligkeit
+        const cur = paintIn(ed, s, W, 'dark');
+        if (!/^#/.test(cur)) continue;
+        setDark(s, W, darkState(s, W) === 'same' && !tok ? invertLightness(cur) : cur);
+      }
+    }
+    commit(want === 'design' ? t('Im Dunkeln: folgt Design') : want === 'own' ? t('Im Dunkeln: eigene Farbe') : t('Im Dunkeln: gleich in beiden'));
+    // eigene Farbe bearbeitet man in der Dunkel-Ansicht
+    if (want === 'own' && ed.sv.mode !== 'dark') ed.sv.set('dark');
+  }));
+  colorPanel.querySelector('[data-dstate]').addEventListener('keydown', e => {
+    const list = [...colorPanel.querySelectorAll('[data-ds]:not(:disabled)')], i = list.indexOf(document.activeElement);
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d || i < 0) return;
+    e.preventDefault(); e.stopPropagation(); list[(i + d + list.length) % list.length].focus();
   });
   function applyColor(c, a) {
     const p = paintOf(target());
     if (p.mode === 'linear' || p.mode === 'radial') {
       const g = ownGradient(p.grad);
       const stops = gradientStops(ed.root, g);
-      if (!stops[stopIdx]) return;
-      stops[stopIdx].color = c; stops[stopIdx].opacity = a;
+      if (!stops[gs.i]) return;
+      stops[gs.i].color = c; stops[gs.i].opacity = a;
       writeStops(g, stops);
       paintGradBar();
       return;
@@ -188,7 +272,7 @@ export function buildPanels(ed) {
         g = newGradient(m, null);
         writeStops(g, gradientStops(ed.root, p.grad));
       } else g = newGradient(m, p.color);
-      stopIdx = 0;
+      gs.i = 0;
       setPaint(w, `url(#${g.id})`);
     }
     commit(t('Farbart geändert'));
@@ -199,13 +283,13 @@ export function buildPanels(ed) {
     if (!p.grad) return;
     const stops = gradientStops(ed.root, p.grad);
     gbar.style.setProperty('--g', `linear-gradient(90deg, ${stops.map(s => { const c = parseColor(s.color); return `rgba(${c.r},${c.g},${c.b},${s.opacity}) ${num(s.offset * 100, 1)}%`; }).join(', ')})`);
-    gbar.innerHTML = stops.map((s, i) => `<button type="button" class="ge-grad__stop${i === stopIdx ? ' is-on' : ''}" data-si="${i}" style="left:${s.offset * 100}%;--c:${esc(s.color)}" aria-label="${esc(t('Farbstopp {n}: {c}', { n: i + 1, c: s.color }))}" aria-pressed="${i === stopIdx}"></button>`).join('');
+    gbar.innerHTML = stops.map((s, i) => `<button type="button" class="ge-grad__stop${i === gs.i ? ' is-on' : ''}" data-si="${i}" style="left:${s.offset * 100}%;--c:${esc(s.color)}" aria-label="${esc(t('Farbstopp {n}: {c}', { n: i + 1, c: s.color }))}" aria-pressed="${i === gs.i}"></button>`).join('');
     gbar.querySelectorAll('[data-si]').forEach(b => {
-      b.addEventListener('click', e => { e.stopPropagation(); stopIdx = +b.dataset.si; api.refresh(); });
+      b.addEventListener('click', e => { e.stopPropagation(); gs.i = +b.dataset.si; api.refresh(); });
       b.addEventListener('pointerdown', e => {
         e.stopPropagation();
         const i = +b.dataset.si, r = gbar.getBoundingClientRect();
-        stopIdx = i;
+        gs.i = i;
         const g = ownGradient(paintOf(target()).grad);
         b.setPointerCapture(e.pointerId);
         let moved = false;
@@ -217,7 +301,7 @@ export function buildPanels(ed) {
           b.style.left = st[i].offset * 100 + '%';
           ed.draw();
         };
-        const up = () => { b.removeEventListener('pointermove', mv); b.removeEventListener('pointerup', up); if (moved) { stopIdx = gradientStops(ed.root, g).findIndex((s, k) => k === i) ; commit(t('Verlauf geändert')); } };
+        const up = () => { b.removeEventListener('pointermove', mv); b.removeEventListener('pointerup', up); if (moved) { gs.i = gradientStops(ed.root, g).findIndex((s, k) => k === i) ; commit(t('Verlauf geändert')); } };
         b.addEventListener('pointermove', mv); b.addEventListener('pointerup', up);
       });
       b.addEventListener('keydown', e => {
@@ -238,7 +322,7 @@ export function buildPanels(ed) {
     const c = st.reduce((best, s) => Math.abs(s.offset - off) < Math.abs(best.offset - off) ? s : best, st[0] || { color: '#000000', opacity: 1 });
     st.push({ offset: off, color: c.color, opacity: c.opacity });
     st.sort((a, b) => a.offset - b.offset);
-    stopIdx = st.findIndex(s => s.offset === off);
+    gs.i = st.findIndex(s => s.offset === off);
     writeStops(g, st);
     commit(t('Farbstopp hinzugefügt'));
   });
@@ -254,8 +338,8 @@ export function buildPanels(ed) {
     const p = paintOf(target());
     if (!p.grad) return;
     const g = ownGradient(p.grad), st = gradientStops(ed.root, g);
-    if (!st[stopIdx]) return;
-    st[stopIdx].offset = Math.max(0, Math.min(1, (+e.target.value || 0) / 100));
+    if (!st[gs.i]) return;
+    st[gs.i].offset = Math.max(0, Math.min(1, (+e.target.value || 0) / 100));
     writeStops(g, st); commit(t('Verlauf geändert'));
   });
   colorPanel.querySelector('[data-gdel]').addEventListener('click', () => {
@@ -263,7 +347,7 @@ export function buildPanels(ed) {
     if (!p.grad) return;
     const g = ownGradient(p.grad), st = gradientStops(ed.root, g);
     if (st.length <= 2) { toast(t('Ein Verlauf braucht mindestens zwei Farbstopps.'), 'info'); return; }
-    st.splice(stopIdx, 1); stopIdx = Math.max(0, stopIdx - 1);
+    st.splice(gs.i, 1); gs.i = Math.max(0, gs.i - 1);
     writeStops(g, st); commit(t('Farbstopp entfernt'));
   });
 
@@ -282,11 +366,26 @@ export function buildPanels(ed) {
       const sw = (ed.boot.swatches || []).find(s => s.token === p.token);
       note.hidden = false; note.textContent = t('Farbe des Designs: {name}', { name: sw?.name || p.token });
     }
+    // Zustand im Dunkeln (nur mit Auswahl und einfarbiger Farbe)
+    const dr = colorPanel.querySelector('[data-darkrow]');
+    const el0 = paintEl(first());
+    dr.hidden = !(el0 && p.mode === 'solid' && p.color !== 'currentColor');
+    if (!dr.hidden) {
+      const st = darkState(el0, w), tok = el0.getAttribute(TOKEN_ATTR[w]);
+      colorPanel.querySelectorAll('[data-ds]').forEach(b => { b.setAttribute('aria-checked', String(b.dataset.ds === st)); b.tabIndex = b.dataset.ds === st ? 0 : -1; });
+      const db = colorPanel.querySelector('[data-ds=design]');
+      db.disabled = !tok;
+      db.title = tok ? t('Im Dunkeln gilt der Dunkel-Wert der Design-Farbe') : t('Nur für Farben des Designs (Farbfelder → Design der Website)');
+      const dc = paintIn(ed, el0, w, 'dark');
+      colorPanel.querySelector('[data-dsw]').style.setProperty('--c', /^#/.test(dc) ? dc : 'transparent');
+      colorPanel.querySelector('[data-dsw]').title = dc;
+    }
+    if (darkView() && p.mode === 'solid') { const prev = note.hidden ? '' : note.textContent + ' · '; note.hidden = false; note.textContent = prev + t('Dunkel-Ansicht: Änderungen gelten zunächst nur für Dunkel.'); }
     updateContrast();
     if (p.grad) {
       const stops = gradientStops(ed.root, p.grad);
-      if (stopIdx >= stops.length) stopIdx = 0;
-      const s = stops[stopIdx];
+      if (gs.i >= stops.length) gs.i = 0;
+      const s = stops[gs.i];
       if (s) cp.set(s.color, s.opacity);
       colorPanel.querySelector('[data-gangle]').value = getAngle(p.grad);
       colorPanel.querySelector('[data-gangle]').closest('label').hidden = p.mode !== 'linear';
@@ -316,7 +415,7 @@ export function buildPanels(ed) {
       if ((p.mode === 'linear' || p.mode === 'radial') && c !== 'none') { applyColor(c, 1); }
       else setPaint(target(), c, 1, b.dataset.token || null);
       rememberColor(c);
-      if (sel().length) commit(t('Farbe aus Farbfeld')); else api.refresh();
+      if (sel().length) finishColor(t('Farbe aus Farbfeld')); else api.refresh();
     }));
   }
 
@@ -381,12 +480,9 @@ export function buildPanels(ed) {
   </div>`;
   lookPanel.innerHTML = lookHtml('') + `<div class="ge-form">
     <label class="ge-lbl" data-radiusrow>${esc(t('Eckenradius'))} <input type="number" class="ge-in ge-in--s" data-radius min="0" max="9999" step="1"></label>
-    <label class="ge-lbl ge-chk"><input type="checkbox" data-shadow> ${esc(t('Schatten'))}</label>
-    <div class="ge-row4" data-shadowopts>
-      <label>X <input type="number" class="ge-in ge-in--s" data-sh="dx" step="1"></label><label>Y <input type="number" class="ge-in ge-in--s" data-sh="dy" step="1"></label>
-      <label>${esc(t('Weich'))} <input type="number" class="ge-in ge-in--s" data-sh="stdDeviation" min="0" step="0.5"></label>
-      <label>${esc(t('Deckkraft'))} <input type="number" class="ge-in ge-in--s" data-sh="flood-opacity" min="0" max="1" step="0.05"></label></div>
-  </div>`;
+  </div><div data-fxbox></div>`;
+  // Ebeneneffekte (fx.js): Schlagschatten, innerer Schatten, Leuchten, Weichzeichnen, Kontur außen, Farbüberlagerung
+  const fx = buildFx(ed, lookPanel.querySelector('[data-fxbox]'), { sel, commit });
   function bindLook(box) {
     box.querySelector('[data-op]').addEventListener('input', e => { box.querySelector('[data-opo]').textContent = e.target.value + ' %'; for (const el of sel()) setProp(el, 'opacity', +e.target.value >= 100 ? null : num(+e.target.value / 100, 2)); ed.draw(); });
     box.querySelector('[data-op]').addEventListener('change', () => commit(t('Deckkraft')));
@@ -397,25 +493,6 @@ export function buildPanels(ed) {
     for (const el of sel()) if (el.localName === 'rect') { const v = Math.max(0, +e.target.value || 0); el.setAttribute('rx', num(v)); el.removeAttribute('ry'); if (!v) el.removeAttribute('rx'); }
     commit(t('Eckenradius'));
   });
-  const shadowOf = el => { const f = refOf(ed.root, getProp(el, 'filter', false)); return f?.querySelector('feDropShadow') ? f : null; };
-  lookPanel.querySelector('[data-shadow]').addEventListener('change', e => {
-    for (const el of sel()) {
-      if (!e.target.checked) { setProp(el, 'filter', null); continue; }
-      const f = document.createElementNS(NS, 'filter');
-      f.id = uid(ed.root, 'schatten-');
-      Object.entries({ x: '-50%', y: '-50%', width: '200%', height: '200%' }).forEach(([k, v]) => f.setAttribute(k, v));
-      const ds = document.createElementNS(NS, 'feDropShadow');
-      const s = ed.format === 'info' ? 1 : 0.25;
-      Object.entries({ dx: num(4 * s), dy: num(6 * s), stdDeviation: num(6 * s), 'flood-color': '#000000', 'flood-opacity': '0.25' }).forEach(([k, v]) => ds.setAttribute(k, v));
-      f.append(ds); defs(ed.root).append(f);
-      setProp(el, 'filter', `url(#${f.id})`);
-    }
-    commit(t('Schatten'));
-  });
-  lookPanel.querySelectorAll('[data-sh]').forEach(i => i.addEventListener('change', () => {
-    for (const el of sel()) { const f = shadowOf(el); if (f) f.querySelector('feDropShadow').setAttribute(i.dataset.sh, num(+i.value || 0, 3)); }
-    commit(t('Schatten'));
-  }));
   function refreshLook(box) {
     const el = first();
     box.querySelectorAll('input,select').forEach(i => { i.disabled = !el; });
@@ -426,10 +503,7 @@ export function buildPanels(ed) {
     const rr = box.querySelector('[data-radiusrow]');
     rr.hidden = !(el && el.localName === 'rect');
     if (!rr.hidden) box.querySelector('[data-radius]').value = num(parseFloat(el.getAttribute('rx') || el.getAttribute('ry') || '0'), 2);
-    const f = el ? shadowOf(el) : null;
-    box.querySelector('[data-shadow]').checked = !!f;
-    box.querySelector('[data-shadowopts]').hidden = !f;
-    if (f) { const ds = f.querySelector('feDropShadow'); box.querySelectorAll('[data-sh]').forEach(i => { i.value = ds.getAttribute(i.dataset.sh) ?? ''; }); }
+    fx.render();
   }
 
   // ================================================================= Ebenen
@@ -515,7 +589,7 @@ export function buildPanels(ed) {
     if (e.target.closest('[data-exp]')) { const k = li.dataset.path; expanded.has(k) || li.getAttribute('aria-expanded') === 'true' ? (expanded.delete(k), li.setAttribute('aria-expanded', 'false')) : expanded.add(k); if (li.getAttribute('aria-expanded') === 'false') { /* zugeklappt */ } refreshLayers(); return; }
     if (e.target.closest('[data-lock]')) { el.getAttribute('data-locked') === '1' ? el.removeAttribute('data-locked') : el.setAttribute('data-locked', '1'); if (isLocked(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isLocked(el) ? t('Gesperrt') : t('Entsperrt')); return; }
     if (e.target.closest('[data-eye]')) { isHidden(el) ? (setProp(el, 'display', null)) : setProp(el, 'display', 'none'); if (isHidden(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isHidden(el) ? t('Ausgeblendet') : t('Eingeblendet')); return; }
-    if (isLocked(el)) return;
+    // gesperrte Ebenen lassen sich hier wählen (Farbe, Effekte, Name) – verschieben/skalieren auf der Fläche bleibt gesperrt
     // Form einer Beschneidung/Maske: bearbeiten über Pfeiltasten, Transformieren, Knoten
     if (el.closest('clipPath,mask')) { ed.scope = ed.root; ed.select([el]); return; }
     if (el.parentNode !== ed.root && el.parentNode !== ed.scope) ed.scope = el.parentNode;
@@ -746,10 +820,19 @@ export function buildPanels(ed) {
         if (!v || !v.includes('var(')) continue;
         let token = null;
         el.setAttribute(a, v.replace(re, (m, name, fb) => { const s = tok(name); if (s) { token = s.token; return s.color; } return (fb || '#1F2430').trim(); }));
-        if (token && (a === 'fill' || a === 'stroke')) el.setAttribute(a === 'fill' ? 'data-ge-ftoken' : 'data-ge-stoken', token);
+        // Token am Element merken – auch für Verlaufsstopps (stop-color) und color: die Grafik folgt dann dem Design (hell/dunkel)
+        const w = a === 'stop-color' ? 'fill' : a;
+        if (token && TOKEN_ATTR[w]) el.setAttribute(TOKEN_ATTR[w], token);
       }
       const st = el.getAttribute('style');
-      if (st && st.includes('var(')) el.setAttribute('style', st.replace(re, (m, name, fb) => tok(name)?.color || (fb || '#1F2430').trim()));
+      if (st && st.includes('var(')) {
+        el.setAttribute('style', st.replace(/(^|;)\s*(fill|stroke|stop-color|color)\s*:\s*var\(\s*(--[\w-]+)\s*(?:,\s*([^)]+))?\)/g, (m, sep, prop, name, fb) => {
+          const s = tok(name);
+          const w = prop === 'stop-color' ? 'fill' : prop;
+          if (s && TOKEN_ATTR[w]) el.setAttribute(TOKEN_ATTR[w], s.token);
+          return `${sep}${prop}:${s ? s.color : (fb || '#1F2430').trim()}`;
+        }).replace(re, (m, name, fb) => tok(name)?.color || (fb || '#1F2430').trim()));
+      }
     }
     if (ed.prefs.libSiteColors && g.hasAttribute('color')) {
       const acc = sw.find(s => /^(accent|primary|brand|akzent)/i.test(s.token || ''));
@@ -825,6 +908,7 @@ export function buildPanels(ed) {
       <label>X <input type="number" class="ge-in" data-tf="x" step="any"></label><label>${esc(t('B'))} <input type="number" class="ge-in" data-tf="w" step="any" min="0" aria-label="${esc(t('Breite'))}"></label>
       <label>Y <input type="number" class="ge-in" data-tf="y" step="any"></label><label>${esc(t('H'))} <input type="number" class="ge-in" data-tf="h" step="any" min="0" aria-label="${esc(t('Höhe'))}"></label>
       <label>R <input type="number" class="ge-in" data-tf="r" step="any" aria-label="${esc(t('Drehung in Grad'))}"></label>
+      <label title="${esc(t('Neigen (waagerecht) um den Bezugspunkt, in Grad – wirkt einmal, das Feld steht danach wieder auf 0'))}">${esc(t('N'))} <input type="number" class="ge-in" data-tf="k" step="1" min="-80" max="80" placeholder="0" aria-label="${esc(t('Neigen in Grad'))}"></label>
       ${iconBtn('link-simple', t('Seitenverhältnis sperren'), 'data-lockratio aria-pressed="false"')}
     </div></div>`;
   trPanel.querySelectorAll('[data-anchor]').forEach(b => b.addEventListener('click', () => { anchor = b.dataset.anchor; refreshTransform(); }));
@@ -845,6 +929,7 @@ export function buildPanels(ed) {
     trPanel.querySelectorAll('[data-tf]').forEach(i => { i.disabled = !s; if (!s) i.value = ''; });
     if (!s || trPanel.contains(document.activeElement) && document.activeElement.matches('input')) return;
     const set = (k, v) => { trPanel.querySelector(`[data-tf="${k}"]`).value = num(v, 2); };
+    trPanel.querySelector('[data-tf="k"]').value = '';
     set('x', s.A.x); set('y', s.A.y); set('w', s.w); set('h', s.h); set('r', ((s.r % 360) + 360) % 360 > 180 ? s.r : s.r);
     trPanel.querySelector('[data-tf="r"]').disabled = ed.sel.length !== 1;
   }
@@ -864,6 +949,8 @@ export function buildPanels(ed) {
       T = F.multiply(new DOMMatrix().translate(s.a.x, s.a.y).scale(sx, sy).translate(-s.a.x, -s.a.y)).multiply(Fi);
     }
     if (i.dataset.tf === 'r') T = new DOMMatrix().translate(s.A.x, s.A.y).rotate(v - s.r).translate(-s.A.x, -s.A.y);
+    // Neigen (affin): einmalig um den Bezugspunkt, in der Lage des Rahmens (gedrehte Objekte neigen in ihrer eigenen Richtung)
+    if (i.dataset.tf === 'k') { if (!v || Math.abs(v) > 80) { refreshTransform(); return; } T = F.multiply(new DOMMatrix().translate(s.a.x, s.a.y).skewX(v).translate(-s.a.x, -s.a.y)).multiply(Fi); }
     if (!T) return;
     ed.sel.forEach(el => applyTransform(el, T, ed.root));
     void b;
@@ -895,6 +982,8 @@ export function buildPanels(ed) {
     }
     const parts = ed.ordered(ed.sel).map(el => {
       const c = el.cloneNode(true);
+      // Design-Farben bleiben Variablen: auf einer anderen Website nimmt der Baustein deren Farben an (resolveTokens beim Einfügen)
+      tokensToVars(c);
       const P = el.parentNode === ed.root ? null : docMatrixOf(el.parentNode);
       if (!P) return new XMLSerializer().serializeToString(c);
       const g = document.createElementNS(NS, 'g');
@@ -912,22 +1001,33 @@ export function buildPanels(ed) {
     if (libBuilt) buildLib();
   }
 
+  // ================================================================= Prüfen (check.js)
+  const check = buildCheckPanel(ed, C.panel('check'));
+
   // ================================================================= Schnittstelle für den Editor
   const api = {
     groups: [A.el, TP.el, B.el, C.el],
     text: TP,
+    check,
+    /** Bereich „Prüfen“ zeigen und neu prüfen (focus: Fokus auf den Reiter) */
+    showCheck(focus = false) {
+      C.el.classList.remove('is-folded');
+      C.select('check', focus);
+      return check.run();
+    },
+    checkOpen: () => C.current() === 'check' && !C.el.classList.contains('is-folded'),
     aspectLocked: () => lock,
     /** Farbe der Auswahl als Objekt { kind: 'value'|'token', value, token, alpha } (null = keine/Verlauf) – Andockstelle 3b */
     paintValue(which = target()) { const p = paintOf(which); return p.mode === 'solid' ? paintValue(p.color, p.alpha, p.token || null) : null; },
     /** Farbe als Objekt setzen (ein Schritt im Protokoll) */
-    setPaintValue(which, v) { if (!v) return; setPaint(which, v.value, v.alpha ?? 1, v.kind === 'token' ? v.token : null); commit(which === 'fill' ? t('Füllung') : t('Kontur')); },
+    setPaintValue(which, v) { if (!v) return; setPaint(which, v.value, v.alpha ?? 1, v.kind === 'token' ? v.token : null); return finishColor(which === 'fill' ? t('Füllung') : t('Kontur')); },
     showColor() { A.select('color'); refreshColor(); },
     refresh() {
       thumbCache.clear();
       const a = A.current(), b = B.current(), c = C.current();
       if (a === 'color') refreshColor(); else if (a === 'swatches') refreshSwatches(); else if (a === 'stroke') refreshStroke(); else refreshLook(lookPanel);
       if (b === 'layers') refreshLayers(); else if (b === 'lib' && !libBuilt) buildLib(); else if (b === 'icons' && !iconsBuilt) buildIcons();
-      if (c === 'transform') refreshTransform(); else refreshHistory();
+      if (c === 'transform') refreshTransform(); else if (c === 'check') check.render(); else refreshHistory();
       TP.refresh();
     },
     async insertItem(item, p) {

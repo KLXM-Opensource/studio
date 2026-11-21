@@ -143,6 +143,7 @@
     <tr><td>Verbinder</td><td><kbd>C</kbd></td><td>Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten und folgen, wenn Formen sich bewegen (siehe <a href="#grafik-diagramme">Diagramme</a>).</td></tr>
     <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet. <kbd>⌘</kbd><kbd>Z</kbd> nimmt beim Tippen Schritt für Schritt zurück – auch Formatierung wie Fett oder Farbe.</td></tr>
     <tr><td>Verlauf</td><td><kbd>F</kbd></td><td>Auf einem Objekt ziehen = linearen Verlauf anlegen bzw. neu ausrichten. Anfang/Ende (radial: Mitte/Radius) und Farbstopps auf der Fläche ziehen, Doppelklick auf die Linie = neuer Stopp, <kbd>⌫</kbd> löscht den gewählten.</td></tr>
+    <tr><td>Formgitter</td><td><kbd>M</kbd></td><td>Mindestens zwei sich überlappende Formen auswählen. Der Zeiger zeigt die einzelnen Bereiche; Klick oder Ziehen über mehrere Bereiche vereint sie zu einer Form, mit <kbd>⌥</kbd> werden die Bereiche entfernt (siehe <a href="#grafik-wiederholen">Formgitter, Wiederholen, Effekte</a>).</td></tr>
     <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
   </table>
   <ul>
@@ -156,7 +157,9 @@
       <b>Farbfelder</b> zeigt die Farben aus dem Design der Website, zuletzt verwendete Farben und die Farben der Grafik.
       „Schriftfarbe“ (A) übernimmt die Textfarbe der Umgebung – ideal für Symbole.</li>
     <li><b>Ebenen:</b> oben liegt, was vorn ist. Ziehen sortiert um (auch in Gruppen hinein), Doppelklick oder <kbd>F2</kbd> benennt um,
-      Auge blendet aus, Schloss sperrt. Deckkraft und Mischmodus gelten für die Auswahl.</li>
+      Auge blendet aus, Schloss sperrt. Gesperrte Ebenen lassen sich hier trotzdem wählen, um Farbe, Effekte oder Namen zu ändern – auf der
+      Fläche bleiben sie unverrückbar. Der Auswahlrahmen wählt alles, was er berührt; unter dem Zoom-Menü lässt er sich auf „Objekte vollständig
+      umschließen“ umstellen. <b>Objekt → Auf Zeichenfläche einpassen</b> vergrößert z. B. ein klein importiertes Symbol verlustfrei. Deckkraft und Mischmodus gelten für die Auswahl.</li>
     <li><b>Bibliothek:</b> fertige Bausteine (Flussdiagramm, Organigramm, Hinweise und Pfeile, Browserfenster, Smartphone, Karte,
       Diagramm, Zeichen …) anklicken oder auf die Fläche ziehen – sie landen dort, wo Sie loslassen. Eine Auswahl lässt sich unter Ebenen
       <b>als Baustein speichern</b>: mit Ordner und wahlweise für <b>diese Website</b> oder <b>alle Websites der Installation</b>.
@@ -186,6 +189,59 @@
       der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
       Gerät vorhanden sind – deshalb wandelt das Speichern Texte in Schriften der Website auf Wunsch in Kurven um (siehe unten); im Editor bleiben sie Text.</li>
   </ul>
+  <h4 id="grafik-dunkel">Design-Farben, Hell und Dunkel</h4>
+  <p>Wählen Sie eine Farbe unter <b>Farbfelder → Design der Website</b> (z. B. „Akzent“), merkt sich die Grafik die <b>Design-Farbe</b>, nicht nur
+    den Farbwert: Ändern Sie später unter <b>Design</b> den Akzent, zeigt die Website die Grafik in der neuen Farbe – ohne sie neu zu speichern.
+    Hat die Website ein dunkles Farbschema, erscheint die Grafik dort automatisch mit den Dunkel-Werten des Designs.</p>
+  <ul>
+    <li><b>Hell | Dunkel | Nebeneinander</b> oben neben den Personas schaltet die Ansicht um – das ist keine eigene Grafik, sondern dieselbe
+      Grafik in zwei Fassungen. „Nebeneinander“ zeigt rechts die dunkle Fassung, während Sie links bearbeiten. Der Knopf daneben wählt den
+      <b>Hintergrund</b> der Vorschau: neutral weiß oder einer der Abschnitts-Hintergründe der Website (Standard, Getönt, Akzent, Dunkel …), jeweils hell und dunkel.</li>
+    <li>In der Ansicht <b>Dunkel</b> wirkt eine neue Farbe sofort nur in der dunklen Fassung; beim Übernehmen fragt der Editor:
+      <b>Nur für Dunkel</b> oder <b>Für Hell und Dunkel</b> – wahlweise für <b>alle gleichen Farben</b> der Grafik. „Nicht mehr fragen“ gilt, bis Sie den Editor schließen.</li>
+    <li>Im Bereich <b>Farbe</b> zeigt <b>Im Dunkeln</b>, was mit der gewählten Farbe passiert: <b>Folgt Design</b> (nur Design-Farben: ihr Dunkel-Wert),
+      <b>Eigene Farbe</b> (eine feste Farbe nur für Dunkel – der Editor wechselt dafür in die dunkle Ansicht) oder <b>Gleich in beiden</b>.</li>
+    <li><b>Dunkel-Fassung vorschlagen</b> (Menü am Hintergrund-Knopf; mit Auswahl nur für diese): Design-Farben folgen dem Design, eigene Farben
+      bekommen die umgekehrte Helligkeit bei gleichem Farbton (Schwarz wird hell, Weiß dunkel, mittlere Töne bleiben). Danach zeigt der Editor beide
+      Fassungen nebeneinander; <kbd>⌘</kbd><kbd>Z</kbd> nimmt den Vorschlag in einem Schritt zurück. <b>Eigene Dunkel-Farben entfernen</b> setzt zurück.</li>
+    <li><b>Exportieren → SVG für Desktop-Programme</b> enthält feste Farben (die hellen); dazu gibt es die <b>Dunkel-Fassung</b> als eigene Datei.
+      Bausteine, die Sie in der Bibliothek speichern, behalten ihre Design-Farben und übernehmen auf einer anderen Website deren Farben.</li>
+  </ul>
+  <h4 id="grafik-pruefen">Prüfen: Kontrast und Barrierefreiheit</h4>
+  <p>Der Reiter <b>Prüfen</b> (rechts unten, auch über das Menü am Hintergrund-Knopf) listet Hinweise – beim Speichern läuft die Prüfung
+    automatisch, hält das Speichern aber nicht auf. Ein Klick auf einen Hinweis wählt das Element, holt es ins Bild und zeigt die Fassung
+    (hell oder dunkel), in der das Problem auftritt; kleine Markierungen auf der Fläche zeigen dieselben Stellen.</p>
+  <ul>
+    <li><b>Titel, Beschreibung, Alt-Text</b> fehlen – mit Knöpfen zum Ergänzen; der Alt-Text-Vorschlag stammt aus Titel und Texten der Grafik
+      (auch im Speichern-Dialog: „Vorschlag aus Titel und Texten“).</li>
+    <li><b>Kontrast</b> von Text zur Fläche darunter (4,5:1, große Schrift 3:1) und von wichtigen Linien und Konturen (3:1) – in Hell und Dunkel,
+      auf dem gewählten Hintergrund. <b>Verschwindet im Dunkeln</b> meldet z. B. eine schwarze Kontur, die auf dunklem Grund nicht mehr zu sehen ist.</li>
+    <li><b>Schrift zu klein</b>: unter 12 px in der vorgesehenen Größe. Wie breit die Grafik auf der Website erscheint, stellen Sie unter
+      <b>Dokument → Breite auf der Website</b> ein (leer = so breit wie die Zeichenfläche).</li>
+    <li><b>Lesereihenfolge</b>: Diagramme mit Verbindern brauchen den Ablauf in der Beschreibung (ein Klick fügt ihn ein); Texte, deren
+      Reihenfolge in den Ebenen nicht der sichtbaren entspricht, werden genannt.</li>
+  </ul>
+  <h4 id="grafik-wiederholen">Formgitter, Wiederholen, Ebeneneffekte</h4>
+  <ul>
+    <li><b>Formgitter</b> (<kbd>M</kbd>, wie der Shape Builder in Illustrator/Affinity): Formen auswählen, Werkzeug wählen – die Überlappungen
+      erscheinen als einzelne Bereiche (gestrichelt). Über einen Bereich fahren hebt ihn hervor, Klick oder Ziehen über mehrere vereint sie,
+      <kbd>⌥</kbd>-Klick bzw. <kbd>⌥</kbd>-Ziehen entfernt sie. Alle übrigen Bereiche bleiben als eigene Formen erhalten; jeder Schritt lässt sich mit
+      <kbd>⌘</kbd><kbd>Z</kbd> zurücknehmen.</li>
+    <li><b>Wiederholen:</b> <kbd>⌘</kbd><kbd>D</kbd> dupliziert; verschieben (oder drehen) Sie die Kopie und drücken erneut <kbd>⌘</kbd><kbd>D</kbd>,
+      bekommt jede weitere Kopie denselben Versatz – wie „Erneut transformieren“. <b>Objekt → Wiederholen …</b> (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>D</kbd>)
+      erzeugt viele Kopien auf einmal: <b>Versatz</b> (Anzahl, X/Y, Drehung und Skalierung je Kopie), <b>Kreis</b> (um einen Mittelpunkt, z. B. für
+      Zifferblätter und Strahlen; Objekte mitdrehen oder nicht) oder <b>Raster</b> (Spalten × Zeilen mit Abstand). Die Vorschau erscheint sofort auf der
+      Fläche; das Ergebnis ist eine Gruppe und ein Schritt im Protokoll.</li>
+    <li><b>Ebeneneffekte</b> (Bereich Darstellung): Schlagschatten, innerer Schatten, äußeres und inneres Leuchten, Kontur außen, Farbüberlagerung und
+      Weichzeichnen – mehrere je Ebene, jeweils mit Haken an/aus (die Einstellungen bleiben gemerkt) und „…“ für Größe, Versatz, Farbe und Deckkraft.
+      Die Fläche zeigt das Ergebnis sofort. Große Weichzeichner kosten Rechenzeit beim Anzeigen; im PDF fehlen Effekte, in SVG für
+      Desktop-Programme bleiben sie erhalten.</li>
+  </ul>
+  <h4 id="grafik-verzerren">Verzerren und Neigen</h4>
+  <p><b>Objekt → Perspektivisch verzerren</b> zeigt vier Eckgriffe: Ziehen Sie eine Ecke, entsteht eine Fluchtperspektive (gerade Linien
+    bleiben gerade). <b>Objekt → Hülle verzerren</b> hat zusätzlich Griffe in den Kantenmitten – damit wölben Sie Kanten, z. B. für ein
+    gebogenes Banner. <kbd>↵</kbd> oder ein Klick daneben übernimmt, <kbd>Esc</kbd> bricht ab. Texte werden dafür nach einer Rückfrage in
+    Kurven umgewandelt. <b>Neigen</b> steht im Bereich Transformieren (Feld N, Grad um den Bezugspunkt).</p>
   <h4 id="grafik-geometrie">Formen kombinieren, ausstanzen, umwandeln</h4>
   <p>Zwei oder mehr Objekte wählen, dann in der Kontextleiste bzw. im Menü <b>Objekt</b>. Gerechnet wird mit den echten Kurven
     (Kreise bleiben rund); Konturen zählen nicht zur Fläche.</p>

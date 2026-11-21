@@ -346,11 +346,50 @@ final class Graphics
                 if (($t['type'] ?? '') !== 'color') continue;
                 $c = \Core\Design::color($values[$name] ?? ($t['default'] ?? null));
                 // token = Name des Design-Tokens (Andockstelle für Farben als Variablen: der Editor merkt ihn am Element)
-                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c, 'token' => (string) $name];
+                // dark = Wert im dunklen Farbschema (Hell/Dunkel im Editor, Core\Graphics\Themed); ohne eigenen Dunkel-Wert = hell
+                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c, 'token' => (string) $name,
+                    'dark' => \Core\Design::color($values[$name . '@dark'] ?? null) ?? $c];
             }
         } catch (\Throwable) {
             // Kit ohne Design-Tokens: keine Farbfelder des Designs
         }
+        return $out;
+    }
+
+    /**
+     * Abschnitts-Hintergründe des Kits (theme.php 'backgrounds': Standard, Getönt, Akzent, Dunkel …) mit Farben hell/dunkel für
+     * die Vorschau im Editor. Die Farben kommen aus den Design-Tokens mit üblichen Namen (background, surface, accent,
+     * secondary, dark_section …); „Akzent hell“ = 14 % Akzent im Hintergrund (wie fluid); Unbekanntes fällt weg.
+     * @return list<array{id: string, label: string, light: string, dark: string}>
+     */
+    public static function sections(): array
+    {
+        $pal = Themed::palette();
+        $pick = function (array $names) use ($pal): ?array {
+            foreach ($names as $n) if (isset($pal[$n])) return $pal[$n];
+            return null;
+        };
+        $mix = function (string $a, string $b, float $p): string {
+            $ca = sscanf($a, '#%02x%02x%02x'); $cb = sscanf($b, '#%02x%02x%02x');
+            return sprintf('#%02X%02X%02X', ...array_map(fn($i) => (int) round($ca[$i] * $p + $cb[$i] * (1 - $p)), [0, 1, 2]));
+        };
+        $bg = $pick(['background', 'bg', 'paper', 'page', 'base']) ?? ['light' => '#FFFFFF', 'dark' => '#111318'];
+        $acc = $pick(['accent', 'primary', 'brand', 'signal']);
+        $map = [
+            'white' => $bg,
+            'muted' => $pick(['surface', 'bg_muted', 'muted_bg', 'tinted', 'gray', 'grey', 'surface_alt']) ?? ['light' => $mix('#000000', $bg['light'], .04), 'dark' => $mix('#FFFFFF', $bg['dark'], .05)],
+            'tint' => $acc ? ['light' => $mix($acc['light'], $bg['light'], .14), 'dark' => $mix($acc['dark'], $bg['dark'], .14)] : null,
+            'accent' => $acc,
+            'secondary' => $pick(['secondary', 'accent2', 'brand2']),
+            'dark' => $pick(['dark_section', 'dark_bg', 'night', 'dark', 'panel_dark']) ?? ['light' => '#111827', 'dark' => '#0B0D14'],
+        ];
+        $out = [];
+        foreach ((array) app()->theme->backgrounds() as $id => $label) {
+            $c = $map[(string) $id] ?? null;
+            if ($c === null) continue;
+            $out[] = ['id' => (string) $id, 'label' => __((string) $label), 'light' => $c['light'], 'dark' => $c['dark']];
+        }
+        if (!$out) $out[] = ['id' => 'white', 'label' => __('Standard'), 'light' => $bg['light'], 'dark' => $bg['dark']];
         return $out;
     }
 
@@ -517,7 +556,7 @@ final class Graphics
 
     /**
      * Einstellungen des Editors je Konto: Favoriten und zuletzt verwendete Schriften (Stapel bzw. Familien), Farbmodus.
-     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool}
+     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool, marquee: string}
      */
     public static function prefs(?array $user): array
     {
@@ -531,7 +570,7 @@ final class Graphics
         $raw = app()->db->fetchValue('SELECT ui_prefs FROM users WHERE id = ?', [$userId]);
         $all = json_decode((string) $raw, true);
         $cur = is_array($all) && is_array($all['grafik'] ?? null) ? $all['grafik'] : [];
-        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
+        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors', 'marquee'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
         $cur[$key] = $value;
         $clean = self::cleanPrefs($cur);
         \Core\UiPrefs::set($userId, 'grafik', $clean);
@@ -556,7 +595,9 @@ final class Graphics
         // Favoriten der Bibliothek: lib:{id} (mitgeliefert), part:{id} (Website), net:{id} (alle Websites)
         $fav = array_values(array_unique(array_filter(is_array($p['libFav'] ?? null) ? $p['libFav'] : [], fn($v) => is_string($v) && preg_match('~^(lib|part|net):[a-z0-9_-]{1,60}$~i', $v))));
         return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode,
-            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors'])];
+            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors']),
+            // Auswahlrahmen: berühren (Standard) oder vollständig enthalten
+            'marquee' => ($p['marquee'] ?? '') === 'contain' ? 'contain' : 'touch'];
     }
 
     /** Schriften für Text: Kit-Schriften (Core\Design::fonts) und allgemeine Familien */

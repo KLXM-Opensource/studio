@@ -1080,8 +1080,18 @@ final class Media
             . (isset($opt['path']) ? ' data-media-path="' . e((string) $opt['path']) . '"' : '')
             . ($ratio && !$fit && $m['mime'] !== Svg::MIME ? ' data-ratio="' . e($ratio) . '"' : '')
             . ($ratio ? ' data-frame="' . e($ratio) . '"' : '') : '';
-        $pic = $fit ? '<picture class="' . e(ImageFit::pictureClass($fit, $m, $ratio)) . '">' : '<picture>';
+        $picClass = $fit ? ImageFit::pictureClass($fit, $m, $ratio) : '';
         $sources = '';
+        // Infografik mit Design-Farben (Core\Graphics\Themed): Fassung mit den Farben dieser Website, dunkel über <source>
+        // (Gerät) bzw. js/graphic-scheme.js (Hell/Dunkel-Schalter, dunkle Abschnitte) – nicht im Bearbeiten-Modus der Verwaltung nötig
+        if ($m['mime'] === Svg::MIME && ($tv = Graphics\Themed::variants($m))) {
+            $src['src'] = $tv['light'];
+            if ($tv['dark'] !== null) {
+                $sources .= '<source media="(prefers-color-scheme: dark)" srcset="' . e($tv['dark']) . '" data-scheme="dark">';
+                $picClass = trim($picClass . ' cms-scheme-img');
+            }
+        }
+        $pic = $picClass !== '' ? '<picture class="' . e($picClass) . '">' : '<picture>';
         foreach (['avif', 'webp'] as $fmt) {
             if ($src[$fmt] !== '') {
                 $sources .= '<source type="image/' . $fmt . '" srcset="' . e($src[$fmt]) . '" sizes="' . e($sizes) . '">';

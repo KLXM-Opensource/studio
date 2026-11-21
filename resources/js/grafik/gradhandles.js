@@ -146,7 +146,19 @@ export class GradientHandles {
         writeStops(g, st);
       }
       ed.draw();
-    }, () => { if (moved) ed.commit(t('Verlauf geändert')); else ed.draw(); });
+    }, () => {
+      if (moved) { ed.commit(t('Verlauf geändert')); return; }
+      // Klick ohne Ziehen auf Anfang/Ende: dort liegt meist der erste bzw. letzte Stopp (der Griff liegt darüber) – wie in Affinity
+      // wird er aktiv, Farbfelder und Farbwähler färben dann genau ihn
+      if (key === 'a' || key === 'b') {
+        const st = gradientStops(ed.root, g);
+        let best = 0;
+        st.forEach((s, i) => { if (key === 'a' ? s.offset < st[best].offset : s.offset >= st[best].offset) best = i; });
+        this.stop = best;
+        ed.panels.refresh();
+      }
+      ed.draw();
+    });
   }
 
   /** Lage des Zeigers auf der Verlaufslinie (0 … 1) */

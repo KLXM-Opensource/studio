@@ -75,6 +75,10 @@ const norm = (name, v) => {
 export const CSS_ONLY = ['font-variation-settings', 'font-feature-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps',
   'font-variant-position', 'font-kerning', 'font-optical-sizing'];
 
+/** Stylesheet der Dunkel-Ansicht (scheme.js setzt es, solange „Dunkel“ gezeigt wird) */
+export const VIEW = { sheet: null };
+const PAINTS = ['fill', 'stroke', 'stop-color', 'color'];
+
 export function setProp(el, name, value) {
   if (value === null || value === undefined || value === '') {
     el.removeAttribute(name);
@@ -87,7 +91,11 @@ export function setProp(el, name, value) {
   if (el.style?.getPropertyValue(name)) { el.style.setProperty(name, value); return; }
   el.setAttribute(name, value);
   let comp = '';
-  try { comp = getComputedStyle(el).getPropertyValue(name); } catch { return; }
+  // Dunkel-Ansicht (scheme.js): deren Stylesheet überdeckt Farben mit !important – für die Prüfung „gewinnt eine Klassenregel?“
+  // kurz abschalten, sonst landete jede Farbe einer Design-Farbe zusätzlich im style
+  const sheet = VIEW.sheet?.sheet && PAINTS.includes(name) && el.getRootNode() === VIEW.sheet.getRootNode() ? VIEW.sheet.sheet : null;
+  if (sheet) sheet.disabled = true;
+  try { comp = getComputedStyle(el).getPropertyValue(name); } catch { return; } finally { if (sheet) sheet.disabled = false; }
   if (comp && norm(name, comp) !== norm(name, value) && !/currentcolor/i.test(value)) el.style.setProperty(name, value);
 }
 
