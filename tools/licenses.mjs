@@ -72,14 +72,6 @@ const REQUIRED_FILES = [
   'public/assets/vendor/pdfjs/wasm/LICENSE_QCMS',
   'public/assets/vendor/pdfjs/wasm/LICENSE_QUICKJS',
   'public/assets/fonts/OFL-Lato.txt',
-  'public/assets/vendor/grafik/LICENSE-paper.txt',
-  'public/assets/vendor/grafik/LICENSE-paperjs-offset.txt',
-  'public/assets/vendor/grafik/LICENSE-fontkit.txt',
-  'public/assets/vendor/grafik/THIRD-PARTY-LICENSES-fontkit.txt',
-  'public/assets/vendor/grafik/LICENSE-jspdf.txt',
-  'public/assets/vendor/grafik/LICENSE-svg2pdf.txt',
-  'public/assets/vendor/grafik/LICENSE-hyphen.txt',
-  'public/assets/vendor/grafik/LICENSE-hyphen-patterns.txt',
   'public/assets/icons/LICENSE.txt',
 ];
 
@@ -119,7 +111,8 @@ function composer() {
 // ------------------------------------------------------------------ npm (pnpm)
 function pnpmProjects() {
   const dirs = [path.join(ROOT, 'tools')];
-  for (const root of ['kits']) {
+  // Kits und Erweiterungen mit eigenen Build-Paketen (z. B. extensions/{name}/package.json – Symlink auf das eigene Repository zählt mit)
+  for (const root of ['kits', 'extensions']) {
     const themes = path.join(ROOT, root);
     for (const t of fs.existsSync(themes) ? fs.readdirSync(themes).sort() : []) {
       if (fs.existsSync(path.join(themes, t, 'package.json'))) dirs.push(path.join(themes, t));
