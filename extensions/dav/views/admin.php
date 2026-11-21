@@ -94,6 +94,15 @@ $email = strtolower((string) $user['email']);
           <option value="draft"<?= $s['on_delete'] === 'draft' ? ' selected' : '' ?>><?= e(__('→ Entwurf (sicher, wiederherstellbar)')) ?></option>
           <option value="delete"<?= $s['on_delete'] === 'delete' ? ' selected' : '' ?>><?= e(__('→ endgültig löschen (Recht „Einträge löschen“)')) ?></option></select></div>
       </div>
+      <label class="f-check"><input type="checkbox" name="<?= $n ?>[published_only]" value="1"<?= Dav::publishedOnlyPreset($t) ? ' checked' : '' ?>> <span><?= e(__('Nur veröffentlichte Einträge')) ?></span></label>
+      <p class="f-help"><?= e(__('Entwürfe und geplante Einträge erscheinen nicht in den Apps. Ohne Haken sehen Apps auch Entwürfe.')) ?></p>
+      <?php if (!$isCal): $org = $s['org'] ?? true; ?>
+      <div class="adm-grid2">
+        <div class="f"><label for="dav-org-<?= e($t['handle']) ?>"><?= e(__('Organisation (ORG) ohne Feld')) ?></label><input id="dav-org-<?= e($t['handle']) ?>" name="<?= $n ?>[org]" maxlength="200" value="<?= e(is_string($org) ? $org : '') ?>" placeholder="<?= e(org_name()) ?>" aria-describedby="dav-org-h-<?= e($t['handle']) ?>"></div>
+        <div class="f"><label class="f-check"><input type="checkbox" name="<?= $n ?>[org_off]" value="1"<?= $org === false ? ' checked' : '' ?>> <span><?= e(__('Keine Organisation ausgeben')) ?></span></label></div>
+      </div>
+      <p class="f-help" id="dav-org-h-<?= e($t['handle']) ?>"><?= e(__('Gilt, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Leer: Name der Organisation aus den Website-Einstellungen.')) ?></p>
+      <?php endif; ?>
       <?php if (!$isCal): ?>
       <details<?= $s['addressbook'] ? ' open' : '' ?>><summary><?= e(__('Zuordnung der vCard-Felder')) ?></summary>
         <div class="adm-grid2">

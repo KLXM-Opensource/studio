@@ -16,7 +16,7 @@ spl_autoload_register(function (string $class): void {
 return [
     'name' => 'dav',
     'label' => 'CalDAV/CardDAV',
-    'version' => '1.2.0',
+    'version' => '1.3.0',
     'requires' => '>=1.0.0',
     'description' => 'Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵). Anmeldung mit App-Passwörtern.',
     'author' => 'KLXM Crossmedia GmbH and contributors',
@@ -25,6 +25,7 @@ return [
     'provides' => ['Abschnitt „Kalender & Kontakte in Apps“ im Konto (App-Passwörter)', 'Einstellungen je Tabelle unter Administration → Einstellungen → Einstellungen der Funktionen (Recht data.schema)', 'Adressen /dav und /.well-known/caldav|carddav', 'App-Passwörter je Benutzer'],
     'requirements' => fn(): array => ['sabre/dav (Composer)' => class_exists(\Sabre\DAV\Server::class)],
     'docs' => ['Technik: CalDAV/CardDAV' => '/admin/hilfe/technik#dav'],
+    'commands' => ['dav:password', 'dav:selftest'],
     'boot' => function (Core\Extension $x): void {
         $x->feature('dav', 'CalDAV/CardDAV (Kalender und Kontakte in Apps)', ['dav.use']);
         $x->permissions('CalDAV/CardDAV', ['dav.use' => 'Kalender und Kontakte mit Apps abgleichen (App-Passwörter)']);
@@ -49,6 +50,8 @@ return [
             $r->post('/admin/dav/passwords/{id}/delete', [$c, 'delete'], 'dav.use');
             $r->post('/admin/dav/tables', [$c, 'tables'], 'data.schema');
         });
+        $x->command('dav:selftest', 'CalDAV/CardDAV: Namen (FN → N), Organisation, Rich-Text als Text, Rückweg aus Apps, nur veröffentlichte Einträge',
+            fn(array $args): int => Klxm\Dav\SelfTest::run());
         $x->command('dav:password', 'App-Passwort anlegen: dav:password <e-mail> [name] [read|write]', function (array $args): int {
             $u = app()->db->fetch('SELECT id FROM users WHERE LOWER(email) = LOWER(?)', [(string) ($args[0] ?? '')]);
             if (!$u) { fwrite(STDERR, "Benutzer nicht gefunden.\n"); return 1; }

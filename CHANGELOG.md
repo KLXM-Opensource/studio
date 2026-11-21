@@ -10,6 +10,15 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### CalDAV/CardDAV (Erweiterung dav 1.3.0): nur veröffentlichte Einträge, Namen, Organisation, Text statt HTML
+- Neue Option je Tabelle **`published_only`** („Nur veröffentlichte Einträge“, `ext.dav.tables.<tabelle>.published_only`): Entwürfe
+  und geplante Einträge bleiben aus Kalender- und Adressbuch-Apps heraus (Abruf/Ändern 404). Standard aus, damit bestehende
+  Einrichtungen sich nicht unbemerkt ändern; die Verwaltung schlägt sie für neu bereitgestellte Tabellen vor.
+- vCards: N aus dem ganzen Namen (Nachname;Vorname;;Präfix, Partikel wie „von“ beim Nachnamen), ORG ohne Feld aus dem Namen der
+  Organisation der Website (Option `org`, Text oder `false`), `X-MYCMS-*` und NOTE aus Rich-Text als reiner Text ohne
+  Redaktionsnotizen; verschachtelte Felder (Inhaltsblöcke u. a.) nicht mehr als „Array“. **ETags aller Kontakte ändern sich** –
+  Apps laden die Adressbücher einmal neu. Selbsttest `dav:selftest`; Handbuch → Daten → Kalender-Apps, Entwicklerhandbuch → CalDAV/CardDAV.
+
 ### Agentur Hub: offene Spezifikationen für andere Systeme
 - **`docs/agentur-hub/`** beschreibt, wie KLXM Studio, REDAXO 6 (AddOn `klxm_hub`), REDAXO 5 (AddOn in Arbeit) und eigene
   Lösungen am Agentur Hub teilnehmen: `oidc-profil.md` (Discovery inkl. optionalem `logo_uri`, Code-Flow mit PKCE S256, `state`,

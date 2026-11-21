@@ -65,6 +65,11 @@ final class AdminController extends \Core\Http\Controllers\Admin\AdminController
             $s['addressbook'] = !Calendar::enabled($t) && !empty($in['addressbook']);
             $s['status'] = ($in['status'] ?? '') === 'draft' ? 'draft' : 'published';
             $s['on_delete'] = ($in['on_delete'] ?? '') === 'delete' ? 'delete' : 'draft';
+            $s['published_only'] = !empty($in['published_only']);
+            if (!Calendar::enabled($t)) {
+                $org = mb_substr(trim(strip_tags((string) ($in['org'] ?? ''))), 0, 200);
+                $s['org'] = !empty($in['org_off']) ? false : ($org !== '' ? $org : true);
+            }
             $map = [];
             $types = array_column($t['fields'], 'type', 'name');
             foreach (Dav::CARD_MAP as $k => $allowed) {
