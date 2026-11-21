@@ -391,6 +391,33 @@ $preis = \Core\Extensions::filter('ext:buchung.preis', $grundpreis, ['termin' =&
     <li><b>Eigenes Layout mit Impressum:</b> Wer das Impressum selbst in sein Layout setzt (z. B. ein Newsletter mit Fußzeile im Design), baut es aus <code>Imprint::get($lang = null, $network = false)</code> → <code>['text', 'html', 'url', 'body', 'label', 'lang']</code> (<code>text</code>/<code>html</code> fertig, <code>body</code> = Anbieterkennzeichnung, <code>url</code> = Impressum-Seite, alles leer = nicht eingerichtet), hängt den Text mit <code>Imprint::appendText($text, $imp)</code> an und übergibt <code>'imprint' =&gt; 'included'</code> – dann fügt der Mailer nichts hinzu (nie doppelt). <code>Imprint::appendHtml($html, $imp)</code> setzt die Standard-Fußzeile vor <code>&lt;/body&gt;</code>.</li>
     <li><b>Massenversand sperren:</b> <code>Imprint::bulkError()</code> liefert eine Meldung, solange weder Text noch Impressum-Seite eingerichtet sind (<code>Imprint::missing()</code>), sonst <code>null</code>. Werbe- und Massenversand (Newsletter-Ausgaben, Bestätigungsbitten) startet dann nicht und zeigt die Meldung; einzelne Mails (Passwort, Formulare) laufen weiter. <code>Imprint::health()</code> ist Teil von <code>bin/console health</code> und der Systemübersicht.</li>
   </ul>
+  <h4 id="mail-uebersicht">E-Mail: welche Adresse gilt wofür (<code>Core\Mail\Overview</code>)</h4>
+  <p>Rangfolge als reine Funktion <code>Accounts::resolve($zweck, $netzwerk, $konten, $zuordnung, $netzwerkKonto, $standard)</code> →
+    <code>['account' =&gt; …, 'origin' =&gt; network|route|missing|fallback|network-missing]</code>; <code>Accounts::route()</code> ruft sie mit den
+    Einstellungen der aktuellen Website auf, die Übersicht mit denselben Daten (bzw. für andere Websites mit deren rohen Einstellungen – Geheimnisse
+    bleiben verschlüsselt, eine eingetragene DSN zählt als vorhanden). Reihenfolge: 1. <code>'network' =&gt; true</code> → Netzwerk-Konto (wenn versandbereit),
+    2. <code>sys.mail_routes[zweck]</code>, sonst <code>standard</code> (fehlendes Konto → <code>standard</code>, <code>missing</code>), 3. nicht versandbereit →
+    Netzwerk-Konto (<code>fallback</code>), 4. <code>via</code> nur wenn versandbereit, 5. <code>reply_to</code> des Aufrufs vor „Antworten an“ des Kontos,
+    6. Test-Umleitung <code>sys.mail_redirect</code> (nicht bei <code>'account' =&gt; true</code>), außerhalb der Produktion <code>mail_redirect</code> oder
+    nur Protokoll, <code>mail_dump</code>.</p>
+  <table class="adm-table">
+    <thead><tr><th>Mailart (<code>Overview::TYPES</code>)</th><th>Code</th><th>Zweck / Optionen</th><th>Empfänger</th><th>Gilt für</th></tr></thead>
+    <tbody>
+      <tr><td><code>account</code></td><td><code>Invites</code>, <code>PasswordReset</code>, <code>EmailChange</code></td><td><code>account</code>, <code>'account' =&gt; true</code></td><td>Person</td><td>Website</td></tr>
+      <tr><td><code>network</code></td><td>dieselben</td><td><code>account</code>, <code>'network' =&gt; true</code> (Impressum der Netzwerk-Website)</td><td>Netzwerk-Konto</td><td>alle Websites</td></tr>
+      <tr><td><code>requests</code></td><td><code>DataForms</code>, <code>Delivery</code> (Fehlschlag)</td><td><code>notify</code></td><td><code>settings.form.notify</code> der Tabelle, sonst <code>sys.mail_to</code></td><td>Website/Tabelle</td></tr>
+      <tr><td><code>delivery</code></td><td><code>Data\Delivery::send</code></td><td><code>notify</code>, <code>require_tls</code>, <code>reply_to</code> = E-Mail-Feld, optional <code>smime</code></td><td><code>inbox.delivery.to</code> / <code>routes</code></td><td>Tabelle</td></tr>
+      <tr><td><code>receipt</code></td><td><code>DataForms::sendReceipt</code></td><td><code>visitor</code></td><td>Adresse aus dem Formular</td><td>Tabelle</td></tr>
+      <tr><td><code>integrity</code></td><td><code>Integrity::notify</code> (<code>sys.integrity_mail</code>)</td><td><code>notify</code></td><td>Konten mit <code>*</code>-Rolle</td><td>Website</td></tr>
+      <tr><td><code>review</code>, <code>support</code>, <code>chat</code></td><td><code>Review\Queue</code>, <code>Support</code>, <code>Chat\Messages</code></td><td><code>notify</code></td><td>Freigebende, Support-Team, Erwähnte</td><td>Website</td></tr>
+      <tr><td><code>newsletter</code>, <code>ext:{name}.{zweck}</code></td><td>Erweiterungen (<code>Extension::mailPurpose</code>)</td><td>Zweck der Erweiterung, ggf. <code>via</code></td><td>Verteiler</td><td>Website</td></tr>
+    </tbody>
+  </table>
+  <p>Seiten: <code>GET /admin/system/mail/uebersicht</code> (<code>Overview::rows()</code>, Recht <code>system.manage</code>; Zeile <code>network</code> nur für
+    Netzwerk-Konten), <code>POST /admin/system/mail/uebersicht/test/{art}</code> (<code>Overview::test()</code>: Testnachricht an die eigene Adresse mit den
+    Optionen der Mailart, Ergebnis über <code>Overview::outcome()</code>), Netzwerk → E-Mail (<code>Overview::sites()</code>, alle Websites, Zwecke
+    <code>Overview::NET_PURPOSES</code>). Health, Geplante Aufgaben, Sicherung außer Haus, Überwachung und Push senden keine E-Mails. Zwecke von Erweiterungen
+    erscheinen automatisch als eigene Zeile. Selbsttest in <code>mail:selftest</code>.</p>
   <pre><code>// Newsletter-Erweiterung: eigener Zweck – die Website wählt dafür ein Konto (z. B. „Mailjet Newsletter“)
 $x-&gt;mailPurpose('kampagne', 'Newsletter-Kampagnen', 'Versand an alle Abonnenten');
 foreach ($abonnenten as $a) {

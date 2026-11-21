@@ -15,8 +15,18 @@ $stdErr = array_intersect_key($errors, array_flip(array_values(Accounts::STANDAR
 $routes = Accounts::routes();
 $key = fn(string $p) => preg_replace('~[^a-z0-9_]~', '_', $p);   // Feldname je Zweck (ext:x.y → ext_x_y)
 $edit = fn(string $id) => url('/admin/system/mail?konto=' . $id . '#konto-' . $id);
+$netAcc = $accounts['network'] ?? null;
 ?>
 <div class="set-groups">
+<?php // Geltungsbereich: alles hier gilt nur für diese Website – das Netzwerk-Konto (falls vorhanden) für alle; Link zur Übersicht ?>
+<div class="adm-flash adm-flash--info mo-scopenote" id="mail-geltung" role="note">
+  <p><strong><?= e(__('Gilt nur für diese Website ({site}).', ['site' => site()->label()])) ?></strong>
+    <?= e(\Core\Sites::multi()
+        ? ($netAcc ? __('Das Netzwerk-Konto ({from}) gilt für alle Websites: Es versendet Mails an Netzwerk-Konten und springt ein, wenn das Konto dieser Website nicht versandbereit ist.', ['from' => $netAcc['from']])
+            : __('Ein Netzwerk-Konto für alle Websites ist nicht eingerichtet.'))
+        : __('Konten, Verwendung, Empfänger, Test-Umleitung und Impressum.')) ?></p>
+  <p><a href="<?= e(url('/admin/system/mail/uebersicht')) ?>"><?= e(__('Übersicht: welche Adresse gilt wofür')) ?></a></p>
+</div>
 <?php if (!$anyReady || $stdErr): // noch kein Konto: direkt das erste einrichten ?>
   <input type="hidden" name="mail_std_inline" value="1">
   <?= Fields::renderGroups(array_merge([['type' => 'heading', 'label' => __('Erstes E-Mail-Konto einrichten'),
@@ -29,7 +39,7 @@ $edit = fn(string $id) => url('/admin/system/mail?konto=' . $id . '#konto-' . $i
     <?php foreach ($accounts as $id => $a): $ready = Accounts::ready($a); ?>
     <div class="f f--inline mk-row">
       <span class="mk-row__label"><strong><?= e($a['label']) ?></strong>
-        <span class="f-help"><?= e(Accounts::describe($a)) ?><?= $id === 'network' ? ' · ' . e(__('für alle Websites, im Netzwerk-Dashboard')) : '' ?></span></span>
+        <span class="f-help"><?= e(Accounts::describe($a)) ?> · <?= e($id === 'network' ? __('gilt für: alle Websites (Netzwerk)') : __('gilt für: nur diese Website')) ?></span></span>
       <span class="mk-row__act">
         <span class="adm-badge adm-badge--<?= $ready ? 'ok' : 'warn' ?>"><?= e($ready ? __('bereit') : __('nicht eingerichtet')) ?></span>
         <?php if ($id !== 'network'): ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e($edit($id)) ?>"><?= e(__('Bearbeiten')) ?></a><?php endif; ?>
@@ -55,7 +65,7 @@ $edit = fn(string $id) => url('/admin/system/mail?konto=' . $id . '#konto-' . $i
     </div>
     <?php endforeach; ?>
   </div>
-  <p class="set-group__note"><?= e(__('Hat das gewählte Konto keinen gültigen Absender, versendet das E-Mail-Konto des Netzwerks (falls eingerichtet). Mails an Netzwerk-Konten gehen immer darüber.')) ?></p>
+  <p class="set-group__note"><?= e(__('Gilt nur für diese Website.')) ?> <?= e(__('Hat das gewählte Konto keinen gültigen Absender, versendet das E-Mail-Konto des Netzwerks (falls eingerichtet). Mails an Netzwerk-Konten gehen immer darüber.')) ?></p>
 </section>
 <?php endif; ?>
 </div>

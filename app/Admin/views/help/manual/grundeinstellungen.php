@@ -26,6 +26,23 @@
   <p>Darunter wählen Sie unter <b>Verwendung</b> (sobald es mehr als ein Konto gibt) je Zweck das Konto – gespeichert mit „Speichern“ wie alle Grundeinstellungen: <b>Konto &amp; Sicherheit</b> (Einladungen, Passwort), <b>Benachrichtigungen an die Redaktion</b>, <b>Nachrichten an Besucher</b> und <b>Newsletter</b>. Erweiterungen können weitere Zwecke ergänzen. Ohne Auswahl gilt „Standard“.</p>
   <p><b>E-Mail-Konto des Netzwerks</b> (Netzwerk-Dashboard, Karte „E-Mail-Konto des Netzwerks“ – nur Netzwerk-Administration): ein Konto für die ganze Installation. Darüber gehen alle Mails an Netzwerk-Konten und die Mails von Websites ohne eigenes Konto. Wählen Sie einen neutralen Absender (z. B. den Namen des Systems) – so verrät keine Mail einem Kunden, welche anderen Kunden die Installation nutzen. Mails an Netzwerk-Konten laufen nie über das Konto einer Kunden-Website. Fehlt das Netzwerk-Konto, weist die Prüfung (Health) darauf hin.</p>
   <p>Versandarten „sendmail“ und „PHP mail()“ gibt es nicht mehr: Sie werden oft als Spam eingestuft. Nutzen Sie SMTP oder einen Versanddienst.</p>
+  <h3 id="mail-uebersicht">E-Mail: welche Adresse gilt wofür</h3>
+  <p>Die Seite <b>Grundeinstellungen → E-Mail-Versand → Übersicht: welche Adresse gilt wofür</b> (auch oben auf der Seite „E-Mail-Konten“) zeigt für jede Art von E-Mail dieser Website, welcher Absender beim Versand <b>wirklich</b> verwendet wird, wer sie bekommt, wohin Antworten gehen, ob das Impressum angehängt wird und ob die Mail überhaupt hinausgeht (Test-Umleitung, Testumgebung). Geändert wird dort nichts – jede Zeile führt mit <b>Ändern</b> zur richtigen Einstellung. <b>Testen</b> schickt eine Testnachricht genau dieser Mailart an Ihre eigene Adresse, mit Absender, Antwortadresse und Impressum wie im Ernstfall.</p>
+  <p>Jede Einstellung trägt den Hinweis, für wen sie gilt: <b>nur diese Website</b> (Konten, Verwendung, Empfänger, Test-Umleitung, Impressum) oder <b>alle Websites (Netzwerk)</b> (das E-Mail-Konto des Netzwerks).</p>
+  <table class="adm-table">
+    <thead><tr><th>Mailart</th><th>Absender (Zweck → Konto)</th><th>Empfänger</th><th>Antworten an</th></tr></thead>
+    <tbody>
+      <tr><td>Einladung, Passwort vergessen, E-Mail-Änderung</td><td>Konto &amp; Sicherheit</td><td>die Person selbst – auch bei Test-Umleitung</td><td>„Antworten an“ des Kontos</td></tr>
+      <tr><td>Mails an Netzwerk-Konten (nur in Netzwerken)</td><td>E-Mail-Konto des Netzwerks, ohne dieses das Konto der Website</td><td>die Netzwerk-Administration</td><td>Netzwerk-Konto</td></tr>
+      <tr><td>Neue Anfrage, neuer Eintrag, Zustellung fehlgeschlagen</td><td>Benachrichtigungen an die Redaktion</td><td>„Benachrichtigung an“ der Tabelle, sonst „Empfänger für Benachrichtigungen“</td><td>Konto</td></tr>
+      <tr><td>Zustellung von Anfragen per E-Mail (mit Inhalt)</td><td>Benachrichtigungen an die Redaktion</td><td>Zustellung der Tabelle (ggf. je Feldwert)</td><td>E-Mail-Feld der Anfrage</td></tr>
+      <tr><td>Eingangsbestätigung</td><td>Nachrichten an Besucher</td><td>Adresse aus dem Formular</td><td>Konto</td></tr>
+      <tr><td>Integrität, Freigaben, Support, Chat</td><td>Benachrichtigungen an die Redaktion</td><td>Konten mit allen Rechten, Freigebende, Support-Team, erwähnte Person</td><td>Konto</td></tr>
+      <tr><td>Newsletter (Erweiterung)</td><td>Newsletter bzw. Zweck der Erweiterung</td><td>Verteiler</td><td>Konto bzw. Verteiler</td></tr>
+    </tbody>
+  </table>
+  <p><b>Rangfolge:</b> Mails an Netzwerk-Konten gehen über das Netzwerk-Konto. Sonst gilt das unter <b>Verwendung</b> gewählte Konto, ohne Wahl „Standard“. Ist dieses Konto nicht versandbereit (kein gültiger Absender, kein Server, „Deaktiviert“), springt das Netzwerk-Konto ein – die Übersicht markiert das als <b>Rückfall</b>. Zuletzt greifen Test-Umleitung und Testumgebung.</p>
+  <p><b>Im Netzwerk:</b> Netzwerk → E-Mail zeigt unter dem Netzwerk-Konto die Tabelle <b>„Welche Adresse gilt wofür – alle Websites“</b>: je Website der wirksame Absender je Zweck, Empfänger für Benachrichtigungen, Impressum und Zustellung; „Übersicht der Website“ öffnet die Seite dieser Website.</p>
 
   <h3 id="domain">Domain und Hauptadresse</h3>
   <p>Bei einer einzelnen Website (ohne Netzwerk) öffnet oben rechts der Knopf <b>Domain</b> die Liste der Adressen dieser Website:</p>

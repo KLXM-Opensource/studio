@@ -17,8 +17,8 @@ final class Purposes
     /** Zwecke des Cores: Schlüssel → [Beschriftung, Erklärung] */
     public const CORE = [
         'account' => ['Konto & Sicherheit', 'Einladungen, Passwort vergessen, E-Mail-Änderung, Hinweise zur Anmeldung.'],
-        'notify' => ['Benachrichtigungen an die Redaktion', 'Neue Anfragen und Einträge, Support, Chat, Freigaben, Testnachricht.'],
-        'visitor' => ['Nachrichten an Besucher', 'Eingangsbestätigungen von Formularen und Zustellung von Anfragen per E-Mail.'],
+        'notify' => ['Benachrichtigungen an die Redaktion', 'Neue Anfragen und Einträge, Zustellung von Anfragen per E-Mail, Integrität, Support, Chat, Freigaben, Testnachricht.'],
+        'visitor' => ['Nachrichten an Besucher', 'Eingangsbestätigungen von Formularen an Besucher.'],
         'newsletter' => ['Newsletter und Massenversand', 'Für Erweiterungen (z. B. Newsletter) – viele Empfänger; oft ein eigener Dienst über eine API.'],
     ];
 

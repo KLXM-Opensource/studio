@@ -11,6 +11,7 @@ use Core\Http\HttpException;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Mail\Accounts;
+use Core\Mail\Overview;
 use Core\Mail\Purposes;
 use Core\Mailer;
 use Core\Network\Network;
@@ -23,6 +24,7 @@ use Core\Network\Network;
 final class MailAccountsController extends AdminController
 {
     private const BASE = '/admin/system/mail';
+    private const OVERVIEW = '/admin/system/mail/uebersicht';
 
     /** Felder eines Kontos (Core\Fields, show_if je Versandart) */
     public static function fields(bool $network = false): array
@@ -169,14 +171,28 @@ final class MailAccountsController extends AdminController
             if ($acc['id'] !== 'network') app()->settings->set('sys.mail_routes', $routes);
         }
         if ($err) return ['error', $err];
-        return match (Mailer::$outcome) {
-            'sent' => ['success', __('Testnachricht an {to} übergeben.', ['to' => $to])],
-            'redirected' => ['success', __('Testnachricht an die Test-Umleitung gesendet (statt an {to}).', ['to' => $to])],
-            'dumped' => ['success', __('Testnachricht als Datei abgelegt (lokaler Test, mail_dump).')],
-            'logged' => ['info', $acc['transport'] === 'null' ? __('Versand ist bei diesem Konto deaktiviert – nur protokolliert.')
-                : __('Testumgebung: nicht versendet, nur protokolliert. Zum Testen eine Test-Umleitung eintragen (Grundeinstellungen → E-Mail-Versand). Der Versandweg ist eingerichtet.')],
-            default => ['error', __('Nicht zugestellt.')],
-        };
+        return Overview::outcome($to, $acc);
+    }
+
+    /**
+     * E-Mail-Übersicht „Welche Adresse gilt wofür“ (Core\Mail\Overview): je Mailart wirksamer Absender mit Herkunft, Empfänger,
+     * Antwortadresse, Impressum, Zustellung – nur lesend, Testnachricht je Mailart. Netzwerk-Mails nur für die Netzwerk-Administration.
+     */
+    public function overview(Request $r): Response
+    {
+        $u = $this->guard($r);
+        $netView = Overview::networkViewer();
+        return $this->view('system/mail-overview', ['rows' => Overview::rows($netView, self::canNetwork($u)), 'me' => $u,
+            'network' => Accounts::network(), 'netView' => $netView, 'canNetwork' => self::canNetwork($u), 'css' => ['css/mailoverview.css']]);
+    }
+
+    /** Testnachricht einer Mailart an die eigene Adresse (E-Mail-Übersicht) */
+    public function overviewTest(Request $r, string $type): Response
+    {
+        $u = $this->guard($r);
+        $t = Overview::type($type, Overview::networkViewer()) ?? throw new HttpException(404);
+        [$kind, $msg] = Overview::test($t, (string) $u['email'], !empty($r->post['real']));
+        return $this->back(self::OVERVIEW . '#art-' . preg_replace('~[^a-z0-9_-]~', '-', $type), $kind, $msg);
     }
 
     /** Netzwerk-Administration auf der Netzwerk-Website */

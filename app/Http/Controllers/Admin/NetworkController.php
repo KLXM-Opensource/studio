@@ -65,7 +65,7 @@ final class NetworkController extends AdminController
             'invites' => \Core\Invites::open(true), 'inviteLink' => is_array($inviteLink) ? $inviteLink : null, 'inviteOld' => is_array($old) ? $old : null,
             'log' => Network::recentLog($section === 'protokoll' ? 200 : 20), 'shared' => Stats::shared(), 'themes' => Theme::available(), 'me' => $user, 'newSite' => $newSite,
             'section' => $section, 'usage' => $usage, 'install' => $section === 'speicher' ? \Core\StorageUsage::installation() : null, 'logSite' => $r->str('website'), 'logQ' => $r->str('q'),
-            'css' => ['css/passkey.css', 'css/invite.css', 'css/network.css']]);
+            'css' => ['css/passkey.css', 'css/invite.css', 'css/network.css', ...($section === 'email' ? ['css/mailoverview.css'] : [])]]);
     }
 
     // ================================================================= Anmeldung auf anderen Websites

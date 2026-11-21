@@ -208,11 +208,24 @@ final class Accounts
      */
     public static function route(string $purpose, bool $network = false): array
     {
-        if ($network && ($n = self::network()) && self::ready($n)) return $n;
-        $id = self::routes()[$purpose] ?? 'standard';
-        $a = self::find($id) ?? self::standard();
-        if (!self::ready($a) && ($n = self::network()) && self::ready($n)) return $n;
-        return $a;
+        return self::resolve($purpose, $network, self::all(), self::routes(), self::network(), self::standard())['account'];
+    }
+
+    /**
+     * Rangfolge als reine Funktion – route() und die E-Mail-Übersicht (Core\Mail\Overview, auch für andere Websites des
+     * Netzwerks) nutzen dieselbe Regel. origin: network (Mail an ein Netzwerk-Konto über das Netzwerk-Konto), route (gewähltes
+     * Konto bzw. Standard), missing (Zuordnung zeigt auf ein fehlendes Konto → Standard), fallback (gewähltes Konto nicht
+     * versandbereit → Netzwerk-Konto), network-missing (Netzwerk-Mail ohne versandbereites Netzwerk-Konto → Konto der Website).
+     * @param array<string, array> $all Konten der Website (standard, weitere, ggf. network)  @param array<string, string> $routes Zweck → Konto
+     * @return array{account: array, origin: string}
+     */
+    public static function resolve(string $purpose, bool $network, array $all, array $routes, ?array $net, array $standard): array
+    {
+        if ($network && $net && self::ready($net)) return ['account' => $net, 'origin' => 'network'];
+        $id = $routes[$purpose] ?? 'standard';
+        $a = $all[$id] ?? $standard;
+        if (!self::ready($a) && $net && self::ready($net)) return ['account' => $net, 'origin' => 'fallback'];
+        return ['account' => $a, 'origin' => $network ? 'network-missing' : (isset($all[$id]) || $id === 'standard' ? 'route' : 'missing')];
     }
 
     /** Konto versandbereit (ohne Verbindungstest)? */
