@@ -162,7 +162,25 @@ final class Exposure
     /** Bezeichnung eines Ziels (Verwaltung) */
     public static function targetLabel(string $k): string
     {
-        return match ($k) { 'vcard' => __('Visitenkarte (vCard)'), 'ics' => __('Kalender (ICS)'), default => __('Website') };
+        return match ($k) { 'vcard' => __('Kontakt speichern (vCard)'), 'ics' => __('Kalender-Datei (ICS)'), default => __('Website') };
+    }
+
+    /** Kurzform eines Ziels für das Merkmal am Feld („Öffentlich · Website, vCard“) */
+    public static function targetShort(string $k): string
+    {
+        return match ($k) { 'vcard' => 'vCard', 'ics' => 'ICS', default => __('Website') };
+    }
+
+    /**
+     * Text des Merkmals zu reach(): „Öffentlich“ (bei mehreren Zielen der Tabelle mit Kurzform „· Website, vCard“), „Nur Ort“
+     * (Adresse) oder „Intern“. $tg = Ziele der Tabelle.
+     */
+    public static function reachText(array $r, array $tg): string
+    {
+        if (!$r['targets']) return __('Intern');
+        if ($r['scope'] === 'city') return __('Nur Ort');
+        if ($r['mode'] === 'item' || count($tg) < 2) return __('Öffentlich');
+        return __('Öffentlich') . ' · ' . implode(', ', array_map([self::class, 'targetShort'], $r['targets']));
     }
 
     /**
@@ -187,6 +205,66 @@ final class Exposure
     {
         foreach ((array) ($t['fields'] ?? []) as $f) if (!self::forApp($f, $app) && array_key_exists($f['name'], $e)) $e[$f['name']] = null;
         return $e;
+    }
+
+    /**
+     * Wohin gelangt ein Feld bzw. eine Angabe dieses Eintrags? Eine Stelle für alle Anzeigen der Redaktion (Merkmal am Feld,
+     * Zusammenfassung im Formularkopf, Listen) – dieselben Regeln wie publicEntry(), nur als Auskunft statt Bereinigung.
+     *  - $f = null: der Eintrag selbst (Kontakte: „Auf der Website zeigen“; sonst immer – Status/Zeitplan prüft der Aufrufer)
+     *  - $f: das Feld (Modus, Entscheidung je Eintrag in $e['_exposure'] bzw. Standard)
+     *  - $item: eine Angabe eines Mehrfachfeldes (Core\Combo::MULTI): Ziele des Feldes, nur wenn die Angabe freigegeben ist
+     * Nur Ziele, die für die Tabelle eine Rolle spielen (targets()). Rückgabe: targets = Liste der Ziele (leer = intern),
+     * mode = always|editor|never (Feld) bzw. item|entry, fixed = im Formular nicht umschaltbar (immer/nie, Tabellen-Designer),
+     * scope = Angabe: full|city|'' (Adresse „nur Ort“).
+     * @return array{targets: list<string>, mode: string, fixed: bool, scope: string}
+     */
+    public static function reach(array $t, ?array $f, array $e = [], ?array $item = null): array
+    {
+        $tg = self::targets($t);
+        if ($f === null) return ['targets' => self::visible($t, $e) ? $tg : [], 'mode' => 'entry', 'fixed' => false, 'scope' => ''];
+        return self::fieldReach($f, $e, $tg, $item);
+    }
+
+    /** reach() für ein Feld mit bekannten Zielen der Tabelle ($tg = targets($t)) – z. B. im Formular (Core\Fields) */
+    public static function fieldReach(array $f, array $e, array $tg, ?array $item = null): array
+    {
+        $mode = self::rule($f)['mode'];
+        $on = array_values(array_filter($tg, fn($k) => self::allowed($f, $e, $k)));
+        if ($item === null) return ['targets' => $on, 'mode' => $mode, 'fixed' => $mode !== 'editor', 'scope' => ''];
+        $scope = \Core\Combo::publicScope((string) ($f['type'] ?? ''), $item);
+        return ['targets' => $scope === '' ? [] : $on, 'mode' => 'item', 'fixed' => false, 'scope' => $scope];
+    }
+
+    /**
+     * Was von diesen Werten auf der Website steht (Formularkopf „Auf der Website: …“): Beschriftungen ausgefüllter Felder, die
+     * reach() für die Website freigibt; Mehrfachfelder je freigegebener Angabe als „Telefon (Mobil)“ bzw. „Adresse (…, nur Ort)“.
+     * Ja/Nein-Felder und das Feld „Auf der Website zeigen“ zählen nicht. Werte wie im Formular (gespeichert oder gesendet).
+     * @return list<string>
+     */
+    public static function webSummary(array $t, array $values): array
+    {
+        $out = [];
+        foreach (Tables::dataFields((array) ($t['fields'] ?? [])) as $f) {
+            $n = (string) ($f['name'] ?? '');
+            $type = (string) ($f['type'] ?? '');
+            if ($n === '' || !empty($f['legacy']) || $type === 'bool' || (self::perEntry($t) && $n === Kinds::PUBLIC_FIELD)) continue;
+            if (!in_array('web', self::reach($t, $f, $values)['targets'], true)) continue;
+            $label = Tables::label($f);
+            if (\Core\Combo::isMulti($type)) {
+                foreach (\Core\Combo::items($values[$n] ?? null) as $i) {
+                    if (\Core\Combo::itemText($type, $i) === '' && trim((string) ($i['city'] ?? '')) === '') continue;
+                    $r = self::reach($t, $f, $values, $i);
+                    if (!in_array('web', $r['targets'], true)) continue;
+                    $bits = array_filter([\Core\Combo::labelText($type, $i), $r['scope'] === 'city' ? __('nur Ort') : '']);
+                    $out[] = $label . ($bits ? ' (' . implode(', ', $bits) . ')' : '');
+                }
+                continue;
+            }
+            $v = $values[$n] ?? null;
+            if ($v === null || $v === '' || $v === [] || $v === false || (is_string($v) && trim(strip_tags($v)) === '')) continue;
+            $out[] = $label;
+        }
+        return $out;
     }
 
     /** Ist die Tabelle ein Adressbuch (Freigabe je Kontakt)? */

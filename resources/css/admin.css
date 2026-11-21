@@ -873,7 +873,7 @@ img.media-vthumb{object-fit:cover}
 .dt-view{margin-left:auto;padding:2px 7px;border-radius:6px;font-weight:400;color:var(--adm-t3)!important;opacity:0}
 .dt-table tr:hover .dt-view{opacity:1}
 /* Aktion je Zeile aus Erweiterungen (Extension::tableActions, Core\Slots) */
-.dt-rowact{margin-left:6px;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:600;color:var(--adm-a)!important;background:var(--adm-bg);white-space:nowrap}
+.dt-rowact{margin-left:6px;padding:2px 7px;border-radius:6px;font-size:12px;font-weight:600;color:var(--adm-a-ink,var(--adm-a))!important;background:var(--adm-bg);white-space:nowrap}
 .dt-rowact:hover,.dt-rowact:focus-visible{background:var(--adm-line)}
 .dt-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--adm-t2)}
 .dt-status::before{content:"";width:8px;height:8px;border-radius:50%;background:#32D74B}
@@ -3832,31 +3832,94 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rep-row .rep-row__fields:not(:has([name$="[street]"])){display:flex;flex-wrap:wrap;align-items:flex-start}
 .rep-row .rep-row__fields:not(:has([name$="[street]"]))>*{flex:0 0 auto}
 .rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f-vis,.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:first-child{flex:0 1 150px;min-width:110px}
-.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:not(.f--bool):not(:first-child){flex:1 1 220px;min-width:0}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:not(.f--expitem):not(:first-child){flex:1 1 220px;min-width:0}
 .rep-row .rep-row__fields>.f,.rep-row .rep-row__fields>.f-vis>.f{grid-column:auto;margin:0}
 .rep-row .rep-row__fields>.f-vis{grid-column:1/2}
 .rep-row .rep-row__fields .f>label:not(.f-check),.rep-row .rep-row__fields .f>.f-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.rep-row .rep-row__fields>.f--bool{align-self:center;padding:6px 10px;border:1px solid var(--adm-line);border-radius:var(--adm-ctl-r,8px);white-space:nowrap}
-.rep-row .rep-row__fields>.f--bool:has(input:checked){background:var(--adm-ok-bg);border-color:var(--adm-ok);color:var(--adm-ok)}
-.rep-row .rep-row__tools{position:static;display:flex;align-self:center}
+.rep-row .rep-row__tools{position:static;display:flex;align-self:center;background:none}
 .rep-row .rep-row__fields:has([name$="[street]"]){grid-template-columns:repeat(2,minmax(0,1fr))}
 .rep-row .rep-row__fields:has([name$="[street]"])>.f{grid-column:1/-1}
 .rep-row .rep-row__fields:has([name$="[street]"])>.f--half{grid-column:auto}
 @media (max-width:700px){.rep-row .rep-row__fields{grid-template-columns:1fr}.rep-row .rep-row__fields>.f-vis{grid-column:auto}}
 
-/* Freigabe je Eintrag (Core\Data\Exposure, Modus „Redaktion entscheidet“): Weltkugel mit Menü am Feld, Zustand per :has ohne Skript */
-.f-exp{position:relative}
-.f-exp>.f{margin-bottom:4px}
-.f-exp__menu{margin:0 0 14px}
-.f-exp__btn{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--adm-line);border-radius:999px;font-size:12px;font-weight:600;color:var(--adm-t2);cursor:pointer;list-style:none}
+/* Sichtbarkeit (Core\Data\Exposure, Core\Fields::renderExpose): ein Merkmal an jedem Feld und jeder Angabe – Weltkugel „Öffentlich“
+   (grün) bzw. Schloss „Intern“ (grau), immer rechts im Feldkopf bzw. rechts in der Zeile. Fest (immer/nie) als Hinweis, umschaltbar
+   als Menü (<details>, ohne Skript; Zustand per :has). Interne Felder leicht getönt, damit nichts Privates in ein öffentliches Feld gerät. */
+.adm-fields>.f-exp,.f-sec__body>.f-exp{grid-column:1/-1}
+.adm-fields>.f-exp.f--half,.f-sec__body>.f-exp.f--half{grid-column:auto}
+@media (max-width:700px){.adm-fields>.f-exp.f--half,.f-sec__body>.f-exp.f--half{grid-column:1/-1}}
+.f-exp{position:relative;border-radius:8px;container:fexp/inline-size}
+.f-exp:has(>.f[hidden]){display:none}
+.f-exp>.f>label:first-child,.f-exp>.f>legend,.f-exp>.f>.f-label,.f-exp>.f .rep-head>.f-label,.f-exp>.f.f--bool>.f-check{padding-right:var(--exp-w,8.5rem)}
+.f-exp[data-exp-w=s]{--exp-w:7.5rem}.f-exp[data-exp-w=m]{--exp-w:11rem}.f-exp[data-exp-w=l]{--exp-w:15.5rem}
+.f-exp__mark{position:absolute;top:-2px;right:0;z-index:3;margin:0}
+.f-exp__btn,.f-exp__tag{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-height:24px;padding:2px 9px;border:1px solid var(--adm-line);border-radius:999px;background:var(--adm-fill);color:var(--adm-t2);font-size:12px;font-weight:600;line-height:18px;white-space:nowrap;list-style:none}
+.f-exp__btn{cursor:pointer}
 .f-exp__btn::-webkit-details-marker{display:none}
-.f-exp__btn .ico{width:14px;height:14px}
-.f-exp__on{display:none}
-.f-exp:has([data-expose-target]:checked) .f-exp__btn{background:var(--adm-ok-bg);border-color:var(--adm-ok);color:var(--adm-ok)}
-.f-exp:has([data-expose-target]:checked) .f-exp__on{display:inline}
-.f-exp:has([data-expose-target]:checked) .f-exp__off{display:none}
-.f-exp__pop{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0;padding:10px 12px;border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface)}
-.f-exp__pop legend{padding:0 4px;font-size:12px;color:var(--adm-t2)}
+.f-exp__btn::marker{content:""}
+.f-exp__btn:focus-visible{outline:2px solid var(--adm-a-ink,var(--adm-a));outline-offset:2px}
+.f-exp__btn .ico,.f-exp__tag .ico{width:14px;height:14px;flex:none}
+.f-exp__caret .ico{width:11px;height:11px}
+.f-exp__menu[open] .f-exp__caret{transform:rotate(180deg)}
+/* öffentlich: fest (is-public) bzw. mindestens ein Ziel angehakt; Angabe: „Öffentlich“ oder „Nur Ort“ gewählt */
+.f-exp.is-public .f-exp__tag,.f-exp--editor:has([data-expose-target]:checked)>.f-exp__menu>.f-exp__btn,
+.f-exp--item:has([data-expose-item]:checked:not([value="0"]))>.f-exp__btn{border-color:color-mix(in srgb,var(--adm-ok) 45%,transparent);background:var(--adm-ok-bg);color:var(--adm-ok)}
+.f-exp__on,.f-exp__ico--on,.f-exp__st{display:none}
+.f-exp--editor:has([data-expose-target]:checked) :is(.f-exp__on,.f-exp__ico--on){display:inline-flex}
+.f-exp--editor:has([data-expose-target]:checked) :is(.f-exp__off,.f-exp__ico--off){display:none}
+.f-exp--item:has([data-expose-item]:checked:not([value="0"])) .f-exp__ico--on{display:inline-flex}
+.f-exp--item:has([data-expose-item]:checked:not([value="0"])) .f-exp__ico--off{display:none}
+.f-exp--item:has([data-expose-item][value="1"]:checked) .f-exp__st[data-st="1"],.f-exp--item:has([data-expose-item][value="city"]:checked) .f-exp__st[data-st="city"],
+.f-exp--item:has([data-expose-item][value="0"]:checked) .f-exp__st[data-st="0"],.f-exp--item:not(:has([data-expose-item]:checked)) .f-exp__st[data-st="0"]{display:inline}
+/* intern: getönte Fläche (box-shadow statt Innenabstand – das Raster bleibt gleich) */
+.f-exp.is-internal,.f-exp--editor:not(:has([data-expose-target]:checked)){margin:0 -8px 8px;padding:6px 8px 2px;background:var(--adm-fill)}
+:is(.f-exp.is-internal,.f-exp--editor:not(:has([data-expose-target]:checked)))>.f-exp__mark{top:4px;right:8px}
+.f-exp.is-internal :is(input:not([type=checkbox]):not([type=radio]),textarea,select),.f-exp--editor:not(:has([data-expose-target]:checked))>.f :is(input:not([type=checkbox]):not([type=radio]),textarea,select){background-color:var(--adm-card,#fff)}
+/* Schmales Feld (halbe Breite, Seitenleiste): Merkmal in eigener Zeile über der Beschriftung, rechtsbündig */
+@container fexp (max-width:380px){.f-exp[data-exp-w=l]>.f-exp__mark.f-exp__mark{position:relative;top:auto;right:auto;display:block;margin:0 0 4px;text-align:right}.f-exp[data-exp-w=l]>.f>:is(label:first-child,legend,.f-label,.f-check){padding-right:0}}
+@container fexp (max-width:300px){.f-exp[data-exp-w=m]>.f-exp__mark.f-exp__mark{position:relative;top:auto;right:auto;display:block;margin:0 0 4px;text-align:right}.f-exp[data-exp-w=m]>.f>:is(label:first-child,legend,.f-label,.f-check){padding-right:0}}
+@container fexp (max-width:200px){.f-exp[data-exp-w=s]>.f-exp__mark.f-exp__mark{position:relative;top:auto;right:auto;display:block;margin:0 0 4px;text-align:right}.f-exp[data-exp-w=s]>.f>:is(label:first-child,legend,.f-label,.f-check){padding-right:0}}
+.f-exp__pop{position:absolute;top:calc(100% + 6px);right:0;z-index:20;display:grid;gap:6px;min-width:230px;max-width:min(320px,80vw);margin:0;padding:10px 12px 8px;border:1px solid var(--adm-line);border-radius:10px;background:var(--adm-card,#fff);box-shadow:0 8px 24px rgba(0,0,0,.16);white-space:normal}
+.f-exp__pop legend{float:left;width:100%;margin-bottom:2px;padding:0;font-size:12px;font-weight:600;color:var(--adm-t2)}
+.f-exp__pop .f-check{font-weight:500}
+.f-exp__pop .f-help{margin:2px 0 0;font-size:12px}
+/* Mehrfachzeilen: Merkmal rechts in der Zeile; interne Angabe getönt */
+.rep-row .rep-row__fields>.f--expitem{flex:0 0 auto;align-self:center;position:relative;margin:0}
+.f--expitem>.f-exp__menu{position:relative}
+.rep-row:has(.f-exp--item [data-expose-item][value="0"]:checked){border-radius:8px;background:var(--adm-fill);box-shadow:0 0 0 4px var(--adm-fill)}
+.rep-row:has(.f-exp--item [data-expose-item][value="0"]:checked) :is(input:not([type=radio]),select){background-color:var(--adm-card,#fff)}
+.rep-row .rep-row__fields:has([name$="[street]"])>.f--expitem{grid-column:2/3;grid-row:1;justify-self:end}
+.rep-row .rep-row__fields:has([name$="[street]"])>.f:first-child{grid-column:1/2;grid-row:1}
+/* Schmale Spalte (Telefon, Seitenleiste): Beschriftung und Merkmal in einer Zeile, darunter der Wert über die ganze Breite */
+.f-exp .rep-items{container-type:inline-size}
+@container (max-width:520px){
+  .rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f--expitem{order:1;margin-left:auto}
+  .rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:not(.f--expitem):not(:first-child){order:2;flex:1 1 100%;margin-top:6px}
+  .rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f-vis{order:3;flex:1 1 100%}
+}
+/* Formularkopf: „Auf der Website: …“ bzw. „nicht auf der Website“ (app/Admin/views/data/_visibility.php) */
+.f-pubsum{display:grid;gap:6px;margin:0 0 18px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--adm-ok) 35%,transparent);border-radius:10px;background:var(--adm-ok-bg);color:var(--adm-ink)}
+.f-pubsum p{display:flex;gap:8px;align-items:flex-start;margin:0;font-size:13px;line-height:1.45}
+.f-pubsum p>.ico{flex:none;width:16px;height:16px;margin-top:2px}
+.f-pubsum__on>.ico{color:var(--adm-ok)}
+.f-pubsum__k{font-weight:700;margin-right:4px}
+.f-pubsum.is-off{border-color:color-mix(in srgb,var(--adm-warn) 45%,transparent);background:var(--adm-warn-bg)}
+.f-pubsum.is-off .f-pubsum__on>.ico{color:var(--adm-t2)}
+.f-pubsum__off{color:var(--adm-ink)}
+.f-pubsum__off>.ico{color:var(--adm-warn)}
+.f-pubsum__legend{flex-wrap:wrap;align-items:center!important;gap:4px 6px!important;color:var(--adm-t2);font-size:12px!important}
+.f-pubsum__chip{display:inline-flex;align-items:center;gap:4px;padding:0 7px;border:1px solid var(--adm-line);border-radius:999px;background:var(--adm-fill);color:var(--adm-t2);font-weight:600;line-height:18px}
+.f-pubsum__chip.is-public{border-color:color-mix(in srgb,var(--adm-ok) 45%,transparent);background:var(--adm-card,#fff);color:var(--adm-ok)}
+.f-pubsum__chip .ico{width:12px;height:12px}
+.f-pubsum [hidden]{display:none}
+/* Listen: Sichtbarkeit des Eintrags und je Angabe (data/entries.php) */
+.dt-vis{display:inline-flex;align-items:center;gap:4px;padding:0 8px;border:1px solid var(--adm-line);border-radius:999px;background:var(--adm-fill);color:var(--adm-t2);font-size:12px;font-weight:600;line-height:20px;white-space:nowrap}
+.dt-vis.is-public{border-color:color-mix(in srgb,var(--adm-ok) 45%,transparent);background:var(--adm-ok-bg);color:var(--adm-ok)}
+.dt-vis .ico{width:13px;height:13px}
+.dt-items{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.dt-items li{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.dt-items .ico{flex:none;width:13px;height:13px;color:var(--adm-t3)}
+.dt-items .is-public .ico{color:var(--adm-ok)}
 
 /* Tabellen-Designer: Freigabe je Feld */
 .dt-field__row.dt-field__expose{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 20px}

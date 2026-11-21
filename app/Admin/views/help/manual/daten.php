@@ -132,17 +132,29 @@
   <p>Im Tabellen-Designer legen Sie an jedem Feld unter <b>Sichtbarkeit</b> fest, wo eine Angabe öffentlich erscheint – getrennt für drei Ziele:</p>
   <ul>
     <li><b>Website</b> – Blöcke, Detailseite, Angaben für Suchmaschinen, Website-Suche und KI-Chat, RSS,</li>
-    <li><b>Visitenkarte (vCard)</b> – „Kontakt speichern“ auf der Website,</li>
-    <li><b>Kalender (ICS)</b> – Kalender-Datei, Kalender-Abo und „Termin speichern“.</li>
+    <li><b>Kontakt speichern (vCard)</b> – die Visitenkarte zum Herunterladen auf der Website,</li>
+    <li><b>Kalender-Datei (ICS)</b> – Kalender-Datei, Kalender-Abo und „Termin speichern“.</li>
   </ul>
-  <p>Drei Möglichkeiten: <b>Immer öffentlich</b> (in den angehakten Zielen – so verhalten sich alle Felder, für die Sie nichts einstellen), <b>Redaktion entscheidet je Eintrag</b> und <b>Nie öffentlich</b> (wie oben). Bei „Redaktion entscheidet“ legen die Häkchen den Standard für neue Einträge fest; im Eintrag steht dann direkt unter dem Feld ein kleiner Schalter mit Weltkugel („Öffentlich“ bzw. „Intern“). Ein Klick öffnet die Ziele – so steht z. B. die Mobilnummer der Vorsitzenden in ihrer Visitenkarte, aber nicht auf der Website. Bestehende Einträge behalten den Standard, bis Sie den Schalter ändern.</p>
+  <p>Drei Möglichkeiten: <b>Immer öffentlich</b> (in den angehakten Zielen – so verhalten sich alle Felder, für die Sie nichts einstellen), <b>Redaktion entscheidet je Eintrag</b> und <b>Nie öffentlich</b> (wie oben). Bei „Redaktion entscheidet“ legen die Häkchen den Standard für neue Einträge fest; im Eintrag ist das Merkmal rechts im Feldkopf dann ein Menü („Öffentlich“ bzw. „Intern“, siehe unten). Ein Klick öffnet die Ziele – so steht z. B. die Mobilnummer der Vorsitzenden in ihrer Visitenkarte, aber nicht auf der Website. Bestehende Einträge behalten den Standard, bis Sie den Schalter ändern.</p>
   <p>Beispiele: Mobilnummer „Redaktion entscheidet“ (Website aus, Visitenkarte an); interne Notiz „Nie öffentlich“; „Vita“ oder „Über mich“ „Immer öffentlich“ nur mit Haken bei Website – solche Felder erscheinen auf der Detailseite, gehen aber nie in Visitenkarten, Kalender-Dateien oder Adressbuch- und Kalender-Apps. In der Verwaltung, über die Schnittstelle und in den Apps der Redaktion sehen Berechtigte alle übrigen Angaben weiter.</p>
+
+  <h3 id="oeffentlich-erkennen">Auf einen Blick: Was ist öffentlich?</h3>
+  <p>Im Formular eines Eintrags – in der Verwaltung und in der Seitenleiste „Eintrag bearbeiten“ auf der Website – trägt <b>jedes Feld und jede einzelne Angabe dasselbe Merkmal</b>, immer an derselben Stelle: rechts im Feldkopf bzw. rechts in der Zeile einer Nummer, E-Mail-Adresse oder Anschrift.</p>
+  <ul>
+    <li><b>Weltkugel „Öffentlich“</b> (grün) – die Angabe erscheint auf der Website. Haben Visitenkarte oder Kalender-Datei für die Tabelle eine Bedeutung, steht dahinter, wohin genau: „Öffentlich · Website, vCard“.</li>
+    <li><b>Schloss „Intern“</b> (grau) – die Angabe sieht nur die Redaktion. Interne Felder sind zusätzlich leicht grau hinterlegt, damit niemand aus Versehen Privates in ein öffentliches Feld schreibt.</li>
+    <li><b>Nur Ort</b> – bei Adressen: auf der Website steht nur der Ort, ohne Straße und Postleitzahl.</li>
+  </ul>
+  <p>Ist das Feld im Tabellen-Designer auf „Immer öffentlich“ oder „Nie öffentlich“ festgelegt, ist das Merkmal ein reiner Hinweis (der Mauszeiger darauf nennt den Grund). Bei „Redaktion entscheidet“ und bei jeder Angabe in Telefon, E-Mail, Adresse und Web öffnet ein Klick (oder Eingabetaste/Leertaste) ein kleines Menü: Häkchen für <b>Website</b>, <b>Kontakt speichern (vCard)</b> und <b>Kalender-Datei (ICS)</b> bzw. die Wahl <b>Öffentlich / Nur Ort / Intern</b>. Escape oder ein Klick daneben schließt das Menü.</p>
+  <p>Oben im Formular fasst ein Kasten zusammen, was die Website von diesem Eintrag zeigt, z. B. <b>„Auf der Website: Anzeigename, Funktion, Telefon (Geschäftsstelle), E-Mail (Arbeit), Adresse (Geschäftsstelle, nur Ort)“</b>. Die Liste ändert sich beim Tippen und Umschalten mit. Ist „Auf der Website zeigen“ aus oder der Eintrag ein Entwurf, wird der Kasten gelb und sagt deutlich: <b>„Dieser Eintrag ist nicht auf der Website.“</b> – darunter steht, was erscheinen würde.</p>
+  <p><i>Bild: Formular eines Kontakts. Oben der grüne Kasten „Auf der Website: …“, darunter die Felder, jedes rechts oben mit der Pille „Öffentlich · Website, vCard“; bei Telefon zwei Zeilen – „Geschäftsstelle“ mit grüner Weltkugel „Öffentlich“, „Mobil“ grau hinterlegt mit Schloss „Intern“; Geburtstag und Notiz grau mit „Intern“.</i></p>
+  <p>Auch die Liste der Einträge zeigt es: Adressbücher haben eine Spalte <b>Website</b> („Öffentlich“ bzw. „Intern“), und in Spalten mit Telefon, E-Mail, Adresse oder Web steht vor jeder Angabe die Weltkugel oder das Schloss.</p>
 
   <h3 id="adressbuch">Adressbuch: Kontakte mit Telefon, E-Mail und Freigabe</h3>
   <p>Für Ansprechpersonen, Vorstand, Mitglieder oder Partner gibt es die Vorlage <b>Adressbuch</b> (Daten → Neue Tabelle). Sie bringt feste Grundfelder mit, wie Sie sie aus Kontakte-Apps kennen: Titel, Vor- und Nachname, Funktion, Organisation, Foto, <b>Telefon, E-Mail, Adresse und Web</b> – jeweils beliebig oft mit Beschriftung (Mobil, Geschäftsstelle, Arbeit, Privat … oder eine eigene) –, Geburtstag, Listen (z. B. „Vorstand“, „Presse“) und Notiz. Eigene Felder ergänzen Sie wie gewohnt; die Grundfelder lassen sich umbenennen, aber nicht löschen.</p>
   <ul>
     <li><b>Auf der Website zeigen:</b> Nur Kontakte mit diesem Haken erscheinen auf der Website – neue Kontakte sind zuerst intern.</li>
-    <li><b>Freigabe je Angabe:</b> Jede Nummer, E-Mail-Adresse und Anschrift hat ihren eigenen Schalter „Öffentlich“ (bei Adressen auch „Nur Ort öffentlich“). Die Dienstnummer kann auf der Website stehen, die Mobilnummer bleibt intern.</li>
+    <li><b>Freigabe je Angabe:</b> Jede Nummer, E-Mail-Adresse und Anschrift hat rechts in ihrer Zeile dasselbe Merkmal wie die Felder – „Öffentlich“ oder „Intern“, bei Adressen zusätzlich „Nur Ort“. Die Dienstnummer kann auf der Website stehen, die Mobilnummer bleibt intern.</li>
     <li><b>Überall von selbst:</b> Die Blöcke „Personen“, „Datenliste“ und „Datensatz-Felder“, die Detailseite und „Kontakt speichern“ nutzen das Adressbuch ohne weitere Einstellung – mit Name, Funktion, Foto und den freigegebenen Angaben.</li>
     <li><b>Für die Website:</b> Felder, die nur auf der Website erscheinen (z. B. „Vita“), stehen im Eintrag im Abschnitt „Für die Website“.</li>
     <li><b>Kontakt-Feld:</b> In anderen Tabellen verknüpfen Sie Einträge mit Kontakten über ein Feld „Verknüpfung“ mit einer Tabelle aus der Gruppe „Adressbücher“.</li>

@@ -74,6 +74,17 @@ final class ContactsSelfTest
             $eq('Anzeigename gebildet, neu = nicht freigegeben', [$ra['name'] ?? null, $rb['oeffentlich'] ?? null], ['Erika Musterfrau', false]);
             $eq('Entscheidung je Eintrag gespeichert (Standard für B)', [Exposure::allowed(Tables::field($t, 'durchwahl') ?? [], $ra), Exposure::allowed(Tables::field($t, 'durchwahl') ?? [], $rb)], [true, false]);
             $eq('Verwaltung sieht alles', [count(Entries::query($t, ['status' => 'all'])), str_contains((string) json_encode($ra['telefon']), '5550188')], [2, true]);
+            // Sichtbarkeit im Formular (Exposure::reach/webSummary, Merkmal in Core\Fields): eine Auskunft, dieselben Regeln wie publicEntry
+            $tel = Tables::field($t, 'telefon') ?? [];
+            $eq('reach: Eintrag, Feld fest, Angaben, Redaktion entscheidet', [Exposure::reach($t, null, $ra)['targets'], Exposure::reach($t, null, $rb)['targets'],
+                Exposure::reach($t, $tel, $ra)['fixed'], Exposure::reach($t, $tel, $ra, Combo::items($ra['telefon'])[1])['targets'],
+                Exposure::reach($t, Tables::field($t, 'durchwahl') ?? [], $ra)['targets'], Exposure::reach($t, Tables::field($t, 'notiz') ?? [], $ra)['targets']],
+                [['web', 'vcard'], [], true, [], ['web'], []]);
+            $sum = Exposure::webSummary($t, $ra);
+            $eq('webSummary: freigegebene Angaben, keine Mobilnummer/Notiz', [in_array(__('Telefon') . ' (' . __('Geschäftsstelle') . ')', $sum, true), (bool) preg_grep('~Mobil|Notiz~', $sum)], [true, false]);
+            $form = \Core\Fields::renderForm(Entries::formSchema($t), $ra, [], 'f');
+            $eq('Formular: Merkmal an jedem Feld, Menü je Angabe, kein Häkchen „Öffentlich“ mehr', [substr_count($form, 'data-expose ') >= 10, substr_count($form, 'data-expose-item') >= 4,
+                str_contains($form, 'name="f[telefon][0][public]" value="1" checked'), str_contains($form, 'f[_exposure][durchwahl][web]')], [true, true, true, true]);
 
             // Website-Anfrage: Abfragen (auch von Kits) liefern nur freigegebene Kontakte
             app()->request = new Request('GET', '/' . $t['settings']['route'], [], [], [], []);
@@ -120,7 +131,9 @@ final class ContactsSelfTest
                 $eq('CardDAV: Redaktion sieht Mobilnummer (CELL), keine Vita, Beschriftung per X-ABLabel', [str_contains($card, '5550188'), str_contains($card, self::VITA), str_contains($card, 'TEL;TYPE=CELL'), (bool) preg_match('~item\d+\.X-ABLABEL:Geschäftsstelle~', $card)], [true, false, true, true]);
                 [$in] = \Klxm\Dav\CardBackend::parse($t, $ra, str_replace(self::WORK, '02841 5550199', $card));
                 $pub = array_column((array) ($in['telefon'] ?? []), 'public', 'value');
-                $eq('CardDAV: geänderte Nummer wird intern, unveränderte behält die Freigabe', [$pub['02841 5550199'] ?? null, $pub[self::MOBILE] ?? null], [false, false]);
+                // Freigabe als Combo::publicScope ('' = intern) – gespeichert als '0' (Auswahl), aus der App neu als false
+                $scope = fn($v) => $v === null ? null : Combo::publicScope('phones', ['public' => $v]);
+                $eq('CardDAV: geänderte Nummer wird intern, unveränderte behält die Freigabe', [$scope($pub['02841 5550199'] ?? null), $scope($pub[self::MOBILE] ?? null)], ['', '']);
                 $eq('CardDAV: Vita und Freigaben schreibt die App nie', [array_key_exists('vita', $in), array_key_exists(Exposure::STATE, $in), array_key_exists('oeffentlich', $in)], [false, false, false]);
             }
 
