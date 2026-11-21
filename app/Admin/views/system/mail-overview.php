@@ -34,7 +34,7 @@ $multi = \Core\Sites::multi();
         <?php if ($multi): ?>
         <div class="mo-scope__box mo-scope__box--net">
           <p class="mo-scope__tag mo-tag mo-tag--net"><?= e(__('alle Websites (Netzwerk)')) ?></p>
-          <p class="f-help"><?= e($network ? __('Netzwerk-Konto: {how}', ['how' => Accounts::describe($network)]) : __('Kein Netzwerk-Konto eingerichtet.')) ?>
+          <p class="f-help"><?= e($network ? __('Netzwerk-Konto: {how}', ['how' => Accounts::describe($network)]) . '.' : __('Kein Netzwerk-Konto eingerichtet.')) ?>
             <?= e(__('Es versendet die Mails an Netzwerk-Konten und springt ein, wenn das Konto dieser Website nicht versandbereit ist.')) ?>
             <?php if ($canNetwork): ?><a href="<?= e(url('/admin/network/email')) ?>"><?= e(__('Netzwerk → E-Mail')) ?></a><?php else: ?><?= e(__('Eingerichtet von der Netzwerk-Administration.')) ?><?php endif; ?></p>
         </div>
