@@ -494,11 +494,13 @@ export function buildPanels(ed) {
     const top = drawnChildren(ed.root);
     const many = ed.root.querySelectorAll('*').length > 400;
     const focusPath = document.activeElement?.closest?.('.ge-lay')?.dataset.path;
+    const focusOn = !!document.activeElement?.closest?.('.ge-lay.is-on');   // Fokus lag auf einer gewählten Ebene
     tree.innerHTML = top.length ? [...top].reverse().map(el => rowHtml(el, 0, many)).join('') : `<li class="ge-lay__empty">${esc(t('Noch leer – Werkzeug links wählen oder Baustein aus der Bibliothek ziehen.'))}</li>`;
     const items = [...tree.querySelectorAll('[role=treeitem]')];
-    const cur = items.find(li => li.dataset.path === focusPath) || items.find(li => li.classList.contains('is-on')) || items[0];
+    // gewählte Ebene, die (z. B. per ⌘]) ihren Platz gewechselt hat: Fokus wandert mit
+    const cur = (focusOn && items.find(li => li.classList.contains('is-on'))) || items.find(li => li.dataset.path === focusPath) || items.find(li => li.classList.contains('is-on')) || items[0];
     if (cur) cur.tabIndex = 0;
-    if (focusPath && cur && tree.contains(document.activeElement) === false && cur.dataset.path === focusPath) cur.focus();
+    if (focusPath && cur && tree.contains(document.activeElement) === false && (cur.dataset.path === focusPath || focusOn)) cur.focus();
     layPanel.querySelectorAll('[data-la]').forEach(b => { b.disabled = !ed.sel.length; });
   }
   const elOf = li => ed.byPath(li.dataset.path.split('.').filter(x => x !== '').map(Number));
@@ -507,6 +509,9 @@ export function buildPanels(ed) {
     if (!li) return;
     const el = elOf(li);
     if (!el) return;
+    // Doppelklick auf den Namen = umbenennen (am zweiten Klick erkannt: der erste baut die Liste neu auf, ein dblclick-Ereignis
+    // träfe den Namen dann nicht mehr)
+    if (e.detail === 2 && e.target.closest('.ge-lay__name')) { rename(li); return; }
     if (e.target.closest('[data-exp]')) { const k = li.dataset.path; expanded.has(k) || li.getAttribute('aria-expanded') === 'true' ? (expanded.delete(k), li.setAttribute('aria-expanded', 'false')) : expanded.add(k); if (li.getAttribute('aria-expanded') === 'false') { /* zugeklappt */ } refreshLayers(); return; }
     if (e.target.closest('[data-lock]')) { el.getAttribute('data-locked') === '1' ? el.removeAttribute('data-locked') : el.setAttribute('data-locked', '1'); if (isLocked(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isLocked(el) ? t('Gesperrt') : t('Entsperrt')); return; }
     if (e.target.closest('[data-eye]')) { isHidden(el) ? (setProp(el, 'display', null)) : setProp(el, 'display', 'none'); if (isHidden(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isHidden(el) ? t('Ausgeblendet') : t('Eingeblendet')); return; }
@@ -518,10 +523,7 @@ export function buildPanels(ed) {
     if (e.shiftKey || e.metaKey || e.ctrlKey) ed.select(ed.sel.includes(el) ? ed.sel.filter(s => s !== el) : [...ed.sel, el]);
     else ed.select([el]);
   });
-  tree.addEventListener('dblclick', e => {
-    const li = e.target.closest('[role=treeitem]');
-    if (li && e.target.closest('.ge-lay__name')) rename(li);
-  });
+
   tree.addEventListener('keydown', e => {
     const items = [...tree.querySelectorAll('[role=treeitem]')], li = e.target.closest('[role=treeitem]');
     if (!li) return;

@@ -387,6 +387,9 @@ final class Svg
                 continue;
             }
             if (!in_array($name, self::ELEMENTS, true)) { $this->other++; continue; }   // metadata, font, view …
+            // requiredExtensions="…" ist in Browsern nie erfüllt: solche Elemente zeichnen nichts (in <switch> greift die nächste
+            // Alternative). Ohne das Attribut würden sie plötzlich sichtbar – deshalb ganz weglassen.
+            if (trim($c->getAttribute('requiredExtensions')) !== '') { $this->other++; continue; }
             if ($name === 'style') {
                 $css = $this->sheet($c->textContent, 0);
                 if (trim($css) !== '') $dst->appendChild($doc->createElementNS(self::NS, 'style'))->appendChild($doc->createTextNode($css));
@@ -830,6 +833,8 @@ final class Svg
         $t(!str_contains($r['svg'], 'unused') && !str_contains($r['svg'], 'nie') && !str_contains($r['svg'], '<g'), 'ungenutzte ids/Definitionen und leere Gruppen entfernt');
         $r = self::clean('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><defs><linearGradient id="a"><stop offset="0" stop-color="red"/></linearGradient><linearGradient id="b" href="#a"/></defs><rect width="10" height="10" fill="url(#b)"/></svg>');
         $t(str_contains($r['svg'], 'id="a"') && str_contains($r['svg'], 'id="b"'), 'Verlaufskette (href) bleibt erhalten');
+        $r = self::clean('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><switch><rect requiredExtensions="http://example.org/ext" width="10" height="10" fill="red"/><rect width="10" height="10" fill="green"/></switch></svg>');
+        $t(!str_contains($r['svg'], 'red') && str_contains($r['svg'], 'green'), '<switch>: Alternative mit requiredExtensions entfällt (Browser zeigen sie nie)');
         return ['ok' => $ok, 'fails' => $fails, 'log' => $log];
     }
 

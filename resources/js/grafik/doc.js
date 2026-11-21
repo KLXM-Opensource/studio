@@ -231,6 +231,35 @@ export function remapIds(frag, root) {
   }
 }
 
+/**
+ * Klassen eines eingefügten Stücks mit eigenem <style> eindeutig machen: Illustrator & Co. nennen sie immer .cls-1, .st0 …
+ * – ohne Umbenennen würde die Regel der neuen Grafik die vorhandenen Formen umfärben (ein <style> wirkt im ganzen Dokument).
+ */
+export function remapClasses(frag, root) {
+  const styles = frag.querySelectorAll('style');
+  if (!styles.length) return;
+  const names = new Set();
+  for (const n of [frag, ...frag.querySelectorAll('[class]')]) for (const c of (n.getAttribute('class') || '').split(/\s+/)) if (c) names.add(c);
+  const map = {}, css0 = [...root.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  for (const c of names) {
+    if (!root.querySelector('.' + CSS.escape(c)) && !css0.includes('.' + c)) continue;
+    let i = 2, nc = c + '-' + i;
+    while (root.querySelector('.' + CSS.escape(nc)) || names.has(nc)) nc = c + '-' + (++i);
+    map[c] = nc;
+  }
+  if (!Object.keys(map).length) return;
+  for (const n of [frag, ...frag.querySelectorAll('[class]')]) {
+    const v = n.getAttribute('class');
+    if (v) n.setAttribute('class', v.split(/\s+/).map(c => map[c] || c).join(' '));
+  }
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const st of styles) {
+    let css = st.textContent;
+    for (const [a, b] of Object.entries(map)) css = css.replace(new RegExp('\\.' + esc(a) + '(?![\\w-])', 'g'), '.' + b);
+    st.textContent = css;
+  }
+}
+
 /** Element hinter url(#id) */
 export function refOf(root, v) {
   const m = /url\(\s*['"]?#([^'")\s]+)/.exec(v || '');
