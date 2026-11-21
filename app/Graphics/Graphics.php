@@ -556,7 +556,7 @@ final class Graphics
 
     /**
      * Einstellungen des Editors je Konto: Favoriten und zuletzt verwendete Schriften (Stapel bzw. Familien), Farbmodus.
-     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool}
+     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool, marquee: string}
      */
     public static function prefs(?array $user): array
     {
@@ -570,7 +570,7 @@ final class Graphics
         $raw = app()->db->fetchValue('SELECT ui_prefs FROM users WHERE id = ?', [$userId]);
         $all = json_decode((string) $raw, true);
         $cur = is_array($all) && is_array($all['grafik'] ?? null) ? $all['grafik'] : [];
-        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
+        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors', 'marquee'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
         $cur[$key] = $value;
         $clean = self::cleanPrefs($cur);
         \Core\UiPrefs::set($userId, 'grafik', $clean);
@@ -595,7 +595,9 @@ final class Graphics
         // Favoriten der Bibliothek: lib:{id} (mitgeliefert), part:{id} (Website), net:{id} (alle Websites)
         $fav = array_values(array_unique(array_filter(is_array($p['libFav'] ?? null) ? $p['libFav'] : [], fn($v) => is_string($v) && preg_match('~^(lib|part|net):[a-z0-9_-]{1,60}$~i', $v))));
         return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode,
-            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors'])];
+            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors']),
+            // Auswahlrahmen: berühren (Standard) oder vollständig enthalten
+            'marquee' => ($p['marquee'] ?? '') === 'contain' ? 'contain' : 'touch'];
     }
 
     /** Schriften für Text: Kit-Schriften (Core\Design::fonts) und allgemeine Familien */

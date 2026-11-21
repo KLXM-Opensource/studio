@@ -3808,7 +3808,7 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .adm-find__search:hover{background:var(--adm-press);color:var(--adm-ink)}
 .adm-find__search span{flex:1}
 .adm-find__search svg,.adm-find__ai svg{width:18px;height:18px;flex:none}
-.adm-find__search kbd{border:0;background:var(--adm-press);color:var(--adm-t3);font:600 11px var(--adm-font)}
+.adm-find__search kbd{border:0;background:var(--adm-press);color:var(--adm-t2);font:600 11px var(--adm-font)}
 .adm-find__ai[hidden]{display:none}
 .adm-find__ai{flex:none;display:grid;place-items:center;width:34px;height:34px;margin:0;padding:0;border:0;border-radius:8px;background:none;color:var(--adm-t2);cursor:pointer}
 .adm-find__ai:hover{background:var(--adm-hover);color:var(--adm-ink)}

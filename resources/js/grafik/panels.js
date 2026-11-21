@@ -36,7 +36,8 @@ export function buildPanels(ed) {
   A.el.classList.add('ge-pg--color'); B.el.classList.add('ge-pg--layers'); C.el.classList.add('ge-pg--transform');
   let lock = false, anchor = 'c';
   const expanded = new Set();     // geöffnete Gruppen (Pfad als Text)
-  let stopIdx = 0;                // gewählter Verlaufs-Stopp
+  // gewählter Verlaufs-Stopp: einer für Fläche (gradhandles.js) und Bereich Farbe – Klick auf einen Stopp der Fläche färbt genau diesen
+  const gs = { get i() { return ed.grad?.stop ?? 0; }, set i(v) { if (ed.grad) ed.grad.stop = v; } };
   let libBuilt = false, iconsBuilt = false;
 
   // ------------------------------------------------------------------ Hilfen
@@ -249,8 +250,8 @@ export function buildPanels(ed) {
     if (p.mode === 'linear' || p.mode === 'radial') {
       const g = ownGradient(p.grad);
       const stops = gradientStops(ed.root, g);
-      if (!stops[stopIdx]) return;
-      stops[stopIdx].color = c; stops[stopIdx].opacity = a;
+      if (!stops[gs.i]) return;
+      stops[gs.i].color = c; stops[gs.i].opacity = a;
       writeStops(g, stops);
       paintGradBar();
       return;
@@ -271,7 +272,7 @@ export function buildPanels(ed) {
         g = newGradient(m, null);
         writeStops(g, gradientStops(ed.root, p.grad));
       } else g = newGradient(m, p.color);
-      stopIdx = 0;
+      gs.i = 0;
       setPaint(w, `url(#${g.id})`);
     }
     commit(t('Farbart geändert'));
@@ -282,13 +283,13 @@ export function buildPanels(ed) {
     if (!p.grad) return;
     const stops = gradientStops(ed.root, p.grad);
     gbar.style.setProperty('--g', `linear-gradient(90deg, ${stops.map(s => { const c = parseColor(s.color); return `rgba(${c.r},${c.g},${c.b},${s.opacity}) ${num(s.offset * 100, 1)}%`; }).join(', ')})`);
-    gbar.innerHTML = stops.map((s, i) => `<button type="button" class="ge-grad__stop${i === stopIdx ? ' is-on' : ''}" data-si="${i}" style="left:${s.offset * 100}%;--c:${esc(s.color)}" aria-label="${esc(t('Farbstopp {n}: {c}', { n: i + 1, c: s.color }))}" aria-pressed="${i === stopIdx}"></button>`).join('');
+    gbar.innerHTML = stops.map((s, i) => `<button type="button" class="ge-grad__stop${i === gs.i ? ' is-on' : ''}" data-si="${i}" style="left:${s.offset * 100}%;--c:${esc(s.color)}" aria-label="${esc(t('Farbstopp {n}: {c}', { n: i + 1, c: s.color }))}" aria-pressed="${i === gs.i}"></button>`).join('');
     gbar.querySelectorAll('[data-si]').forEach(b => {
-      b.addEventListener('click', e => { e.stopPropagation(); stopIdx = +b.dataset.si; api.refresh(); });
+      b.addEventListener('click', e => { e.stopPropagation(); gs.i = +b.dataset.si; api.refresh(); });
       b.addEventListener('pointerdown', e => {
         e.stopPropagation();
         const i = +b.dataset.si, r = gbar.getBoundingClientRect();
-        stopIdx = i;
+        gs.i = i;
         const g = ownGradient(paintOf(target()).grad);
         b.setPointerCapture(e.pointerId);
         let moved = false;
@@ -300,7 +301,7 @@ export function buildPanels(ed) {
           b.style.left = st[i].offset * 100 + '%';
           ed.draw();
         };
-        const up = () => { b.removeEventListener('pointermove', mv); b.removeEventListener('pointerup', up); if (moved) { stopIdx = gradientStops(ed.root, g).findIndex((s, k) => k === i) ; commit(t('Verlauf geändert')); } };
+        const up = () => { b.removeEventListener('pointermove', mv); b.removeEventListener('pointerup', up); if (moved) { gs.i = gradientStops(ed.root, g).findIndex((s, k) => k === i) ; commit(t('Verlauf geändert')); } };
         b.addEventListener('pointermove', mv); b.addEventListener('pointerup', up);
       });
       b.addEventListener('keydown', e => {
@@ -321,7 +322,7 @@ export function buildPanels(ed) {
     const c = st.reduce((best, s) => Math.abs(s.offset - off) < Math.abs(best.offset - off) ? s : best, st[0] || { color: '#000000', opacity: 1 });
     st.push({ offset: off, color: c.color, opacity: c.opacity });
     st.sort((a, b) => a.offset - b.offset);
-    stopIdx = st.findIndex(s => s.offset === off);
+    gs.i = st.findIndex(s => s.offset === off);
     writeStops(g, st);
     commit(t('Farbstopp hinzugefügt'));
   });
@@ -337,8 +338,8 @@ export function buildPanels(ed) {
     const p = paintOf(target());
     if (!p.grad) return;
     const g = ownGradient(p.grad), st = gradientStops(ed.root, g);
-    if (!st[stopIdx]) return;
-    st[stopIdx].offset = Math.max(0, Math.min(1, (+e.target.value || 0) / 100));
+    if (!st[gs.i]) return;
+    st[gs.i].offset = Math.max(0, Math.min(1, (+e.target.value || 0) / 100));
     writeStops(g, st); commit(t('Verlauf geändert'));
   });
   colorPanel.querySelector('[data-gdel]').addEventListener('click', () => {
@@ -346,7 +347,7 @@ export function buildPanels(ed) {
     if (!p.grad) return;
     const g = ownGradient(p.grad), st = gradientStops(ed.root, g);
     if (st.length <= 2) { toast(t('Ein Verlauf braucht mindestens zwei Farbstopps.'), 'info'); return; }
-    st.splice(stopIdx, 1); stopIdx = Math.max(0, stopIdx - 1);
+    st.splice(gs.i, 1); gs.i = Math.max(0, gs.i - 1);
     writeStops(g, st); commit(t('Farbstopp entfernt'));
   });
 
@@ -383,8 +384,8 @@ export function buildPanels(ed) {
     updateContrast();
     if (p.grad) {
       const stops = gradientStops(ed.root, p.grad);
-      if (stopIdx >= stops.length) stopIdx = 0;
-      const s = stops[stopIdx];
+      if (gs.i >= stops.length) gs.i = 0;
+      const s = stops[gs.i];
       if (s) cp.set(s.color, s.opacity);
       colorPanel.querySelector('[data-gangle]').value = getAngle(p.grad);
       colorPanel.querySelector('[data-gangle]').closest('label').hidden = p.mode !== 'linear';
@@ -588,7 +589,7 @@ export function buildPanels(ed) {
     if (e.target.closest('[data-exp]')) { const k = li.dataset.path; expanded.has(k) || li.getAttribute('aria-expanded') === 'true' ? (expanded.delete(k), li.setAttribute('aria-expanded', 'false')) : expanded.add(k); if (li.getAttribute('aria-expanded') === 'false') { /* zugeklappt */ } refreshLayers(); return; }
     if (e.target.closest('[data-lock]')) { el.getAttribute('data-locked') === '1' ? el.removeAttribute('data-locked') : el.setAttribute('data-locked', '1'); if (isLocked(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isLocked(el) ? t('Gesperrt') : t('Entsperrt')); return; }
     if (e.target.closest('[data-eye]')) { isHidden(el) ? (setProp(el, 'display', null)) : setProp(el, 'display', 'none'); if (isHidden(el)) ed.sel = ed.sel.filter(s => s !== el); commit(isHidden(el) ? t('Ausgeblendet') : t('Eingeblendet')); return; }
-    if (isLocked(el)) return;
+    // gesperrte Ebenen lassen sich hier wählen (Farbe, Effekte, Name) – verschieben/skalieren auf der Fläche bleibt gesperrt
     // Form einer Beschneidung/Maske: bearbeiten über Pfeiltasten, Transformieren, Knoten
     if (el.closest('clipPath,mask')) { ed.scope = ed.root; ed.select([el]); return; }
     if (el.parentNode !== ed.root && el.parentNode !== ed.scope) ed.scope = el.parentNode;

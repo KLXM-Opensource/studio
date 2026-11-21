@@ -8831,4 +8831,10 @@ return [
     'Winkel insgesamt (°)' => 'Total angle (°)',
     'Zeilen' => 'Rows',
     'Äußeres Leuchten' => 'Outer glow',
+    'Auf Zeichenfläche eingepasst' => 'Fitted to canvas',
+    'Auf Zeichenfläche einpassen' => 'Fit to canvas',
+    'Auswahlrahmen wählt alle Objekte, die er berührt.' => 'The marquee selects all objects it touches.',
+    'Auswahlrahmen wählt nur Objekte, die ganz darin liegen.' => 'The marquee only selects objects that lie completely inside.',
+    'Auswahlrahmen: Objekte vollständig umschließen' => 'Marquee: enclose objects completely',
+    'Klein importiert – Objekt → „Auf Zeichenfläche einpassen“ vergrößert es ohne Qualitätsverlust.' => 'Imported small – Object → “Fit to canvas” enlarges it without loss of quality.',
 ];

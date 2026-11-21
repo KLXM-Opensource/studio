@@ -157,7 +157,9 @@
       <b>Farbfelder</b> zeigt die Farben aus dem Design der Website, zuletzt verwendete Farben und die Farben der Grafik.
       „Schriftfarbe“ (A) übernimmt die Textfarbe der Umgebung – ideal für Symbole.</li>
     <li><b>Ebenen:</b> oben liegt, was vorn ist. Ziehen sortiert um (auch in Gruppen hinein), Doppelklick oder <kbd>F2</kbd> benennt um,
-      Auge blendet aus, Schloss sperrt. Deckkraft und Mischmodus gelten für die Auswahl.</li>
+      Auge blendet aus, Schloss sperrt. Gesperrte Ebenen lassen sich hier trotzdem wählen, um Farbe, Effekte oder Namen zu ändern – auf der
+      Fläche bleiben sie unverrückbar. Der Auswahlrahmen wählt alles, was er berührt; unter dem Zoom-Menü lässt er sich auf „Objekte vollständig
+      umschließen“ umstellen. <b>Objekt → Auf Zeichenfläche einpassen</b> vergrößert z. B. ein klein importiertes Symbol verlustfrei. Deckkraft und Mischmodus gelten für die Auswahl.</li>
     <li><b>Bibliothek:</b> fertige Bausteine (Flussdiagramm, Organigramm, Hinweise und Pfeile, Browserfenster, Smartphone, Karte,
       Diagramm, Zeichen …) anklicken oder auf die Fläche ziehen – sie landen dort, wo Sie loslassen. Eine Auswahl lässt sich unter Ebenen
       <b>als Baustein speichern</b>: mit Ordner und wahlweise für <b>diese Website</b> oder <b>alle Websites der Installation</b>.

@@ -563,6 +563,8 @@ export class GraphicEditor {
     const P = (x, y) => this.toOv(pt(F, x, y));
     const c = [P(b.x, b.y), P(b.x + b.w, b.y), P(b.x + b.w, b.y + b.h), P(b.x, b.y + b.h)];
     let s = `<polygon class="ge-ov__sel" points="${c.map(p => p.x + ',' + p.y).join(' ')}"/>`;
+    // gesperrte Ebenen (im Ebenen-Bereich gewählt, wie in Affinity): Rahmen ohne Griffe – bearbeiten nur über die Bereiche
+    if (this.sel.some(isLocked)) return s.replace('ge-ov__sel"', 'ge-ov__sel ge-ov__sel--locked"');
     if (this.sel.length > 1) for (const el of this.sel) {
       const cc = corners(el, this.root);
       if (cc) s += `<polygon class="ge-ov__sub" points="${cc.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`;
@@ -690,6 +692,7 @@ export class GraphicEditor {
         const inside = drawnChildren(this.scope).filter(el => {
           if (isLocked(el) || isHidden(el)) return false;
           const bb = docBounds(el, this.root);
+          if (this.prefs.marquee === 'contain') return bb && bb.x >= a.x && bb.x + bb.w <= b.x && bb.y >= a.y && bb.y + bb.h <= b.y;
           return bb && bb.x < b.x && bb.x + bb.w > a.x && bb.y < b.y && bb.y + bb.h > a.y;
         });
         this.sel = [...new Set([...base, ...inside])];
@@ -742,6 +745,7 @@ export class GraphicEditor {
   /** Griffe: Größe (8) und Drehen */
   handleDown(e, k) {
     e.stopPropagation(); e.preventDefault();
+    if (this.sel.some(isLocked)) return;
     if (k === 'tfw') return this.frameWidthDrag(e);
     const f = this.frame();
     if (!f) return;
@@ -1713,6 +1717,7 @@ export class GraphicEditor {
       { label: t('Zusammengesetzt: Vereinen (bearbeitbar)'), disabled: n < 2, run: () => this.compound('unite') },
       { sep: true },
       { label: t('Wiederholen …'), key: ALT + MOD + 'D', disabled: !n, run: () => repeatDialog(this) },
+      { label: t('Auf Zeichenfläche einpassen'), disabled: !n, run: () => this.fitToArtboard() },
       { sep: true },
       { label: t('Kontur in Fläche umwandeln'), disabled: !shapes.some(el => (getProp(el, 'stroke') || 'none') !== 'none'), run: () => this.strokeToFill() },
       { label: t('Pfad versetzen …'), disabled: !n, run: () => this.offsetPath() },
@@ -2231,6 +2236,10 @@ export class GraphicEditor {
       for (let p = el.parentNode; p && p !== this.root && p.nodeType === 1; p = p.parentNode) {
         for (const a of INHERITED) { const v = getProp(p, a, false); if (v && !getProp(c, a, false)) c.setAttribute(a, v); }
       }
+      // Deckkraft der Gruppen gehört dazu (wird nicht vererbt, sondern multipliziert – sonst wäre die Kopie zu kräftig)
+      let op = 1;
+      for (let p = el.parentNode; p && p !== this.root && p.nodeType === 1; p = p.parentNode) { const o = parseFloat(getProp(p, 'opacity', false)); if (Number.isFinite(o)) op *= o; }
+      if (op < 1) { const own = parseFloat(getProp(c, 'opacity', false)); setProp(c, 'opacity', num((Number.isFinite(own) ? own : 1) * op, 3)); }
       const P = parentMatrix(el, this.root), m = [P.a, P.b, P.c, P.d, P.e, P.f].map(v => num(v, 6)).join(' ');
       if (m !== '1 0 0 1 0 0') { const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `matrix(${m})`); g.append(c); return new XMLSerializer().serializeToString(g); }
       return new XMLSerializer().serializeToString(c);
@@ -2570,6 +2579,7 @@ export class GraphicEditor {
       { label: t('Hilfslinien'), key: MOD + ';', checked: this.rulers.showGuides, run: () => this.rulers.toggleGuides() },
       { label: t('Raster'), key: MOD + "'", checked: !!this.opt.grid, run: () => this.toggleGrid() },
       { label: t('Einrasten'), checked: !!this.opt.snap, run: () => { this.opt.snap = !this.opt.snap; this.snapCache = null; this.renderCtx(true); } },
+      { label: t('Auswahlrahmen: Objekte vollständig umschließen'), checked: this.prefs.marquee === 'contain', run: () => { this.setPref('marquee', this.prefs.marquee === 'contain' ? 'touch' : 'contain'); this.announce(this.prefs.marquee === 'contain' ? t('Auswahlrahmen wählt nur Objekte, die ganz darin liegen.') : t('Auswahlrahmen wählt alle Objekte, die er berührt.')); } },
       { label: t('Hilfslinien …'), run: () => this.rulers.dialog() },
       { sep: true },
       { label: t('Einpassen'), key: MOD + '0', run: () => this.fit() },
@@ -2756,6 +2766,12 @@ export class GraphicEditor {
     }
     this.sel = [g];
     this.commit(t('Importiert'));
+    // kleines Symbol (z. B. 24 × 24) auf großer Fläche: Einpassen anbieten (Objekt → Auf Zeichenfläche einpassen)
+    const ib = docBounds(g, this.root), av = this.vb;
+    if (ib && this.format === "info" && ib.w < av.w * 0.15 && ib.h < av.h * 0.15) {
+      this.announce(t('Klein importiert – Objekt → „Auf Zeichenfläche einpassen“ vergrößert es ohne Qualitätsverlust.'));
+      toast(t('Klein importiert – Objekt → „Auf Zeichenfläche einpassen“ vergrößert es ohne Qualitätsverlust.'), 'info');
+    }
   }
 
   /** Titel und Beschreibung als <title>/<desc> in der Grafik (Barrierefreiheit) */
@@ -2768,6 +2784,18 @@ export class GraphicEditor {
     }
     const tt = [...this.root.children].find(c => c.localName === 'title');
     if (tt) this.root.prepend(tt);
+  }
+
+  /** Auswahl auf die Zeichenfläche einpassen (Seitenverhältnis bleibt, 8 % Rand) – z. B. ein klein importiertes Symbol */
+  fitToArtboard() {
+    const list = this.sel.filter(el => !isLocked(el));
+    const b = this.selBounds(list), vb = this.vb;
+    if (!b || !b.w || !b.h) return;
+    const m = Math.min(vb.w, vb.h) * 0.08;
+    const s = Math.min((vb.w - 2 * m) / b.w, (vb.h - 2 * m) / b.h);
+    const T = new DOMMatrix().translate(vb.x + vb.w / 2, vb.y + vb.h / 2).scale(s).translate(-(b.x + b.w / 2), -(b.y + b.h / 2));
+    for (const el of list) applyTransform(el, T, this.root);
+    this.commit(t('Auf Zeichenfläche eingepasst'));
   }
 
   // ================================================================= Hell / Dunkel (scheme.js)

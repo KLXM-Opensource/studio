@@ -54,6 +54,13 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   (vorher landete z. B. ⌘D direkt nach Pfeiltasten im Schritt „Verschieben“).
 - **Ebeneneffekte** im Bereich Darstellung: Schlagschatten, innerer Schatten, äußeres/inneres Leuchten, Kontur außen, Farbüberlagerung,
   Weichzeichnen – mehrere je Ebene, an/aus, Einstellungen mit Vorschau; als SVG-Filter aus den Primitiven, die die Bereinigung schon erlaubt.
+- **Behoben:** Schriftauswahl – ein Klick auf eine Schrift wirkte nach dem Zeigen auf andere Schriften oft nicht (die Liste scrollte die
+  ganze Seite mit und rutschte unter dem Zeiger weg; jetzt scrollt nur die Liste). Verlauf – ein auf der Fläche angeklickter Farbstopp ist auch
+  im Bereich Farbe aktiv, Farbfelder färben genau ihn (auch Anfang/Ende, deren Griff über dem Stopp liegt).
+- **Kleinere Verbesserungen:** gesperrte Ebenen lassen sich im Ebenen-Bereich wählen (Farbe, Effekte, Name; verschieben bleibt gesperrt),
+  Auswahlrahmen wahlweise „Objekte vollständig umschließen“ (Ansicht-Menü, je Konto), Kopieren aus einer Gruppe nimmt deren Deckkraft mit,
+  Objekt → „Auf Zeichenfläche einpassen“ (Hinweis nach dem Import kleiner Symbole). Verwaltung: Kürzel ⌘K in der Seitenleiste mit
+  ausreichendem Kontrast (4,7:1 hell, 5,7:1 dunkel; vorher 3,2:1 bzw. 3,9:1).
 - `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Design-Farben, Hell und Dunkel; Prüfen; Formgitter, Wiederholen,
   Ebeneneffekte), Entwicklerhandbuch → Medien → Grafik-Editor.
 

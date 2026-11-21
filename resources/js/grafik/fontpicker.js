@@ -151,9 +151,21 @@ export function fontPicker(ed, opts = {}) {
     pop.querySelectorAll('.ge-fp__fams [role=option]').forEach(o => o.setAttribute('aria-selected', String(o.id === active)));
     renderStyles();
     const node = col === 'sty' ? pop.querySelector(`#${id}-s${styleActive}`) : active && pop.querySelector('#' + active);
-    if (node) { input.setAttribute('aria-activedescendant', node.id); node.scrollIntoView({ block: 'nearest' }); } else input.removeAttribute('aria-activedescendant');
+    // Nur die Liste selbst scrollen: scrollIntoView verschob auch Seite/Editor – die Liste rutschte unter dem Zeiger weg, der Klick
+    // traf daneben und nahm die Vorschau zurück (Klick auf eine Schrift wirkte nach dem Zeigen auf andere Schriften nicht)
+    if (node) { input.setAttribute('aria-activedescendant', node.id); scrollInto(node); } else input.removeAttribute('aria-activedescendant');
     pop.querySelector('.ge-fp__fams').classList.toggle('is-dim', col === 'sty');
     if (preview) doPreview();
+  }
+
+  /** Eintrag in seiner Liste sichtbar machen – ohne Vorfahren (Seite, Editor) zu scrollen */
+  function scrollInto(node) {
+    const box = node.closest('[role=listbox]');
+    if (!box) return;
+    const r = node.getBoundingClientRect(), br = box.getBoundingClientRect();
+    const top = r.top - br.top + box.scrollTop, bot = top + r.height;
+    if (top < box.scrollTop) box.scrollTop = top;
+    else if (bot > box.scrollTop + box.clientHeight) box.scrollTop = bot - box.clientHeight;
   }
 
   function propsFor(it, s = null) {
