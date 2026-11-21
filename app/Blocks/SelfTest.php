@@ -42,6 +42,8 @@ final class SelfTest
             $t->dataClamp();
             $t->firstBlock();
             $t->picker();
+            $t->peopleSource();
+            $t->subpages();
         } finally {
             app()->editing = $prev;
         }
@@ -367,6 +369,115 @@ final class SelfTest
         $files = array_merge([ROOT . '/public/assets/css/data.css'], glob(ROOT . '/kits/*/assets/css/data.css') ?: []);
         $missing = array_filter($files, fn($f) => !preg_match('~\.dl-clamp-3\s*\{|@import\s+"[./]*(?:resources/css/)?(?:_data-clamp|_data-list|data)\.css"~', (string) file_get_contents($f)));
         $this->assert(!$missing, 'Textlänge: CSS fehlt in ' . implode(', ', array_map(fn($f) => substr($f, strlen(ROOT) + 1), $missing)));
+    }
+
+    /** Block „Personen“, Quelle „gefiltert“ (Core\Blocks\PeopleSource): Werte, Bedingung je Feldtyp, Filter, Sortierung, Höchstzahl, Ausgabe */
+    private function peopleSource(): void
+    {
+        $P = PeopleSource::class;
+        $this->assert($P::values("Vorstand, Kasse\nBeirat;; Vorstand ") === ['Vorstand', 'Kasse', 'Beirat'], 'Personen: Werte je Zeile/Komma, ohne Doppelte');
+        $sel = ['name' => 'funktion', 'type' => 'select', 'options' => ['vorstand' => 'Vorstand', 'beirat' => 'Beirat']];
+        $this->assert($P::condition($sel, 'Vorstand') === ['=', 'vorstand'] && $P::condition($sel, 'beirat') === ['=', 'beirat']
+            && $P::condition(['type' => 'text'], 'Vor') === ['contains', 'Vor'] && $P::condition(['type' => 'bool'], 'ja') === ['=', '1'],
+            'Personen: Auswahl auch per Beschriftung, Text „enthält“, Ja/Nein');
+        $h = 'qa_people_' . bin2hex(random_bytes(3));
+        try {
+            [$def, $err] = \Core\Data\Tables::validate(['name' => 'QA Personen', 'singular' => 'QA Person', 'handle' => $h, 'fields' => [
+                ['label' => 'Name', 'name' => 'name', 'type' => 'text', 'required' => 1],
+                ['label' => 'Funktion', 'name' => 'funktion', 'type' => 'select', 'options' => "vorstand=Vorstand\nbeirat=Beirat\nmitglied=Mitglied"],
+                ['label' => 'Gruppe', 'name' => 'gruppe', 'type' => 'text'],
+            ]]);
+            $this->assert($err === [], 'Personen: Testtabelle gültig');
+            if ($err) return;
+            \Core\Data\Tables::create($def);
+            \Core\Data\Tables::flush();
+            $t = \Core\Data\Tables::find($h);
+            $ids = [];
+            foreach ([['Erika Musterfrau', 'vorstand', 'Nord', 'published'], ['Max Mustermann', 'beirat', 'Süd', 'published'],
+                ['Anna Beispiel', 'vorstand', 'Nord-West', 'published'], ['Otto Entwurf', 'vorstand', 'Nord', 'draft']] as [$n, $f, $g, $st]) {
+                [$id] = \Core\Data\Entries::save($t, null, ['name' => $n, 'funktion' => $f, 'gruppe' => $g, 'status' => $st]);
+                $ids[$n] = (int) $id;
+            }
+            $names = fn(array $d) => array_map(fn($e) => (string) $e['name'], $P::filtered($t, $d + ['source' => 'filter']));
+            $all = $names([]);
+            $this->assert(count($all) === 3 && !in_array('Otto Entwurf', $all, true), 'Personen gefiltert: ohne Filter alle veröffentlichten');
+            $v = $names(['filter_field' => "$h.funktion", 'filter_values' => 'Vorstand', 'sort_field' => "$h.name", 'sort_dir' => 'asc']);
+            $this->assert($v === ['Anna Beispiel', 'Erika Musterfrau'], 'Personen gefiltert: Auswahlfeld per Beschriftung, sortiert nach Name: ' . implode(', ', $v));
+            $two = $names(['filter_field' => "$h.funktion", 'filter_values' => "vorstand\nbeirat", 'sort_field' => "$h.name", 'sort_dir' => 'desc', 'limit' => 2]);
+            $this->assert($two === ['Max Mustermann', 'Erika Musterfrau'], 'Personen gefiltert: mehrere Werte („oder“), absteigend, Höchstzahl: ' . implode(', ', $two));
+            $txt = $names(['filter_field' => "$h.gruppe", 'filter_values' => 'Nord', 'sort_field' => "$h.name", 'sort_dir' => 'asc']);
+            $this->assert($txt === ['Anna Beispiel', 'Erika Musterfrau'], 'Personen gefiltert: Textfeld „enthält“: ' . implode(', ', $txt));
+            $this->assert($names(['filter_field' => "$h.funktion", 'filter_values' => 'niemand']) === [], 'Personen gefiltert: unbekannter Wert → keine Einträge');
+            $manual = $P::rows($t, ['items' => [['person' => "entry:$h:" . $ids['Max Mustermann'], 'role' => 'Kasse'], ['person' => "entry:$h:" . $ids['Otto Entwurf']], ['person' => 'entry:andere:1']]]);
+            $this->assert(count($manual) === 1 && $manual[0]['i'] === 0 && ($manual[0]['item']['role'] ?? '') === 'Kasse', 'Personen von Hand: Reihenfolge der Liste, Entwürfe und fremde Tabellen fallen weg');
+            $th = app()->theme;
+            if ($th->block('people') && !empty($th->block('people')['core'])) {
+                $blk = \Core\Pages::sanitizeBlocks([['id' => 'qapeople', 'type' => 'people', 'data' => ['table' => $h, 'source' => 'filter',
+                    'filter_field' => "$h.funktion", 'filter_values' => 'Vorstand', 'contact' => true, 'vcard' => false, 'link_detail' => false]]]);
+                $html = $blk ? (string) $th->renderInner($th->makeBlock($blk[0])) : '';
+                $this->assert(str_contains($html, 'Erika Musterfrau') && str_contains($html, 'Anna Beispiel') && !str_contains($html, 'Max Mustermann')
+                    && substr_count($html, 'class="cms-person"') === 2, 'Personen gefiltert: Ausgabe des Blocks');
+                $old = \Core\Pages::sanitizeBlocks([['id' => 'qapeople2', 'type' => 'people', 'data' => ['table' => $h, 'items' => [['person' => "entry:$h:" . $ids['Max Mustermann']]]]]]);
+                $oh = $old ? (string) $th->renderInner($th->makeBlock($old[0])) : '';
+                $this->assert(str_contains($oh, 'Max Mustermann') && substr_count($oh, 'class="cms-person"') === 1, 'Personen: bestehende Blöcke ohne Quelle bleiben „von Hand“');
+            }
+        } catch (\Throwable $e) {
+            $this->assert(false, 'Personen gefiltert: ' . $e->getMessage());
+        } finally {
+            if ($x = \Core\Data\Tables::find($h)) \Core\Data\Tables::delete($x);
+        }
+    }
+
+    /** Block „Unterseiten“ (Core\Blocks\SubpageList): Kinder, veröffentlicht, Menü, Reihenfolge, Höchstzahl, Bild/Text, Ausgabe */
+    private function subpages(): void
+    {
+        $db = app()->db;
+        $made = [];
+        $mk = function (array $f) use ($db, &$made): int {
+            $id = (int) $db->insert('pages', $f + ['meta_description' => '', 'og_image' => null, 'is_home' => 0, 'noindex' => 1, 'type' => 'page',
+                'lang' => \Core\Lang::default(), 'menu' => 1, 'content_draft' => null, 'content_published' => null, 'updated_at' => now(), 'published_at' => now()]);
+            return $made[] = $id;
+        };
+        try {
+            $slug = 'qa-unterseiten-' . bin2hex(random_bytes(3));
+            $parent = $mk(['slug' => $slug, 'path' => $slug, 'title' => 'QA Eltern', 'status' => 'published', 'sort' => 0, 'parent_id' => null]);
+            $hero = json_encode(['blocks' => [['id' => 'h1', 'type' => 'hero', 'data' => ['title' => 'B', 'text' => 'Text aus dem *Seitenkopf*', 'image' => 4242]]]]);
+            $mk(['slug' => 'c', 'path' => "$slug/c", 'title' => 'Cäsar', 'status' => 'published', 'sort' => 10, 'parent_id' => $parent, 'meta_description' => 'Beschreibung C', 'og_image' => 77]);
+            $mk(['slug' => 'a', 'path' => "$slug/a", 'title' => 'Anton', 'nav_title' => 'Anton kurz', 'status' => 'published', 'sort' => 20, 'parent_id' => $parent, 'content_published' => $hero]);
+            $mk(['slug' => 'b', 'path' => "$slug/b", 'title' => 'Berta', 'status' => 'published', 'sort' => 30, 'parent_id' => $parent, 'menu' => 0]);
+            $mk(['slug' => 'd', 'path' => "$slug/d", 'title' => 'Dora Entwurf', 'status' => 'draft', 'sort' => 5, 'parent_id' => $parent]);
+            $mk(['slug' => 't', 'path' => "$slug/t", 'title' => 'Vorlage', 'status' => 'published', 'sort' => 1, 'parent_id' => $parent, 'type' => 'template']);
+            $L = SubpageList::class;
+            $titles = fn(array $d) => array_column($L::items($d + ['parent' => 'page:' . $parent]), 'title');
+            $this->assert($titles([]) === ['Cäsar', 'Anton kurz', 'Berta'], 'Unterseiten: nur veröffentlichte Seiten, Reihenfolge wie im Menü, Menütitel: ' . implode(', ', $titles([])));
+            $this->assert($titles(['only_menu' => true]) === ['Cäsar', 'Anton kurz'], 'Unterseiten: „nur im Menü“');
+            $this->assert($titles(['sort' => 'title', 'limit' => 2]) === ['Anton kurz', 'Berta'], 'Unterseiten: Titel A–Z, Höchstzahl');
+            $items = array_column($L::items(['parent' => 'page:' . $parent]), null, 'title');
+            $this->assert($items['Cäsar']['text'] === 'Beschreibung C' && $items['Cäsar']['image'] === 77 && $items['Anton kurz']['text'] === 'Text aus dem Seitenkopf'
+                && $items['Anton kurz']['image'] === 4242 && str_ends_with($items['Berta']['href'], "/$slug/b"), 'Unterseiten: Beschreibung (Meta, sonst Seitenkopf), Bild (Seitenkopf, sonst Vorschaubild), Adresse');
+            $prev = app()->currentPage;
+            app()->currentPage = \Core\Pages::find($parent);
+            try {
+                $this->assert(count($L::items([])) === 3, 'Unterseiten: ohne Angabe die aufgerufene Seite');
+                $th = app()->theme;
+                if ($th->block('subpages')) {
+                    foreach (['cards', 'list', 'tiles'] as $lay) {
+                        $blk = \Core\Pages::sanitizeBlocks([['id' => 'qasub' . $lay, 'type' => 'subpages', 'data' => ['title' => 'Bereiche', 'layout' => $lay, 'heading' => 'h3', 'show_image' => false]]]);
+                        $html = $blk ? (string) $th->renderInner($th->makeBlock($blk[0])) : '';
+                        $this->assert(substr_count($html, '<li class="cms-subpage') === 3 && substr_count($html, '<h3 class="cms-subpage__title"><a href=') === 3
+                            && str_contains($html, 'cms-subpages--' . $lay) && str_contains($html, 'aria-labelledby=') && self::inert(preg_replace('~<svg class="ico".*?</svg>~s', '', $html) ?? ''),
+                            "Unterseiten ($lay): Liste mit Links, Überschriftenebene, keine Skripte");
+                    }
+                }
+            } finally {
+                app()->currentPage = $prev;
+            }
+            $this->assert($L::items(['parent' => 'page:999999999']) === [], 'Unterseiten: unbekannte Elternseite → nichts');
+        } catch (\Throwable $e) {
+            $this->assert(false, 'Unterseiten: ' . $e->getMessage());
+        } finally {
+            foreach ($made as $id) $db->query('DELETE FROM pages WHERE id = ?', [$id]);
+        }
     }
 
     private function assert(bool $cond, string $label): void

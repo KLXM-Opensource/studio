@@ -49,6 +49,16 @@
     <li><b>Beschreibung für Screenreader:</b> ein Satz, was das Diagramm zeigt. Unter dem Diagramm steht „Als Tabelle anzeigen“ mit allen Werten – auch ohne JavaScript.</li>
   </ul>
   <?php endif; ?>
+  <?php if (isset($blocks['subpages'])): ?>
+  <h3 id="unterseiten">Unterseiten</h3>
+  <p>Zeigt die Unterseiten einer Seite automatisch – etwa auf „Verein“ die Seiten „Vorstand“, „Geschichte“ und „Mitmachen“. Neue Unterseiten erscheinen von selbst, sobald sie veröffentlicht sind; Sie pflegen keine zweite Liste.</p>
+  <ul>
+    <li><b>Unterseiten von:</b> leer = die Seite, auf der der Block steht; sonst eine andere Seite über die Linkauswahl wählen.</li>
+    <li><b>Was erscheint:</b> Titel (bzw. Menütitel), die <b>Beschreibung</b> aus den Seiteneinstellungen (sonst der Text im Seitenkopf) und das <b>Bild</b> des Seitenkopfs (sonst das Vorschaubild der Seite). Entwürfe, Detailseiten-Vorlagen und geschützte Seiten (für Gäste) erscheinen nie; mit „Nur Seiten, die im Menü erscheinen“ fallen auch ausgeblendete weg.</li>
+    <li><b>Darstellung:</b> Karten mit Bild, Liste mit Links oder Kacheln mit Pfeil; Spalten, Bildformat, Reihenfolge (wie im Menü, Titel A–Z, zuletzt veröffentlicht), Höchstzahl.</li>
+    <li><b>Überschriftenebene:</b> „Automatisch“ setzt die Seitentitel eine Ebene unter die Überschrift des Blocks; für eine saubere Gliederung bei Bedarf H2, H3 oder H4 wählen.</li>
+  </ul>
+  <?php endif; ?>
   <?php if (isset($blocks['partners'])): ?>
   <h3 id="partner-logos">Partner &amp; Logos</h3>
   <p>Zeigt Logos von Partnern, Kunden oder Förderern in gleich großen Kacheln. Breite Schriftzüge, quadratische Zeichen und hohe Logos wirken dabei gleich schwer: Das System gibt jedem Logo ungefähr dieselbe Fläche – nicht dieselbe Höhe. Kurzinfo und Link erscheinen erst, wenn jemand auf ein Logo klickt (oder es mit der Tastatur auswählt). Bitte nur Logos verwenden, für die eine Freigabe vorliegt.</p>

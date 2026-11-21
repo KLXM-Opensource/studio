@@ -1,11 +1,13 @@
 <?php
 /**
  * Personen (Kern-Block, vom Kit überschreibbar: kits/{name}/blocks/people.php). Ausgewählte Einträge einer zentral gepflegten
- * Personen-Tabelle (Feld „Person“ = Verweis entry:{tabelle}:{id} aus dem Struktur-Browser). Name, Foto, E-Mail, Telefon und
+ * Personen-Tabelle (Feld „Person“ = Verweis entry:{tabelle}:{id} aus dem Struktur-Browser) oder – Quelle „gefiltert“ – alle
+ * Einträge der Tabelle mit bestimmten Werten in einem Feld (Core\Blocks\PeopleSource). Name, Foto, E-Mail, Telefon und
  * Funktion kommen aus dem Eintrag; Funktion, Text und Foto lassen sich je Stelle überschreiben. Visitenkarte (vCard mit Foto)
  * über vcard_entry_url(), wenn die Tabelle den Schema-Typ „Person“ hat. Aussehen: resources/css/people.css (--kit-*).
  * @var \Core\Block $b  @var array $d
  */
+use Core\Blocks\PeopleSource;
 use Core\Data\Entries;
 use Core\Data\Tables;
 use Core\StructuredData;
@@ -15,12 +17,12 @@ $t = Tables::findContent((string) ($d['table'] ?? ''));
 $layout = in_array($d['layout'] ?? '', ['cards', 'list', 'feature'], true) ? $d['layout'] : 'cards';
 $cols = in_array((string) ($d['columns'] ?? ''), ['2', '3', '4'], true) ? (string) $d['columns'] : '3';
 $people = [];
+$byFilter = ($d['source'] ?? 'manual') === 'filter';
 if ($t) {
     $img = Tables::imageField($t);
-    foreach ((array) ($d['items'] ?? []) as $i => $it) {
-        if (!preg_match('~^entry:([a-z][a-z0-9_]*):(\d+)$~', (string) ($it['person'] ?? ''), $m) || $m[1] !== $t['handle']) continue;
-        $e = Entries::find($t, (int) $m[2]);
-        if (!$e || (($e['status'] ?? 'published') !== 'published' && !is_editing())) continue;
+    // Von Hand (Liste „Personen“) oder alle Einträge der Tabelle nach Filter (Core\Blocks\PeopleSource)
+    foreach (PeopleSource::rows($t, $d, is_editing()) as $row) {
+        ['i' => $i, 'entry' => $e, 'item' => $it] = $row;
         $role = trim((string) ($it['role'] ?? '')) ?: (string) (StructuredData::field($t, $e, ['text'], ['funktion', 'position', 'rolle', 'job', 'beruf', 'title']) ?? '');
         $people[] = ['i' => $i, 'name' => Entries::title($t, $e), 'role' => $role, 'note' => trim((string) ($it['note'] ?? '')),
             'image' => (int) ($it['image'] ?? 0) ?: ($img !== '' ? (int) ($e[$img] ?? 0) : 0),
@@ -53,8 +55,8 @@ $ratio = $layout === 'list' ? '1:1' : '3:4';
       </div>
       <div class="cms-person__body">
         <<?= $tag ?> class="cms-person__name"><?= $p['href'] ? '<a href="' . e($p['href']) . '">' . e($p['name']) . '</a>' : e($p['name']) ?></<?= $tag ?>>
-        <?php if ($p['role'] !== ''): ?><p class="cms-person__role"<?= $b->edit('items.' . $p['i'] . '.role') ?>><?= e($p['role']) ?></p><?php endif; ?>
-        <?php if ($p['note'] !== ''): ?><p class="cms-person__note"<?= $b->edit('items.' . $p['i'] . '.note') ?>><?= e($p['note']) ?></p><?php endif; ?>
+        <?php if ($p['role'] !== ''): ?><p class="cms-person__role"<?= $p['i'] !== null ? $b->edit('items.' . $p['i'] . '.role') : '' ?>><?= e($p['role']) ?></p><?php endif; ?>
+        <?php if ($p['note'] !== ''): ?><p class="cms-person__note"<?= $p['i'] !== null ? $b->edit('items.' . $p['i'] . '.note') : '' ?>><?= e($p['note']) ?></p><?php endif; ?>
         <?php if ((!empty($d['contact']) && ($p['email'] !== '' || $p['tel'] !== '')) || $p['vcard']): ?>
         <ul class="cms-person__actions" role="list">
           <?php if (!empty($d['contact']) && $p['email'] !== ''): ?><li><a href="mailto:<?= e($p['email']) ?>"><?= icon('envelope-simple') ?><span><?= e($p['email']) ?></span></a></li><?php endif; ?>
@@ -66,5 +68,5 @@ $ratio = $layout === 'list' ? '1:1' : '3:4';
     </li>
     <?php endforeach; ?>
   </ul>
-  <?php elseif (is_editing()): ?><p class="empty-hint"><?= e(__('Noch keine Personen – Tabelle wählen und Personen hinzufügen.')) ?></p><?php endif; ?>
+  <?php elseif (is_editing()): ?><p class="empty-hint"><?= e($byFilter && $t ? __('Keine veröffentlichten Einträge mit diesem Filter.') : __('Noch keine Personen – Tabelle wählen und Personen hinzufügen.')) ?></p><?php endif; ?>
 </div>

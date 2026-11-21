@@ -1,7 +1,10 @@
 /* Kern-Block „Personen“ (app/Blocks/people.php) – nur über den Farb-Vertrag der Kits (--kit-*); ein Kit kann css/people.css
    mitbringen. Karten (Porträt 3:4), Liste (rundes Porträt) oder Groß (Porträt neben den Angaben). Container-Queries, keine Breakpoints. */
-.cms-people{--pp-accent:var(--kit-accent,#0b6b3a);--pp-ink:var(--kit-ink,#14201a);--pp-muted:var(--kit-muted,#5c6b63);--pp-bg:var(--kit-bg,#fff);
-  --pp-surface:var(--kit-surface,#f1f5f3);--pp-line:var(--kit-line,rgb(0 0 0/.12));--pp-r:var(--kit-radius,12px);container:pp/inline-size}
+/* Farben je Karte neu ableiten (nicht nur am Block): Kits setzen auf farbigen Abschnitten für Karten in Seitenfarbe die Schrift der
+   Seite (fluid: --f0-* an .cms-person) – sonst erbte die Karte die helle Schrift der Fläche auf weißem Grund. */
+.cms-people,.cms-person{--pp-accent:var(--kit-accent,#0b6b3a);--pp-ink:var(--kit-ink,#14201a);--pp-muted:var(--kit-muted,#5c6b63);--pp-bg:var(--kit-bg,#fff);
+  --pp-surface:var(--kit-surface,#f1f5f3);--pp-line:var(--kit-line,rgb(0 0 0/.12));--pp-r:var(--kit-radius,12px)}
+.cms-people{container:pp/inline-size}
 .cms-people__head{max-width:46rem;margin-bottom:1.5rem}
 .cms-people__head .h2{margin:0 0 .4rem}
 .cms-people__intro{margin:0;color:var(--pp-muted)}
