@@ -52,6 +52,8 @@ rules:
       Fragment/Block-HTML, json_encode mit JSON_HEX_TAG). Sonst e() verwenden.
     patterns:
       - pattern: echo $X;
+      - pattern-not: echo (int) $X;
+      - pattern-not: echo (float) $X;
       # nur einfache Variablen und Array-Zugriffe ($html, $b['text']) – Funktionsaufrufe wie e(), rich(), icon() nicht
       - metavariable-regex:
           metavariable: $X
