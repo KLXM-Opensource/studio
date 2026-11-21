@@ -62,13 +62,14 @@ export function closeMenus() {
 }
 
 /**
- * Reiter-Gruppe: tabs [{id, label}] → { el, panel(id), select(id) }; Pfeiltasten wechseln (WAI-ARIA Tabs)
+ * Reiter-Gruppe: tabs [{id, label}] → { el, panel(id), select(id) }; Pfeiltasten wechseln (WAI-ARIA Tabs). Bereiche ohne
+ * tabindex: sie enthalten selbst bedienbare Elemente (sonst verdecken diese den Bereich als Ziel, WCAG 2.5.8)
  */
 export function tabGroup(uid, tabs, onSelect) {
   const el = h(`<section class="ge-pg">
     <div class="ge-pg__tabs"><div class="ge-pg__list" role="tablist">${tabs.map((tb, i) => `<button type="button" role="tab" id="${uid}-t-${tb.id}" aria-controls="${uid}-p-${tb.id}" aria-selected="${i ? 'false' : 'true'}" tabindex="${i ? -1 : 0}">${esc(tb.label)}</button>`).join('')}</div>
       <button type="button" class="ge-pg__fold" aria-expanded="true" aria-label="${esc(t('Bereich ein-/ausklappen'))}" title="${esc(t('Bereich ein-/ausklappen'))}">${ico('caret-down')}</button></div>
-    ${tabs.map((tb, i) => `<div class="ge-pg__panel" role="tabpanel" id="${uid}-p-${tb.id}" aria-labelledby="${uid}-t-${tb.id}" tabindex="0"${i ? ' hidden' : ''}></div>`).join('')}
+    ${tabs.map((tb, i) => `<div class="ge-pg__panel" role="tabpanel" id="${uid}-p-${tb.id}" aria-labelledby="${uid}-t-${tb.id}"${i ? ' hidden' : ''}></div>`).join('')}
   </section>`);
   const btns = [...el.querySelectorAll('[role=tab]')];
   const select = (id, focus = false) => {

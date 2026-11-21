@@ -2246,6 +2246,8 @@ export class GraphicEditor {
       ['Tab', t('Nächstes Objekt auswählen')], ['↵ / Esc', t('Gruppe betreten bzw. Text bearbeiten / verlassen')], [t('Leertaste + Ziehen'), t('Ansicht verschieben')],
       [MOD + '0 / ' + MOD + '1 / ' + MOD + '+ / ' + MOD + '−', t('Einpassen / 100 % / Zoom')], ['X / ' + SHIFT + 'X', t('Füllung oder Kontur bearbeiten / tauschen')],
       [ALT + t('Ziehen'), t('Kopie ziehen')], [SHIFT + MOD + 'F', t('Vollbild ein/aus (Overlay)')],
+      [MOD + 'R / ' + MOD + '; / ' + MOD + "'", t('Lineale / Hilfslinien / Raster')], [MOD + '7 / ' + ALT + MOD + '7', t('Beschneiden / Maske freigeben')],
+      [MOD + '↵', t('In Kurven umwandeln')], [MOD + 'J', t('Pfade verbinden')], [MOD + 'B / I / U', t('Text: fett / kursiv / unterstrichen')],
     ];
     modal(this.el, { title: t('Tastaturkürzel'), ok: '', wide: true, body: `<dl class="ge-keys">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` });
   }

@@ -723,6 +723,16 @@
           "Ausstanzen",
           "Knockout",
           "maske umgekehrt loch"
+        ],
+        "arrow-up": [
+          "Pfeil hoch",
+          "Arrow up",
+          "nach oben vorn"
+        ],
+        "arrow-down": [
+          "Pfeil runter",
+          "Arrow down",
+          "nach unten hinten"
         ]
       }
     },

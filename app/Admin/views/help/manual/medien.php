@@ -135,12 +135,13 @@
   <table class="doc-table">
     <tr><th>Werkzeug</th><th>Taste</th><th>So geht es</th></tr>
     <tr><td>Verschieben</td><td><kbd>V</kbd></td><td>Klick wählt, Ziehen verschiebt, Rahmen ziehen wählt mehrere; Griffe ändern die Größe (<kbd>⇧</kbd> = Seitenverhältnis, <kbd>⌥</kbd> = von der Mitte), der runde Griff dreht (<kbd>⇧</kbd> = 15°-Schritte). <kbd>⌥</kbd>+Ziehen zieht eine Kopie. Doppelklick betritt eine Gruppe bzw. bearbeitet Text.</td></tr>
-    <tr><td>Knoten</td><td><kbd>A</kbd></td><td>Zeigt die Punkte einer Kurve; Punkte und Griffe ziehen, Doppelklick auf einen Punkt = Ecke/glatt, <kbd>⌫</kbd> löscht Punkte. Rechtecke, Kreise und Linien werden dabei zu Kurven.</td></tr>
+    <tr><td>Knoten</td><td><kbd>A</kbd></td><td>Zeigt die Punkte einer Kurve; Punkte und Griffe ziehen, <b>Klick auf die Kurve fügt einen Punkt ein</b> (die Form bleibt gleich), Doppelklick auf einen Punkt = Ecke/glatt, <kbd>⌥</kbd> beim Ziehen eines Griffs trennt die Griffe, <kbd>⌫</kbd> löscht Punkte. In der Kontextleiste: Knotenart Ecke/glatt/symmetrisch, an Knoten auftrennen, Endpunkte verbinden, Pfad schließen, Richtung umkehren, Teilpfade trennen, Vereinfachen. Rechtecke, Kreise und Linien werden dabei zu Kurven.</td></tr>
     <tr><td>Zeichenstift</td><td><kbd>P</kbd></td><td>Klick = Eckpunkt, Ziehen = glatter Punkt; Klick auf den ersten Punkt schließt die Form, <kbd>↵</kbd>/<kbd>Esc</kbd> beendet.</td></tr>
     <tr><td>Bleistift</td><td><kbd>N</kbd></td><td>Freihand zeichnen – die Linie wird geglättet (Stärke in der Kontextleiste).</td></tr>
     <tr><td>Rechteck, Ellipse, Vieleck/Stern</td><td><kbd>R</kbd> <kbd>E</kbd> <kbd>G</kbd></td><td>Ziehen; <kbd>⇧</kbd> = gleichmäßig, <kbd>⌥</kbd> = von der Mitte. Eckenradius, Zahl der Ecken und Stern in der Kontextleiste.</td></tr>
     <tr><td>Linie und Pfeil</td><td><kbd>L</kbd></td><td>Ziehen, <kbd>⇧</kbd> = 45°-Schritte; Pfeilspitzen am Anfang/Ende in der Kontextleiste.</td></tr>
-    <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken und tippen, <kbd>↵</kbd> = neue Zeile, <kbd>Esc</kbd> beendet. Text bleibt Text (Suchmaschinen, Screenreader).</td></tr>
+    <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet.</td></tr>
+    <tr><td>Verlauf</td><td><kbd>F</kbd></td><td>Auf einem Objekt ziehen = linearen Verlauf anlegen bzw. neu ausrichten. Anfang/Ende (radial: Mitte/Radius) und Farbstopps auf der Fläche ziehen, Doppelklick auf die Linie = neuer Stopp, <kbd>⌫</kbd> löscht den gewählten.</td></tr>
     <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
   </table>
   <ul>
@@ -162,12 +163,59 @@
       Pfeiltasten verschieben (<kbd>⇧</kbd> = 10), <kbd>Tab</kbd> wählt das nächste Objekt, <kbd>⌘</kbd><kbd>0</kbd> einpassen.</li>
     <li><b>Barrierefreiheit:</b> Unter <b>Dokument …</b> erhalten Infografiken einen <b>Titel</b> und eine ausführliche <b>Beschreibung</b>;
       der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
-      Gerät vorhanden sind – für Logos besser allgemeine Schriften wählen.</li>
+      Gerät vorhanden sind – deshalb wandelt das Speichern Texte in Schriften der Website auf Wunsch in Kurven um (siehe unten); im Editor bleiben sie Text.</li>
   </ul>
+  <h4 id="grafik-geometrie">Formen kombinieren, ausstanzen, umwandeln</h4>
+  <p>Zwei oder mehr Objekte wählen, dann in der Kontextleiste bzw. im Menü <b>Objekt</b>. Gerechnet wird mit den echten Kurven
+    (Kreise bleiben rund); Konturen zählen nicht zur Fläche.</p>
+  <table class="doc-table">
+    <tr><th>Befehl</th><th>Ergebnis</th><th>Wann?</th></tr>
+    <tr><td>Vereinen</td><td>eine Form aus allen</td><td>Umriss aus mehreren Teilen, z. B. Sprechblase aus Kreis und Dreieck</td></tr>
+    <tr><td><b>Abziehen</b> (Ausstanzen)</td><td>die oberen Formen schneiden Löcher in die unterste – der Hintergrund scheint durch</td><td>Schablonen, Stanz-Optik, Text aus einer Fläche ausstanzen (Text wird dafür in Kurven umgewandelt)</td></tr>
+    <tr><td>Schnittmenge</td><td>nur der gemeinsame Teil</td><td>Ausschnitte, z. B. Halbkreis aus Kreis und Rechteck</td></tr>
+    <tr><td>Ausschluss</td><td>alles außer dem gemeinsamen Teil</td><td>Muster, Logos mit Überlappung</td></tr>
+    <tr><td>Teilen</td><td>einzelne Flächen an allen Schnittlinien</td><td>Teile getrennt einfärben</td></tr>
+    <tr><td>Zusammengesetzt (bearbeitbar)</td><td>wie Abziehen bzw. Vereinen, die Originale bleiben erhalten</td><td>wenn sich Text oder Formen noch ändern: Doppelklick bzw. „Originale bearbeiten“, danach wird neu berechnet; „In Pfad umwandeln“ macht es endgültig. Auf der Website erscheint immer der fertige Pfad.</td></tr>
+    <tr><td>Ausstanzen per Maske</td><td>Loch über eine umgekehrte Maske, nichts wird umgerechnet</td><td>wenn die Stanze ein Text bleiben soll (bearbeitbar) oder weiche Kanten/Verläufe hat</td></tr>
+    <tr><td>Kontur in Fläche</td><td>die Kontur wird eine gefüllte Form</td><td>Schneide-/Plotter-Daten, Logos, bevor man die Kontur weiter kombiniert</td></tr>
+    <tr><td>Pfad versetzen …</td><td>Umriss nach außen (+) oder innen (−), Ecken rund/spitz/abgeschrägt</td><td>Rand um ein Logo, Aufkleber-Kontur, Abstand für Ausstanzungen</td></tr>
+  </table>
+  <h4 id="grafik-text">Text: Zeichen und Absatz</h4>
+  <p>Ist ein Text gewählt, erscheint rechts der Bereich <b>Zeichen | Absatz</b>: Schrift (die selbst gehosteten Schriften der Website
+    und Systemschriften), Schnitt, Kursiv, Größe, Laufweite, Unterschneidung, Unterstrichen/Durchgestrichen, Groß-/Kleinschreibung
+    (wird als echte Zeichen geschrieben); Ausrichtung, Zeilenabstand, Breite des Textrahmens. Während Sie tippen, gelten
+    Zeichen-Einstellungen nur für die markierten Zeichen. <b>Text auf Pfad:</b> Text und Kurve wählen → „Text auf Pfad“, mit
+    Startversatz verschieben, „Vom Pfad lösen“ macht wieder normalen Text. <b>In Kurven umwandeln</b> (<kbd>⌘</kbd><kbd>↵</kbd>)
+    macht aus Text Pfade – nur mit einer Schrift, deren Datei auf der Website liegt.</p>
+  <h4 id="grafik-ansicht">Lineale, Hilfslinien, Raster</h4>
+  <p>Menü <b>Ansicht</b> (Zoom-Knopf): Lineale (<kbd>⌘</kbd><kbd>R</kbd>), Hilfslinien (<kbd>⌘</kbd><kbd>;</kbd>), Raster (<kbd>⌘</kbd><kbd>'</kbd>),
+    Einrasten. Hilfslinien aus dem Lineal ziehen, zum Verschieben anfassen, zurück aufs Lineal = löschen, Doppelklick = genaue
+    Position; ohne Maus über „Hilfslinien …“. Abstand und Unterteilung des Rasters stehen unter <b>Dokument …</b>.
+    Hilfslinien gehören nur zur Bearbeitung – auf der Website erscheinen sie nicht.</p>
+  <h4 id="grafik-masken">Beschneiden und Masken</h4>
+  <p>Das <b>oberste</b> Objekt der Auswahl wirkt auf die übrigen: <b>Beschneiden</b> (<kbd>⌘</kbd><kbd>7</kbd>) zeigt nur, was in der Form liegt;
+    <b>Als Maske verwenden</b> blendet nach Helligkeit (weiß zeigt, schwarz verbirgt, Verläufe blenden weich aus);
+    <b>Ausstanzen per Maske</b> schneidet ein Loch. Die Form erscheint in den Ebenen in der Gruppe und lässt sich dort wählen und
+    bearbeiten; <b>Maske freigeben</b> (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>7</kbd>) macht wieder einzelne Objekte daraus.</p>
+  <h4 id="grafik-export">Speichern und Exportieren</h4>
+  <ul>
+    <li>Beim Speichern entsteht eine <b>für das Web optimierte</b> Fassung (der Dialog zeigt die Größe vorher/nachher und die Genauigkeit).
+      Ebenennamen, Sperren, Hilfslinien und Textrahmen bleiben für den Editor erhalten, die Website lädt nur die schlanke Datei.
+      Texte in Schriften der Website werden dafür auf Wunsch in Kurven umgewandelt (empfohlen – SVG-Bilder zeigen sonst eine Ersatzschrift);
+      im Editor bleiben sie Text.</li>
+    <li><b>Exportieren</b>: SVG für das Web, <b>SVG für Desktop-Programme</b> (Affinity, Illustrator, Inkscape, Figma – mit Ebenen und Namen),
+      <b>PDF</b> als Vektor. Pixelbilder gibt es bewusst nicht: Der Editor arbeitet nur mit Vektoren.</li>
+    <li><b>Importieren</b>: SVG-Dateien über „SVG-Datei importieren …“, per Ziehen auf die Fläche oder Einfügen aus der Zwischenablage.
+      Pixelbilder (PNG, JPG) werden nicht übernommen – der Editor meldet das.</li>
+  </ul>
+
   <p id="grafiken"><b>Symbole und Blockvorschauen</b> liegen nicht in der Mediathek, sondern unter <a href="<?= e(url('/admin/grafik')) ?>">Grafiken</a>
     (Mediathek → Neu → Grafiken verwalten). Eine <b>Blockvorschau</b> startet mit der Skizze des Kits für den gewählten Block; nach dem
     Speichern zeigt die Blockauswahl („+ Block einfügen“) auf dieser Website Ihre Fassung. „Vorschau des Kits zeigen“ stellt das
-    Original wieder her.</p>
+    Original wieder her. Schneller geht es direkt in der Blockauswahl: Ansicht <b>Liste mit großer Vorschau</b>, Block (und ggf.
+    Variante) wählen, <b>Vorschau gestalten</b> – der Editor öffnet sich im Fenster, nach dem Speichern zeigt die Auswahl sofort die neue Vorschau.
+    Weil Blockvorschauen für die ganze Website gelten, brauchen Sie dafür das Recht <b>Design</b>; Symbole und eigene Bausteine
+    verlangen das Recht <b>Eigene Blöcke bauen</b>. Infografiken in der Mediathek gehen mit dem Recht zum Hochladen.</p>
 
   <h3>PDFs und Downloads</h3>
   <p>PDFs öffnen sich auf der Website <b>immer</b> in einem eigenen, schnellen Betrachter (Mozilla PDF.js) – ohne Programme von Dritten, egal ob über einen Link im Text, einen Button, ein Datei-Feld oder den Block Downloads; dort steht zusätzlich der Knopf zum Herunterladen. In der Karte auf der Website kopiert <b>„Link kopieren“</b> einen Link auf die Seite, der beim Öffnen genau diese Karte wieder zeigt – zum Weitergeben an Interessierte. Der Block <b>Downloads</b> zeigt entweder einzeln gewählte Dateien oder den Inhalt einer ganzen <b>Sammlung</b> (z. B. „Formulare“) – neue PDFs in der Sammlung erscheinen dann automatisch. Mit <b>„Nur Dateien mit Schlagworten“</b> zeigt er nur Dateien, die eines der Schlagworte der Mediathek tragen (z. B. „satzung, protokoll“). Im Kit fluid zeigt die Variante <b>„Liste“</b> ein kleines Vorschaubild je Datei, ab drei Dateien eine <b>Suche</b> und den Umschalter <b>Liste/Kacheln</b>; auf Wunsch kommen <b>Filter-Schaltflächen nach Schlagworten</b> dazu („Filter nach Schlagworten anbieten“, mit „Nur diese Schlagworte als Filter“ lassen sich interne Schlagworte ausblenden). Ist auf dem Server <i>poppler-utils</i> installiert, zeigt die Mediathek bei PDFs die <b>erste Seite als Vorschaubild</b> – sonst ein neutrales Dokument-Symbol.</p>
