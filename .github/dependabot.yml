@@ -16,3 +16,13 @@ updates:
     groups:
       actions:
         patterns: ['*']
+
+  # Build-Werkzeuge und ausgelieferte Frontend-Bibliotheken (Editor.js, PDF.js, MapLibre, ECharts …) – tools/pnpm-lock.yaml
+  - package-ecosystem: npm
+    directory: /tools
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
