@@ -399,6 +399,71 @@ final class Graphics
         return $out;
     }
 
+    // ================================================================= Bibliothek: Ordner, Namen, Austausch als Datei
+
+    /** Name ohne Markup, gekürzt */
+    public static function cleanName(string $name): string
+    {
+        return mb_substr(trim((string) preg_replace('~\s+~u', ' ', strip_tags($name))), 0, 120);
+    }
+
+    /** Ordnername (frei, ohne Markup; leer = ohne Ordner) */
+    public static function cleanFolder(string $folder): string
+    {
+        return mb_substr(trim((string) preg_replace('~[\x00-\x1f<>/\\\\]+~u', ' ', strip_tags($folder))), 0, 60);
+    }
+
+    /** Eigene Bausteine der Website für den Editor (mit SVG und Ordner) */
+    public static function partsForEditor(): array
+    {
+        $out = [];
+        foreach (app()->db->fetchAll("SELECT id, name, folder, svg, width, height, updated_at FROM graphics WHERE kind = 'part' ORDER BY folder, name, id") as $r) {
+            $out[] = ['id' => (int) $r['id'], 'kind' => 'part', 'name' => (string) $r['name'], 'folder' => (string) ($r['folder'] ?? ''), 'svg' => (string) $r['svg'],
+                'width' => (int) $r['width'], 'height' => (int) $r['height'], 'updated_at' => (string) $r['updated_at']];
+        }
+        return $out;
+    }
+
+    /** Baustein der Website umbenennen bzw. in einen Ordner legen */
+    public static function updatePart(int $id, ?string $name, ?string $folder): bool
+    {
+        $g = self::find($id);
+        if (!$g || $g['kind'] !== 'part') return false;
+        $row = ['updated_at' => now()];
+        if ($name !== null && ($n = self::cleanName($name)) !== '') $row['name'] = $n;
+        if ($folder !== null) $row['folder'] = self::cleanFolder($folder);
+        app()->db->update('graphics', $row, 'id = :id', ['id' => $id]);
+        return true;
+    }
+
+    /**
+     * Bausteine aus einer Austauschdatei (JSON des Editors: {format: 'klxm-grafik-bausteine', version: 1, items: [{name, folder, svg}]}).
+     * Jedes SVG wird bereinigt; ungültige Einträge werden übersprungen. Rückgabe: [gespeichert (Einträge), übersprungen]
+     * @return array{0: list<array<string, mixed>>, 1: int}
+     */
+    public static function importParts(mixed $data, string $scope = 'site'): array
+    {
+        if (!is_array($data) || ($data['format'] ?? '') !== 'klxm-grafik-bausteine' || !is_array($data['items'] ?? null)) {
+            throw new \RuntimeException(__('Das ist keine Austauschdatei des Grafik-Editors.'));
+        }
+        $done = []; $skipped = 0;
+        foreach (array_slice($data['items'], 0, 200) as $it) {
+            if (!is_array($it) || !is_string($it['svg'] ?? null) || strlen($it['svg']) > Svg::MAX_BYTES) { $skipped++; continue; }
+            try {
+                if ($scope === 'network') {
+                    $done[] = Shared::store((string) ($it['name'] ?? ''), $it['svg'], (string) ($it['folder'] ?? '')) + ['scope' => 'network'];
+                } else {
+                    $item = self::store('part', (string) ($it['name'] ?? ''), $it['svg']);
+                    self::updatePart($item['id'], null, (string) ($it['folder'] ?? ''));
+                    $done[] = ['id' => $item['id'], 'name' => $item['name'], 'folder' => self::cleanFolder((string) ($it['folder'] ?? '')), 'svg' => (string) (self::find($item['id'])['svg'] ?? ''), 'scope' => 'site'];
+                }
+            } catch (\RuntimeException) {
+                $skipped++;
+            }
+        }
+        return [$done, $skipped];
+    }
+
     // ================================================================= Formatvorlagen für Text (Bibliothek der Website)
 
     /** Eigenschaften, die eine Vorlage tragen darf (Zeichen bzw. Absatz) */
@@ -452,7 +517,7 @@ final class Graphics
 
     /**
      * Einstellungen des Editors je Konto: Favoriten und zuletzt verwendete Schriften (Stapel bzw. Familien), Farbmodus.
-     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string}
+     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool}
      */
     public static function prefs(?array $user): array
     {
@@ -466,7 +531,7 @@ final class Graphics
         $raw = app()->db->fetchValue('SELECT ui_prefs FROM users WHERE id = ?', [$userId]);
         $all = json_decode((string) $raw, true);
         $cur = is_array($all) && is_array($all['grafik'] ?? null) ? $all['grafik'] : [];
-        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
+        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
         $cur[$key] = $value;
         $clean = self::cleanPrefs($cur);
         \Core\UiPrefs::set($userId, 'grafik', $clean);
@@ -488,7 +553,10 @@ final class Graphics
             return $out;
         };
         $mode = is_string($p['colorMode'] ?? null) && in_array($p['colorMode'], self::COLOR_MODES, true) ? $p['colorMode'] : 'hex';
-        return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode];
+        // Favoriten der Bibliothek: lib:{id} (mitgeliefert), part:{id} (Website), net:{id} (alle Websites)
+        $fav = array_values(array_unique(array_filter(is_array($p['libFav'] ?? null) ? $p['libFav'] : [], fn($v) => is_string($v) && preg_match('~^(lib|part|net):[a-z0-9_-]{1,60}$~i', $v))));
+        return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode,
+            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors'])];
     }
 
     /** Schriften für Text: Kit-Schriften (Core\Design::fonts) und allgemeine Familien */

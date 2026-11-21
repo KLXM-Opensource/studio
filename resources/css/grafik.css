@@ -413,3 +413,15 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-sty__apply:hover { background: var(--adm-hover) }
 .ge-sty__name { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .ge-sty__meta { color: var(--adm-t3); font: 500 11px var(--adm-font) }
+
+/* Bibliothek: Favoriten, Ordner, Menü je Baustein, Austausch */
+.ge-libbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px }
+.ge-h4 { display: flex; align-items: center; gap: 5px; margin: 10px 0 5px; font-size: 11.5px; font-weight: 700; color: var(--adm-t2) }
+.ge-h4 svg.ico { width: 14px; height: 14px }
+.ge-tilewrap { position: relative }
+.ge-tile__more { position: absolute; top: 3px; right: 3px; display: grid; place-items: center; width: 24px; height: 24px; border: 0; border-radius: 6px; background: var(--adm-card);
+  color: var(--adm-t2); cursor: pointer; opacity: 0; box-shadow: 0 0 0 1px var(--adm-line) }
+.ge-tilewrap:hover .ge-tile__more, .ge-tile__more:focus-visible, .ge-tile__more[aria-expanded=true], .ge-tile:focus-visible + .ge-tile__more { opacity: 1 }
+.ge-tile__more svg.ico { width: 15px; height: 15px }
+.ge-tile span svg.ico.ge-tile__fav { width: 11px; height: 11px; margin-right: 3px; color: var(--adm-a); vertical-align: -1px }
+@media (hover: none) { .ge-tile__more { opacity: 1 } }

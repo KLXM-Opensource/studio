@@ -58,6 +58,7 @@ final class SelfTest
             self::media($files);
             self::sources($files);
             self::rights();
+            self::library();
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -124,6 +125,28 @@ final class SelfTest
         // Persönliche Einstellungen: nur bekannte Werte
         $p = Graphics::prefs(['ui_prefs' => json_encode(['grafik' => ['fontFav' => ['Lato, sans-serif', '<b>x</b>', str_repeat('a', 200)], 'colorMode' => 'cmyk']])]);
         self::t($p['fontFav'] === ['Lato, sans-serif'] && $p['colorMode'] === 'hex', 'Einstellungen: Schriftnamen ohne Markup, unbekannter Farbmodus → hex');
+    }
+
+    /** Bibliothek (Ausbaustufe 3a): Ordner, Umbenennen, Austauschdatei (bereinigt), Formatvorlagen der Website */
+    private static function library(): void
+    {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="var(--accent, #123456)"/></svg>';
+        [$done, $skipped] = Graphics::importParts(['format' => 'klxm-grafik-bausteine', 'version' => 1, 'items' => [
+            ['name' => 'Selbsttest <b>A</b>', 'folder' => 'Ordner/<x>', 'svg' => $svg],
+            ['name' => 'Selbsttest B', 'svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><script>alert(1)</script><rect width="5" height="5" onclick="x()"/></svg>'],
+            ['name' => 'kaputt', 'svg' => 'keine Grafik'],
+        ]]);
+        self::t(count($done) === 2 && $skipped === 1, 'Austauschdatei: gültige Bausteine übernommen, ungültige übersprungen');
+        $b = Graphics::find((int) ($done[1]['id'] ?? 0));
+        self::t($b && !str_contains((string) $b['svg'], 'script') && !str_contains((string) $b['svg'], 'onclick'), 'Austauschdatei: SVG bereinigt');
+        $a = Graphics::find((int) ($done[0]['id'] ?? 0));
+        self::t($a && $a['name'] === 'Selbsttest A' && $a['folder'] === 'Ordner' && str_contains((string) $a['svg'], 'var(--accent'), 'Name/Ordner ohne Markup, Design-Farbe (var) bleibt');
+        self::t(Graphics::updatePart((int) $a['id'], 'Neu', 'Diagramme') && (Graphics::find((int) $a['id'])['folder'] ?? '') === 'Diagramme', 'Umbenennen und Ordner');
+        $bad = false;
+        try { Graphics::importParts(['items' => []]); } catch (\RuntimeException) { $bad = true; }
+        self::t($bad, 'fremde Datei wird abgelehnt');
+        $st = Graphics::cleanStyles(['p' => [['n' => 'Titel', 'props' => ['font-size' => '32', 'fill' => 'url(https://example.org/x)', 'onload' => 'x'], 'para' => ['data-ge-para' => 'al:justify']]], 'c' => [['n' => '', 'props' => []]]]);
+        self::t(count($st['p']) === 1 && !isset($st['p'][0]['props']['fill']) && !isset($st['p'][0]['props']['onload']) && $st['p'][0]['para']['data-ge-para'] === 'al:justify' && $st['c'] === [], 'Formatvorlagen der Website bereinigt');
     }
 
     /** Rolle vorübergehend setzen (wie ExtensionsSelfTest::actAs) */

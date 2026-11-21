@@ -15,7 +15,7 @@ import {
   gradientStops, writeStops, setAngle, getAngle, applyTransform, remapIds, paintEl,
 } from './doc.js';
 import { colorPicker, parseColor, toHex, hex, onColor, contrast, over, paintValue } from './color.js';
-import { h, tabGroup, iconBtn, modal } from './ui.js';
+import { h, tabGroup, iconBtn, modal, menu } from './ui.js';
 import { clipOf } from './clip.js';
 import { buildTextPanel } from './textpanel.js';
 import { layoutText } from './text.js';
@@ -588,20 +588,52 @@ export function buildPanels(ed) {
     const body = it.svg;
     return `<svg xmlns="${NS}" viewBox="0 0 ${it.w} ${it.h}" color="${esc(it.color || '#1F2430')}">${body}</svg>`;
   }
-  const tile = (it, kind) => `<li><button type="button" class="ge-tile" draggable="true" data-kind="${kind}" data-id="${esc(String(it.id))}" title="${esc(it.label || it.name)}" aria-label="${esc(t('Einfügen: {name}', { name: it.label || it.name }))}">
-      <img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(kind === 'part' ? it.svg : itemSvg(it)).replace(/'/g, '%27')}"><span>${esc(it.label || it.name)}</span></button></li>`;
+  /** Eintrag der Bibliothek: lib (mitgeliefert), part (diese Website), net (alle Websites der Installation) */
+  const itemOf = (kind, id) => kind === 'lib' ? (ed.boot.library || []).find(x => x.id === id)
+    : (kind === 'net' ? ed.boot.sharedParts || [] : ed.boot.parts || []).find(x => String(x.id) === String(id));
+  const favKey = (kind, id) => kind + ':' + id;
+  const favs = () => new Set(ed.prefs.libFav || []);
+  const tile = (it, kind) => {
+    const name = it.label || it.name, fav = favs().has(favKey(kind, it.id));
+    const src = kind === 'lib' ? itemSvg(it) : it.svg;
+    return `<li class="ge-tilewrap"><button type="button" class="ge-tile" draggable="true" data-kind="${kind}" data-id="${esc(String(it.id))}" title="${esc(name)}" aria-label="${esc(t('Einfügen: {name}', { name }))}">
+      <img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(src).replace(/'/g, '%27')}"><span>${fav ? ico('star', 'ge-tile__fav') : ''}${esc(name)}</span></button>
+      <button type="button" class="ge-tile__more" data-more-kind="${kind}" data-more-id="${esc(String(it.id))}" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(t('Aktionen für „{name}“', { name }))}" title="${esc(t('Aktionen'))}">${ico('dots-three')}</button></li>`;
+  };
+  /** Einträge nach Ordner (leer = ohne Ordner zuerst) */
+  const byFolder = list => {
+    const m = new Map();
+    for (const it of list) { const f = it.folder || ''; if (!m.has(f)) m.set(f, []); m.get(f).push(it); }
+    return [...m].sort((x, y) => (x[0] ? 1 : 0) - (y[0] ? 1 : 0) || x[0].localeCompare(y[0]));
+  };
+  const folderBlock = (list, kind) => byFolder(list).map(([f, items]) => (f ? `<h4 class="ge-h4">${ico('folder')} ${esc(f)}</h4>` : '') + `<ul class="ge-tiles">${items.map(it => tile(it, kind)).join('')}</ul>`).join('');
   function buildLib() {
     libBuilt = true;
     const groups = ed.boot.libraryGroups || {};
-    const parts = ed.boot.parts || [];
+    const parts = ed.boot.parts || [], shared = ed.boot.sharedParts || [];
+    const fav = [...favs()].map(k => { const [kind, ...rest] = k.split(':'); const it = itemOf(kind, rest.join(':')); return it ? [it, kind] : null; }).filter(Boolean);
+    const q0 = libPanel.querySelector('[data-q]')?.value || '';
     libPanel.innerHTML = `<label class="ge-search">${ico('magnifying-glass')}<input type="search" class="ge-in" data-q placeholder="${esc(t('Bausteine suchen'))}" aria-label="${esc(t('Bausteine suchen'))}"></label>
-      <p class="ge-note">${esc(t('Anklicken fügt in der Mitte ein, Ziehen legt den Baustein an die Stelle.'))}</p>
-      <h3 class="ge-h3">${esc(t('Eigene Bausteine'))}</h3>${parts.length ? `<ul class="ge-tiles" data-parts>${parts.map(p => tile(p, 'part')).join('')}</ul>` : `<p class="ge-note" data-noparts>${esc(t('Noch keine – Auswahl unter Ebenen als Baustein speichern.'))}</p><ul class="ge-tiles" data-parts></ul>`}
+      <div class="ge-libbar"><label class="ge-lbl ge-chk"><input type="checkbox" data-sitecolors${ed.prefs.libSiteColors ? ' checked' : ''}> ${esc(t('Farben der Website'))}</label>
+        ${ed.boot.canParts ? `<span class="ge-seg" role="group" aria-label="${esc(t('Austausch'))}">${iconBtn('download-simple', t('Eigene Bausteine exportieren (Datei)'), 'data-libexport')}${iconBtn('upload-simple', t('Bausteine importieren (Datei)'), 'data-libimport')}</span>` : ''}</div>
+      <p class="ge-note">${esc(t('Anklicken fügt in der Mitte ein, Ziehen legt den Baustein an die Stelle. Menü am Baustein: Favorit, Umbenennen, Ordner, Teilen, Löschen.'))}</p>
+      ${fav.length ? `<h3 class="ge-h3">${esc(t('Favoriten'))}</h3><ul class="ge-tiles">${fav.map(([it, kind]) => tile(it, kind)).join('')}</ul>` : ''}
+      <h3 class="ge-h3">${esc(t('Eigene Bausteine'))}</h3>${parts.length ? folderBlock(parts, 'part') : `<p class="ge-note" data-noparts>${esc(t('Noch keine – Auswahl unter Ebenen als Baustein speichern.'))}</p>`}
+      ${shared.length ? `<h3 class="ge-h3">${esc(t('Alle Websites'))}</h3>${folderBlock(shared, 'net')}` : ''}
       ${Object.entries(groups).map(([g, label]) => `<h3 class="ge-h3">${esc(label)}</h3><ul class="ge-tiles">${(ed.boot.library || []).filter(it => it.group === g).map(it => tile(it, 'lib')).join('')}</ul>`).join('')}`;
-    libPanel.querySelector('[data-q]').addEventListener('input', e => {
-      const q = e.target.value.trim().toLowerCase();
-      libPanel.querySelectorAll('.ge-tile').forEach(b => { b.parentNode.hidden = !!q && !b.title.toLowerCase().includes(q); });
-    });
+    const qi = libPanel.querySelector('[data-q]');
+    const filter = () => {
+      const q = qi.value.trim().toLowerCase();
+      libPanel.querySelectorAll('.ge-tilewrap').forEach(li => { li.hidden = !!q && !li.querySelector('.ge-tile').title.toLowerCase().includes(q); });
+      // leere Abschnitte ausblenden
+      libPanel.querySelectorAll('.ge-tiles').forEach(ul => { const none = ![...ul.children].some(li => !li.hidden); ul.hidden = none; const h = ul.previousElementSibling; if (h?.matches('.ge-h4')) h.hidden = none; });
+    };
+    qi.value = q0;
+    qi.addEventListener('input', filter);
+    if (q0) filter();
+    libPanel.querySelector('[data-sitecolors]').addEventListener('change', e => ed.setPref('libSiteColors', e.target.checked));
+    libPanel.querySelector('[data-libexport]')?.addEventListener('click', () => exportParts(ed.boot.parts || []));
+    libPanel.querySelector('[data-libimport]')?.addEventListener('click', importParts);
     bindTiles(libPanel);
   }
   function bindTiles(box) {
@@ -610,7 +642,117 @@ export function buildPanels(ed) {
       const item = () => ({ kind: b.dataset.kind, id: b.dataset.id });
       b.addEventListener('click', () => api.insertItem(item()));
       b.addEventListener('dragstart', e => { e.dataTransfer.setData('application/x-ge-item', JSON.stringify(item())); e.dataTransfer.effectAllowed = 'copy'; });
+      // Kontextmenü (Rechtsklick bzw. Umschalt+F10) wie der Knopf daneben
+      b.addEventListener('contextmenu', e => { e.preventDefault(); tileMenu(b.dataset.kind, b.dataset.id, b.parentNode.querySelector('.ge-tile__more')); });
+      b.addEventListener('keydown', e => { if (e.key === 'F10' && e.shiftKey || e.key === 'ContextMenu') { e.preventDefault(); tileMenu(b.dataset.kind, b.dataset.id, b.parentNode.querySelector('.ge-tile__more')); } });
     });
+    box.querySelectorAll('.ge-tile__more:not([data-bound])').forEach(m => { m.dataset.bound = '1'; m.addEventListener('click', () => tileMenu(m.dataset.moreKind, m.dataset.moreId, m)); });
+  }
+
+  /** Menü eines Bausteins */
+  function tileMenu(kind, id, btn) {
+    const it = itemOf(kind, id);
+    if (!it) return;
+    const own = kind !== 'lib', may = !!ed.boot.canParts, k = favKey(kind, id), isFav = favs().has(k);
+    menu(btn, [
+      { label: isFav ? t('Aus den Favoriten entfernen') : t('Als Favorit merken'), run: () => { const f = favs(); if (isFav) f.delete(k); else f.add(k); ed.setPref('libFav', [...f]); buildLib(); } },
+      { sep: true },
+      { label: t('Umbenennen …'), disabled: !own || !may, run: () => renamePart(kind, it) },
+      { label: t('In Ordner …'), disabled: !own || !may, run: () => folderPart(kind, it) },
+      { label: t('Durch Auswahl ersetzen'), disabled: !own || !may || !ed.sel.length, run: () => savePart({ replace: { kind, it } }) },
+      { label: kind === 'net' ? t('In diese Website kopieren') : t('Für alle Websites freigeben'), disabled: !own || !may, run: () => copyPart(kind, it) },
+      { label: t('Exportieren (Datei)'), disabled: !own, run: () => exportParts([it], it.name) },
+      { sep: true },
+      { label: t('Löschen'), disabled: !own || !may || !ed.boot.canDeleteParts, run: () => deletePart(kind, it) },
+    ]);
+  }
+  const scopeOf = kind => kind === 'net' ? 'network' : 'site';
+  async function renamePart(kind, it) {
+    const r = await modal(ed.el, { title: t('Umbenennen'), ok: t('Übernehmen'), body: `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" required value="${esc(it.name)}" autofocus></label>` });
+    if (!r || !(await ed.api('POST', ed.boot.urls.partUpdate, { id: it.id, scope: scopeOf(kind), name: r.name }))) return;
+    it.name = r.name.trim();
+    buildLib();
+  }
+  const folders = () => [...new Set([...(ed.boot.parts || []), ...(ed.boot.sharedParts || [])].map(x => x.folder).filter(Boolean))].sort();
+  const folderField = (cur = '') => `<label class="f">${esc(t('Ordner'))}<input name="folder" maxlength="60" list="${ed.uid}-folders" value="${esc(cur)}" placeholder="${esc(t('ohne Ordner'))}">
+    <datalist id="${ed.uid}-folders">${folders().map(f => `<option value="${esc(f)}">`).join('')}</datalist></label>`;
+  async function folderPart(kind, it) {
+    const r = await modal(ed.el, { title: t('In Ordner'), ok: t('Übernehmen'), body: folderField(it.folder || '') });
+    if (!r || !(await ed.api('POST', ed.boot.urls.partUpdate, { id: it.id, scope: scopeOf(kind), folder: r.folder }))) return;
+    it.folder = r.folder.trim();
+    buildLib();
+  }
+  async function copyPart(kind, it) {
+    const res = await ed.api('POST', ed.boot.urls.part, { name: it.name, svg: it.svg, folder: it.folder || '', scope: kind === 'net' ? 'site' : 'network' });
+    if (!res) return;
+    if (kind === 'net') ed.boot.parts = [res.item, ...(ed.boot.parts || [])]; else ed.boot.sharedParts = [...(ed.boot.sharedParts || []), res.item];
+    toast(kind === 'net' ? t('In diese Website kopiert') : t('Für alle Websites freigegeben'));
+    buildLib();
+  }
+  async function deletePart(kind, it) {
+    const r = await modal(ed.el, { title: t('Baustein löschen?'), ok: t('Löschen'), body: `<p>${esc(kind === 'net' ? t('„{name}“ wird für alle Websites der Installation gelöscht. Grafiken, die ihn schon enthalten, bleiben unverändert.', { name: it.name }) : t('„{name}“ wird aus der Bibliothek dieser Website gelöscht. Grafiken, die ihn schon enthalten, bleiben unverändert.', { name: it.name }))}</p>` });
+    if (!r || !(await ed.api('POST', ed.boot.urls.partUpdate, { id: it.id, scope: scopeOf(kind), action: 'delete' }))) return;
+    if (kind === 'net') ed.boot.sharedParts = ed.boot.sharedParts.filter(x => x !== it); else ed.boot.parts = ed.boot.parts.filter(x => x !== it);
+    const f = favs(); if (f.delete(favKey(kind, it.id))) ed.setPref('libFav', [...f]);
+    buildLib();
+  }
+  /** Austauschdatei (JSON mit bereinigtem SVG) herunterladen */
+  function exportParts(list, name = 'bausteine') {
+    if (!list.length) { toast(t('Noch keine eigenen Bausteine.'), 'info'); return; }
+    const data = { format: 'klxm-grafik-bausteine', version: 1, exported: new Date().toISOString(), items: list.map(it => ({ name: it.name, folder: it.folder || '', svg: it.svg })) };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+    a.download = (String(name).toLowerCase().replace(/[^a-z0-9äöüß_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'bausteine') + '.grafik-bausteine.json';
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  /** Austauschdatei einlesen (jedes SVG bereinigt der Server) – für diese Website oder alle Websites */
+  function importParts() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.addEventListener('change', async () => {
+      const f = inp.files?.[0];
+      if (!f) return;
+      let data;
+      try { data = JSON.parse(await f.text()); } catch { toast(t('Das ist keine Austauschdatei des Grafik-Editors.'), 'error'); return; }
+      const n = Array.isArray(data?.items) ? data.items.length : 0;
+      const r = await modal(ed.el, { title: t('Bausteine importieren'), ok: t('Importieren'),
+        body: `<p>${esc(t('{n} Bausteine in „{file}“.', { n, file: f.name }))}</p><fieldset class="f"><legend>${esc(t('Ablegen in'))}</legend>
+          <label class="f-check"><input type="radio" name="scope" value="site" checked> ${esc(t('Bibliothek dieser Website'))}</label>
+          <label class="f-check"><input type="radio" name="scope" value="network"> ${esc(t('Alle Websites der Installation'))}</label></fieldset>` });
+      if (!r) return;
+      const res = await ed.api('POST', ed.boot.urls.partsImport, { data, scope: r.scope });
+      if (!res) return;
+      for (const it of res.items) { if (it.scope === 'network') ed.boot.sharedParts = [...(ed.boot.sharedParts || []), it]; else ed.boot.parts = [it, ...(ed.boot.parts || [])]; }
+      toast(res.skipped ? t('{n} Bausteine importiert, {s} übersprungen.', { n: res.items.length, s: res.skipped }) : t('{n} Bausteine importiert.', { n: res.items.length }));
+      buildLib();
+    });
+    inp.click();
+  }
+
+  /**
+   * Farben des Designs beim Einfügen: var(--token[, ersatz]) in fill/stroke/stop-color/style → Farbe des Tokens auf dieser
+   * Website (Token am Element gemerkt, data-ge-ftoken/-stoken); „Farben der Website“: Akzentfarbe statt der Vorgabe des Bausteins.
+   */
+  function resolveTokens(g) {
+    const sw = ed.boot.swatches || [];
+    const tok = name => { const n = name.replace(/^--/, '').replace(/^(color|farbe|c)-/, '').replace(/-/g, '_'); return sw.find(s => s.token === n || s.token === name.replace(/^--/, '')); };
+    const re = /var\(\s*(--[\w-]+)\s*(?:,\s*([^)]+))?\)/g;
+    for (const el of [g, ...g.querySelectorAll('*')]) {
+      for (const a of ['fill', 'stroke', 'stop-color', 'color']) {
+        const v = el.getAttribute(a);
+        if (!v || !v.includes('var(')) continue;
+        let token = null;
+        el.setAttribute(a, v.replace(re, (m, name, fb) => { const s = tok(name); if (s) { token = s.token; return s.color; } return (fb || '#1F2430').trim(); }));
+        if (token && (a === 'fill' || a === 'stroke')) el.setAttribute(a === 'fill' ? 'data-ge-ftoken' : 'data-ge-stoken', token);
+      }
+      const st = el.getAttribute('style');
+      if (st && st.includes('var(')) el.setAttribute('style', st.replace(re, (m, name, fb) => tok(name)?.color || (fb || '#1F2430').trim()));
+    }
+    if (ed.prefs.libSiteColors && g.hasAttribute('color')) {
+      const acc = sw.find(s => /^(accent|primary|brand|akzent)/i.test(s.token || ''));
+      if (acc) { g.setAttribute('color', acc.color); g.setAttribute('data-ge-ctoken', acc.token); }
+    }
   }
 
   /** Teil in die Grafik einfügen (zentriert an p, sonst in der Mitte der Ansicht); passt sehr große Teile ein */
@@ -735,12 +877,20 @@ export function buildPanels(ed) {
   }
 
   // ================================================================= Als Baustein speichern
-  async function savePart() {
+  async function savePart(opts = {}) {
     if (!ed.sel.length) return;
     const b = ed.selBounds();
     if (!b) return;
-    const r = await modal(ed.el, { title: t('Als Baustein speichern'), ok: t('Speichern'), body: `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" required value="${esc(nameOf(ed.sel[0]))}"></label><p class="f-help">${esc(t('Der Baustein erscheint in der Bibliothek des Editors auf dieser Website.'))}</p>` });
-    if (!r) return;
+    const rep = opts.replace || null;
+    let r = { name: rep?.it.name, folder: rep?.it.folder || '', scope: rep?.kind === 'net' ? 'network' : 'site' };
+    if (!rep) {
+      r = await modal(ed.el, { title: t('Als Baustein speichern'), ok: t('Speichern'), body: `<label class="f">${esc(t('Name'))}<input name="name" maxlength="120" required value="${esc(nameOf(ed.sel[0]))}"></label>
+        ${folderField('')}
+        <fieldset class="f"><legend>${esc(t('Ablegen in'))}</legend>
+          <label class="f-check"><input type="radio" name="scope" value="site" checked> ${esc(t('Bibliothek dieser Website'))}</label>
+          <label class="f-check"><input type="radio" name="scope" value="network"> ${esc(t('Alle Websites der Installation'))}</label></fieldset>` });
+      if (!r) return;
+    }
     const parts = ed.ordered(ed.sel).map(el => {
       const c = el.cloneNode(true);
       const P = el.parentNode === ed.root ? null : docMatrixOf(el.parentNode);
@@ -751,12 +901,12 @@ export function buildPanels(ed) {
       return new XMLSerializer().serializeToString(g);
     }).join('');
     const used = [...ed.root.children].filter(c => c.localName === 'defs' || c.localName === 'style').map(c => new XMLSerializer().serializeToString(c)).join('');
-    const pad = 0;
-    const svg = `<svg xmlns="${NS}" viewBox="${num(b.x - pad)} ${num(b.y - pad)} ${num(b.w + pad * 2)} ${num(b.h + pad * 2)}" width="${num(b.w)}" height="${num(b.h)}">${used}${parts}</svg>`;
-    const res = await ed.api('POST', ed.boot.urls.part, { name: r.name, svg });
+    const svg = `<svg xmlns="${NS}" viewBox="${num(b.x)} ${num(b.y)} ${num(b.w)} ${num(b.h)}" width="${num(b.w)}" height="${num(b.h)}">${used}${parts}</svg>`;
+    const res = await ed.api('POST', ed.boot.urls.part, { name: r.name, svg, folder: r.folder || '', scope: r.scope, id: rep ? rep.it.id : undefined });
     if (!res) return;
-    ed.boot.parts = [res.item, ...(ed.boot.parts || [])];
-    toast(t('Als Baustein gespeichert'));
+    const list = res.item.scope === 'network' ? 'sharedParts' : 'parts';
+    ed.boot[list] = [res.item, ...(ed.boot[list] || []).filter(x => String(x.id) !== String(res.item.id))];
+    toast(rep ? t('Baustein ersetzt') : t('Als Baustein gespeichert'));
     if (libBuilt) buildLib();
   }
 
@@ -786,9 +936,10 @@ export function buildPanels(ed) {
         g.setAttribute('data-name', it.label);
         g.setAttribute('color', it.color);
         g.innerHTML = it.svg;
+        resolveTokens(g);
         placeFragment(g, it.w, it.h, p, it.label, it.text !== undefined ? x => fillBoxes(x, it.text) : null);
-      } else if (item.kind === 'part') {
-        const it = (ed.boot.parts || []).find(x => String(x.id) === String(item.id));
+      } else if (item.kind === 'part' || item.kind === 'net') {
+        const it = itemOf(item.kind, item.id);
         if (!it) return;
         const doc = new DOMParser().parseFromString(it.svg, 'image/svg+xml').documentElement;
         const vb = (doc.getAttribute('viewBox') || '0 0 100 100').split(/[\s,]+/).map(Number);
@@ -798,6 +949,7 @@ export function buildPanels(ed) {
         if (vb[0] || vb[1]) inner.setAttribute('transform', `translate(${num(-vb[0])} ${num(-vb[1])})`);
         for (const c of [...doc.children]) if (!['title', 'desc', 'metadata'].includes(c.localName)) inner.append(document.importNode(c, true));
         g.append(inner);
+        resolveTokens(g);
         placeFragment(g, vb[2] || 100, vb[3] || 100, p, it.name);
       } else if (item.kind === 'icon') {
         const sym = await iconSymbol(item.id);

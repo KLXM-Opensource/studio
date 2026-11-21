@@ -138,6 +138,9 @@ final class Network
         // Protokoll: wer hat welche Website geöffnet, Wartung, Sicherungen, Konten
         $db->pdo->exec("CREATE TABLE IF NOT EXISTS network_log (id $pk, created_at VARCHAR(25) NOT NULL, user_email VARCHAR(191) NULL,
             site VARCHAR(40) NULL, action VARCHAR(40) NOT NULL, detail VARCHAR(191) NULL, ip_hash VARCHAR(32) NULL)$tail");
+        // Grafik-Editor: Bausteine für alle Websites der Installation (Core\Graphics\Shared)
+        $db->pdo->exec("CREATE TABLE IF NOT EXISTS graphic_shared (id $pk, name VARCHAR(191) NOT NULL, folder VARCHAR(191) NULL, svg " . ($my ? 'MEDIUMTEXT' : 'TEXT') . ",
+            width INT NULL, height INT NULL, site VARCHAR(40) NULL, user_email VARCHAR(191) NULL, created_at VARCHAR(25), updated_at VARCHAR(25))$tail");
         $db->ensureColumns('users', self::USER_COLUMNS);
         \Core\Passkeys::ensureTable($db);   // Passkeys der Netzwerk-Konten (eine Zeile je Domain)
     }

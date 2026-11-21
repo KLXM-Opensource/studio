@@ -361,6 +361,8 @@ return function (Router $r): void {
     $r->get('/admin/api/grafik/version', [$gr, 'version']);
     $r->post('/admin/api/grafik/save', [$gr, 'save']);
     $r->post('/admin/api/grafik/part', [$gr, 'part']);
+    $r->post('/admin/api/grafik/part/update', [$gr, 'partUpdate']);
+    $r->post('/admin/api/grafik/parts/import', [$gr, 'partsImport']);
     $r->post('/admin/api/grafik/prefs', [$gr, 'prefs']);
     $r->post('/admin/api/grafik/styles', [$gr, 'styles']);
     $r->post('/admin/api/grafik/clean', [$gr, 'clean']);
