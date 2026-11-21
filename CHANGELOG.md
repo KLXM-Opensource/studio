@@ -51,6 +51,8 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   (vorher nahm ⇧ das Objekt aus der Auswahl); Doppelklick auf einen Knoten (Ecke/glatt) und auf den Namen einer noch nicht gewählten
   Ebene wirkt jetzt auch beim ersten Mal; Fokus bleibt nach ⌘]/⌘[ auf der verschobenen Ebene; Pipette übernimmt die Deckkraft von
   Füllung und Kontur; Menü „Objekt“ in der Schrift der Verwaltung.
+- **Schriftauswahl:** Die Liste der Schriften blättert wieder in ihrem Rahmen – vorher wuchs sie über die Höhe des Aufklappers hinaus,
+  die Fußzeile lag mitten in der Liste und verdeckte Einträge (Klick traf dann die falsche Schrift).
 - `Core\Svg`: Elemente mit `requiredExtensions` entfallen (Browser zeigen sie nie; in `<switch>` griff vorher die falsche Alternative).
   `svg:selftest` um den Fall erweitert. Entwicklerhandbuch → Medien → Grafik-Editor (Import, Zwischenablage, Protokoll).
 
