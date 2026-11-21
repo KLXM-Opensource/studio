@@ -9,7 +9,7 @@ namespace Core;
  * Persönliche Einstellungen der Oberfläche je Konto (users.ui_prefs, JSON) – z. B. Akzentfarbe (Core\Accent), Willkommen
  * (Core\Welcome), Anordnung der Übersicht (Core\Dashboard). Erweiterungen speichern unter eigenem Schlüssel „ext.{name}“:
  *
- *   UiPrefs::get($user, 'ext.schnellmodus', 'einfach');   UiPrefs::set((int) $user['id'], 'ext.schnellmodus', 'normal');
+ *   UiPrefs::get($user, 'ext.meine_erweiterung', 'einfach');   UiPrefs::set((int) $user['id'], 'ext.meine_erweiterung', 'normal');
  *
  * Werte: Skalare oder Arrays (JSON). Beim Schreiben wird der aktuelle Stand aus der Datenbank gelesen (keine verlorenen Schlüssel).
  */

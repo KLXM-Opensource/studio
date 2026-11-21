@@ -2,7 +2,7 @@ KLXM Studio
 Copyright (c) 2026 KLXM Crossmedia GmbH and contributors
 SPDX-License-Identifier: MIT
 
-KLXM Studio (core, bundled themes in themes/* and bundled extensions in
+KLXM Studio (core, bundled kits in kits/* and bundled extensions in
 extensions/*) is released under the MIT License; the full text is in the file
 LICENSE. Source code: https://github.com/KLXM-Opensource/studio
 

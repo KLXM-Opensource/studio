@@ -6,6 +6,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer create-project klxm/studio meine-website`
+oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
+die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
+
+### Installation per Composer (Packagist)
+- Paket `klxm/studio` (Typ `project`): `composer create-project klxm/studio meine-website` lädt die Version mit allen Abhängigkeiten
+  und führt danach `php bin/console install` aus – Ordner, Datenbank und `config/config.local.php` entstehen, Setup-Token und
+  nächste Schritte erscheinen im Terminal (ohne Rückfragen, wiederholbar). Paketangaben für Packagist (englische Beschreibung,
+  Schlagworte, Support-Adressen), `minimum-stability: stable`, `prefer-stable`.
+- `.gitattributes`: Archive (GitHub-ZIP, Packagist) ohne die CI des Kern-Repositorys und ohne die Release-Prüfung des Kerns;
+  Shell-Skripte und `bin/console` immer mit LF.
+- Release-Workflow: Ist der Abschnitt im CHANGELOG zu lang für einen GitHub-Release (Grenze 125 000 Zeichen), stehen in den
+  Release-Notizen die Einleitung und ein Verweis auf `CHANGELOG.md`.
+
 ### Kit fluid: Dachzeilen und Links in „Akzent hell“ immer lesbar
 - Im Abschnitt „Akzent hell“ mischt fluid die Fläche selbst (14 % Farbton im Hintergrund) und setzte den Akzent als Schrift darauf – ohne Prüfung. Bei manchen eigenen Farben fiel das unter 4,5:1 (z. B. Dachzeile im Einstieg 4,29:1), obwohl Akzent und Hintergrund für sich bestanden. Jetzt rechnet der Kern eine lesbare Variante: nur wenn das Paar durchfällt, wird die Linkfarbe dort minimal Richtung Überschriftenfarbe gemischt; wo es besteht, bleibt alles pixelgleich (alle Voreinstellungen unverändert). Gewählte Farbwerte ändern sich nie. Bei „Farbenfroh“ je Farbton des Abschnitts.
 - Neu im Design eines Kits: `'derive'` – abgeleitete Farben mit Kontrastschutz (`Core\Design::derived()`, `readable()`), siehe Entwicklerhandbuch → Kits → Design.
@@ -133,10 +147,10 @@ Gleiches Aussehen, weniger CSS und JavaScript je Seite – geprüft pixel- und s
 - Felder des Eintrags beim Bearbeiten: weiße Bubble „Datensatz · Feld“ über dem Feld unter der Maus bzw. mit Fokus – zeigt, dass der Eintrag geändert wird, nicht die Seite.
 - Datenlisten: Stift „Eintrag bearbeiten“ auf Karten ist jetzt eine weiße Bubble „Datensatz“ (mit Stift); in Tabellenzeilen nur das Symbol.
 - Kommandozeile: `settings:list [präfix]`, `settings:get <schlüssel>`, `settings:set <schlüssel> <wert> [--force]` für die Grundeinstellungen (Typ aus dem Schema, Geheimnisse nie im Klartext, leert den Seiten-Cache) – z. B. `settings:set sys.noindex false` nach einem Umzug.
-- Erweiterungen: neue Filter `admin.nav` (Seitenleiste der Verwaltung ändern), `admin.home` (eigene Startseite statt Übersicht, `/admin?uebersicht=1` zeigt sie immer) und `admin.brand` (Marke der Seitenleiste) sowie `Core\UiPrefs` (persönliche Einstellungen je Konto, `ext.{name}`) – Grundlage für eine vereinfachte Verwaltung (Erweiterung „Schnellmodus“).
+- Erweiterungen: neue Filter `admin.nav` (Seitenleiste der Verwaltung ändern), `admin.home` (eigene Startseite statt Übersicht, `/admin?uebersicht=1` zeigt sie immer) und `admin.brand` (Marke der Seitenleiste) sowie `Core\UiPrefs` (persönliche Einstellungen je Konto, `ext.{name}`) – Grundlage für eine vereinfachte Verwaltung als Erweiterung.
 - Kit fluid: „Logo ragt aus dem Kopf“ wirkt nicht mehr bei „Zentriert“ und den Seitenleisten – dort verdeckte das Logo sonst die Menüpunkte.
 - Verwaltung, Seitenleiste: „Suchen“ als Suchzeile unter der Marke (⌘K, daneben der Assistent) und „Website ansehen ↗“ als erster Punkt des Hauptmenüs – vorher kleine Symbole, die oft übersehen wurden; Profilbild und Abmelden nur noch unten. Auf großen Bildschirmen ist die Seitenleiste breiter (264 px ab 1400 px, 288 px ab 1800 px).
-- Daten: **Duplizieren** von Einträgen – Kopie als Entwurf mit „(Kopie)“ und eigener Adresse (Felder, Inhaltsblöcke, Bildverweise; ohne Zeitplan und Übersetzungen; heute ungültige Werte optionaler Felder bleiben leer und werden genannt). Im Formular, je Zeile in der Liste, auf der Website im Menü ⋯ (öffnet die Kopie gleich zum Bearbeiten), im Schnellmodus „Als Vorlage nutzen“.
+- Daten: **Duplizieren** von Einträgen – Kopie als Entwurf mit „(Kopie)“ und eigener Adresse (Felder, Inhaltsblöcke, Bildverweise; ohne Zeitplan und Übersetzungen; heute ungültige Werte optionaler Felder bleiben leer und werden genannt). Im Formular, je Zeile in der Liste, auf der Website im Menü ⋯ (öffnet die Kopie gleich zum Bearbeiten).
 - Detailseite beim Bearbeiten: Knopf **„Alle Felder“** in der Werkzeugleiste (vorher nur im Menü ⋯). „+ Neuer Eintrag“ auch unter „Nächste Termine“ und dem Kalender.
 - Leere Bildplätze (Platzhalter der Kits: `media--empty`, `frame--empty` oder neu `data-media-empty`): Klick öffnet „Bild wählen …“ / „Hochladen“ direkt am Platz – der Editor ordnet das leere Bildfeld des Blocks zu (`CMSEditor.swap.empty`), sonst öffnet sich die Seitenleiste.
 - Block-Leiste: weiß und geschlossen (Name, ↑ ↓, „Bearbeiten“, ⋯ in einer Leiste) und ruhig – immer oben rechts im Block mit gleichem Inhalt; vorher sprang sie je nach Inhalt darunter nach links/außen und wechselte zwischen Name und Symbol.

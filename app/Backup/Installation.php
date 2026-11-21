@@ -81,7 +81,7 @@ final class Installation
         return $out;
     }
 
-    /** Eigene Kits und Erweiterungen im Code-Stand (nicht aus dem Kern, nicht über Composer): ['kits/klxm', 'extensions/kalkulation', …] */
+    /** Eigene Kits und Erweiterungen im Code-Stand (nicht aus dem Kern, nicht über Composer): ['kits/meinkit', 'extensions/meine_erweiterung', …] */
     public static function ownCode(): array
     {
         $out = [];

@@ -1,0 +1,10 @@
+# Archive (git archive, GitHub-ZIP, Packagist-Dist für „composer create-project klxm/studio“): nur, was ein Projekt braucht.
+# Laufzeit, gebaute Assets, Kits, Erweiterungen, tools/ (Build, Kit-Prüfung, Tutorials für eigene Kits), deploy/ und .claude/
+# (allgemeine Skills und Schutz-Hooks) bleiben enthalten. Ausgenommen: CI des Kern-Repositorys und die Release-Prüfung des Kerns.
+/.github                      export-ignore
+/.gitattributes               export-ignore
+/.claude/skills/release-check export-ignore
+
+# Zeilenenden: Shell-Skripte und die Konsole immer LF (auch bei Checkout unter Windows)
+*.sh        text eol=lf
+/bin/console text eol=lf

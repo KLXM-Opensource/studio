@@ -68,7 +68,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: |
             tools/pnpm-lock.yaml
-            themes/*/pnpm-lock.yaml
+            kits/*/pnpm-lock.yaml
 
       - name: Build
         run: cd tools && pnpm install --frozen-lockfile && pnpm run build
