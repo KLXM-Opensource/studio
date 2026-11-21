@@ -2,8 +2,12 @@
 /**
  * Grundeinstellungen → Integrität (Core\Integrity, IntegrityController): letzte Prüfung von Dateien und Datenbank mit Funden,
  * Jetzt prüfen, Als bekannt übernehmen, E-Mail-Hinweis.
- * @var ?array $files  @var bool $canFiles  @var ?array $db  @var bool $mail
+ * Netzwerk (Core\Network\Area): im Netzwerk-Bereich nur „Dateien der Installation“ ($net), auf der Website nur die Datenbank.
+ * @var ?array $files  @var bool $canFiles  @var ?array $db  @var bool $mail  @var bool $net  @var bool $showDb  @var list<string> $systemTo
  */
+$net ??= false;
+$showDb ??= true;
+$systemTo ??= [];
 $f = \Core\Format::admin();
 $section = function (string $id, string $title, string $help, ?array $res, string $accept) use ($f): void {
     $err = $res ? count(array_filter($res['findings'], fn($x) => $x['level'] === 'error')) : 0;
@@ -35,9 +39,11 @@ $section = function (string $id, string $title, string $help, ?array $res, strin
 };
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Integrität')) ?></h1>
-    <p class="adm-muted"><?= e(__('Überwacht, was Angreifer typischerweise verändern: Code, .htaccess und Konfiguration, ausführbare Dateien in Medien- und Datenordnern, Trigger in der Datenbank, neue Administrator-Konten und Skript-Code in Inhalten. Die Prüfung läuft stündlich (Geplante Aufgaben).')) ?></p></div>
-  <form method="post" action="<?= e(url('/admin/system/integritaet/check')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--primary" type="submit"><?= icon('shield-check') ?> <?= e(__('Jetzt prüfen')) ?></button></form>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e($net ? __('Integrität der Dateien') : __('Integrität')) ?></h1>
+    <p class="adm-muted"><?= e($net ? __('Überwacht die Dateien der ganzen Installation: Code, .htaccess und Konfiguration, ausführbare Dateien in Medien- und Datenordnern. Die Datenbank prüft jede Website in ihren Grundeinstellungen. Die Prüfung läuft stündlich (Geplante Aufgaben).')
+      : (\Core\Network\Area::active() ? __('Überwacht die Datenbank dieser Website: Trigger, neue Administrator-Konten, API-Schlüssel und Skript-Code in Inhalten. Die Prüfung läuft stündlich (Geplante Aufgaben).')
+      : __('Überwacht, was Angreifer typischerweise verändern: Code, .htaccess und Konfiguration, ausführbare Dateien in Medien- und Datenordnern, Trigger in der Datenbank, neue Administrator-Konten und Skript-Code in Inhalten. Die Prüfung läuft stündlich (Geplante Aufgaben).'))) ?></p></div>
+  <form method="post" action="<?= e(url('/admin/system/integritaet/check')) ?>"><?= csrf_field() ?><?php if (\Core\Network\Area::active()): ?><input type="hidden" name="scope" value="<?= $net ? 'files' : 'db' ?>"><?php endif; ?><button class="adm-btn adm-btn--primary" type="submit"><?= icon('shield-check') ?> <?= e(__('Jetzt prüfen')) ?></button></form>
 </header>
 
 <div class="adm-tabs-form--side us-shell" data-secnav>
@@ -45,14 +51,19 @@ $section = function (string $id, string $title, string $help, ?array $res, strin
   <div class="us-main">
 <?php
 if ($canFiles) $section('files', __('Dateien der Installation'), __('Prüfsummen von Code, Autoloader, Konfiguration und jeder .htaccess/.user.ini – dazu ausführbare Dateien in public/ und storage/ sowie PHP-Code in neuen Mediendateien. Nach einem Update oder Deploy den Stand als bekannt übernehmen.'), $files, 'files');
-$section('db', __('Datenbank dieser Website'), __('Trigger und Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel und Skript-Code in Seiten oder Einstellungen.'), $db, 'db');
+if ($showDb) $section('db', __('Datenbank dieser Website'), __('Trigger und Views, neue Tabellen, neue Konten mit allen Rechten, neue API-Schlüssel und Skript-Code in Seiten oder Einstellungen.'), $db, 'db');
 ?>
 <section class="adm-card" aria-labelledby="ig-mail">
   <h2 id="ig-mail"><?= icon('envelope-simple') ?> <?= e(__('Hinweis per E-Mail')) ?></h2>
+  <?php if ($net): // Netzwerk: neue Fehler in den Dateien gehen an „Systemmeldungen an“ (Core\Network\SystemMail) ?>
+  <p><?= e(__('Neue Fehler meldet die Prüfung an: {to}', ['to' => $systemTo ? implode(', ', $systemTo) : __('– niemand (bitte unter E-Mail „Systemmeldungen an“ eintragen)')])) ?></p>
+  <p><a class="adm-btn adm-btn--small" href="<?= e(url('/admin/network/email#systemmeldungen')) ?>"><?= e(__('Systemmeldungen an … ändern')) ?></a></p>
+  <?php else: ?>
   <form method="post" action="<?= e(url('/admin/system/integritaet/settings')) ?>" class="adm-row"><?= csrf_field() ?>
-    <label class="f-check"><input type="checkbox" name="mail" value="1"<?= $mail ? ' checked' : '' ?>><span><?= e(__('Neue Fehler an alle Konten mit allen Rechten melden (je Fund einmal)')) ?></span></label>
+    <label class="f-check"><input type="checkbox" name="mail" value="1"<?= $mail ? ' checked' : '' ?>><span><?= e(\Core\Network\Area::active() ? __('Neue Fehler an die Administration dieser Website melden (je Fund einmal)') : __('Neue Fehler an alle Konten mit allen Rechten melden (je Fund einmal)')) ?></span></label>
     <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Speichern')) ?></button>
   </form>
+  <?php endif; ?>
 </section>
   </div>
 </div>

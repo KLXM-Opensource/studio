@@ -151,7 +151,7 @@ a.net-card__host:focus-visible{outline:2px solid var(--adm-a);outline-offset:2px
 .net-att__all summary{display:inline;color:var(--adm-a-ink);font-weight:600;cursor:pointer}
 .net-att__all ul{margin:4px 0 0;padding-left:18px}
 .net-att__more{border-top:1px solid var(--adm-line);padding-top:8px}
-.net-att__more > summary{margin:0 0 4px}
+.net-att__more > summary{margin:0 0 4px;color:var(--adm-a-ink)}
 .net-allok{display:flex;align-items:center;gap:8px;margin:0 0 22px;color:var(--adm-ok);font-weight:600}
 .net-allok .ico{width:18px;height:18px}
 

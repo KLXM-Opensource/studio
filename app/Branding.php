@@ -34,6 +34,7 @@ final class Branding
         if (!app()->auth->check()) return false;
         if (Domains::available()) return can('system.manage');
         if (Network\Network::isNetworkUser()) return true;
+        if (Sites::multi()) return false;   // mehrere Websites: nur Netzwerk-Konten (Netzwerk-Bereich, Core\Network\Area)
         try {
             $none = !(int) Network\Network::db()->fetchValue("SELECT COUNT(*) FROM users WHERE role = 'network'");
         } catch (\Throwable) {

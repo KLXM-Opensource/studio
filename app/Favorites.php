@@ -33,6 +33,7 @@ final class Favorites
         $out = [];
         foreach ($list as $f) {
             if (is_array($f) && is_string($f['url'] ?? null) && ($u = self::normalize($f['url'])) !== null) {
+                $u = \Core\Network\Area::path($u);   // umgezogene Seiten (Netzwerk-Bereich): Favorit zeigt auf die neue Adresse
                 $out[] = ['url' => $u, 'title' => self::title((string) ($f['title'] ?? '')) ?: $u,
                     'icon' => self::icon((string) ($f['icon'] ?? '')), 'added' => (string) ($f['added'] ?? '')];
             }

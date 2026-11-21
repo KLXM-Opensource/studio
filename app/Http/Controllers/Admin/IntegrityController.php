@@ -14,6 +14,8 @@ use Core\Permissions;
 /**
  * Grundeinstellungen → Integrität (/admin/system/integritaet, Core\Integrity): letzte Prüfung von Dateien (nur wer die Installation
  * verwaltet) und Datenbank der Website, „Jetzt prüfen“, „Als bekannt übernehmen“, E-Mail-Hinweis an/aus.
+ * Netzwerk (Core\Network\Area): Dateien unter Netzwerk → Integrität der Dateien (/admin/network/integritaet, nur Netzwerk-Konten),
+ * die Website-Seite zeigt nur die Datenbank – nichts gemischt. Einzelinstallation: beides auf einer Seite wie bisher.
  */
 final class IntegrityController extends AdminController
 {
@@ -21,30 +23,36 @@ final class IntegrityController extends AdminController
 
     public function index(Request $r): Response
     {
-        $this->auth($r, 'system.manage');
-        $files = Permissions::installationAdmin();
-        return $this->view('system/integritaet', ['title' => __('Integrität'), 'files' => $files ? Integrity::lastFiles() : null, 'canFiles' => $files,
-            'db' => Integrity::lastDb(), 'mail' => (bool) app()->settings->get('sys.integrity_mail', true)]);
+        $net = \Core\Network\Area::here($r->path);
+        if ($net) { $this->auth($r); if (!Permissions::installationAdmin()) throw new HttpException(403, __('Nur für die Netzwerk-Administration.')); }
+        else $this->auth($r, 'system.manage');
+        // Netzwerk: Dateien nur im Netzwerk-Bereich, Datenbank nur auf der Website
+        $files = Permissions::installationAdmin() && (!\Core\Network\Area::active() || $net);
+        return $this->view('system/integritaet', ['title' => $net ? __('Integrität der Dateien') : __('Integrität'), 'files' => $files ? Integrity::lastFiles() : null, 'canFiles' => $files,
+            'db' => $net ? null : Integrity::lastDb(), 'showDb' => !$net, 'net' => $net, 'mail' => (bool) app()->settings->get('sys.integrity_mail', true),
+            'systemTo' => $net ? \Core\Network\SystemMail::recipients() : []]);
     }
 
     /** Jetzt prüfen (Datenbank immer, Dateien nur für die Installations-Verwaltung) */
     public function check(Request $r): Response
     {
-        $this->auth($r, 'system.manage');
-        if (Permissions::installationAdmin()) Integrity::checkFiles();
-        Integrity::checkDb();
-        return $this->back(self::BASE, 'success', __('Geprüft.'));
+        $this->auth($r, Permissions::installationAdmin() ? false : 'system.manage');
+        // Netzwerk: „Jetzt prüfen“ im Netzwerk-Bereich prüft die Dateien, auf der Website die Datenbank
+        $scope = $r->str('scope');
+        if (Permissions::installationAdmin() && $scope !== 'db') Integrity::checkFiles();
+        if ($scope !== 'files') { if (!can('system.manage')) throw new HttpException(403); Integrity::checkDb(); }
+        return $this->back($scope === 'files' && \Core\Network\Area::active() ? '/admin/network/integritaet' : self::BASE, 'success', __('Geprüft.'));
     }
 
     /** Aktuellen Stand als bekannt übernehmen: files | db */
     public function accept(Request $r, string $what): Response
     {
-        $user = $this->auth($r, 'system.manage');
+        $user = $this->auth($r, $what === 'files' ? false : 'system.manage');
         $by = (string) ($user['email'] ?? '');
         if ($what === 'files') {
             if (!Permissions::installationAdmin()) throw new HttpException(403, __('Für diese Aktion fehlt Ihrer Rolle die Berechtigung.'));
             $n = Integrity::acceptFiles($by);
-            return $this->back(self::BASE, 'success', __('{n} Dateien als bekannt übernommen.', ['n' => $n]));
+            return $this->back(\Core\Network\Area::active() ? '/admin/network/integritaet' : self::BASE, 'success', __('{n} Dateien als bekannt übernommen.', ['n' => $n]));
         }
         if ($what !== 'db') throw new HttpException(404);
         Integrity::acceptDb($by);

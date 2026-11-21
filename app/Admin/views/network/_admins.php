@@ -55,27 +55,7 @@
         <button class="adm-btn adm-btn--primary adm-btn--small" type="submit"><?= e(__('Einladung senden')) ?></button>
       </form>
     </details>
-    <?php $np = \Core\Mfa::netPolicy(); // Anmelde-Richtlinie der Netzwerk-Konten (Core\Mfa, sys.net_auth) ?>
-    <details class="net-add" id="net-auth">
-      <summary class="adm-btn adm-btn--small"><?= e(__('Anmelde-Richtlinie')) ?></summary>
-      <form method="post" action="<?= e(url('/admin/network/auth-policy')) ?>">
-        <?= csrf_field() ?>
-        <fieldset class="us-2fa__set"><legend><?= e(__('Erlaubte Verfahren für Netzwerk-Konten')) ?></legend>
-          <label class="f-check"><input type="checkbox" name="totp" value="1"<?= $np['totp'] ? ' checked' : '' ?>> <span><?= e(__('Authenticator-App (6-stelliger Code)')) ?></span></label>
-          <label class="f-check"><input type="checkbox" name="passkey" value="1"<?= $np['passkey'] ? ' checked' : '' ?>> <span><?= e(__('Passkeys')) ?></span></label>
-          <label class="f-check"><input type="checkbox" name="passwordless" value="1"<?= $np['passwordless'] ? ' checked' : '' ?>> <span><?= e(__('Anmeldung ohne Passwort mit Passkey')) ?></span></label>
-          <label class="f-check"><input type="checkbox" name="passkey_only" value="1"<?= $np['passkey_only'] ? ' checked' : '' ?>> <span><?= e(__('Nur Passkey als zweiter Faktor (phishing-resistent)')) ?></span></label>
-        </fieldset>
-        <p class="f-help"><?= e(__('Netzwerk-Konten melden sich immer mit zweitem Faktor an (App oder Passkey). Passkeys gelten je Domain – für die direkte Anmeldung auf einer anderen Website dort einen eigenen Passkey hinzufügen; „Öffnen“ aus dieser Übersicht braucht keinen.')) ?></p>
-        <button class="adm-btn adm-btn--small" type="submit"><?= e(__('Speichern')) ?></button>
-      </form>
-    </details>
-    <?php $nhSet = \Core\NetworkHost::get(); // Netzwerk-Domain (Core\NetworkHost): zentrale Adresse für Verwaltung und Anmeldung ?>
-    <details class="net-add" id="net-host"<?= $nhSet !== null && \Core\NetworkHost::problem($nhSet) !== null ? ' open' : '' ?>>
-      <summary class="adm-btn adm-btn--small"><?= e(__('Netzwerk-Domain')) ?><?= $nhSet !== null ? ': ' . e($nhSet) : '' ?></summary>
-      <form id="netnetworkhost" method="post" action="<?= e(url('/admin/system/network-host')) ?>"><?= csrf_field() ?></form>
-      <?php $nhForm = 'netnetworkhost'; $nhBack = 'network'; include dirname(__DIR__) . '/system/_network_host.php'; ?>
-    </details>
+    <p class="adm-muted"><?= e(__('Anmelde-Richtlinie, Netzwerk-Domain und Agentur-Zugang (OpenID Connect):')) ?> <a href="<?= e(url('/admin/network/anmeldung')) ?>"><?= e(__('Anmeldung & Domain')) ?></a></p>
     <details class="net-add">
       <summary class="adm-btn adm-btn--small adm-btn--ghost"><?= e(__('Ohne E-Mail: mit Startpasswort anlegen')) ?></summary>
       <form method="post" action="<?= e(url('/admin/network/accounts')) ?>" novalidate>

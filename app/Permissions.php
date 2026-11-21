@@ -153,10 +153,13 @@ final class Permissions
     /** Darf die Rolle das? Optional für eine bestimmte Datentabelle. */
     /**
      * Darf die angemeldete Person Einstellungen ändern, die für die ganze Installation gelten (Kits, Schriften, geteilte Medien,
-     * geplante Aufgaben)? Integratoren bzw. Netzwerk-Konten sowie die Administration (system.manage) der Netzwerk-Website.
+     * geplante Aufgaben, Sicherung, Dateien-Integrität)? Mit mehreren Websites nur Netzwerk-Konten (Rolle network) – die Seiten
+     * liegen dann im Netzwerk-Bereich (Core\Network\Area); die Administration einer Website (auch der Netzwerk-Website) verwaltet
+     * nur ihre Website. Einzelinstallation: Integratoren und die Administration (system.manage) wie bisher.
      */
     public static function installationAdmin(): bool
     {
+        if (Sites::multi()) return Network\Network::isNetworkUser();
         return Features::integrator() || (can('system.manage') && Network\Network::isNetworkSite());
     }
 

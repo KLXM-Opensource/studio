@@ -25,6 +25,7 @@
  *   adminpath:selftest                                Selbsttest der eigenen Verwaltungsadresse (Abbildung, Prüfung, Links)
  *   network:host [<domain>|--reset] [--no-check]      Netzwerk-Domain anzeigen bzw. setzen: Verwaltung und Anmeldung der Netzwerk-Website
  *                                                     zentral unter dieser Domain (config.local.php); --no-check = ohne Abruf
+ *   network:selftest                                  Selbsttest Netzwerk-Bereich (Umleitungen, Rücksprünge, Zugriff, Systemmeldungen)
  *   network-host:selftest                             Selbsttest Netzwerk-Domain (Adressen, Weiterleitung, Ausnahmen, Prüfung,
  *                                                     Selbstauskunft /.well-known/klxm-studio)
  *   keys:generate [--force]                           Schlüssel für verschlüsselte Formulare erzeugen
@@ -752,6 +753,13 @@ switch ($cmd) {
               . 'Beim Anbieter (OpenID Connect) eintragen: Redirect-URI ' . $N::siteLink($N::siteKey(), '/admin/login/oidc/callback')
               . ', Einstieg ' . $N::siteLink($N::siteKey(), '/admin/login/oidc') . "\n";
         break;
+
+    case 'network:selftest':
+        // Netzwerk-Bereich (Core\Network\Area): Umleitungen, Rücksprünge, Routen, Zugriff, Systemmeldungen
+        $res = Core\Network\AreaSelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
 
     case 'network-host:selftest':
         $res = Core\NetworkHostSelfTest::run();

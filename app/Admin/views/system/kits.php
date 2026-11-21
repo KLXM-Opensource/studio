@@ -8,7 +8,7 @@ $srcLabel = ['local' => __('mitgeliefert / lokal'), 'upload' => __('hochgeladen'
 $siteLabel = fn(string $k) => $k === \Core\Site::DEFAULT ? __('Hauptwebsite') . ' (' . $k . ')' : $k;
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Kits')) ?></h1>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e(__('Kits')) ?></h1>
     <p class="adm-muted"><?= e(__('Kits bringen Gestaltung, Blöcke und Startinhalte einer Website mit. Sie gelten für die ganze Installation: Jede Website wählt ihr Kit unter Grundeinstellungen → Aktives Kit. Zusätzliche Kits lassen sich als Paket installieren – per Composer oder als ZIP-Datei.')) ?></p></div>
 </header>
 

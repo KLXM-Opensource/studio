@@ -184,7 +184,11 @@ final class AdminPages
                 [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
                 ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
                 // Branding der Agentur (Core\Branding): Einzel-Installation Administration, Netzwerk nur Netzwerk-Administration
-                ['/admin/system/branding', __('Branding & Support'), 'branding', \Core\Branding::canEdit()],
+                // – mit mehreren Websites im Netzwerk-Bereich (Core\Network\Area), nicht in der Website-Verwaltung
+                ['/admin/system/branding', __('Branding & Support'), 'branding', \Core\Branding::canEdit() && !\Core\Network\Area::active()],
+                // Mehrere Websites: Integrität der Datenbank dieser Website als eigener Punkt (die Unterseiten-Leiste der Grundeinstellungen
+                // entfällt dort, die Dateien prüft der Netzwerk-Bereich)
+                ['/admin/system/integritaet', __('Integrität'), 'integrity', can('system.manage') && \Core\Network\Area::active()],
                 // Aktionslog (Core\Activity): wer hat wann Seiten, Datensätze, Medien angelegt, geändert, veröffentlicht, gelöscht
                 ['/admin/aktionslog', __('Aktionslog'), 'activity', \Core\Activity::canView()],
                 // Werkzeuge/Infoseiten von Funktionen und Erweiterungen (nav('admin'), v. a. kind tool – z. B. Video-Werkzeuge)

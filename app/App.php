@@ -233,6 +233,8 @@ final class App
             if ($direct && !($this->session->hasCookie() && $this->auth->user())) {
                 throw new Http\HttpException(404);
             }
+            // Netzwerk-Bereich (Core\Network\Area): umgezogene Seiten leiten weiter, Netzwerk-Seiten nur auf der Netzwerk-Website
+            if ($request->isAdminPath() && ($to = Network\Area::redirect($request))) return Http\Response::redirect($to[0], $to[1]);
             return $router->dispatch($request);
         } catch (Http\Controllers\Admin\RedirectException $e) {
             return $request->wantsJson()

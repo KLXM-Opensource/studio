@@ -325,6 +325,7 @@ final class Cron
         $ended = time();
         $db->query('UPDATE cron_tasks SET last_end = ?, last_status = ?, last_output = ? WHERE k = ?', [$ended, $status, $out, $key]);
         $db->insert('cron_runs', ['k' => $key, 'started' => $started, 'ended' => $ended, 'status' => $status, 'output' => $out, 'trigger' => $qid ? 'queue' : ($trigger === 'schedule' ? 'schedule' : 'manual')]);
+        self::notice($key, (string) $t['label'], $status, $out);
         if ($qid) {
             // Fehler: bis zu 3 Versuche (nächster Lauf), dann „fehlgeschlagen“
             $attempts = (int) $db->fetchValue('SELECT attempts FROM cron_queue WHERE id = ?', [$qid]);
@@ -381,5 +382,22 @@ final class Cron
     public static function line(): string
     {
         return '* * * * *  cd ' . ROOT . ' && ' . Network\Stats::phpBinary() . ' bin/console cron:run > /dev/null 2>&1';
+    }
+
+    /**
+     * Systemmeldung bei Fehler bzw. Zeitüberschreitung einer Aufgabe (Core\Network\SystemMail, „Systemmeldungen an“): einmal je
+     * Fehlerserie, nach dem nächsten erfolgreichen Lauf wieder scharf.
+     */
+    private static function notice(string $key, string $label, string $status, string $out): void
+    {
+        try {
+            if ($status === 'ok') { Network\SystemMail::clear('cron:' . $key); return; }
+            Network\SystemMail::once('cron:' . $key, __('Geplante Aufgabe fehlgeschlagen: {name}', ['name' => $label]),
+                __('Die geplante Aufgabe „{name}“ ist fehlgeschlagen ({status}).', ['name' => $label, 'status' => $status === 'timeout' ? __('Zeitlimit überschritten') : __('Fehler')])
+                . "\n\n" . mb_substr($out, -1500) . "\n\n" . __('Protokoll: Verwaltung → {where} → Geplante Aufgaben. Nach dem nächsten erfolgreichen Lauf kommt bei einem neuen Fehler wieder eine Meldung.', ['where' => Sites::multi() ? __('Netzwerk') : __('Grundeinstellungen')]),
+                Integrity::recipients('files'));
+        } catch (\Throwable $e) {
+            error_log('[cron] Systemmeldung: ' . $e->getMessage());
+        }
     }
 }

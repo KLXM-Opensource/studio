@@ -3,34 +3,38 @@
  * Seitenleiste der Grundeinstellungen auf deren Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Kits): dieselben Bereiche wie die
  * Reiter von /admin/system (Links auf /admin/system#bereich) plus die Unterseiten; schmal ein Auswahlfeld (admin.js, data-secnav).
  * @var string $current  domain | branding | fonts | kits | Bereich der Grundeinstellungen (z. B. mail für E-Mail-Konten)
+ * Netzwerk-Bereich (Core\Network\Area::here): keine Leiste – die Seitenleiste des Netzwerks führt; in Netzwerken fehlen hier die
+ * installationsweiten Punkte (stehen nur im Netzwerk-Bereich).
  */
+if (\Core\Network\Area::here()) return;
+$netMoved = \Core\Network\Area::active();
 $ico = ['website' => 'gear-six', 'index' => 'tree-structure', 'app' => 'device-mobile', 'proxy' => 'map-trifold', 'sprachen' => 'translate',
     'mail' => 'envelope-simple', 'spam' => 'shield-check', 'suche' => 'magnifying-glass', 'ki' => 'sparkle', 'keys' => 'lock-key',
     'pools' => 'images', 'shared' => 'share-network', 'medien' => 'images', 'umgebung' => 'hard-drives', 'adminpath' => 'link', 'info' => 'info'];
 $items = [];
 foreach (\Core\SystemSchema::groups() as $g) $items[] = [url('/admin/system#' . $g['id']), $g['label'], $ico[$g['id']] ?? 'gear-six', '', $g['id']];
 $items[] = [url('/admin/system#keys'), 'Verschlüsselung', 'lock-key', !\Core\FormCrypto::ready() && \Core\Data\Inbox::anyNeedsKey() ? __('Kein Schlüssel für verschlüsselte Anfragen') : ''];
-$items[] = [url('/admin/system#pools'), __('Geteilte Medien'), 'images', ''];
+if (!$netMoved) $items[] = [url('/admin/system#pools'), __('Geteilte Medien'), 'images', ''];
 if (\Core\Data\Shared::canManage() || \Core\Data\Shared::forSite()) $items[] = [url('/admin/system#shared'), __('Geteilte Daten'), 'share-network', ''];
 $items[] = [url('/admin/system#push'), __('Push-Benachrichtigungen'), 'bell-ringing', ''];
 $items[] = [url('/admin/system#umgebung'), __('Umgebung'), 'hard-drives', environment() !== 'production' ? __('Testumgebung aktiv') : ''];
-$items[] = [url('/admin/system#adminpath'), __('Adresse der Verwaltung'), 'link', ''];
+if (!$netMoved) $items[] = [url('/admin/system#adminpath'), __('Adresse der Verwaltung'), 'link', ''];
 $items[] = [url('/admin/system#info'), 'Systeminfo', 'info', ''];
 $sub = [];
 if (\Core\Domains::available()) $sub['domain'] = [url('/admin/system/domain'), __('Domain'), 'globe', ''];
-if (\Core\Branding::canEdit()) $sub['branding'] = [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush', ''];
-if (\Core\Fonts::canManage()) $sub['fonts'] = [url('/admin/system/fonts'), __('Schriften'), 'text-t', ''];
-if (\Core\Cron::canManage()) $sub['aufgaben'] = [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown', \Core\Cron::running() ? '' : __('Cronjob läuft nicht')];
+if (!$netMoved && \Core\Branding::canEdit()) $sub['branding'] = [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush', ''];
+if (!$netMoved && \Core\Fonts::canManage()) $sub['fonts'] = [url('/admin/system/fonts'), __('Schriften'), 'text-t', ''];
+if (!$netMoved && \Core\Cron::canManage()) $sub['aufgaben'] = [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown', \Core\Cron::running() ? '' : __('Cronjob läuft nicht')];
 if (can('system.manage')) {
     $ig = \Core\Integrity::health();
     $sub['integritaet'] = [url('/admin/system/integritaet'), __('Integrität'), 'shield-check', in_array(false, $ig, true) ? __('Unerwartete Änderungen gefunden') : ''];
 }
 if (can('system.manage')) $sub['ueberwachung'] = [url('/admin/system/ueberwachung'), __('Überwachung'), 'heartbeat', ''];
-if (can('system.manage') && \Core\Permissions::installationAdmin()) {
+if (!$netMoved && can('system.manage') && \Core\Permissions::installationAdmin()) {
     $bkState = \Core\Backup\Offsite::state();
     $sub['sicherung'] = [url('/admin/system/sicherung'), __('Sicherung außer Haus'), 'cloud-arrow-up', array_filter($bkState, fn($s) => !empty($s['error'])) ? __('Letzte Sicherung fehlgeschlagen') : ''];
 }
-if (\Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
+if (!$netMoved && \Core\KitPackages::canManage()) $sub['kits'] = [url('/admin/system/kits'), __('Kits'), 'package', ''];
 ?>
   <nav class="adm-tabs adm-secnav" aria-label="<?= e(__('Bereiche')) ?>">
     <?php foreach ($items as $it): [$href, $label, $i, $warn] = $it; $gid = $it[4] ?? ''; ?>

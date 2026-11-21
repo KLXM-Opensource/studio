@@ -22,7 +22,7 @@ foreach ($tasks as $k => $t) $groups[$t['group']][$k] = $t;
 $presets = Cron::presets();
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Geplante Aufgaben')) ?></h1>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e(__('Geplante Aufgaben')) ?></h1>
     <p class="adm-muted"><?= e(__('Wiederkehrende Arbeiten der Installation – Suchindex, Sicherungen, Push, Aufräumen und die Aufgaben der Erweiterungen. Ein einziger Cronjob startet sie; Zeitplan, An/Aus und „Jetzt ausführen“ regeln Sie hier.')) ?></p></div>
 </header>
 
