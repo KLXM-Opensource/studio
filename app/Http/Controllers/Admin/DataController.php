@@ -115,6 +115,10 @@ final class DataController extends AdminController
         foreach (self::PRESETS as $k => $p) {
             $all[$k] = $p;
             if ($k === 'events') $all['jobs'] = \Core\Data\Jobs::preset();
+            // Adressbuch: Tabellenart „contacts“ mit festem Grundschema (Core\Data\Kinds) – Freigabe je Kontakt und je Angabe
+            if ($k === 'team') $all['contacts'] = ['name' => 'Adressbuch', 'singular' => 'Kontakt', 'icon' => 'address-book', 'route' => 'kontakte', 'sort' => ['nachname', 'asc'],
+                'kind' => \Core\Data\Kinds::CONTACTS, 'schema_type' => 'Person', 'fields' => \Core\Data\Kinds::presetFields(\Core\Data\Kinds::CONTACTS),
+                'title' => 'name', 'image' => 'foto', 'desc' => 'position'];
         }
         $all['applications'] = \Core\Data\Jobs::applicationsPreset() + ['purpose' => 'registration'];
         // Eingänge nur mit Funktion „requests“, „nur per E-Mail“ zusätzlich mit „requests.mail“, Anmeldung mit Formularen für Datentabellen
@@ -349,7 +353,7 @@ final class DataController extends AdminController
             $def['settings']['search'] = ['enabled' => '0'];
         }
         foreach ($def['fields'] as &$f) {
-            $f['name'] = Tables::normName($f['label']);
+            $f['name'] = (string) ($f['name'] ?? '') !== '' ? (string) $f['name'] : Tables::normName($f['label']);   // Grundschema (Kinds): feste Namen
         }
         unset($f);
         return $def;

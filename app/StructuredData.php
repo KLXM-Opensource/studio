@@ -278,7 +278,7 @@ final class StructuredData
     private static function entryNode(array $table, array $e, string $url): ?array
     {
         $type = self::typeOf($table);
-        if (!$type) return null;
+        if (!$type || !Data\Exposure::visible($table, $e)) return null;   // Kontakte ohne Freigabe: keine strukturierten Daten
         $e = Data\Exposure::publicEntry($table, $e);                // private Felder nie in strukturierten Daten
         if ($type === 'Event' && Calendar::enabled($table) && ($span = Calendar::span($table, $e))) {
             // Wiederkehrende Termine: nächster Termin ab heute
@@ -307,6 +307,7 @@ final class StructuredData
                     if (in_array($f['type'], ['relation'], true) && preg_match('~autor|author|verfasser~i', $f['name']) && !empty($e[$f['name']])) {
                         $target = Tables::findContent((string) ($f['target'] ?? ''));
                         $p = $target ? Entries::find($target, (int) $e[$f['name']]) : null;
+                        if ($p && !Data\Exposure::visible($target, $p)) $p = null;   // Kontakt ohne Freigabe: kein Autor
                         if ($p) $author = ['@type' => 'Person', 'name' => Entries::title($target, $p)] + (($u = Entries::absUrl($target, $p)) ? ['url' => $u] : []);
                     }
                 }
@@ -318,6 +319,7 @@ final class StructuredData
                 if ($v = $find(['text'], ['position', 'funktion', 'rolle', 'job', 'beruf'])) $n['jobTitle'] = $v;
                 if ($v = $find(['email'])) $n['email'] = $v;
                 if ($v = $find(['tel'])) $n['telephone'] = substr((string) tel_href($v), 4) ?: $v;
+                if ($a = self::postal($table, $e)) $n['address'] = $a;   // freigegebene Adresse (Mehrfachfeld, „nur Ort“ ohne Straße)
                 $n['worksFor'] = $org;
                 break;
             case 'Product':
@@ -338,6 +340,7 @@ final class StructuredData
                     'addressLocality' => $find(['text'], ['ort', 'stadt', 'city']),
                 ]);
                 if ($addr) $n['address'] = ['@type' => 'PostalAddress'] + $addr;
+                elseif ($a = self::postal($table, $e)) $n['address'] = $a;
                 if (($g = $find(['geo'])) && ($p = Maps::parse($g))) $n['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => $p[0], 'longitude' => $p[1]];
                 if ($v = $find(['tel'])) $n['telephone'] = substr((string) tel_href($v), 4) ?: $v;
                 if ($v = $find(['email'])) $n['email'] = $v;
@@ -351,6 +354,13 @@ final class StructuredData
     public static function field(array $table, array $e, array $types, array $names = []): mixed
     {
         foreach ($table['fields'] as $f) {
+            // Beschriftete Mehrfachfelder (Telefon, E-Mail, Web) zählen wie der einfache Typ: erste Angabe – nach Exposure::publicEntry
+            // nur freigegebene, Arbeit/Geschäftsstelle zuerst
+            if (Combo::isMulti($f['type']) && in_array(Combo::COMPAT[$f['type']] ?? '', $types, true) && !Data\Exposure::isPrivate($f)) {
+                if ($names && !preg_match('~' . implode('|', array_map('preg_quote', $names)) . '~i', $f['name'] . ' ' . $f['label'])) continue;
+                if (($v = Combo::firstValue($f['type'], $e[$f['name']] ?? null, ['work', 'office', 'main'])) !== null) return $v;
+                continue;
+            }
             if (!in_array($f['type'], $types, true) || Data\Exposure::isPrivate($f)) continue;   // „Nie öffentlich“: nie in JSON-LD, Visitenkarte, Personen-Block
             if ($names && !preg_match('~' . implode('|', array_map('preg_quote', $names)) . '~i', $f['name'] . ' ' . $f['label'])) continue;
             $v = $e[$f['name']] ?? null;
@@ -361,6 +371,20 @@ final class StructuredData
                 'multiselect', 'relations' => implode(', ', array_filter(array_map('trim', explode(',', Entries::text($table, $e, $f['name']))))),
                 default => trim(Entries::text($table, $e, $f['name'])),
             };
+        }
+        return null;
+    }
+
+    /** Erste Adresse aus einem beschrifteten Mehrfachfeld (Core\Combo „addresses“) als PostalAddress – der Eintrag ist schon bereinigt */
+    private static function postal(array $table, array $e): ?array
+    {
+        foreach ($table['fields'] as $f) {
+            if ($f['type'] !== 'addresses' || Data\Exposure::isPrivate($f)) continue;
+            foreach (Combo::items($e[$f['name']] ?? null) as $i) {
+                $a = array_filter(['streetAddress' => trim((string) ($i['street'] ?? '')), 'postalCode' => trim((string) ($i['zip'] ?? '')),
+                    'addressLocality' => trim((string) ($i['city'] ?? '')), 'addressCountry' => trim((string) ($i['country'] ?? ''))], fn($v) => $v !== '');
+                if ($a) return ['@type' => 'PostalAddress'] + $a;
+            }
         }
         return null;
     }

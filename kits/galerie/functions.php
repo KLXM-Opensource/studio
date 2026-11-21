@@ -7,6 +7,7 @@
  */
 
 use Core\Data\Entries;
+use Core\Data\Exposure;
 use Core\Data\Tables;
 use Core\Pages;
 
@@ -566,11 +567,11 @@ function galerie_entry_from(string $role, ?string $link = null): ?array
         return $ctx && $ctx['table']['handle'] === $t['handle'] ? $ctx['entry'] : null;
     }
     if (preg_match('~^entry:([a-z][a-z0-9_]*):(\d+)$~', $link, $m)) {
-        return $m[1] === $t['handle'] ? Entries::query($t, ['ids' => [(int) $m[2]]])[0] ?? null : null;
+        return $m[1] === $t['handle'] ? Exposure::publicRows($t, Entries::query($t, ['ids' => [(int) $m[2]]]))[0] ?? null : null;
     }
     $route = trim((string) $t['settings']['route'], '/');
     if ($route !== '' && preg_match('~/' . preg_quote($route, '~') . '/([^/?#]+)~', $link, $m)) {
-        return Entries::bySlug($t, $m[1]);
+        return ($w = Entries::bySlug($t, $m[1])) ? Exposure::publicEntry($t, $w) : null;
     }
     return null;
 }
@@ -586,7 +587,7 @@ function galerie_by_ids(string $role, array $ids): array
     $missing = array_values(array_diff($ids, array_keys($cache[$key] ?? [])));
     if ($missing) {
         foreach ($missing as $id) $cache[$key][$id] = null;
-        foreach (Entries::query($t, ['ids' => $missing]) as $r) $cache[$key][(int) $r['id']] = $r;
+        foreach (Exposure::publicRows($t, Entries::query($t, ['ids' => $missing])) as $r) $cache[$key][(int) $r['id']] = $r;
     }
     $out = [];
     foreach ($ids as $id) if (!empty($cache[$key][$id])) $out[$id] = $cache[$key][$id];
@@ -688,7 +689,7 @@ function galerie_exhibitions(array $o = []): array
 {
     $t = galerie_table('exhibitions');
     if (!$t) return [];
-    $rows = Entries::query($t, ['limit' => 1000]);
+    $rows = Exposure::publicRows($t, Entries::query($t, ['limit' => 1000]));
     $today = galerie_today();
     $want = array_values(array_filter((array) ($o['status'] ?? [])));
     $venues = array_values(array_filter((array) ($o['venue'] ?? [])));
@@ -751,7 +752,7 @@ function galerie_artists(bool $featured = false, string $order = 'alpha'): array
 {
     $t = galerie_table('artists');
     if (!$t) return [];
-    $rows = Entries::query($t, ['limit' => 1000] + ($featured && galerie_has($t, 'featured') ? ['where' => [['featured', '=', '1']]] : []));
+    $rows = Exposure::publicRows($t, Entries::query($t, ['limit' => 1000] + ($featured && galerie_has($t, 'featured') ? ['where' => [['featured', '=', '1']]] : [])));
     if ($order === 'alpha') usort($rows, fn($a, $b) => strcmp(galerie_sortkey($a), galerie_sortkey($b)));
     return $rows;
 }
@@ -785,7 +786,7 @@ function galerie_works(array $o = []): array
     if (!empty($o['artist']) && galerie_has($t, 'kuenstler')) $where[] = ['kuenstler', '=', (string) (int) $o['artist']];
     if ($where) $q['where'] = $where;
     if (!empty($o['ids'])) $q['ids'] = array_map('intval', (array) $o['ids']);
-    $rows = Entries::query($t, $q);
+    $rows = Exposure::publicRows($t, Entries::query($t, $q));
     if (!empty($o['ids'])) {
         $pos = array_flip(array_map('intval', (array) $o['ids']));
         usort($rows, fn($a, $b) => ($pos[$a['id']] ?? 0) <=> ($pos[$b['id']] ?? 0));
@@ -865,7 +866,7 @@ function galerie_enquiry_prefill(): string
 {
     $slug = trim((string) (app()->request?->query['werk'] ?? ''));
     if ($slug === '' || !preg_match('~^[a-z0-9-]{1,120}$~', $slug) || !($t = galerie_table('works'))) return '';
-    $w = Entries::bySlug($t, $slug);
+    $w = ($w = Entries::bySlug($t, $slug)) ? Exposure::publicEntry($t, $w) : null;
     return $w ? galerie_work_label($w) : '';
 }
 

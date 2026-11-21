@@ -57,6 +57,7 @@ final class ICal
      */
     public static function vevent(array $table, array $e, array $o = []): array
     {
+        $e = Exposure::forApps($table, $e);                // „Nur Website“: nie in ICS-Feed, Einzeltermin oder CalDAV
         $span = Calendar::span($table, $e);
         if (!$span) return [];
         $c = Calendar::config($table);

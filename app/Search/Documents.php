@@ -201,6 +201,7 @@ final class Documents
             foreach ($rows as $e) {
                 if ($next !== null && !isset($next[$e['id']])) continue;
                 if ($cfg['exclude'] && self::matches($t, $e, $cfg['exclude'])) continue;   // Ausschluss prüft den vollen Eintrag
+                if (!Exposure::visible($t, $e)) continue;           // Kontakte ohne „Auf der Website zeigen“: nicht im Index
                 $e = Exposure::publicEntry($t, $e);              // „Nie öffentlich“: weder Text, Auszug, Facetten noch Bild
                 $url = Entries::href($t, $e);
                 if (!$url) continue;

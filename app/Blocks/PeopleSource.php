@@ -38,7 +38,7 @@ final class PeopleSource
         foreach ((array) ($d['items'] ?? []) as $i => $it) {
             if (!preg_match('~^entry:([a-z][a-z0-9_]*):(\d+)$~', (string) ($it['person'] ?? ''), $m) || $m[1] !== $t['handle']) continue;
             $e = Entries::find($t, (int) $m[2]);
-            if (!$e || (($e['status'] ?? 'published') !== 'published' && !$editing)) continue;
+            if (!$e || (($e['status'] ?? 'published') !== 'published' && !$editing) || !Exposure::visible($t, $e)) continue;   // Kontakte: nur mit Freigabe
             $out[] = ['i' => (int) $i, 'entry' => Exposure::publicEntry($t, $e), 'item' => (array) $it];
         }
         return $out;

@@ -79,6 +79,13 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
               if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
               continue;
           }
+          // Beschriftete Mehrfachfelder (Kontakte): freigegebene Nummern/E-Mails/Webadressen als Knöpfe, Anschrift als Fakt
+          if (in_array($tp, ['phones', 'emails', 'urls'], true)) { array_push($acts, ...\Core\Combo::actions($tp, $e[$f] ?? null)); continue; }
+          if ($tp === 'addresses') {
+              $adr = array_filter(array_map(fn($i) => e(\Core\Combo::itemText($tp, $i)), \Core\Combo::items($e[$f] ?? null)));
+              if ($adr) $facts[] = [$f, implode('<br>', $adr)];
+              continue;
+          }
           $h = Entries::html($t, $e, $f);
           if ($h === '') continue;
           if (in_array($tp, ['richtext', 'textarea', 'mediatext'], true)) { $body[] = [$f, $tp, $h]; continue; }
@@ -125,6 +132,7 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
           if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
           continue;
       }
+      if (in_array($tp, ['phones', 'emails', 'urls'], true)) { array_push($acts, ...\Core\Combo::actions($tp, $e[$f] ?? null)); continue; }
       if ($f !== '_title' && ($h = Entries::html($t, $e, $f)) !== '') $lead[] = [$f, $tp, $h];
   }
   // Visitenkarte (Schema-Typ „Person“): „Kontakt speichern“ als vCard mit Foto
@@ -154,6 +162,15 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
           if ($h === '') continue;
           if ($tp === 'geo') { $map = $h; continue; }
           if (isset($icons[$tp])) { $rows[] = [$f, $tp, $h]; continue; }
+          // Mehrfachfelder: je freigegebener Angabe eine Zeile (Anschrift als Adresszeilen)
+          if (in_array($tp, ['phones', 'emails', 'urls'], true)) {
+              foreach (\Core\Combo::actions($tp, $e[$f] ?? null) as [$href, $ico, $txt]) $rows[] = [$f, \Core\Combo::COMPAT[$tp], '<a href="' . e($href) . '">' . e($txt) . '</a>'];
+              continue;
+          }
+          if ($tp === 'addresses') {
+              foreach (\Core\Combo::items($e[$f] ?? null) as $i) $lines[] = [e(\Core\Combo::itemText($tp, $i)), \Core\Combo::itemText($tp, $i)];
+              continue;
+          }
           // Adresse: Textzeilen untereinander; eine Postleitzahl steht mit der folgenden Zeile (Ort) zusammen
           $plain = trim(strip_tags($h));
           if ($lines && preg_match('~^\d{4,5}$~', $lines[count($lines) - 1][1])) { $lines[count($lines) - 1][0] .= ' ' . $h; $lines[count($lines) - 1][1] = $plain . 'x'; continue; }

@@ -10,6 +10,7 @@ $type = $f['type'] ?? 'text';
 ?>
 <li class="dt-field<?= $err ? ' is-error' : '' ?>" data-field data-type="<?= e($type) ?>">
   <input type="hidden" name="<?= $n ?>[id]" value="<?= e($f['id'] ?? '') ?>">
+  <?php if (!empty($f['legacy'])): // Altfeld nach data:convert – bleibt ausgeblendet, bis „data:convert --revert“ oder „--drop-legacy“ ?><input type="hidden" name="<?= $n ?>[legacy]" value="1"><?php endif; ?>
   <span class="dt-field__icon" aria-hidden="true" data-type-icon><?= icon(Tables::TYPES[$type][2] ?? 'text-t') ?></span>
   <div class="dt-field__main">
     <div class="dt-field__row">
@@ -21,6 +22,11 @@ $type = $f['type'] ?? 'text';
         <?php endforeach; ?>
       </select></label>
     </div>
+    <?php if (!empty($f['system'])): // Grundschema einer Tabellenart (Core\Data\Kinds) ?>
+    <p class="f-help dt-field__system"><?= icon('lock') ?> <?= e(__('Feld des Grundschemas (Adressbuch): Name und Typ bleiben fest, es lässt sich nicht entfernen – Beschriftung und Hilfe sind änderbar.')) ?></p>
+    <?php elseif (!empty($f['legacy'])): ?>
+    <p class="f-help dt-field__system"><?= icon('archive') ?> <?= e(__('Altfeld aus der Umwandlung: ausgeblendet und nie öffentlich, Werte bleiben für das Zurückdrehen erhalten.')) ?></p>
+    <?php endif; ?>
     <?php // Nur Redaktion: kurzer Hinweis am Feld (immer), damit klar ist, dass Besucher es nicht ausfüllen
     $outTypes = Tables::typeGroups(array_keys(Tables::TYPES));
     $outTypes = array_values(array_filter($outTypes, fn($g) => $g['key'] === 'output'))[0]['types'] ?? []; ?>
@@ -33,6 +39,7 @@ $type = $f['type'] ?? 'text';
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[width]" value="half"<?= ($f['width'] ?? '') === 'half' ? ' checked' : '' ?>> <span>Halbe Breite</span></label>
       <?php if (!$inbox): // Core\Data\Exposure: nie in einer Website-Ausgabe (Blöcke, Detailseite, Visitenkarte, JSON-LD, Suche, Feeds) ?>
       <label class="f-check" title="<?= e(__('Erscheint nirgends auf der Website – nicht in Blöcken, auf der Detailseite, in der Visitenkarte, den strukturierten Daten, der Suche oder Feeds. Verwaltung, API und Adressbuch-Apps sehen es weiter.')) ?>"><input type="checkbox" name="<?= $n ?>[private]" value="1"<?= !empty($f['private']) ? ' checked' : '' ?>> <span><?= icon('lock') ?> <?= e(__('Nie öffentlich')) ?></span></label>
+      <label class="f-check" title="<?= e(__('Erscheint auf der Website (Detailseite, Blöcke), geht aber nie an Adressbuch- und Kalender-Apps (CardDAV/CalDAV), Visitenkarten oder ICS-Kalender – z. B. für „Vita“ oder „Über mich“.')) ?>"><input type="checkbox" name="<?= $n ?>[website_only]" value="1"<?= !empty($f['website_only']) ? ' checked' : '' ?>> <span><?= icon('globe') ?> <?= e(__('Nur Website')) ?></span></label>
       <?php endif; ?>
     </div>
     <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint.')) ?></p><?php endif; ?>
@@ -57,8 +64,12 @@ $type = $f['type'] ?? 'text';
       <label class="dt-in"><span>Auswahlmöglichkeiten (eine pro Zeile)</span><textarea name="<?= $n ?>[options]" rows="3" placeholder="Neuigkeiten&#10;Hinweise&#10;Veranstaltungen"><?= e($opts) ?></textarea></label>
     </div>
     <div class="dt-field__extra" data-show-for="relation relations">
+      <?php // Adressbücher (Core\Data\Kinds) zuerst: eine Verknüpfung dorthin ist ein Kontakt-Feld (Auswahl mit Funktion/Organisation, Website zeigt nur freigegebene Kontakte)
+      $books = array_filter($tables, fn($h) => ($bt = Tables::findContent((string) $h)) && \Core\Data\Kinds::isContacts($bt), ARRAY_FILTER_USE_KEY); ?>
       <label class="dt-in"><span>Verknüpfte Tabelle</span><select name="<?= $n ?>[target]"><option value="">– wählen –</option>
-        <?php foreach ($tables as $h => $l): ?><option value="<?= e($h) ?>"<?= ($f['target'] ?? '') === $h ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select></label>
+        <?php if ($books): ?><optgroup label="<?= e(__('Adressbücher – Feld „Kontakt“')) ?>"><?php foreach ($books as $h => $l): ?><option value="<?= e($h) ?>"<?= ($f['target'] ?? '') === $h ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></optgroup><optgroup label="<?= e(__('Tabellen')) ?>"><?php endif; ?>
+        <?php foreach (array_diff_key($tables, $books) as $h => $l): ?><option value="<?= e($h) ?>"<?= ($f['target'] ?? '') === $h ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?><?= $books ? '</optgroup>' : '' ?></select></label>
+      <p class="f-help"><?= e(__('Kontakt-Feld: Tabelle aus „Adressbücher“ wählen – „Verknüpfung (mehrere)“ für mehrere Kontakte. Auf der Website erscheinen nur freigegebene Kontakte mit ihren öffentlichen Angaben.')) ?></p>
     </div>
     <?php
     // Wiederholbare Gruppe: Unterfelder (Bezeichnung, Kurzname, Typ, Pflicht, halbe Breite, Auswahlmöglichkeiten) + Anzahl und Beschriftungen

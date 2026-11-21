@@ -6,17 +6,23 @@ declare(strict_types=1);
 namespace Core\Data;
 
 /**
- * Was von einem Eintrag auf der Website erscheinen darf – eine Stelle für alle öffentlichen Ausgabewege.
- *
- * Heute (Stufe 0): Feld-Option „Nie öffentlich“ (Feld-Eigenschaft `private` im Tabellen-Designer). Solche Felder erscheinen in
- * keiner Website-Ausgabe: Blöcke (Personen, Datenliste, Datensatz-Felder), Detailseite samt Vorlage (app()->entry), Visitenkarte
+ * Was von einem Eintrag auf der Website erscheinen darf – eine Stelle für alle öffentlichen Ausgabewege: Blöcke (Personen,
+ * Datenliste, Datensatz-Felder, Kalender …), Kits mit eigenen Abfragen, Detailseite samt Vorlage (app()->entry), Visitenkarte
  * (/vcard/…), strukturierte Daten (JSON-LD), Suchindex (damit auch Besucher-Chat/KI-Antwort), RSS-/iCal-Feeds, llms.txt und
- * geteilte Tabellen auf allen Mitglieds-Websites (die Option steht im Schema der Eigentümer-Website). Verwaltung, API mit Token,
- * MCP und CardDAV/CalDAV sehen weiter alles.
+ * geteilte Tabellen auf allen Mitglieds-Websites (Freigaben stehen am Eintrag bzw. im Schema der Eigentümer-Website).
+ * Verwaltung, API mit Token, MCP und CardDAV/CalDAV sehen weiter alles. Jede Ebene kann nur einschränken:
  *
- * Aufrufer nehmen statt des Eintrags publicEntry() (bereinigte Kopie, private Felder = null) bzw. publicRows(); wer Felder
- * auswählt (Blöcke, Suche), filtert mit publicNames()/isPrivate(). Spätere Stufen (Kontakt-Art, Freigabe je Eintrag/Angabe,
- * Sperrliste je Tabelle) erweitern publicEntry(), ohne dass sich die Aufrufer ändern.
+ *  1. Eintrag: Kontakte (Core\Data\Kinds, Art contacts) nur mit „Auf der Website zeigen“ (Feld oeffentlich). Auf der Website
+ *     filtert das schon die Abfrage (Entries::query/count/facets/bySlug über visibleSql()), damit auch Kits mit eigenen Abfragen
+ *     nichts anderes bekommen; publicRows() lässt solche Einträge weg (Suchindex, Kommandozeile).
+ *  2. Angabe: beschriftete Mehrfachfelder (Core\Combo::MULTI) nur mit Freigabe „Öffentlich“ (Adressen auch „nur Ort“).
+ *  3. Feld: Option „Nie öffentlich“ (private) und Altfelder nach einer Umwandlung (legacy) – in keiner Website-Ausgabe.
+ *
+ * Gegenstück „Nur Website“ (website_only): erscheint auf der Website, geht aber nie an Adressbuch-/Kalender-Apps (CardDAV/CalDAV),
+ * Visitenkarte (.vcf) oder ICS (Feed, Export) – appOnly()/forApps() für diese Wege.
+ *
+ * Aufrufer nehmen statt des Eintrags publicEntry() (bereinigte Kopie) bzw. publicRows(); wer Felder auswählt (Blöcke, Suche),
+ * filtert mit publicNames()/isPrivate(). Tabellen ohne diese Merkmale bleiben in jedem Weg byte-gleich.
  */
 final class Exposure
 {
@@ -25,10 +31,60 @@ final class Exposure
     /** Feldtypen, für die der Hinweis gilt (Text, Telefon, E-Mail, Datum, Adresse) */
     public const HINT_TYPES = ['text', 'tel', 'email', 'date', 'address', 'textarea'];
 
-    /** Ist das Feld „Nie öffentlich“? */
+    /** Ist das Feld „Nie öffentlich“ (oder ein ausgeblendetes Altfeld nach data:convert)? */
     public static function isPrivate(?array $f): bool
     {
-        return $f !== null && !empty($f['private']);
+        return $f !== null && (!empty($f['private']) || !empty($f['legacy']));
+    }
+
+    /** Feld „Nur Website“: nie in vCard, CardDAV, CalDAV, ICS */
+    public static function isWebsiteOnly(?array $f): bool
+    {
+        return $f !== null && !empty($f['website_only']);
+    }
+
+    /** Felder einer Tabelle, die an Apps und Austauschformate gehen dürfen (ohne „Nur Website“ und ohne Altfelder) */
+    public static function appFields(array $t): array
+    {
+        return array_values(array_filter((array) ($t['fields'] ?? []), fn($f) => !self::isWebsiteOnly($f) && empty($f['legacy'])));
+    }
+
+    /** Eintrag für Apps/Austausch (vCard, ICS): „Nur Website“-Felder sind null – Verwaltung, API und Website bleiben unberührt */
+    public static function forApps(array $t, array $e): array
+    {
+        foreach ((array) ($t['fields'] ?? []) as $f) if ((self::isWebsiteOnly($f) || !empty($f['legacy'])) && array_key_exists($f['name'], $e)) $e[$f['name']] = null;
+        return $e;
+    }
+
+    /** Ist die Tabelle ein Adressbuch (Freigabe je Kontakt)? */
+    public static function perEntry(array $t): bool
+    {
+        return Kinds::isContacts($t);
+    }
+
+    /** Darf der Eintrag überhaupt auf der Website erscheinen? (Kontakte: „Auf der Website zeigen“) */
+    public static function visible(array $t, array $e): bool
+    {
+        return !self::perEntry($t) || !empty($e[Kinds::PUBLIC_FIELD]);
+    }
+
+    /**
+     * SQL-Bedingung für Website-Abfragen ('' = keine): Kontakte nur mit Freigabe. Gilt, solange eine Website-Anfrage läuft
+     * (nicht Verwaltung, API, MCP, CardDAV/CalDAV, Kommandozeile – dort sehen Berechtigte alles; Suchindex und Feeds prüfen selbst).
+     */
+    public static function visibleSql(array $t): string
+    {
+        return self::perEntry($t) && self::websiteRequest() ? Kinds::PUBLIC_FIELD . ' = 1' : '';
+    }
+
+    /** Läuft gerade eine Anfrage der Website (Besucher, auch angemeldete Redaktion auf der Website)? */
+    public static function websiteRequest(): bool
+    {
+        $r = app()->request;
+        if (!$r || $r->isAdminPath()) return false;
+        $p = (string) $r->path;
+        foreach (['/api/', '/mcp', '/dav', '/.well-known/'] as $pre) if ($p === rtrim($pre, '/') || str_starts_with($p, $pre)) return false;
+        return true;
     }
 
     /** Kurznamen der privaten Felder einer Tabelle */
@@ -39,25 +95,52 @@ final class Exposure
         return $out;
     }
 
-    /** Hat die Tabelle private Felder? (sonst bleibt jeder Ausgabeweg unverändert) */
+    /** Hat die Tabelle private Felder? */
     public static function hasPrivate(array $t): bool
     {
         return self::privateFields($t) !== [];
     }
 
-    /** Bereinigte Kopie eines Eintrags für die Website: private Felder sind null */
+    /** Muss ein Eintrag dieser Tabelle für die Website bereinigt werden? (sonst bleibt jeder Ausgabeweg unverändert) */
+    public static function affects(array $t): bool
+    {
+        if (self::hasPrivate($t) || self::perEntry($t)) return true;
+        foreach ((array) ($t['fields'] ?? []) as $f) if (\Core\Combo::isMulti((string) ($f['type'] ?? ''))) return true;
+        return false;
+    }
+
+    /**
+     * Bereinigte Kopie eines Eintrags für die Website: private Felder und Altfelder sind null, Mehrfachfelder enthalten nur
+     * freigegebene Angaben. Ein nicht freigegebener Kontakt (visible() = false) verliert alle Feldwerte und bekommt _hidden = true
+     * – Aufrufer, die einzelne Einträge laden (find), prüfen visible() vorher.
+     */
     public static function publicEntry(array $t, array $e): array
     {
-        foreach (self::privateFields($t) as $n) if (array_key_exists($n, $e)) $e[$n] = null;
+        if (!self::visible($t, $e)) {
+            foreach ((array) ($t['fields'] ?? []) as $f) if (array_key_exists($f['name'], $e)) $e[$f['name']] = null;
+            $e['_hidden'] = true;
+            return $e;
+        }
+        foreach ((array) ($t['fields'] ?? []) as $f) {
+            $n = (string) $f['name'];
+            if (!array_key_exists($n, $e)) continue;
+            if (self::isPrivate($f)) $e[$n] = null;
+            elseif (\Core\Combo::isMulti((string) $f['type'])) $e[$n] = \Core\Combo::publicItems((string) $f['type'], $e[$n]);
+        }
         return $e;
     }
 
-    /** publicEntry() für eine Liste von Einträgen (Schlüssel bleiben) */
+    /** publicEntry() für eine Liste von Einträgen (Schlüssel bleiben); nicht freigegebene Kontakte fallen weg */
     public static function publicRows(array $t, array $rows): array
     {
-        if (!self::hasPrivate($t)) return $rows;
-        foreach ($rows as $k => $e) if (is_array($e)) $rows[$k] = self::publicEntry($t, $e);
-        return $rows;
+        if (!self::affects($t)) return $rows;
+        $list = array_is_list($rows);
+        foreach ($rows as $k => $e) {
+            if (!is_array($e)) continue;
+            if (!self::visible($t, $e)) { unset($rows[$k]); continue; }
+            $rows[$k] = self::publicEntry($t, $e);
+        }
+        return $list ? array_values($rows) : $rows;
     }
 
     /** Auswahl von Feldnamen ohne private Felder (Pseudo-Felder wie _title, published_at bleiben) */
