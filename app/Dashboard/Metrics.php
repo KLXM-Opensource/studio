@@ -172,8 +172,16 @@ final class Metrics
                 __('Von API, MCP oder KI vorgeschlagen – erst nach Ihrer Freigabe online.'), '/admin/ai/eingereicht', __('Prüfen'));
         }
         // Hinweise zum Projekt mit „aufgabe: ja“ (Core\Guide): bis die Person sie über „Lesen“ geöffnet hat
+        // (als Aufgabe übernommene – tasks:import-guide – stehen nur noch als Aufgabe da)
+        $imported = \Core\Tasks\Tasks::importedGuideKeys();
         foreach (\Core\Guide::tasks((int) ($user['id'] ?? 0)) as $n) {
+            if (in_array($n['key'], $imported, true)) continue;
             $add('guide-' . $n['key'], 2, 'info', 'lightbulb', 1, $n['title'], \Core\Guide::plain($n, 180), '/admin/hilfe/aufgabe/' . rawurlencode($n['key']), __('Lesen'));
+        }
+        // Aufgaben der Redaktion (Core\Tasks): je offene Aufgabe, für die die Person zuständig ist (auch über Rolle oder „alle“),
+        // und Entwurfs-Notizen mit zuständiger Person – sichtbar, bis jemand sie abhakt
+        if ($user) {
+            foreach (\Core\Tasks\Tasks::todos($user) as $t) $out[] = $t;
         }
         if (\Core\Support\Support::canReport()) {
             $add('support', 3, 'info', 'lifebuoy', \Core\Support\Support::navCount(), __('Antworten im Support'),
