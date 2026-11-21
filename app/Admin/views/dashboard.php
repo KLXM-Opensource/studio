@@ -40,7 +40,7 @@ $fmtTrend = function (?array $t): string {
 </header>
 
 <div class="dash-bar">
-  <a class="dash-bar__btn" href="<?= e(url('/admin' . ($customize ? '' : '?anpassen=1'))) ?>" data-dash-customize aria-pressed="<?= $customize ? 'true' : 'false' ?>"><?= icon('sliders-horizontal') ?><span data-dash-customize-label><?= e($customize ? __('Fertig') : __('Übersicht anpassen')) ?></span></a>
+  <a class="dash-bar__btn" href="<?= e(url('/admin' . ($customize ? '' : '?anpassen=1'))) ?>" data-dash-customize role="button" aria-pressed="<?= $customize ? 'true' : 'false' ?>"><?= icon('sliders-horizontal') ?><span data-dash-customize-label><?= e($customize ? __('Fertig') : __('Übersicht anpassen')) ?></span></a>
   <form method="post" action="<?= e(url('/admin/api/dashboard/prefs')) ?>" class="dash-bar__reset" data-dash-form<?= $customize ? '' : ' hidden' ?>><?= csrf_field() ?><input type="hidden" name="do" value="reset"><button type="submit" class="dash-bar__btn"><?= icon('arrow-counter-clockwise') ?><span><?= e(__('Standard wiederherstellen')) ?></span></button></form>
   <p class="dash-bar__hint adm-muted" data-dash-hint<?= $customize ? '' : ' hidden' ?>><?= e(__('Karten mit den Pfeilen oder per Ziehen am Griff verschieben, mit dem Auge aus- und einblenden.')) ?></p>
 </div>
