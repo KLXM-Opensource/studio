@@ -122,14 +122,16 @@ async function vendors() {
   copy(nm('pdfjs-dist/build/pdf.min.mjs'), path.join(pdf, 'pdf.min.mjs'));
   copy(nm('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(pdf, 'pdf.worker.min.mjs'));
   copy(nm('pdfjs-dist/LICENSE'), path.join(pdf, 'LICENSE.txt'));
+  // QuickJS (wasm/quickjs-eval.*) braucht nur pdf.sandbox.mjs (Skripte in PDF-Formularen, Viewer von pdf.js) – den liefern wir
+  // nicht aus (resources/js/pdfviewer.mjs nutzt pdf.min.mjs ohne Skripte), daher weg: 475 KB weniger
+  const skip = f => /quickjs/i.test(path.basename(f));
+  fs.rmSync(path.join(pdf, 'wasm'), { recursive: true, force: true });
   for (const dir of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
     if (fs.existsSync(nm('pdfjs-dist', dir))) {
-      fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true });
+      fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true, filter: f => !skip(f) });
       console.log('  vendor  ' + path.relative(ROOT, path.join(pdf, dir)) + '/');
     }
   }
-  // QuickJS (wasm/quickjs-eval.*): pdfjs-dist liefert keine Lizenzdatei mit – MIT-Texte aus resources/licenses/
-  if (fs.existsSync(path.join(pdf, 'wasm/quickjs-eval.wasm'))) copy(path.join(ROOT, 'resources/licenses/LICENSE_QUICKJS.txt'), path.join(pdf, 'wasm/LICENSE_QUICKJS'));
 }
 
 

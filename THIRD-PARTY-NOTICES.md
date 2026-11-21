@@ -24,7 +24,7 @@ not part of the distribution. **Service**: an online service contacted at runtim
 
 | License | Where | Type |
 |---|---|---|
-| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), NativeCSS (parts in `kits/fluid`, kit `native`, also its demo media), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, QuickJS, lbuchs/webauthn | Bundled |
+| MIT | FriendsOfREDAXO/consent_kit (ported into `extensions/consent_kit`), most PHP packages, Phosphor Icons (also in `extensions/video_tools`), Tabler Icons, UIkit and Tailwind CSS (kit `frameworks`), NativeCSS (parts in `kits/fluid`, kit `native`, also its demo media), editorjs-drag-drop, Editor.js sub-packages, MapLibre sub-packages, qcms, lbuchs/webauthn | Bundled |
 | MIT OR Apache-2.0 | chillerlan/php-qrcode, @maplibre/mlt | Bundled |
 | Apache-2.0 | Editor.js, Mozilla PDF.js (incl. its JBIG2 wrapper), Apache ECharts | Bundled |
 | BSD-3-Clause | sabre/* (CalDAV/CardDAV), MapLibre GL JS, ZRender (ECharts), pbf, @mapbox/vector-tile, PDFium JBIG2 and Foxit fonts in PDF.js, Adobe CMaps (BSD-style) | Bundled |
@@ -114,7 +114,6 @@ Installed from `kits/frameworks/package.json` and copied/built by `kits/framewor
 | JBIG2 decoder (`wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `wasm/LICENSE_JBIG2`, `wasm/LICENSE_PDFJS_JBIG2` |
 | OpenJPEG (`wasm/openjpeg*`); PDF.js wrapper © 2024 Mozilla Foundation | BSD-2-Clause; wrapper BSD | `wasm/LICENSE_OPENJPEG`, `wasm/LICENSE_PDFJS_OPENJPEG` |
 | qcms (`wasm/qcms_bg.wasm`), © 2009-2024 Mozilla Corporation, © 1998-2007 Marti Maria | MIT | `wasm/LICENSE_QCMS`, `wasm/LICENSE_PDFJS_QCMS` |
-| QuickJS (`wasm/quickjs-eval.*`), © 2017-2021 Fabrice Bellard, Charlie Gordon; build scripts © Mozilla Foundation (mozilla/pdf.js.quickjs) | MIT | `wasm/LICENSE_QUICKJS` (added by `tools/build.mjs` from `resources/licenses/`, because pdfjs-dist ships none) |
 | ICC colour profile (`iccs/*.icc`) | CC0-1.0 | `iccs/LICENSE` |
 
 The Liberation fonts are separate font files that PDF.js loads to render PDFs without embedded fonts. They are not
