@@ -6,7 +6,7 @@
  * @var array $page  @var array $blocks  @var array $previews  @var ?array $content (Modus „Inhalt“: Inhaltsblöcke eines Eintrags)
  */
 $content ??= null;
-$config = app()->theme->editorConfig();
+$config = app()->theme->editorConfig($page);   // Blockauswahl nach Kontext (Detailseiten-Vorlage, 404-Seite)
 $config['page'] = ['id' => (int) $page['id'], 'title' => $page['title']];
 $config['endpoints'] = [
     'save' => url('/admin/api/pages/' . $page['id'] . '/save'),

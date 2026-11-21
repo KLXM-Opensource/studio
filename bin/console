@@ -201,6 +201,9 @@
  *   glossary:share [--invite=a,b] | glossary:invite a,b | glossary:join [--plan] [--choice=existing|mine|both] | glossary:leave [--no-copies]
  *                                                     Geteiltes Glossar: teilen, einladen, beitreten (Doppel abgleichen), verlassen
  *   glossary:sharetest --sandbox                      Ende-zu-Ende-Test des geteilten Glossars (zwei Websites) – nur in einer Wegwerf-Kopie
+ *   roles:clean [--dry-run] [--all]                  Rollen: Rechte entfernen, die weder Kern noch eine installierte Erweiterung kennt
+ *                                                     (Probelauf mit --dry-run; migrate entfernt nichts – Health zeigt einen Hinweis)
+ *   roles:selftest                                    Selbsttest: unbekannte Rechte, Probelauf, Erhalt beim Speichern einer Rolle
  *   notfound:create [--lang=en] [--publish]           Seite „Nicht gefunden (404)“ anlegen (Startinhalte des Kits, sonst Entwurf)
  *   notfound:selftest                                 Selbsttest der 404-Seite (Anlegen, Sichtbarkeit, eigene Adresse, Vorschläge)
  *   media:web [--all] [--force] [--pool=key]          Web-Fassung großer Videos erzeugen (kleiner, startet sofort; nur mit ffmpeg)
@@ -904,6 +907,12 @@ switch ($cmd) {
     case 'redirects:selftest':
         // Weiterleitungen (Core\Redirects) je Website (--site=…)
         exit(Core\Redirects\Console::run($cmd, $args));
+
+    case 'roles:clean':
+    case 'roles:selftest':
+        // Tote Rechte in Rollen (Core\RoleCleanup) je Website (--site=…, --all)
+        if ($cmd === 'roles:clean' && Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite($cmd, $args));
+        exit(Core\RoleCleanup::console($cmd, $args));
 
     case 'notfound:create':
     case 'notfound:selftest':

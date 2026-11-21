@@ -43,10 +43,11 @@ $type = $f['type'] ?? 'text';
     ?>
     <div class="dt-field__extra" data-show-for="section"<?= $type === 'section' ? '' : ' hidden' ?>>
       <label class="dt-in"><span><?= e(__('Darstellung')) ?></span><select name="<?= $n ?>[style]">
-        <option value="heading"<?= ($f['style'] ?? 'heading') !== 'fieldset' ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
+        <option value="heading"<?= !in_array($f['style'] ?? 'heading', ['fieldset', 'collapsed'], true) ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
         <option value="fieldset"<?= ($f['style'] ?? '') === 'fieldset' ? ' selected' : '' ?>><?= e(__('Gruppe mit Rahmen')) ?></option>
+        <option value="collapsed"<?= ($f['style'] ?? '') === 'collapsed' ? ' selected' : '' ?>><?= e(__('Eingeklappt (zeigt die Anzahl ausgefüllter Felder)')) ?></option>
       </select></label>
-      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?></p>
+      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?> <?= e(__('„Eingeklappt“ gilt für die Eingabe der Redaktion: Der Abschnitt öffnet sich per Klick, bei Fehlern und bei leeren Pflichtfeldern von selbst; im öffentlichen Formular erscheint er als Zwischenüberschrift.')) ?></p>
     </div>
     <div class="dt-field__extra" data-show-for="content"<?= $type === 'content' ? '' : ' hidden' ?>>
       <div class="dt-in dt-in--rich"><span id="<?= $sid ?>-l"><?= e(__('Text im Formular')) ?></span>

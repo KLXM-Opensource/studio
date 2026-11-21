@@ -14,7 +14,10 @@ return [
             ['name' => 'title', 'label' => 'Überschrift', 'type' => 'text', 'width' => 'half'],
             ['name' => 'intro', 'label' => 'Einleitung (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
             ['type' => 'heading', 'label' => 'Daten'],
-            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true],
+            ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable', 'required' => true, 'width' => 'half'],
+            ['name' => 'limit', 'label' => 'Anzahl', 'type' => 'number', 'default' => 6, 'width' => 'half', 'help' => '0 = alle'],
+            // Grundfelder oben, alles Weitere eingeklappt (Core\Fields 'collapse')
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Felder, Karten oder Liste, Spalten, Bild'],
             ['name' => 'fields', 'label' => 'Angezeigte Felder', 'type' => 'datafields',
                 'help' => 'Reihenfolge wie in der Tabelle. Das erste Bildfeld wird zum Kartenbild, der Titel zum Link.'],
             ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'cards', 'width' => 'half',
@@ -28,11 +31,10 @@ return [
                 'options' => ['2' => '2', '3' => '3', '4' => '4']],
             ['name' => 'ratio', 'label' => 'Bildformat', 'type' => 'select', 'default' => '16:10', 'width' => 'half', 'required' => true,
                 'options' => ['16:9' => '16:9', '16:10' => '16:10', '4:3' => '4:3', '1:1' => '1:1', '3:4' => '3:4']],
-            ['name' => 'limit', 'label' => 'Anzahl', 'type' => 'number', 'default' => 6, 'width' => 'half', 'help' => '0 = alle'],
             ['name' => 'image_fit', 'label' => 'Bilder', 'type' => 'select', 'default' => '', 'width' => 'half',
                 'options' => ['' => 'Automatisch (im Verzeichnis eingepasst)', 'cover' => 'Fläche füllen (Fotos)', 'contain' => 'Ganz zeigen auf einer Kachel (Logos)']],
             ...\Core\Data\Clamp::fields(),   // Textlänge, Titel kürzen (Karten und Listen)
-            ['type' => 'heading', 'label' => 'Filter & Sortierung'],
+            ['type' => 'heading', 'label' => 'Filter & Sortierung', 'collapse' => true, 'summary' => 'Nur bestimmte Einträge, Reihenfolge, Blättern'],
             ['name' => 'filter_field', 'label' => 'Nur Einträge, bei denen …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– kein Filter –'],
             ['name' => 'filter_op', 'label' => 'Bedingung', 'type' => 'select', 'default' => '=', 'width' => 'half', 'required' => true,
                 'options' => ['=' => 'ist gleich', '!=' => 'ist nicht', 'contains' => 'enthält', '>=' => 'ab / größer gleich', '<=' => 'bis / kleiner gleich',
@@ -44,7 +46,8 @@ return [
             ['name' => 'sort_dir', 'label' => 'Richtung', 'type' => 'select', 'default' => '', 'width' => 'half',
                 'options' => ['' => 'wie eingestellt', 'asc' => 'aufsteigend (A–Z, alt → neu)', 'desc' => 'absteigend (Z–A, neu → alt)']],
             ['name' => 'paginate', 'label' => 'Seitenweise blättern', 'type' => 'bool', 'default' => false],
-            ['type' => 'heading', 'label' => 'Filter für Besucher', 'help' => 'Für Verzeichnisse mit vielen Einträgen (Mitglieder, Partner, Angebote). Funktioniert ohne JavaScript; die Auswahl steht in der Adresse und lässt sich teilen.'],
+            ...\Core\Data\Shared::blockFields(true),   // geteilte Tabellen: welche Einträge
+            ['type' => 'heading', 'label' => 'Filter für Besucher', 'collapse' => true, 'summary' => 'Schaltflächen, Suchfeld, A–Z', 'help' => 'Für Verzeichnisse mit vielen Einträgen (Mitglieder, Partner, Angebote). Funktioniert ohne JavaScript; die Auswahl steht in der Adresse und lässt sich teilen.'],
             ['name' => 'visitor_filter', 'label' => 'Filter-Schaltflächen nach', 'type' => 'datafield', 'types' => ['select', 'multiselect'], 'width' => 'half', 'empty_label' => '– keine –',
                 'help' => 'Ein Auswahl- oder Mehrfachauswahl-Feld, z. B. Kategorie.'],
             ['name' => 'visitor_filter2', 'label' => 'Zweite Filter-Reihe nach', 'type' => 'datafield', 'types' => ['select', 'multiselect'], 'width' => 'half', 'empty_label' => '– keine –',
@@ -54,8 +57,7 @@ return [
             ['name' => 'az_index', 'label' => 'A–Z-Sprungleiste (alphabetisch gruppiert)', 'type' => 'bool', 'default' => false, 'width' => 'half',
                 'help' => 'Sortiert nach dem Titel und gruppiert nach Anfangsbuchstaben – nur ohne seitenweises Blättern.'],
             ...\Core\Blocks\ListFilter::fields(),   // „Filter erst ab … Einträgen“, nur Optionen mit Treffern
-            ...\Core\Data\Shared::blockFields(true),
-            ['type' => 'heading', 'label' => 'Links'],
+            ['type' => 'heading', 'label' => 'Links & Button', 'collapse' => true, 'summary' => 'Detailseite, Button, Text ohne Einträge'],
             ['name' => 'link_detail', 'label' => 'Einträge verlinken (Detailseite)', 'type' => 'bool', 'default' => true],
             ['name' => 'more_label', 'label' => 'Button unter der Liste', 'type' => 'text', 'width' => 'half', 'placeholder' => 'z. B. Alle Beiträge'],
             ['name' => 'more_link', 'label' => 'Button-Link', 'type' => 'link', 'width' => 'half'],
@@ -66,6 +68,7 @@ return [
     ],
     'entry_nav' => [
         'label' => 'Vor / Zurück', 'icon' => 'arrow-right', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Links zum vorigen und nächsten Eintrag – für Detailseiten-Vorlagen.',
         'nestable' => true,
         'help' => 'Für Detailseiten-Vorlagen: Links zum vorherigen und nächsten Eintrag derselben Tabelle – in der Reihenfolge der Tabelle (z. B. älterer / neuerer Beitrag).',
@@ -77,6 +80,7 @@ return [
     ],
     'data_fields' => [
         'label' => 'Datensatz-Felder', 'icon' => 'table', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Felder des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für Detailseiten-Vorlagen: zeigt Felder des aufgerufenen Eintrags. In allen anderen Blöcken der Vorlage funktionieren zusätzlich Platzhalter wie {{titel}}.',
@@ -99,6 +103,7 @@ return [
     ],
     'entry_blocks' => [
         'label' => 'Inhaltsblöcke des Eintrags', 'icon' => 'squares-four', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Platz für die Inhaltsblöcke des aufgerufenen Eintrags – für Detailseiten-Vorlagen.',
         'nestable' => true,   // in einer Spalte (Layout): Blöcke des Eintrags untereinander in der Spalte, z. B. neben einer Seitenleiste
         'help' => 'Für Detailseiten-Vorlagen: An dieser Stelle erscheinen die Blöcke aus dem Feld „Inhaltsblöcke“ des aufgerufenen Eintrags – als eigene Abschnitte der Seite, in einer Layout-Spalte untereinander in der Spalte.',
@@ -122,7 +127,7 @@ return [
             ['name' => 'submit_label', 'label' => 'Beschriftung des Buttons (optional)', 'type' => 'text', 'width' => 'half', 'placeholder' => 'Absenden'],
             ['name' => 'success_text', 'label' => 'Text nach dem Absenden (optional)', 'type' => 'text', 'width' => 'half',
                 'help' => 'Leer = Text aus den Einstellungen der Tabelle.'],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Breite, Ausrichtung'],
             ['name' => 'form_width', 'label' => 'Breite', 'type' => 'select', 'required' => true, 'default' => 'text', 'width' => 'half',
                 'options' => ['text' => 'Textbreite (wie Fließtext)', 'normal' => 'Normal', 'full' => 'Volle Breite'],
                 'help' => 'Textbreite: in derselben Spalte wie die Fließtexte der Seite. Normal: schmales Formular im Inhaltsbereich. Volle Breite: Felder nutzen den ganzen Inhaltsbereich.'],
@@ -134,6 +139,7 @@ return [
     // Stellenangebote (Core\Data\Jobs): nur auf der Detailseiten-Vorlage einer Tabelle mit schema.org-Typ „JobPosting“
     'job_facts' => [
         'label' => 'Stelle: Eckdaten', 'icon' => 'briefcase', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Eckdaten eines Stellenangebots mit Button „Jetzt bewerben“.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: Beschäftigungsart, Arbeitsort, Beginn, Gehalt, Bewerbungsfrist und Ansprechperson auf einen Blick – mit Button „Jetzt bewerben“ zum Formular. Ist die Stelle abgelaufen, steht hier „Diese Stelle ist nicht mehr ausgeschrieben“.',
@@ -145,6 +151,7 @@ return [
     ],
     'job_apply' => [
         'label' => 'Stelle: Bewerbung', 'icon' => 'envelope-simple', 'group' => 'Daten',
+        'context' => 'detail',   // Blockauswahl: nur in Detailseiten-Vorlagen (Core\Blocks\Picker::fits)
         'description' => 'Bewerbungsformular für die Detailseite eines Stellenangebots.',
         'nestable' => true,   // in einer Spalte des Blocks „Layout“ erlaubt (Core\Layout)
         'help' => 'Für die Detailseite eines Stellenangebots: das Bewerbungsformular der Tabelle (Felder & Einstellungen → „Bewerbungsformular“). Das Feld „Stelle“ ist ausgefüllt und gesperrt, der Betreff der E-Mail nennt die Stelle. Bei abgelaufenen Stellen erscheint kein Formular.',
@@ -173,6 +180,7 @@ return [
                 'help' => 'Tabelle mit „Als Kalender nutzen“ (Daten → Tabelle → Felder & Einstellungen).'],
             ['name' => 'view', 'label' => 'Ansicht', 'type' => 'select', 'required' => true, 'default' => 'month', 'width' => 'half',
                 'options' => ['month' => 'Monatsübersicht', 'agenda' => 'Terminliste des Monats']],
+            ['type' => 'heading', 'label' => 'Filter & Links', 'collapse' => true, 'summary' => 'Nur bestimmte Termine, Kategorie-Filter, Abo-Link'],
             ['name' => 'filter_field', 'label' => 'Nur Termine, bei denen …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– kein Filter –'],
             ['name' => 'filter_op', 'label' => 'Bedingung', 'type' => 'select', 'default' => '=', 'width' => 'half', 'required' => true,
                 'options' => ['=' => 'ist gleich', 'current' => 'verknüpft mit dem aufgerufenen Eintrag', 'same' => 'gleich wie beim aufgerufenen Eintrag']],
@@ -199,6 +207,7 @@ return [
             ['type' => 'heading', 'label' => 'Termine'],
             ['name' => 'table', 'label' => 'Kalender-Tabelle', 'type' => 'datatable', 'required' => true],
             ['name' => 'limit', 'label' => 'Anzahl', 'type' => 'number', 'default' => 5, 'width' => 'half'],
+            ['type' => 'heading', 'label' => 'Zeitraum & Filter', 'collapse' => true, 'summary' => 'Nächste Tage, nur bestimmte Termine'],
             ['name' => 'days', 'label' => 'Nur in den nächsten … Tagen', 'type' => 'number', 'default' => 0, 'width' => 'half', 'help' => '0 = ohne Grenze (bis 1 Jahr)'],
             ['name' => 'filter_field', 'label' => 'Nur Termine, bei denen …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– kein Filter –'],
             ['name' => 'filter_op', 'label' => 'Bedingung', 'type' => 'select', 'default' => '=', 'width' => 'half', 'required' => true,
@@ -206,6 +215,7 @@ return [
             ['name' => 'filter_value', 'label' => 'Wert (Kurzname der Auswahl)', 'type' => 'text', 'width' => 'half',
                 'help' => 'Bei „aufgerufenem Eintrag“ leer lassen (für Detailseiten, z. B. Termine einer Gruppe oder eines Ortes).'],
             ...\Core\Data\Shared::blockFields(),
+            ['type' => 'heading', 'label' => 'Darstellung & Links', 'collapse' => true, 'summary' => 'Liste oder kompakt, Ort, Abo-Link, Button'],
             ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'list', 'width' => 'half',
                 'options' => ['list' => 'Liste mit Datum', 'compact' => 'Kompakt']],
             ['name' => 'show_location', 'label' => 'Ort anzeigen', 'type' => 'bool', 'default' => true, 'width' => 'half'],
@@ -238,6 +248,7 @@ return [
     ],
     'not_found' => [
         'label' => '404-Vorschläge', 'icon' => 'signpost', 'group' => 'Navigation',
+        'context' => '404',      // Blockauswahl: nur auf der Seite „Nicht gefunden (404)“
         'description' => 'Vorschläge, Suchfeld und Link zur Startseite für die Seite „Nicht gefunden (404)“.',
         'help' => 'Für die Seite „Nicht gefunden (404)“ (Seiten → Sonderseiten): Überschrift und Text, „Vielleicht meinten Sie …“ mit ähnlichen Seiten zur aufgerufenen Adresse, Suchfeld und Button zur Startseite. Die Vorschläge erscheinen nur, wenn Besucher eine Adresse aufrufen, die es nicht gibt.',
         'fields' => [
@@ -284,7 +295,7 @@ return [
                 ['name' => 'image', 'label' => 'Bild', 'type' => 'media', 'required' => true, 'width' => 'half'],
                 ['name' => 'caption', 'label' => 'Bildunterschrift (optional)', 'type' => 'text', 'width' => 'half'],
             ]],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Anordnung, Spalten, Bildformat, Lightbox'],
             ['name' => 'layout', 'label' => 'Anordnung', 'type' => 'select', 'required' => true, 'default' => 'grid', 'width' => 'half',
                 'options' => ['grid' => 'Raster (gleiches Format)', 'masonry' => 'Mosaik (Originalformat, Spalten)', 'justified' => 'Zeilen (Originalformat, bündig)']],
             ['name' => 'columns', 'label' => 'Spalten', 'type' => 'select', 'required' => true, 'default' => '3', 'width' => 'half',
@@ -317,7 +328,7 @@ return [
                 'options' => ['newest' => 'Neueste zuerst', 'oldest' => 'Älteste zuerst', 'collection' => 'Wie sortiert (Sammlung bzw. Liste)'],
                 'help' => 'Bei einzelnen Bildern gilt das zuletzt hinzugefügte als neuestes.'],
             ['name' => 'limit', 'label' => 'Höchstens', 'type' => 'number', 'default' => 24, 'width' => 'half', 'help' => '0 = alle'],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Anordnung, Spalten, Bildformat, Lightbox'],
             ['name' => 'layout', 'label' => 'Anordnung', 'type' => 'select', 'required' => true, 'default' => 'grid', 'width' => 'half',
                 'options' => ['grid' => 'Raster (gleiches Format)', 'masonry' => 'Mosaik (Originalformat, Spalten)']],
             ['name' => 'columns', 'label' => 'Spalten', 'type' => 'select', 'required' => true, 'default' => '3', 'width' => 'half',
@@ -347,6 +358,7 @@ return [
             ['name' => 'table', 'label' => 'Tabelle (bei „Datentabelle“)', 'type' => 'datatable',
                 'help' => 'Titel = Überschrift der Meldung, dazu ein Textfeld. Nur veröffentlichte Einträge erscheinen.'],
             ['name' => 'text_field', 'label' => 'Textfeld (optional)', 'type' => 'datafield', 'empty_label' => '– Beschreibung der Tabelle –'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Ticker oder aktuelle Meldung, Anzahl, Uhrzeit'],
             ['name' => 'mode', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'ticker', 'width' => 'half',
                 'options' => ['ticker' => 'Ticker (neueste oben)', 'latest' => 'Nur die aktuelle Meldung (groß)']],
             ['name' => 'limit', 'label' => 'Anzahl (Ticker)', 'type' => 'number', 'default' => 20, 'width' => 'half', 'help' => '0 = alle'],
@@ -377,7 +389,7 @@ return [
                 ['name' => 'overlay', 'label' => 'Bild hinter dem Text', 'type' => 'select', 'required' => true, 'default' => 'dark', 'width' => 'half',
                     'options' => ['dark' => 'Abdunkeln (helle Schrift)', 'light' => 'Aufhellen (dunkle Schrift)', 'box' => 'Textkasten', 'none' => 'Unverändert']],
             ]],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Format, Übergang, Pfeile, Automatik'],
             ['name' => 'height', 'label' => 'Format / Höhe', 'type' => 'select', 'required' => true, 'default' => '16:9', 'width' => 'half',
                 'options' => ['16:9' => 'Breitbild 16:9', '21:9' => 'Kino 21:9', '3:2' => 'Querformat 3:2', '4:3' => 'Querformat 4:3', 'screen' => 'Vollbild (Bildschirmhöhe)']],
             ['name' => 'transition', 'label' => 'Übergang', 'type' => 'select', 'required' => true, 'default' => 'slide', 'width' => 'half',
@@ -441,7 +453,7 @@ return [
                 ['name' => 'image', 'label' => 'Anderes Foto an dieser Stelle (optional)', 'type' => 'media', 'width' => 'half'],
                 ['name' => 'note', 'label' => 'Text an dieser Stelle (optional)', 'type' => 'textarea', 'rows' => 2, 'max' => 400],
             ]],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Karten oder Liste, Spalten, Kontakt, Visitenkarte'],
             ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'cards', 'width' => 'half',
                 'options' => ['cards' => 'Karten mit Porträt (3:4)', 'list' => 'Liste mit rundem Porträt', 'feature' => 'Groß – Porträt neben den Angaben (für eine oder zwei Personen)']],
             ['name' => 'columns', 'label' => 'Spalten (Karten)', 'type' => 'select', 'required' => true, 'default' => '3', 'width' => 'half', 'options' => ['2' => '2', '3' => '3', '4' => '4']],
@@ -459,13 +471,14 @@ return [
             ['type' => 'heading', 'label' => 'Seiten'],
             ['name' => 'parent', 'label' => 'Unterseiten von', 'type' => 'link',
                 'help' => 'Leer = diese Seite. Eine andere Seite über die Linkauswahl wählen (Seitenbaum).'],
+            ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'cards', 'width' => 'half',
+                'options' => ['cards' => 'Karten mit Bild', 'list' => 'Liste mit Links', 'tiles' => 'Kacheln mit Pfeil (ohne Bild)']],
+            ['type' => 'heading', 'label' => 'Auswahl & Reihenfolge', 'collapse' => true, 'summary' => 'Nur Menüseiten, Reihenfolge, Anzahl'],
             ['name' => 'only_menu', 'label' => 'Nur Seiten, die im Menü erscheinen', 'type' => 'bool', 'default' => false, 'width' => 'half'],
             ['name' => 'sort', 'label' => 'Reihenfolge', 'type' => 'select', 'required' => true, 'default' => 'menu', 'width' => 'half',
                 'options' => ['menu' => 'Wie im Menü (Seitenbaum)', 'title' => 'Titel A–Z', 'newest' => 'Zuletzt veröffentlicht zuerst']],
             ['name' => 'limit', 'label' => 'Höchstens', 'type' => 'number', 'default' => 0, 'width' => 'half', 'help' => '0 = alle'],
-            ['type' => 'heading', 'label' => 'Darstellung'],
-            ['name' => 'layout', 'label' => 'Darstellung', 'type' => 'select', 'required' => true, 'default' => 'cards', 'width' => 'half',
-                'options' => ['cards' => 'Karten mit Bild', 'list' => 'Liste mit Links', 'tiles' => 'Kacheln mit Pfeil (ohne Bild)']],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Spalten, Bild, Text, Buttons'],
             ['name' => 'columns', 'label' => 'Spalten (Karten, Kacheln)', 'type' => 'select', 'required' => true, 'default' => '3', 'width' => 'half', 'options' => ['2' => '2', '3' => '3', '4' => '4']],
             ['name' => 'ratio', 'label' => 'Bildformat (Karten)', 'type' => 'select', 'required' => true, 'default' => '16:10', 'width' => 'half',
                 'options' => ['16:9' => '16:9', '16:10' => '16:10', '3:2' => '3:2', '4:3' => '4:3', '1:1' => '1:1']],
@@ -506,7 +519,7 @@ return [
                     'help' => 'Nur nötig, wenn die Datei viel Rand hat oder das Logo sehr fein ist.'],
                 ['name' => 'mono', 'label' => 'Einfarbiges Logo – darf auf dunklem Hintergrund weiß erscheinen', 'type' => 'bool', 'default' => false],
             ]],
-            ['type' => 'heading', 'label' => 'Datentabelle (bei „Aus einer Datentabelle“)'],
+            ['type' => 'heading', 'label' => 'Datentabelle', 'collapse' => true, 'summary' => 'Nur bei „Aus einer Datentabelle“'],
             ['name' => 'table', 'label' => 'Tabelle', 'type' => 'datatable'],
             ['name' => 'map_logo', 'label' => 'Logo aus Feld', 'type' => 'datafield', 'types' => ['media'], 'width' => 'half', 'empty_label' => '– Bildfeld der Tabelle –'],
             ['name' => 'map_name', 'label' => 'Name aus Feld', 'type' => 'datafield', 'types' => ['_title', 'text'], 'width' => 'half', 'empty_label' => '– Titel des Eintrags –'],
@@ -523,7 +536,7 @@ return [
             ['name' => 'sort_field', 'label' => 'Sortieren nach (bei „Nach Tabellenfeld“)', 'type' => 'datafield', 'system' => true, 'width' => 'half', 'empty_label' => '– wie in der Tabelle eingestellt –'],
             ['name' => 'sort_dir', 'label' => 'Richtung', 'type' => 'select', 'default' => 'asc', 'required' => true, 'width' => 'half',
                 'options' => ['asc' => 'aufsteigend (A–Z, 1–9)', 'desc' => 'absteigend (Z–A, 9–1)']],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Spalten, Kachel, Logogröße, Graustufen'],
             ['name' => 'columns', 'label' => 'Spalten (große Bildschirme)', 'type' => 'select', 'required' => true, 'default' => '5', 'width' => 'half',
                 'options' => ['3' => '3', '4' => '4', '5' => '5', '6' => '6'], 'help' => 'Auf Tablets 3, auf Smartphones 2 Spalten.'],
             ['name' => 'ratio', 'label' => 'Format der Kachel', 'type' => 'select', 'required' => true, 'default' => '3:2', 'width' => 'half',
@@ -537,7 +550,7 @@ return [
                 'options' => ['marked' => 'Nur Logos mit „einfarbig“', 'all' => 'Alle Logos (nur wenn alle einfarbig sind)', 'off' => 'Nie'],
                 'help' => 'Auf dunklen Abschnitten und im dunklen Farbschema erscheinen einfarbige Logos weiß. Nicht mit „Kachel: immer hell“.'],
             ['name' => 'group', 'label' => 'Überschrift je Kategorie (bei „Kategorie, dann Name“)', 'type' => 'bool', 'default' => false],
-            ['type' => 'heading', 'label' => 'Details'],
+            ['type' => 'heading', 'label' => 'Details', 'collapse' => true, 'summary' => 'Kurzinfo und Link per Klick'],
             ['name' => 'details', 'label' => 'Kurzinfo und Link zeigen', 'type' => 'select', 'required' => true, 'default' => 'inline',
                 'options' => ['inline' => 'Aufklappen unter der Reihe', 'dialog' => 'Dialog', 'off' => 'Keine Details – Logo verlinkt direkt'],
                 'help' => 'Kurzinfo und Link erscheinen erst nach einem Klick auf das Logo. Ohne JavaScript stehen alle Angaben als Liste unter den Logos.'],
@@ -561,7 +574,7 @@ return [
                 ['name' => 'max', 'label' => 'Höchstwert der Skala (optional)', 'type' => 'number', 'width' => 'half',
                     'help' => 'Bogen = Zahl ÷ Höchstwert. Prozentwerte brauchen keinen Höchstwert; ohne Angaben bleibt die Skala neutral.'],
             ]],
-            ['type' => 'heading', 'label' => 'Darstellung'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Größe, Skala, Hochzählen'],
             ['name' => 'size', 'label' => 'Größe', 'type' => 'select', 'required' => true, 'default' => 'm', 'width' => 'half',
                 'options' => ['s' => 'Klein', 'm' => 'Mittel', 'l' => 'Groß']],
             ['name' => 'style', 'label' => 'Skala', 'type' => 'select', 'required' => true, 'default' => 'arc', 'width' => 'half',

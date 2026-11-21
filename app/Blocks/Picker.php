@@ -25,11 +25,32 @@ use Core\UiPrefs;
  * {name} ist der Blocktyp (bzw. 'preview'); gleichbedeutende Namen teilen sich die Kern-Vorschau (ALIASES).
  * Optional je Variante: {name}--{variante}.svg (z. B. hero--compact.svg) – fehlt sie, gilt die des Blocks.
  * Je Website übersteuerbar (Einstellung 'block_previews', Filter 'blocks.previews') – siehe overrides().
+ *
+ * Kontext (nur Blockauswahl): theme.php → blocks → {typ} → 'context' => 'detail' | '404' | ['detail', '404'] – der Block
+ * erscheint nur auf Detailseiten-Vorlagen bzw. der Seite „Nicht gefunden (404)“ in der Auswahl. Vorhandene Blöcke bleiben
+ * überall bearbeitbar; API, MCP und KI prüfen den Kontext nicht. Ohne Angabe: überall.
  */
 final class Picker
 {
     /** Gleiches Aussehen, anderer Name → Kern-Vorschau mitbenutzen */
     public const ALIASES = ['text' => 'richtext', 'accordion' => 'faq', 'media_text' => 'text_image', 'photo_text' => 'text_image'];
+
+    /** Kontexte der Blockauswahl: normale Seite, Detailseiten-Vorlage einer Tabelle, Seite „Nicht gefunden (404)“ */
+    public const CONTEXTS = ['page', 'detail', '404'];
+
+    /** Kontext der bearbeiteten Seite (pages-Zeile) */
+    public static function context(?array $page): string
+    {
+        if (\Core\NotFound::isPage($page)) return '404';
+        return ($page['type'] ?? '') === 'template' ? 'detail' : 'page';
+    }
+
+    /** Passt der Block (Definition mit optionalem 'context') in diesen Kontext? */
+    public static function fits(array $def, string $context): bool
+    {
+        $want = array_map('strval', (array) ($def['context'] ?? []));
+        return !$want || in_array($context, $want, true);
+    }
 
     /** Ansichten der Blockauswahl */
     public const VIEWS = ['list', 'tiles', 'split'];

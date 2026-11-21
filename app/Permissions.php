@@ -81,6 +81,18 @@ final class Permissions
         return array_merge(...array_map('array_keys', array_values(self::catalog())));
     }
 
+    /**
+     * Rechte einer Rolle beim Speichern: angehakte Rechte, soweit es sie gibt, plus die bisherigen Rechte, die die Oberfläche nicht
+     * zeigt (z. B. einer gerade abgeschalteten Erweiterung) – sonst gingen sie beim Speichern verloren. Aufräumen: roles:clean.
+     */
+    public static function keepHidden(array $posted, array $old): array
+    {
+        $all = self::all();
+        $known = array_values(array_intersect(array_map('strval', $posted), $all));
+        $hidden = array_values(array_filter(array_map('strval', $old), fn($p) => $p !== '*' && !in_array($p, $all, true)));
+        return array_values(array_unique([...$known, ...$hidden]));
+    }
+
     /** Vorgaben beim ersten Start: Standardrollen – Rechte danach frei änderbar (außer admin/network), aber nie löschbar (builtin) */
     public static function defaults(): array
     {

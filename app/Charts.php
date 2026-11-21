@@ -144,6 +144,9 @@ final class Charts
                     ['name' => 'values', 'label' => 'Werte (je Beschriftung einer, getrennt mit ; oder Zeilenumbruch)', 'type' => 'textarea', 'rows' => 3, 'max' => 4000,
                         'placeholder' => '12; 19; 15'],
                 ]],
+            ['name' => 'description', 'label' => 'Beschreibung für Screenreader', 'type' => 'text', 'max' => 300,
+                'help' => 'Ein Satz, was das Diagramm zeigt (z. B. „Anfragen je Monat, höchster Wert im Mai“). Die Werte stehen zusätzlich als Tabelle bereit.'],
+            ['type' => 'heading', 'label' => 'Darstellung', 'collapse' => true, 'summary' => 'Zahlen, Einheit, Höhe, Tabelle'],
             ['name' => 'format', 'label' => 'Zahlen', 'type' => 'select', 'default' => 'number', 'width' => 'half',
                 'options' => ['number' => 'Zahl', 'percent' => 'Prozent', 'bytes' => 'Dateigröße', 'duration' => 'Dauer (Sekunden)']],
             ['name' => 'unit', 'label' => 'Einheit (optional)', 'type' => 'text', 'max' => 12, 'width' => 'half', 'placeholder' => 'z. B. €, kg'],
@@ -152,8 +155,6 @@ final class Charts
             ['name' => 'table_view', 'label' => 'Tabelle unter dem Diagramm', 'type' => 'select', 'default' => '', 'width' => 'half',
                 'options' => ['' => 'Anbieten (aufklappbar)', 'open' => 'Aufgeklappt zeigen', 'none' => 'Nicht anbieten'],
                 'help' => '„Nicht anbieten“ nur, wenn dieselben Zahlen schon als Tabelle auf der Seite stehen (z. B. Datenliste in der Darstellung „Tabelle“).'],
-            ['name' => 'description', 'label' => 'Beschreibung für Screenreader', 'type' => 'text', 'max' => 300,
-                'help' => 'Ein Satz, was das Diagramm zeigt (z. B. „Anfragen je Monat, höchster Wert im Mai“). Die Werte stehen zusätzlich als Tabelle bereit.'],
         ];
     }
 

@@ -58,8 +58,12 @@ final class Tables
 
     /** Gestaltungs-Elemente: speichern nichts, haben keine Spalte – nur in Formularen (öffentlich und Redaktion) sichtbar */
     public const LAYOUT = ['section', 'content'];
-    /** Darstellung eines Abschnitts: Zwischenüberschrift (ohne Rahmen) oder Gruppe mit Rahmen – beides <fieldset> mit <legend> */
-    public const SECTION_STYLES = ['heading', 'fieldset'];
+    /**
+     * Darstellung eines Abschnitts: Zwischenüberschrift (ohne Rahmen) oder Gruppe mit Rahmen – beides <fieldset> mit <legend>.
+     * 'collapsed' = in der Eingabemaske der Redaktion eingeklappt (Kopf zeigt „3 von 7 ausgefüllt“, offen bei Fehlern und leeren
+     * Pflichtfeldern); im öffentlichen Formular wie eine Zwischenüberschrift.
+     */
+    public const SECTION_STYLES = ['heading', 'fieldset', 'collapsed'];
 
     /** Erlaubte Typen der Unterfelder einer wiederholbaren Gruppe */
     public const GROUP_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'email', 'tel', 'bool', 'iban'];
@@ -566,7 +570,7 @@ final class Tables
     }
 
     /**
-     * Gestaltungs-Element bereinigen. section: label = Überschrift, help = Beschreibung darunter (optional), style heading|fieldset.
+     * Gestaltungs-Element bereinigen. section: label = Überschrift, help = Beschreibung darunter (optional), style heading|fieldset|collapsed.
      * content: text = formatierter Text (Core\Sanitizer, Regeln für Blöcke), label nur als Name im Designer. Fehler in $def['_error'].
      */
     public static function layoutDef(array $f, string $type, string $name, string $label): array
