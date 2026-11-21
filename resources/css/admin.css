@@ -339,6 +339,7 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .fx-src > span:not(.fx-dot){flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fx-src small{color:var(--adm-t3);font-size:12px}
 .fx-src:hover{background:var(--adm-hover)}
+.fx-src--link{text-decoration:none}
 .fx-src.is-active{background:var(--adm-press);font-weight:600}
 .fx-src[data-warn] svg{color:#C47A00}
 .fx-src.is-drop{background:var(--fx-sel);color:#fff}

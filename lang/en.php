@@ -8178,6 +8178,8 @@ return [
     'Gruppiert' => 'Grouped',
     'Gruppierung aufgehoben' => 'Ungrouped',
     'Gruppierung aufheben' => 'Ungroup',
+    'Grafik-Ablage' => 'Graphics store',
+    'Symbole, Blockvorschauen und Bausteine des Grafik-Editors – nicht in der Mediathek' => 'Icons, block previews and building blocks of the graphics editor – not in the media library',
     'Animationen' => 'Animations',
     'Grafiken (SVG)' => 'Graphics (SVG)',
     'Alles auswählen' => 'Select all',

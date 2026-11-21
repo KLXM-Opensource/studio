@@ -902,7 +902,8 @@ class Finder {
           + (counts.video ? row('kind', 'video', SVG.video, 'Videos', counts.video) : '')
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')
           + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')
-          + (this.mode === 'library' && !this.pool && (this.meta.trash_days || counts.trash) ? row('trash', '', ico('trash'), t('Papierkorb'), counts.trash || 0) : '')}
+          + (this.mode === 'library' && !this.pool && (this.meta.trash_days || counts.trash) ? row('trash', '', ico('trash'), t('Papierkorb'), counts.trash || 0) : '')
+          + (this.mode === 'library' && !this.pool && document.documentElement.dataset.grafikJs ? `<li><a class="fx-src fx-src--link" href="${esc(BASE + '/grafik')}" title="${esc(t('Symbole, Blockvorschauen und Bausteine des Grafik-Editors – nicht in der Mediathek'))}">${ico('pen-nib')}<span>${esc(t('Grafik-Ablage'))}</span></a></li>` : '')}
       </ul>
       ${this.checksHtml(row)}
       <details class="fx-checkgrp fx-fold" data-fold="collections"${store.get('fold-collections', true) ? ' open' : ''}><summary><span>Sammlungen</span><button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></summary>

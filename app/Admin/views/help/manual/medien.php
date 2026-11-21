@@ -428,7 +428,7 @@
       Pixelbilder (PNG, JPG) werden nicht übernommen – der Editor meldet das.</li>
   </ul>
 
-  <p id="grafiken"><b>Symbole und Blockvorschauen</b> liegen nicht in der Mediathek, sondern unter <a href="<?= e(url('/admin/grafik')) ?>">Grafiken</a>
+  <p id="grafiken"><b>Symbole und Blockvorschauen</b> liegen nicht in der Mediathek, sondern in der <a href="<?= e(url('/admin/grafik')) ?>">Grafik-Ablage</a> (Mediathek, Seitenleiste unten)
     (Mediathek → Neu → Grafiken verwalten). Eine <b>Blockvorschau</b> startet mit der Skizze des Kits für den gewählten Block; nach dem
     Speichern zeigt die Blockauswahl („+ Block einfügen“) auf dieser Website Ihre Fassung. „Vorschau des Kits zeigen“ stellt das
     Original wieder her. Schneller geht es direkt in der Blockauswahl: Ansicht <b>Liste mit großer Vorschau</b>, Block (und ggf.
