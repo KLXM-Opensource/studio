@@ -17,6 +17,8 @@
  *   user:invite <email> [rolle] [--name="…"] [--lang=de|en]
  *                                                     Person einladen (E-Mail mit Link, 7 Tage gültig; ohne Versand wird der Link angezeigt)
  *   invites:selftest                                  Selbsttest der Einladungen (Token, Hash, Rollenprüfung)
+ *   install                                           Erstinstallation ohne Rückfragen (composer create-project): Ordner, Datenbank,
+ *                                                     config.local.php; zeigt Setup-Token und die nächsten Schritte – wiederholbar
  *   setup:token                                       Setup-Token und Adresse der Einrichtung (…/setup) anzeigen
  *   admin:path [<adresse>|--random|--reset]           Adresse der Verwaltung anzeigen bzw. setzen (statt /admin, z. B. kontor-x4m9q;
  *                                                     alle Websites der Installation, config.local.php); --reset = wieder /admin
@@ -659,6 +661,35 @@ switch ($cmd) {
         foreach ($done as $n => $msg) echo str_pad($n, 14) . ' ' . $msg . "\n";
         if (!$done) echo "Keine Kit-Pakete installiert (Kits unter kits/ baut tools/build.mjs).\n";
         break;
+
+    case 'install':
+        // Erstinstallation, z. B. nach „composer create-project klxm/studio …“ (post-create-project-cmd) – ohne Rückfragen und
+        // beliebig oft aufrufbar. config.local.php (app_key, setup_token) und Datenbank entstehen schon beim Start (Core\Config).
+        $fail = 0;
+        foreach (['storage/database', 'storage/logs', 'storage/sessions', 'storage/cache', 'public/media/cache'] as $d) {
+            if (!is_dir(ROOT . '/' . $d) && !@mkdir(ROOT . '/' . $d, 0775, true)) { fwrite(STDERR, "Ordner $d lässt sich nicht anlegen.\n"); $fail++; }
+            elseif (!is_writable(ROOT . '/' . $d)) { fwrite(STDERR, "Ordner $d ist nicht beschreibbar.\n"); $fail++; }
+        }
+        if (!is_file(ROOT . '/config/config.local.php')) { fwrite(STDERR, "config/config.local.php fehlt – ist config/ beschreibbar?\n"); $fail++; }
+        $app->db->migrate();
+        Core\Extensions::boot();
+        foreach (Core\Extensions::active() as $x) {
+            try { $x->ensureTables(true); } catch (Throwable $e) { fwrite(STDERR, "  {$x->name}: Tabellen – " . $e->getMessage() . "\n"); }
+        }
+        echo "KLXM Studio " . CMS_VERSION . " ist eingerichtet (Datenbank, config/config.local.php).\n\n";
+        if ((int) $app->db->fetchValue('SELECT COUNT(*) FROM users') > 0) {
+            echo "Es gibt bereits Konten – Anmeldung unter " . url('/admin/login') . ".\n";
+        } else {
+            echo "Nächste Schritte / Next steps:\n";
+            echo "  1. Lokal starten / start locally:  php -S localhost:8000 -t public public/index.php\n";
+            echo "     (Server: Dokumentstamm auf public/ setzen / point the document root to public/)\n";
+            echo "  2. http://localhost:8000/admin/setup öffnen und mit diesem Setup-Token das erste Konto anlegen\n";
+            echo "     open /admin/setup and create the first account with this setup token:\n\n";
+            echo "     " . $app->config->get('setup_token') . "\n\n";
+            echo "     (später erneut: php bin/console setup:token · oder per Konsole: php bin/console user:create name@example.org admin)\n";
+            echo "  3. Nach dem Anmelden Kit und Startinhalte wählen / choose a kit and starter content after signing in.\n";
+        }
+        exit($fail ? 1 : 0);
 
     case 'setup:token':
         echo $app->config->get('setup_token') . "\n";

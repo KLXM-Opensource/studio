@@ -1,12 +1,39 @@
 {
     "name": "klxm/studio",
-    "description": "KLXM Studio – schlankes Block-CMS mit Kits, REST-API und MCP-Server",
+    "description": "Lean multi-site CMS without a framework: on-page block editor, kits, custom data tables, encrypted inboxes, AI features, REST API and MCP server. PHP 8.4, SQLite or MySQL.",
     "type": "project",
-    "license": "MIT",
+    "keywords": [
+        "cms",
+        "multisite",
+        "block-editor",
+        "inline-editing",
+        "sqlite",
+        "headless",
+        "rest-api",
+        "mcp",
+        "ai",
+        "gdpr",
+        "accessibility",
+        "privacy"
+    ],
     "homepage": "https://studio.klxm.de",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "KLXM Crossmedia GmbH",
+            "homepage": "https://klxm.de",
+            "role": "Developer"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://github.com/KLXM-Opensource/studio/graphs/contributors"
+        }
+    ],
     "support": {
+        "issues": "https://github.com/KLXM-Opensource/studio/issues",
         "source": "https://github.com/KLXM-Opensource/studio",
-        "issues": "https://github.com/KLXM-Opensource/studio/issues"
+        "docs": "https://studio.klxm.de",
+        "security": "https://github.com/KLXM-Opensource/studio/security/policy"
     },
     "require": {
         "php": ">=8.4.1",
@@ -50,5 +77,12 @@
         "platform": {
             "php": "8.4.1"
         }
-    }
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "@php bin/console install"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
