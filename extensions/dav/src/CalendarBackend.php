@@ -72,14 +72,16 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
 
     // ------------------------------------------------------------------ Objekte
 
-    /** Einträge der Standardsprache; per DAV „gelöschte“ Entwürfe ausgeblendet */
+    /** Einträge der Standardsprache; per DAV „gelöschte“ Entwürfe ausgeblendet, mit „Nur veröffentlichte Einträge“ alle Entwürfe */
     private function entries(array $t): array
     {
         $objs = Dav::objects('cal', $t['handle']);
+        $s = Dav::tableSettings($t);
         $out = [];
         foreach (Entries::query($t, ['status' => 'all', 'lang' => Lang::default(), 'limit' => 5000]) as $e) {
             $o = $objs[$e['id']] ?? null;
             if ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft') continue;
+            if (!Dav::visible($s, $e)) continue;
             if (!Calendar::span($t, $e)) continue;
             $out[] = [$e, $o];
         }
@@ -138,6 +140,8 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
         // Geteilte Tabellen: fremde Einträge nur, wenn die Website sie sehen darf
         if ($e && !\Core\Data\Shared::visibleAll($t, $e)) $e = null;
         if (!$e || ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft')) return [null, $o];
+        // „Nur veröffentlichte Einträge“: Entwürfe sind für Apps nicht vorhanden (Abruf/Ändern → 404, Löschen → nichts zu tun)
+        if (!Dav::visible(Dav::tableSettings($t), $e)) return [null, $o];
         return [$e, $o ?: (Dav::objects('cal', $t['handle'])[$id] ?? null)];
     }
 
@@ -146,6 +150,8 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
         $t = $this->table($calendarId);
         if (!Dav::canWrite($t)) throw new Forbidden('Nur lesender Zugriff.');
         if (Dav::objectByUri($t['handle'], (string) $objectUri)) throw new BadRequest('Objekt existiert bereits.');
+        // Adresse eines vorhandenen, für Apps nicht sichtbaren Eintrags (Entwurf bei „Nur veröffentlichte Einträge“) nicht neu belegen
+        if (Dav::reservedUri($t, (string) $objectUri, 'ics')) throw new Forbidden('Termin ist im CMS nicht veröffentlicht – nur dort bearbeitbar.');
         [$in, $uid] = $this->parse($t, null, (string) $calendarData);
         $s = Dav::tableSettings($t);
         $in['status'] = $s['status'] === 'draft' || ($t['settings']['workflow'] && !Dav::can('data.publish', $t)) ? 'draft' : 'published';

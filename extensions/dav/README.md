@@ -24,6 +24,7 @@ Voraussetzungen: Funktion `data` (und für Kalender `calendar`) an, HTTPS in Pro
 2. **Kalender:** Daten → Tabelle → Felder & Einstellungen → „Als Kalender nutzen“ (Core-Funktion `calendar`).
 3. **Adressbuch:** Administration → Einstellungen → „Kalender & Kontakte in Apps“ → Tabellen (Recht `data.schema`) → „Als Adressbuch (CardDAV) bereitstellen“,
    Zuordnung der vCard-Felder prüfen (wird aus Feldnamen wie vorname, nachname, firma, strasse, plz, ort vorbelegt).
+   Je Tabelle außerdem „Nur veröffentlichte Einträge“ und – bei Adressbüchern ohne Feld „Firma“ – die feste Organisation.
 4. **App-Passwort:** Konto → Abschnitt „Kalender & Kontakte in Apps“ → „App-Passwort anlegen“ (Seite `/admin/dav`) → „Neues App-Passwort“ (nur einmal sichtbar,
    „Lesen und ändern“ oder „Nur lesen“). Alternativ: `php bin/console dav:password <e-mail> [name] [read|write]`.
 
@@ -45,7 +46,31 @@ Pfade: `/dav/principals/{e-mail}/`, `/dav/calendars/{e-mail}/{tabelle}/`, `/dav/
 
 ## Abbildung
 
-**VEVENT ↔ Eintrag** (nur Einträge der Standardsprache; Entwürfe erscheinen als `STATUS:TENTATIVE`):
+### Einstellungen je Tabelle
+
+Website-Einstellung `ext.dav.tables` (je Tabelle ein Eintrag, Kurzname der Tabelle als Schlüssel), gepflegt auf `/admin/dav`:
+
+```php
+'mitarbeitende' => [
+    'addressbook' => true,          // Adressbuch (CardDAV); Kalender-Tabellen: 'caldav' => true (Standard)
+    'status' => 'published',        // neue Einträge aus Apps: published | draft
+    'on_delete' => 'draft',         // in der App gelöscht: draft | delete (mit Recht data.delete)
+    'published_only' => true,       // nur veröffentlichte Einträge an Apps (Standard false = bisheriges Verhalten)
+    'org' => true,                  // ORG ohne Feld „Firma“: true = org_name(), 'Text' = fest, false = kein ORG
+    'map' => ['fn' => 'name', 'note' => 'notiz'],
+],
+```
+
+- **`published_only`:** Entwürfe und geplante Einträge („Online ab“ in der Zukunft = Entwurf) erscheinen nicht in den Apps.
+  Abruf und Ändern solcher Einträge ergeben 404, Löschen ist ohne Wirkung; ihre Adresse `cms-{id}.vcf|ics` können Apps nicht
+  für neue Objekte belegen (403). Wird ein Eintrag veröffentlicht, erscheint er beim nächsten Abgleich. Mit „Neue Einträge aus
+  Apps: als Entwurf“ verschwinden in der App angelegte Objekte bis zur Freigabe. **Standard `false`**, damit bestehende
+  Kalender und Adressbücher sich durch ein Update nicht unbemerkt ändern; die Verwaltung schlägt `true` für Tabellen vor, die
+  noch nicht bereitgestellt werden.
+- **`org`:** gilt nur, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Fehlend/`true` = Name der Organisation aus den
+  Website-Einstellungen (`org_name()`: Organisationsname, sonst Kurzname, sonst Name der Website).
+
+**VEVENT ↔ Eintrag** (nur Einträge der Standardsprache; Entwürfe erscheinen als `STATUS:TENTATIVE`, mit `published_only` gar nicht):
 
 | iCalendar | Feld (Kalender-Einstellung der Tabelle) |
 |---|---|
@@ -63,6 +88,17 @@ dieser Typen – Typ aus Feldname/Beschriftung: „mobil/handy“ → CELL, „f
 **Alle übrigen Felder** als `X-MYCMS-{FELD}` (Kurzname groß, `_` → `-`), z. B. `X-MYCMS-FACHGEBIET:Kardiologie`,
 `X-MYCMS-RUECKRUF-ERWUENSCHT:1`; Ja/Nein = 1/0, Mehrfachauswahl/Verknüpfungen kommagetrennt (Kurznamen bzw. IDs).
 Titelzusätze (N-Präfix „Dr.“) und der Anzeigename der App bleiben erhalten, solange Vor-/Nachname gleich sind.
+
+- **Nur FN zugeordnet:** N wird aus dem ganzen Namen abgeleitet – `Prof. Dr. Erika von Musterstadt` →
+  `N:von Musterstadt;Erika;;Prof. Dr.;`. Letztes Wort = Nachname, Partikel davor (von, van, de, der, zu, …) gehören dazu, führende
+  Titel/Anreden (Dr., Prof., Dr. med., Dipl.-Ing., Priv.-Doz., Herr, Frau) sind Präfix, Zusätze (M.A., MBA, jun.) Suffix;
+  `Musterfrau, Erika` = Nachname, Vorname. Zurück aus der App hat FN Vorrang (Pflicht in vCard 3/4); fehlt FN oder hat die App nur
+  Vor-/Nachname in N geändert (FN unverändert), wird der Name aus N zusammengesetzt.
+- **Rich-Text** (NOTE und `X-MYCMS-*`) als reiner Text: Absätze → Leerzeile, Umbrüche/Listenpunkte → Zeile, Entities dekodiert,
+  Redaktionsnotizen `[# … #]` entfernt. Unveränderter Text aus der App lässt Formatierung und Notizen im CMS stehen; geänderter
+  Text wird zu Absätzen, vorhandene Notizen werden angehängt.
+- Felder mit verschachtelten Werten (Inhaltsblöcke, Kombifelder wie Ansprechperson/Adresse/FAQ/Downloads, Gruppen, Medien + Text,
+  Wiederholung) werden nicht als `X-MYCMS-*` übertragen.
 
 **Verlustfreie Abgleiche:** `dav_objects` speichert je Eintrag URI, UID und die zuletzt vom Client gesendeten Rohdaten.
 Bei der Ausgabe werden die abgebildeten Eigenschaften aus dem Eintrag gesetzt, alles andere (Erinnerungen/VALARM,
@@ -98,6 +134,7 @@ wirkt nur mit `data.delete`.
 ## Test
 
 ```bash
+php bin/console dav:selftest --site=key   # Abbildung (Namen, ORG, Text, Rückweg, published_only) ohne Datenbank
 curl -u "mail@example.org:APP-PASSWORT" -X PROPFIND -H "Depth: 1" https://ihre-domain.de/dav/calendars/mail@example.org/
 python -m pip install caldav   # caldav.DAVClient(url="https://ihre-domain.de/dav/", username=…, password=…)
 ```

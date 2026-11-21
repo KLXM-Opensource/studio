@@ -215,6 +215,7 @@
   <?php if (\Core\Extensions::isActive('dav') && \Core\Features::on('dav')): ?>
   <h3 id="apps">Termine und Kontakte in Kalender-Apps</h3>
   <p>Unter <b>Konto → Kalender &amp; Kontakte in Apps</b> erzeugen Sie ein <b>App-Passwort</b> (nur einmal sichtbar, „Lesen und ändern“ oder „Nur lesen“). Damit verbinden Sie Apple Kalender/Kontakte, Thunderbird oder DAVx⁵ (Android) mit der Website: Kalender-Tabellen erscheinen als Kalender, freigegebene Tabellen als Adressbuch. Benutzername ist Ihre E-Mail-Adresse, Server die Adresse der Website. Was Sie in der App ändern, landet im CMS – und umgekehrt. Löschen in der App setzt einen Eintrag normalerweise nur auf Entwurf.</p>
+  <p>Je Tabelle (Administration → Einstellungen → „Kalender &amp; Kontakte in Apps“): <b>Nur veröffentlichte Einträge</b> hält Entwürfe und geplante Einträge aus den Apps heraus – sie erscheinen dort erst, wenn sie online sind. Bei Adressbüchern ohne Feld „Firma“ steht der Name Ihrer Organisation aus den Website-Einstellungen als Firma in jedem Kontakt; Sie können einen anderen Namen eintragen oder die Angabe abschalten. Ist nur der ganze Name zugeordnet, trennt das CMS Vor- und Nachname selbst (Titel wie „Dr.“ und Namenszusätze wie „von“ werden erkannt), damit die App richtig sortiert. Formatierte Texte kommen in der App als einfacher Text an, Redaktionsnotizen bleiben im CMS.</p>
   <?php endif; ?>
 
   <h3 id="geteilt">Geteilte Tabellen (mehrere Websites)</h3>

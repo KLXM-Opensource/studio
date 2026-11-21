@@ -20,7 +20,8 @@ use Sabre\VObject\Reader;
  * Zuordnung (Dav::CARD_MAP, im Admin einstellbar): FN bzw. N (Nachname/Vorname), ORG, TITLE, ADR (Straße, PLZ, Ort, Land), URL, NOTE, BDAY,
  * PHOTO (Bildfeld → eingebettetes JPEG, nur Ausgabe), CATEGORIES (Auswahl). EMAIL/TEL: alle Felder vom Typ E-Mail bzw. Telefon
  * (Typ aus dem Feldnamen: mobil/handy → CELL, fax → FAX, privat → HOME, sonst WORK).
- * Alle übrigen Felder als X-MYCMS-{FELD} (z. B. X-MYCMS-FACHGEBIET) – in beide Richtungen.
+ * Alle übrigen Felder als X-MYCMS-{FELD} (z. B. X-MYCMS-FACHGEBIET) – in beide Richtungen; Rich-Text als reiner Text.
+ * Nur FN zugeordnet → N aus dem ganzen Namen (splitName); ORG ohne Feld aus der Einstellung org; published_only blendet Entwürfe aus.
  * Unbekannte Eigenschaften aus Apps bleiben in dav_objects.raw erhalten.
  */
 final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
@@ -61,10 +62,12 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
     private function entries(array $t): array
     {
         $objs = Dav::objects('card', $t['handle']);
+        $s = Dav::tableSettings($t);
         $out = [];
         foreach (Entries::query($t, ['status' => 'all', 'lang' => Lang::default(), 'limit' => 5000]) as $e) {
             $o = $objs[$e['id']] ?? null;
             if ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft') continue;
+            if (!Dav::visible($s, $e)) continue;
             $out[] = [$e, $o];
         }
         return $out;
@@ -91,6 +94,8 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         // Geteilte Tabellen: fremde Einträge nur, wenn die Website sie sehen darf
         if ($e && !\Core\Data\Shared::visibleAll($t, $e)) $e = null;
         if (!$e || ($o && (int) $o['hidden'] === 1 && $e['status'] === 'draft')) return [null, $o];
+        // „Nur veröffentlichte Einträge“: Entwürfe sind für Apps nicht vorhanden (Abruf/Ändern → 404, Löschen → nichts zu tun)
+        if (!Dav::visible(Dav::tableSettings($t), $e)) return [null, $o];
         return [$e, $o ?: (Dav::objects('card', $t['handle'])[$id] ?? null)];
     }
 
@@ -106,6 +111,8 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         $t = $this->table($addressBookId);
         if (!Dav::canWrite($t)) throw new Forbidden('Nur lesender Zugriff.');
         if (Dav::objectByUri($t['handle'], (string) $cardUri)) throw new BadRequest('Kontakt existiert bereits.');
+        // Adresse eines vorhandenen, für Apps nicht sichtbaren Eintrags (Entwurf bei „Nur veröffentlichte Einträge“) nicht neu belegen
+        if (Dav::reservedUri($t, (string) $cardUri, 'vcf')) throw new Forbidden('Kontakt ist im CMS nicht veröffentlicht – nur dort bearbeitbar.');
         [$in, $uid] = self::parse($t, null, (string) $cardData);
         $in['status'] = Dav::tableSettings($t)['status'] === 'draft' || ($t['settings']['workflow'] && !Dav::can('data.publish', $t)) ? 'draft' : 'published';
         [$id, $errors] = Entries::save($t, null, $in);
@@ -176,34 +183,41 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         return 'X-MYCMS-' . strtoupper(str_replace('_', '-', $field));
     }
 
-    /** Felder, die als X-MYCMS-* ausgegeben werden (alles, was nicht zugeordnet ist) */
+    /** Felder mit verschachtelten Werten (JSON: Blöcke, Kombifelder, Gruppen) – nicht als Text abbildbar, daher nie X-MYCMS-* */
+    private const NESTED = ['blocks', 'mediatext', 'person', 'faq', 'address', 'downloads', 'group', 'recurrence'];
+
+    /** Felder, die als X-MYCMS-* ausgegeben werden (alles, was nicht zugeordnet ist, ohne verschachtelte Felder) */
     private static function extraFields(array $t, array $map): array
     {
         $used = array_merge(array_values($map), array_keys(self::typed($t, 'email')), array_keys(self::typed($t, 'tel')));
-        return array_values(array_filter($t['fields'], fn($f) => !in_array($f['name'], $used, true)));
+        return array_values(array_filter($t['fields'], fn($f) => !in_array($f['name'], $used, true) && !in_array($f['type'], self::NESTED, true)));
     }
 
     private static function fieldText(array $f, mixed $v): string
     {
         return match (true) {
             $f['type'] === 'bool' => $v ? '1' : '0',
+            $f['type'] === 'richtext' => self::plain($v),
             is_array($v) => implode(',', array_map('strval', $v)),
             default => (string) ($v ?? ''),
         };
     }
 
-    /** vCard 3.0 eines Eintrags (mit Rohdaten des Clients zusammengeführt) */
-    public static function render(array $t, array $e, ?array $o): string
+    /** vCard 3.0 eines Eintrags (mit Rohdaten des Clients zusammengeführt); $s = Einstellungen der Tabelle (Standard: gespeicherte) */
+    public static function render(array $t, array $e, ?array $o, ?array $s = null): string
     {
-        $map = Dav::tableSettings($t)['map'];
+        $s ??= Dav::tableSettings($t);
+        $map = $s['map'];
         $v = fn(string $k) => isset($map[$k]) && $map[$k] !== '' ? trim(strip_tags((string) ($e[$map[$k]] ?? ''))) : '';
         $card = new VCard(['VERSION' => '3.0', 'PRODID' => '-//KLXM//' . CMS_NAME . ' ' . CMS_VERSION . '//DE', 'UID' => $o['uid'] ?? self::uid($t, $e)]);
         $family = $v('n_family');
         $given = $v('n_given');
         $fn = $v('fn') ?: trim($given . ' ' . $family) ?: $v('org') ?: Entries::title($t, $e);
         $card->add('FN', $fn);
-        $card->add('N', [$family ?: ($v('fn') ? $fn : ''), $given, '', '', '']);
+        // Nur „Name (FN)“ zugeordnet: N aus dem ganzen Namen ableiten (Nachname;Vorname;;Präfix;Suffix), damit Apps richtig sortieren
+        $card->add('N', $family === '' && $given === '' && $v('fn') !== '' ? self::splitName($fn) : [$family, $given, '', '', '']);
         if ($v('org') !== '') $card->add('ORG', [isset($map['org']) && (Tables::field($t, $map['org'])['type'] ?? '') === 'select' ? Tables::optionLabel(Tables::field($t, $map['org']), $v('org')) : $v('org')]);
+        elseif (empty($map['org']) && ($org = Dav::fixedOrg($s)) !== '') $card->add('ORG', [$org]);
         if ($v('title') !== '') $card->add('TITLE', $v('title'));
         foreach (self::typed($t, 'email') as $name => $type) {
             if (trim((string) ($e[$name] ?? '')) !== '') $card->add('EMAIL', trim((string) $e[$name]), ['TYPE' => ['INTERNET', $type === 'HOME' ? 'HOME' : 'WORK']]);
@@ -217,7 +231,7 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
             $card->add('ADR', ['', '', $v('adr_street'), $v('adr_city'), '', $v('adr_zip'), $country], ['TYPE' => 'WORK']);
         }
         if ($v('url') !== '') $card->add('URL', link_href($v('url')));
-        if (isset($map['note']) && $map['note'] !== '' && ($note = \Core\Data\ICal::plain((string) ($e[$map['note']] ?? ''))) !== '') $card->add('NOTE', $note);
+        if (isset($map['note']) && $map['note'] !== '' && ($note = self::plain($e[$map['note']] ?? '')) !== '') $card->add('NOTE', $note);
         if ($v('bday') !== '' && preg_match('~^\d{4}-\d{2}-\d{2}$~', $v('bday'))) $card->add('BDAY', $v('bday'), ['VALUE' => 'DATE']);
         if (!empty($map['photo']) && !empty($e[$map['photo']]) && ($jpeg = self::photo((int) $e[$map['photo']]))) {
             $card->add('PHOTO', $jpeg, ['ENCODING' => 'b', 'TYPE' => 'JPEG']);
@@ -287,8 +301,8 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         return (string) ob_get_clean();
     }
 
-    /** vCard → Feldwerte. @return array{0: array, 1: string} */
-    public static function parse(array $t, ?array $e, string $data): array
+    /** vCard → Feldwerte; $s = Einstellungen der Tabelle (Standard: gespeicherte). @return array{0: array, 1: string} */
+    public static function parse(array $t, ?array $e, string $data, ?array $s = null): array
     {
         try {
             $card = Reader::read($data, Reader::OPTION_FORGIVING);
@@ -296,11 +310,20 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
             throw new BadRequest('Ungültige vCard: ' . $ex->getMessage());
         }
         if (!$card instanceof VCard) throw new BadRequest('Erwartet wird eine vCard.');
-        $map = Dav::tableSettings($t)['map'];
+        $map = ($s ?? Dav::tableSettings($t))['map'];
         $in = [];
         $set = function (string $k, string $val) use (&$in, $map) { if (!empty($map[$k])) $in[$map[$k]] = trim($val); };
         $n = isset($card->N) ? $card->N->getParts() : [];
         $fn = trim((string) ($card->FN ?? ''));
+        // Nur „Name (FN)“ zugeordnet: FN hat Vorrang (Pflicht in vCard 3/4). Ohne FN – oder wenn die App nur N geändert hat (FN wie
+        // gespeichert, Vor-/Nachname anders) – den Namen aus N zusammensetzen
+        if (!empty($map['fn']) && empty($map['n_family']) && empty($map['n_given'])) {
+            $fromN = self::joinName($n);
+            $cur = $e ? trim(strip_tags((string) ($e[$map['fn']] ?? ''))) : '';
+            $was = self::splitName($cur);
+            $nChanged = [trim((string) ($n[0] ?? '')), trim((string) ($n[1] ?? ''))] !== [$was[0], $was[1]];
+            if ($fromN !== '' && ($fn === '' || ($cur !== '' && $fn === $cur && $nChanged))) $fn = $fromN;
+        }
         $set('fn', $fn);
         $set('n_family', (string) ($n[0] ?? '') ?: (empty($map['n_given']) ? $fn : ''));
         $set('n_given', (string) ($n[1] ?? ''));
@@ -318,11 +341,9 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         if (!empty($map['adr_country']) && (Tables::field($t, $map['adr_country'])['type'] ?? '') === 'select') $country = self::optionKey(Tables::field($t, $map['adr_country']), [$country])[0] ?? '';
         $set('adr_country', $country);
         $set('url', (string) ($card->URL ?? ''));
-        if (!empty($map['note'])) {
-            $note = trim(str_replace("\r", '', (string) ($card->NOTE ?? '')));
-            $cur = $e ? \Core\Data\ICal::plain((string) ($e[$map['note']] ?? '')) : '';
-            if ($note !== $cur) $in[$map['note']] = (Tables::field($t, $map['note'])['type'] ?? '') === 'richtext'
-                ? implode('', array_map(fn($p) => '<p>' . str_replace("\n", '<br>', e($p)) . '</p>', preg_split("~\n{2,}~", $note) ?: [])) : $note;
+        if (!empty($map['note']) && ($nf = Tables::field($t, $map['note']))) {
+            $note = self::textIn($nf, $e, (string) ($card->NOTE ?? ''));
+            if ($note !== null) $in[$map['note']] = $note;
         }
         if (!empty($map['bday'])) {
             $b = (string) ($card->BDAY ?? '');
@@ -358,6 +379,11 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
             if (!isset($extra[$name])) continue;
             $f = $extra[$name];
             $val = (string) $p;
+            if ($f['type'] === 'richtext') {
+                // Ausgabe ist reiner Text: unverändert → Formatierung im CMS bleibt; geändert → Absätze/Umbrüche als HTML
+                if (($val = self::textIn($f, $e, $val)) !== null) $in[$f['name']] = $val;
+                continue;
+            }
             $in[$f['name']] = match ($f['type']) {
                 'bool' => in_array(strtolower($val), ['1', 'true', 'ja', 'yes'], true),
                 'multiselect', 'relations' => array_values(array_filter(array_map('trim', explode(',', $val)), fn($x) => $x !== '')),
@@ -367,6 +393,89 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
         $tf = $t['settings']['title_field'];
         if ($tf !== '' && trim((string) ($in[$tf] ?? $e[$tf] ?? '')) === '') $in[$tf] = $fn ?: ($org ?: '(ohne Namen)');
         return [$in, trim((string) ($card->UID ?? '')) ?: bin2hex(random_bytes(16))];
+    }
+
+    /** Feldwert als reiner Text für Apps: Absätze → Leerzeile, Umbrüche/Listenpunkte → Zeile, Entities dekodiert, ohne Redaktionsnotizen [# … #] */
+    private static function plain(mixed $v): string
+    {
+        return \Core\Data\ICal::plain(\Core\EditorNotes::strip((string) ($v ?? '')));
+    }
+
+    /**
+     * Text aus der App für ein Text-/Rich-Text-Feld (NOTE, X-MYCMS-* von Rich-Text): null, wenn er dem gespeicherten (als reiner Text)
+     * entspricht – dann bleiben Formatierung und Redaktionsnotizen im CMS –, sonst der Wert (Rich-Text: Leerzeile → Absatz,
+     * Zeilenumbruch → <br>, alles escaped); vorhandene Redaktionsnotizen werden wieder angehängt.
+     */
+    private static function textIn(array $f, ?array $e, string $text): ?string
+    {
+        $text = trim(str_replace("\r", '', $text));
+        $cur = (string) ($e[$f['name']] ?? '');
+        if ($e && $text === self::plain($cur)) return null;
+        $notes = \Core\EditorNotes::find($cur);
+        if ($f['type'] !== 'richtext') return trim($text . implode('', array_map(fn($n) => "\n\n[# $n #]", $notes)));
+        return implode('', array_map(fn($p) => '<p>' . str_replace("\n", '<br>', e($p)) . '</p>', $text === '' ? [] : (preg_split("~\n{2,}~", $text) ?: [])))
+            . implode('', array_map(fn($n) => '<p>[# ' . e($n) . ' #]</p>', $notes));
+    }
+
+    // ------------------------------------------------------------------ Namen
+
+    /** Titel/Anrede vor dem Namen: Dr., Prof., Dr. med., Dipl.-Ing., Priv.-Doz., h. c., Herr, Frau … */
+    private static function isPrefix(string $w): bool
+    {
+        return (bool) preg_match('~^(?:(?:dr|prof|med|dent|vet|rer|nat|pol|oec|phil|jur|theol|habil|soc|sc|mult|ing|mag|apl|univ|hon|em|hr|fr|mr|mrs|ms)\.'
+            . '|(?:dr|prof)\.(?:\p{L}+\.)+|\p{L}+\.-\p{L}+\.?|h\.c\.|e\.h\.|herr|frau|pd)$~iu', $w);
+    }
+
+    /** Zusatz nach dem Namen (nach Komma oder am Ende): M.A., B.Sc., MBA, LL.M., Ph.D., jun., sen., III … */
+    private static function isSuffix(string $w): bool
+    {
+        return (bool) preg_match('~^(?:(?:[mb]\.\s?(?:a|sc|eng|ed)\.|[mb]sc|mba|ll\.\s?[mb]\.|ph\.\s?d\.|phd|mdb|mdl|jun\.|jr\.|sen\.|sr\.|ii|iii|iv)[\s,]*)+$~iu', $w);
+    }
+
+    /** Nachnamen-Partikel (nur klein geschrieben): von, van, de, zu, von der, van den, … */
+    private static function isParticle(string $w): bool
+    {
+        return in_array($w, ['von', 'van', 'vom', 'zu', 'zum', 'zur', 'und', 'de', 'der', 'den', 'des', 'del', 'della', 'di', 'da', 'du', 'dos', 'das',
+            'le', 'la', 'ten', 'ter', 'op', 'af', 'av', 'y'], true);
+    }
+
+    /**
+     * Ganzer Name → N-Teile [Nachname, Vorname, weitere, Präfix, Suffix]: letztes Wort = Nachname (mit Partikeln davor: „von der Leyen“),
+     * der Rest Vorname; führende Titel/Anreden als Präfix, Zusätze am Ende als Suffix; „Musterfrau, Erika“ = Nachname, Vorname.
+     * @return array{0: string, 1: string, 2: string, 3: string, 4: string}
+     */
+    public static function splitName(string $fn): array
+    {
+        $fn = trim((string) preg_replace('~\s+~u', ' ', $fn));
+        if ($fn === '') return ['', '', '', '', ''];
+        $suffix = [];
+        $family = null;
+        if (preg_match('~^(.+?),\s*(.+)$~u', $fn, $m)) {
+            if (self::isSuffix($m[2])) {
+                [$fn, $suffix] = [$m[1], [$m[2]]];
+            } elseif (!str_contains($m[2], ',')) {
+                [$family, $fn] = [$m[1], $m[2]];          // „Musterfrau, Erika“ bzw. „Musterfrau, Dr. Erika“
+            }
+        }
+        $w = explode(' ', $fn);
+        $prefix = [];
+        while (count($w) > ($family === null ? 1 : 0) && self::isPrefix($w[0])) $prefix[] = array_shift($w);
+        if ($family === null) {
+            while (count($w) > 1 && self::isSuffix((string) end($w))) array_unshift($suffix, (string) array_pop($w));
+            $last = [(string) array_pop($w)];
+            while (count($w) > 1 && self::isParticle((string) end($w))) array_unshift($last, (string) array_pop($w));
+            $family = implode(' ', $last);
+        }
+        return [$family, implode(' ', $w), '', implode(' ', $prefix), implode(' ', $suffix)];
+    }
+
+    /** N-Teile → ganzer Name („Prof. Dr. Erika Musterfrau, M.A.“); leer ohne Vor- und Nachname */
+    public static function joinName(array $n): string
+    {
+        $n = array_map(fn($x) => trim((string) $x), array_pad(array_values($n), 5, ''));
+        if ($n[0] === '' && $n[1] === '') return '';
+        $name = implode(' ', array_filter([$n[3], $n[1], $n[2], $n[0]], fn($x) => $x !== ''));
+        return $n[4] !== '' ? $name . ', ' . $n[4] : $name;
     }
 
     /** Auswahl-Kurznamen zu Texten (Kurzname, Beschriftung oder Übersetzung, ohne Groß/klein) */

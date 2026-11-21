@@ -125,7 +125,13 @@ final class Dav
 
     // ================================================================= Einstellungen je Tabelle
 
-    public const TABLE_DEFAULTS = ['caldav' => true, 'addressbook' => false, 'status' => 'published', 'on_delete' => 'draft', 'map' => []];
+    /**
+     * published_only: nur veröffentlichte Einträge an Apps geben (Entwürfe und geplante Einträge bleiben im CMS). Standard aus = bisheriges
+     * Verhalten, damit bestehende Kalender/Adressbücher sich nicht unbemerkt ändern; in der Verwaltung für neu bereitgestellte Tabellen vorbelegt.
+     * org: ORG ohne zugeordnetes Feld – true = Name der Organisation (org_name()), Text = fester Wert, false = kein ORG.
+     */
+    public const TABLE_DEFAULTS = ['caldav' => true, 'addressbook' => false, 'status' => 'published', 'on_delete' => 'draft', 'published_only' => false,
+        'org' => true, 'map' => []];
 
     /** vCard-Zuordnung (Kurzname der Zuordnung → Feldtypen) */
     public const CARD_MAP = [
@@ -142,6 +148,44 @@ final class Dav
         $s = (array) ($all[$table['handle']] ?? []) + self::TABLE_DEFAULTS;
         if ($s['addressbook'] && !$s['map']) $s['map'] = self::guessMap($table);
         return $s;
+    }
+
+    /** Gespeicherte Einstellungen einer Tabelle ohne Standardwerte (leer = nie eingestellt) */
+    public static function storedSettings(string $handle): array
+    {
+        return (array) (((array) app()->settings->get('ext.dav.tables', []))[$handle] ?? []);
+    }
+
+    /**
+     * Vorbelegung „Nur veröffentlichte Einträge“ in der Verwaltung: gespeicherter Wert; sonst an für Tabellen, die noch nicht bereitgestellt
+     * werden (neue Einrichtung), aus für bereits bereitgestellte (Kalender sind ohne Einstellung bereitgestellt – Verhalten bleibt).
+     */
+    public static function publishedOnlyPreset(array $table): bool
+    {
+        $raw = self::storedSettings($table['handle']);
+        if (array_key_exists('published_only', $raw)) return (bool) $raw['published_only'];
+        $s = self::tableSettings($table);
+        return !(Calendar::enabled($table) ? $s['caldav'] : $s['addressbook']);
+    }
+
+    /** Darf der Eintrag in der App erscheinen? (published_only → nur Status „published“; geplante Einträge sind bis „Online ab“ Entwurf) */
+    public static function visible(array $s, array $entry): bool
+    {
+        return empty($s['published_only']) || ($entry['status'] ?? '') === 'published';
+    }
+
+    /** Ist die Adresse „cms-{id}.{ext}“ die eines vorhandenen Eintrags? (Apps dürfen sie nicht für neue Objekte belegen) */
+    public static function reservedUri(array $table, string $uri, string $ext): bool
+    {
+        return (bool) preg_match('~^cms-(\d+)\.' . preg_quote($ext, '~') . '$~', $uri, $m) && \Core\Data\Entries::find($table, (int) $m[1]) !== null;
+    }
+
+    /** ORG ohne zugeordnetes Feld (Einstellung org): Name der Organisation, fester Text oder leer */
+    public static function fixedOrg(array $s): string
+    {
+        $org = $s['org'] ?? true;                       // fehlend/null = Standard
+        if ($org === false || $org === '' || $org === 0 || $org === '0') return '';
+        return is_string($org) && $org !== '1' ? trim(strip_tags($org)) : trim(strip_tags(org_name()));
     }
 
     public static function saveTableSettings(string $handle, array $s): void

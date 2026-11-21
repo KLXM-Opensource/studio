@@ -78,4 +78,9 @@ return [
     'Termine und Kontakte mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵) – Anmeldung mit einem App-Passwort, nicht mit Ihrem Kennwort.' => 'Sync events and contacts with calendar and address book apps (Apple, Thunderbird, DAVx⁵) – sign in with an app password, not with your password.',
     'Zuletzt benutzt' => 'Last used',
     'Tabellen als Kalender bzw. Adressbuch für Apps bereitstellen, App-Passwörter' => 'Provide tables as calendars or address books for apps, app passwords',
+    'Nur veröffentlichte Einträge' => 'Published entries only',
+    'Entwürfe und geplante Einträge erscheinen nicht in den Apps. Ohne Haken sehen Apps auch Entwürfe.' => 'Drafts and scheduled entries do not appear in the apps. Without the tick, apps also see drafts.',
+    'Organisation (ORG) ohne Feld' => 'Organisation (ORG) without field',
+    'Keine Organisation ausgeben' => 'Do not output an organisation',
+    'Gilt, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Leer: Name der Organisation aus den Website-Einstellungen.' => 'Applies when no “Company (ORG)” field is mapped. Empty: organisation name from the website settings.',
 ];

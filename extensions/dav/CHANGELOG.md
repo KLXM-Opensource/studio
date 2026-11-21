@@ -1,5 +1,25 @@
 # Changelog – Erweiterung „dav“
 
+## 1.3.0 (2026-11-21)
+
+- **Nur veröffentlichte Einträge** je Tabelle (`published_only`, Website-Einstellung `ext.dav.tables.<tabelle>.published_only`,
+  in der Verwaltung als Haken): Entwürfe und geplante Einträge erscheinen nicht in Kalender- und Adressbuch-Apps; Abruf und Ändern
+  solcher Einträge ergeben 404, ihre Adresse `cms-{id}.vcf|ics` lässt sich aus Apps nicht neu belegen (403). Gilt für CardDAV und
+  CalDAV. **Standard aus** – bestehende Kalender und Adressbücher verhalten sich wie bisher (Entwürfe sichtbar, Termine als
+  `STATUS:TENTATIVE`); die Verwaltung schlägt den Haken für Tabellen vor, die noch nicht bereitgestellt werden.
+- **Name aus FN:** Ist nur „Name (FN)“ zugeordnet, enthält N jetzt Nachname;Vorname;;Präfix;Suffix (vorher stand der ganze Name im
+  Nachnamen) – Titel/Anreden („Dr.“, „Prof. Dr.“, „Dipl.-Ing.“, „Frau“) als Präfix, Partikel („von“, „van der“, „zu“) beim Nachnamen.
+  Zurück aus der App hat FN Vorrang; ohne FN oder wenn nur N geändert wurde, wird der Name aus N zusammengesetzt.
+- **Feste Organisation (ORG)** je Adressbuch (`org`): ohne zugeordnetes Feld „Firma“ steht standardmäßig der Name der Organisation
+  der Website (`org_name()`) in ORG; eigener Text möglich, `org => false` schaltet ab.
+- **Text statt HTML:** `X-MYCMS-*` aus Rich-Text-Feldern und NOTE als reiner Text (Absätze, Umbrüche, dekodierte Entities), ohne
+  Redaktionsnotizen `[# … #]`. Unveränderter Text aus der App lässt Formatierung und Notizen im CMS stehen.
+- **Korrektur:** Felder mit verschachtelten Werten (Inhaltsblöcke, Kombifelder, Gruppen, Medien + Text, Wiederholung) erscheinen nicht
+  mehr als `X-MYCMS-…:Array,Array` und können aus Apps nicht mehr mit diesem Text überschrieben werden.
+- Selbsttest `php bin/console dav:selftest --site=…`.
+- **Hinweis:** Durch die geänderte Ausgabe (N, ORG, Text statt HTML) ändern sich die ETags aller Kontakte – Apps laden die
+  Adressbücher einmal neu. Daten im CMS ändern sich dadurch nicht.
+
 ## 1.2.0 (2026-11-21)
 
 - **Namensraum umbenannt:** `MyCms\Dav\…` heißt jetzt `Klxm\Dav\…` (wie `Klxm\Members`, `Klxm\Motion`) – der Altname „MyCms“
