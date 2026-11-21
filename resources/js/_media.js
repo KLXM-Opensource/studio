@@ -8,8 +8,7 @@ import { ask } from './_bar.js';   // gestaltete Rückfrage statt window.confirm
 import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertitel & Transkripte (Video/Audio)
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
 import { fitDialog, fitLabel } from './_imagefit.js';   // Bild im Rahmen: füllen, einpassen, Originalformat (Core\ImageFit)
-import { editImage, editToolbar } from './_imageedit.js';
-import { openGraphicEditor, fillGraphicTemplate } from './_grafik.js';   // Grafik-Editor (Core\Graphics): Neu → Grafik, SVG bearbeiten   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
+import { editImage, editToolbar } from './_imageedit.js';   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
  *  - Seitenleiste: Mediathek, Sammlungen (Dateien per Drag & Drop hineinziehen), Tags
@@ -136,6 +135,16 @@ const CAP_HELPERS = { http: (...a) => http(...a), base: BASE, box: () => box(), 
  *   sources(finder) → [{ label, icon, run(finder) }]   Einträge im Knopf „Importieren aus …“ neben „Hochladen“ (Mediathek und
  *                                    Auswahldialog, nur mit Schreibrecht) – run() öffnet z. B. einen eigenen Dialog und ruft danach
  *                                    finder.load(id) auf; Ziel-Pool finder.pool, Sammlungen finder.meta.collections, Ort finder.src
+ *   create(finder) → [{ label, run(finder, button) } | '-']   Einträge im Menü „Neu“ neben „Hochladen“ (z. B. Grafik zeichnen) – der
+ *                                    Knopf erscheint nur, wenn es Einträge gibt (nur mit Schreibrecht, nicht in geteilten Pools und
+ *                                    nicht in Auswahldialogen für PDF, Video, Audio); '-' = Trennlinie
+ *   side(finder) → [{ label, href, icon, title }]   Links in der Seitenleiste der Mediathek (unter den Dateiarten, nur Mediathek
+ *                                    dieser Website, nicht im Auswahldialog), z. B. zu einer eigenen Ablage
+ *   edit(finder, m) → [{ label, menuLabel, icon, hint, run(finder, m, ctx), menu, detail }]   „Bearbeiten mit …“ je Datei: im Kontextmenü
+ *                                    (Standard, menuLabel statt label, menu: false = nicht dort) und im Fenster „Bearbeiten“ (detail: false = nicht dort;
+ *                                    bei SVG statt der Werkzeugleiste für Pixelbilder, sonst als Leiste über ihr, hint = Zeile daneben).
+ *                                    ctx = { dialog, close() } (close schließt das Fenster „Bearbeiten“; im Kontextmenü ohne dialog).
+ *                                    Nur mit Schreibrecht, nicht für Dateien geteilter Pools.
  * ui = { t, ico, ask, esc, http, toast, box, inBox, base } – gleiche Anfragen (CSRF, Pool) und Dialog-Ebene wie die Mediathek.
  */
 const PLUGINS = [];
@@ -148,7 +157,7 @@ function extend(plugin) {
   if (!plugin || PLUGINS.includes(plugin)) return;
   PLUGINS.push(plugin);
   // bereits geöffnete Mediatheken neu zeichnen (Erweiterungs-Skripte laden nach admin.js)
-  FINDERS.forEach(f => { if (f.meta && f.root.isConnected) { plugin.loaded?.(f, f.meta); f.renderSide(); f.render(); f.renderSources(); } });
+  FINDERS.forEach(f => { if (f.meta && f.root.isConnected) { plugin.loaded?.(f, f.meta); f.renderSide(); f.render(); f.renderSources(); f.renderCreate(); } });
 }
 
 // Meldungen: gemeinsame Lösung (_toast.js) – kürzer als sonst, die Mediathek meldet oft hintereinander
@@ -649,24 +658,22 @@ class Finder {
     this.applyView();
   }
 
-  /** Grafik-Editor: neue Grafik; Infografiken erscheinen danach ausgewählt in der Mediathek (im Auswahldialog direkt wählbar) */
-  async newGraphic(opts) {
-    const r = await openGraphicEditor({ returnFocus: $('[data-newmenu]', this.root), ...opts });
-    if (r.saved?.target === 'media') this.load(r.saved.item.id);
+  /** „Bearbeiten mit …“ der Erweiterungen (Hook edit) für eine Datei – nur mit Schreibrecht, nicht in geteilten Pools */
+  editActions(m) {
+    if (!m || this.ro || this.pool || m.pool) return [];
+    return hook('edit', this, m).flat().filter(a => a && a.label && typeof a.run === 'function');
   }
 
-  /** SVG der Mediathek im Grafik-Editor bearbeiten (neue Fassung derselben Datei – ID und Verwendungen bleiben); Bild aus dem
-   * Grafik-Editor (m.compose): Arbeitsfassung öffnen, Speichern ersetzt das Bild */
-  async editGraphic(m) {
-    const r = await openGraphicEditor(m.compose ? { id: m.compose } : { mediaId: m.id });
-    if (r.saved) this.load(r.saved.item?.id || m.id);
+  /** Knopf „Neu“ nur mit Einträgen der Erweiterungen */
+  renderCreate() {
+    const nb = $('[data-newmenu]', this.root);
+    if (nb) nb.hidden = !this.createItems().length;
   }
 
-  /** Aus Vorlage erstellen (Persona Bild): Formular ohne Editor; fertige Bilder erscheinen ausgewählt */
-  async fromTemplate(compose = null) {
-    const r = await fillGraphicTemplate({ id: compose, returnFocus: $('[data-newmenu]', this.root) });
-    const first = r.saved && Object.values(r.saved.outputs || {})[0];
-    if (first) this.load(first.id);
+  /** Einträge im Menü „Neu“ (Hook create) – leer: Knopf ausgeblendet */
+  createItems() {
+    if (this.ro || this.pool || ['pdf', 'video', 'audio'].includes(this.opts.kind)) return [];
+    return hook('create', this).flat().filter(a => a === '-' || (a && a.label && typeof a.run === 'function'));
   }
 
   /** Knopf „Importieren aus …“: Quellen der Erweiterungen (Hook sources) – nur mit Schreibrecht im aktuellen Ort */
@@ -690,23 +697,12 @@ class Finder {
   bind() {
     const r = this.root;
     $('[data-upload]', r).addEventListener('click', () => this.uploader.choose());
-    // Neu → Grafik (Grafik-Editor als Overlay): Infografik in die Mediathek, Symbol/Blockvorschau in die eigene Ablage
+    // Neu → Einträge der Erweiterungen (Hook create, z. B. Grafik zeichnen)
     $('[data-newmenu]', r).addEventListener('click', e => {
-      const rc = e.currentTarget.getBoundingClientRect();
-      const info = (w, h) => () => this.newGraphic({ format: 'info', w, h });
-      const kinds = (document.documentElement.dataset.grafikKinds || '').split(' ');
-      this.menu(rc.left, rc.bottom + 4, [
-        [t('Infografik 16:9 (1600 × 900)'), info(1600, 900)],
-        [t('Infografik quadratisch (1080 × 1080)'), info(1080, 1080)],
-        [t('Infografik frei (800 × 500)'), info(800, 500)],
-        // Persona Bild: Foto und Text gemischt → Pixelbild; Vorlagen der Agentur nur ausfüllen
-        [t('Bild mit Foto und Text (1200 × 630)'), () => this.newGraphic({ format: 'info', w: 1200, h: 630, out: 'jpeg', persona: 'bild' })],
-        [t('Aus Vorlage erstellen …'), () => this.fromTemplate()],
-        // Symbole/Blockvorschauen nur mit dem Recht der Art (Core\Graphics\Graphics::RIGHTS, data-grafik-kinds am <html>)
-        ...(kinds.includes('icon') ? [[t('Symbol 24 × 24 (eigene Ablage)'), () => this.newGraphic({ format: 'icon' })]] : []),
-        ...(kinds.includes('preview') ? [[t('Blockvorschau 160 × 100 (eigene Ablage)'), () => this.newGraphic({ format: 'preview' })]] : []),
-        [t('Grafiken verwalten …'), () => { location.href = BASE + '/grafik'; }],
-      ]);
+      const b = e.currentTarget, rc = b.getBoundingClientRect();
+      const items = this.createItems();
+      if (!items.length) return;
+      this.menu(rc.left, rc.bottom + 4, items.map(a => a === '-' ? ['-'] : [a.label, () => { try { a.run(this, b); } catch (ex) { console.error(ex); toast(ex.message); } }]));
     });
     // Importieren aus externen Quellen (Erweiterungen, Hook sources): Menü unter dem Knopf, Fokus danach zurück
     $('[data-sources]', r).addEventListener('click', e => {
@@ -870,8 +866,7 @@ class Finder {
     this.opts.onLoad?.(this);   // z. B. Sammlungswahl: Knopf „übernehmen“ nachführen
     this.ro = data.can_edit === false;   // z. B. Pool ohne Recht „Geteilte Medien pflegen“: nur ansehen und verwenden
     this.root.classList.toggle('is-ro', this.ro);
-    const nb = $('[data-newmenu]', this.root);
-    if (nb) nb.hidden = this.ro || !!this.pool || !document.documentElement.dataset.grafikJs || this.opts.kind === 'pdf' || this.opts.kind === 'video' || this.opts.kind === 'audio';
+    this.renderCreate();
     RIGHTS = data.rights || 'optional';
     // Office-Dokumente (Grundeinstellungen → Mediathek): erlaubte Typen kommen mit der Liste
     for (const t of data.office || []) if (!ALL_TYPES.includes(t)) ALL_TYPES.push(t);
@@ -914,7 +909,7 @@ class Finder {
           + (counts.audio ? row('kind', 'audio', ico('music-notes'), t('Audio'), counts.audio) : '')
           + (counts.unused !== undefined && this.mode === 'library' ? row('unused', '', ico('eye-slash'), t('Nicht verwendet'), counts.unused) : '')
           + (this.mode === 'library' && !this.pool && (this.meta.trash_days || counts.trash) ? row('trash', '', ico('trash'), t('Papierkorb'), counts.trash || 0) : '')
-          + (this.mode === 'library' && !this.pool && document.documentElement.dataset.grafikJs ? `<li><a class="fx-src fx-src--link" href="${esc(BASE + '/grafik')}" title="${esc(t('Symbole, Blockvorschauen und Bausteine des Grafik-Editors – nicht in der Mediathek'))}">${ico('pen-nib')}<span>${esc(t('Grafik-Ablage'))}</span></a></li>` : '')}
+          + (this.mode === 'library' && !this.pool ? hook('side', this).flat().filter(l => l && l.label && l.href).map(l => `<li><a class="fx-src fx-src--link" href="${esc(l.href)}"${l.title ? ` title="${esc(l.title)}"` : ''}>${ico(l.icon || 'arrow-square-out')}<span>${esc(l.label)}</span></a></li>`).join('') : '')}
       </ul>
       ${this.checksHtml(row)}
       <details class="fx-checkgrp fx-fold" data-fold="collections"${store.get('fold-collections', true) ? ' open' : ''}><summary><span>Sammlungen</span><button type="button" class="fx-add" data-newcol aria-label="Neue Sammlung" title="Neue Sammlung">+</button></summary>
@@ -1134,8 +1129,8 @@ class Finder {
     if (one) e.push(['Bearbeiten …', () => this.edit(one.id)], ['Quick Look', () => this.quickLook(one.id)]);
     if (one?.kind === 'image' && !one.svg) e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
     if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
-    if ((one?.svg || one?.compose) && !this.pool && !one.pool && document.documentElement.dataset.grafikJs) e.push([t('Im Grafik-Editor bearbeiten …'), () => this.editGraphic(one)]);
-    if (one?.compose_tpl && !this.pool && document.documentElement.dataset.grafikJs) e.push([t('Felder der Vorlage ändern …'), () => this.fromTemplate(one.compose)]);
+    // Erweiterungen: „Bearbeiten mit …“ (Hook edit, z. B. im Grafik-Editor)
+    for (const a of this.editActions(one)) if (a.menu !== false) e.push([a.menuLabel || a.label, () => { try { a.run(this, one, {}); } catch (ex) { console.error(ex); toast(ex.message); } }]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
     if (ids.length > 1 && this.meta.zip) e.push([t('Als ZIP herunterladen'), () => { location.href = this.zipUrl(ids); }]);
     if (this.src.type === 'trash') e.push([t('Wiederherstellen'), async () => { await api.bulk({ ids, action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); }]);
@@ -1440,6 +1435,9 @@ class Finder {
     let m;
     try { m = await api.detail(id); } catch (ex) { loadFailed(ex); return; }
     const isImg = m.kind === 'image', cols = this.meta.collections, ratios = this.meta.ratios;
+    // „Bearbeiten mit …“ der Erweiterungen (Hook edit) – Knöpfe über der Werkzeugleiste (SVG: an ihrer Stelle)
+    const extActs = this.editActions(m).filter(a => a.detail !== false);
+    const extBtns = extActs.map((a, i) => `<button type="button" class="adm-btn adm-btn--small" data-ext-edit="${i}">${a.icon ? ico(a.icon) + ' ' : ''}${esc(a.label)}</button>`);
     const dlg = inBox('media-detail', '<dialog id="media-detail" class="adm-dialog adm-dialog--wide md" aria-labelledby="md-title"></dialog>');
     let focus = { ...m.focus }, tags = [...m.tags], dirty = false;
     const cropTiles = () => Object.keys(ratios).map(r => {
@@ -1464,13 +1462,12 @@ class Finder {
       <div class="md-grid">
         <div class="md-preview">
           ${isImg && m.svg ? `<div class="md-focus md-focus--svg"><img src="${esc(m.url)}" alt="" draggable="false"></div>
-            <div class="md-iebar" data-iebar>${!this.ro && !this.pool && !m.pool && document.documentElement.dataset.grafikJs ? `<button type="button" class="adm-btn adm-btn--small" data-ge-edit>${ico('bezier-curve')} ${esc(t('Im Grafik-Editor bearbeiten'))}</button>` : editToolbar(m, this.ro)}</div>
+            <div class="md-iebar" data-iebar>${extBtns.length ? extBtns.join(' ') : editToolbar(m, this.ro)}</div>
             <p class="f-help">${esc(t('SVG-Grafik: wird immer vollständig und in jeder Größe scharf gezeigt – Fokuspunkt und Zuschnitte entfallen.'))}${m.note ? ` ${esc(m.note)}.` : ''}</p>
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast, Schärfe'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
-            ${m.compose && !this.ro && !this.pool && document.documentElement.dataset.grafikJs ? `<div class="md-gebar"><button type="button" class="adm-btn adm-btn--small" data-ge-edit>${ico('bezier-curve')} ${esc(t('Im Grafik-Editor bearbeiten'))}</button>
-              <span class="f-help">${esc(t('Bild aus dem Grafik-Editor: Ebenen und Texte ändern Sie dort – Speichern ersetzt dieses Bild.'))}</span></div>` : ''}
+            ${extBtns.length ? `<div class="md-extbar">${extBtns.join(' ')}${extActs.filter(a => a.hint).map(a => `<span class="f-help">${esc(a.hint)}</span>`).join('')}</div>` : ''}
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
@@ -1558,11 +1555,11 @@ class Finder {
       const b = e.target.closest('[data-crop]'); if (!b) return;
       crop({ ...m, focus }, b.dataset.crop, (r, res) => { m.crops = res.item.crops; $('[data-crops]', dlg).innerHTML = cropTiles(); fxPreview(); this.load(m.id); });
     });
-    // SVG: im Grafik-Editor bearbeiten (Overlay über dem Dialog; danach Dialog schließen, die Liste zeigt die neue Fassung)
-    $('[data-ge-edit]', dlg)?.addEventListener('click', async () => {
-      const r = await openGraphicEditor({ mediaId: m.id });
-      if (r.saved) { $('[data-close]', dlg)?.click(); this.load(m.id); }
-    });
+    // Erweiterungen: „Bearbeiten mit …“ (z. B. Grafik-Editor als Overlay über dem Fenster; ctx.close() schließt es danach)
+    $$('[data-ext-edit]', dlg).forEach(b => b.addEventListener('click', () => {
+      const a = extActs[+b.dataset.extEdit];
+      try { a?.run(this, m, { dialog: dlg, close: () => $('[data-close]', dlg)?.click() }); } catch (ex) { console.error(ex); toast(ex.message); }
+    }));
     // Bild bearbeiten (speichert sofort; neue Größen, eigene Zuschnitte je Format werden zurückgesetzt)
     $('[data-iebar]', dlg)?.addEventListener('click', async e => {
       const b = e.target.closest('[data-ie-tool]'); if (!b) return;

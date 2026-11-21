@@ -4,9 +4,9 @@
 
 /* Werkzeugleiste im Detail-Dialog (Mediathek → Alle Details) */
 .md-iebar{margin-top:10px}
-/* Bild aus dem Grafik-Editor (Persona Bild): Knopf „Im Grafik-Editor bearbeiten“ über der Werkzeugleiste */
-.md-gebar{margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
-.md-gebar .f-help{margin:0}
+/* „Bearbeiten mit …“ der Erweiterungen (Mediathek-Hook edit, _media.js): Knöpfe und Hinweis über der Werkzeugleiste */
+.md-extbar{margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.md-extbar .f-help{margin:0}
 .ie-bar{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:8px;background:var(--adm-fill)}
 .ie-bar__btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border:0;border-radius:6px;background:none;color:var(--adm-ink);font:600 13px var(--adm-font);cursor:pointer}
 .ie-bar__btn:hover:not(:disabled){background:var(--adm-card);box-shadow:0 0 0 1px var(--adm-line)}

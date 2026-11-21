@@ -124,14 +124,24 @@ final class PresenceController extends AdminController
     {
         if ($type === 'page') return ctype_digit($id) && can('pages.edit') && Pages::find((int) $id) !== null;
         if ($type === 'entry' && preg_match('~^([a-z][a-z0-9_]{0,59}):(\d+)$~', $id, $m)) return can('data.edit') && Tables::find($m[1]) !== null;
-        // Grafik im Grafik-Editor (Mediathek bzw. eigene Ablage): wer darf sie bearbeiten?
-        if ($type === 'graphic' && preg_match('~^(media|graphic):(\d+)$~', $id, $m)) {
-            if (!can('media.upload')) return false;
-            if ($m[1] === 'media') return \Core\Media::find((int) $m[2]) !== null;
-            $g = \Core\Graphics\Graphics::find((int) $m[2]);
-            return $g !== null && \Core\Graphics\Graphics::canKind((string) $g['kind']);
-        }
-        return false;
+        // weitere Arten (z. B. Grafiken im Grafik-Editor): die Erweiterung entscheidet (Filter „presence.object“)
+        return (bool) (self::object($type, $id)['allowed'] ?? false);
+    }
+
+    /**
+     * Arten von Erweiterungen (Filter „presence.object“): ['allowed' => darf bearbeiten, 'last' => ['user_id' => …, 'created_at' => …] | null].
+     * Nur mit gültiger Art und ID (a–z, Ziffern, : _ -), je Anfrage einmal gefragt.
+     * @return array{allowed: bool, last: ?array}
+     */
+    private static function object(string $type, string $id): array
+    {
+        static $memo = [];
+        $none = ['allowed' => false, 'last' => null];
+        if (!preg_match('~^[a-z][a-z0-9_]{0,30}$~', $type) || !preg_match('~^[a-z0-9_:.-]{1,80}$~i', $id) || in_array($type, ['page', 'entry'], true)) return $none;
+        if (isset($memo[$type . "\0" . $id])) return $memo[$type . "\0" . $id];
+        $f = \Core\Extensions::filter('presence.object', $none, ['type' => $type, 'id' => $id]);
+        $out = is_array($f) ? ['allowed' => !empty($f['allowed']), 'last' => is_array($f['last'] ?? null) ? $f['last'] : null] : $none;
+        return $memo[$type . "\0" . $id] = $out;
     }
 
     /** Zuletzt gespeichert (Versionen): Person und Zeitpunkt */
@@ -140,8 +150,8 @@ final class PresenceController extends AdminController
         $db = app()->db;
         $row = $type === 'page'
             ? $db->fetch('SELECT user_id, created_at FROM revisions WHERE page_id = ? ORDER BY id DESC LIMIT 1', [(int) $id])
-            : ($type === 'graphic' ? $db->fetch('SELECT user_id, created_at FROM graphic_versions WHERE ref = ? ORDER BY id DESC LIMIT 1', [$id])
-            : (preg_match('~^(.+):(\d+)$~', $id, $m) ? $db->fetch('SELECT user_id, created_at FROM entry_revisions WHERE tbl = ? AND entry_id = ? ORDER BY id DESC LIMIT 1', [$m[1], (int) $m[2]]) : null));
+            : ($type === 'entry' ? (preg_match('~^(.+):(\d+)$~', $id, $m) ? $db->fetch('SELECT user_id, created_at FROM entry_revisions WHERE tbl = ? AND entry_id = ? ORDER BY id DESC LIMIT 1', [$m[1], (int) $m[2]]) : null)
+            : self::object($type, $id)['last']);
         if (!$row) return null;
         $u = $row['user_id'] ? $db->fetch('SELECT id, name, email FROM users WHERE id = ?', [(int) $row['user_id']]) : null;
         return ['user' => (string) ($row['user_id'] ?? ''), 'name' => $u ? (string) ($u['name'] ?: $u['email']) : '', 'at' => (int) strtotime((string) $row['created_at']),

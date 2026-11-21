@@ -28,6 +28,8 @@ final class Filters
         'admin.nav' => ['array{main: list<array{0: href, 1: label, 2: key, 3?: bool}>, groups: list<array{key, label, icon, items}>}', 'user, view', 'Seitenleiste der Verwaltung ändern – Punkte ausblenden, umsortieren, ergänzen (z. B. vereinfachte Verwaltung). Nur Darstellung: Rechte prüft weiter jede Seite.'],
         'admin.home' => ['?string Adresse (null = Übersicht /admin)', 'user', 'Startseite der Verwaltung nach der Anmeldung bzw. bei /admin (z. B. vereinfachte Startseite); /admin?uebersicht=1 zeigt immer die Übersicht.'],
         'admin.brand' => ['array{0: string, 1: string} Zeile 1 und 2', 'site', 'Marke oben in der Seitenleiste der Verwaltung (Standard: project.brand bzw. Website-Name), z. B. „Verbands-CMS“ für einen Verbund.'],
+        'media.usages' => ['list<array{label: string, url: ?string, graphic?: int}> „Verwendet auf“ einer Datei', 'media (ID)', 'Verwendungen einer Datei der Mediathek ergänzen oder Adressen setzen (z. B. Bearbeiten im Grafik-Editor). Einträge ohne label fallen weg.'],
+        'presence.object' => ['array{allowed: bool, last: ?array{user_id: ?int, created_at: string}}', 'type, id (z. B. graphic, media:12)', 'Eigene Arten für „Wer arbeitet gerade wo“ (Core\\Http\\Controllers\\Admin\\PresenceController): darf die Person das Objekt bearbeiten, wer hat zuletzt gespeichert. Kern-Arten page und entry laufen nicht durch den Filter.'],
         'data_list.query' => ['array $options für Entries::query (where, order, limit, q …)', 'table, block (Daten des Blocks)', 'Abfrage des Blocks „Datenliste“ ändern (z. B. zusätzliche Bedingung).'],
     ];
 
