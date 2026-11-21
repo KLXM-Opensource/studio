@@ -30,6 +30,7 @@ if ($edit === 'standard') {
 <header class="adm-head">
   <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a> › <a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('E-Mail-Versand')) ?></a></p><h1><?= e(__('E-Mail-Konten')) ?></h1>
     <p class="adm-muted"><?= e(__('Konten anlegen, bearbeiten und testen. Welches Konto wofür versendet, wählen Sie unter E-Mail-Versand → Verwendung.')) ?></p></div>
+  <div class="adm-head__actions"><a class="adm-btn adm-btn--ghost adm-btn--small" href="<?= e(url('/admin/system/mail/uebersicht')) ?>"><?= icon('list-checks') ?> <?= e(__('Welche Adresse gilt wofür')) ?></a></div>
 </header>
 
 <div class="adm-tabs-form--side us-shell" data-secnav>
@@ -43,7 +44,7 @@ if ($edit === 'standard') {
       <?php foreach ($accounts as $id => $a): $ready = Accounts::ready($a); ?>
       <div class="f f--inline mk-row<?= $edit === $id ? ' is-current' : '' ?>" id="konto-<?= e($id) ?>">
         <span class="mk-row__label"><strong><?= e($a['label']) ?></strong>
-          <span class="f-help"><?= e(Accounts::describe($a)) ?><?= $id === 'network' ? ' · ' . e(__('für alle Websites, im Netzwerk-Dashboard')) : '' ?></span></span>
+          <span class="f-help"><?= e(Accounts::describe($a)) ?> · <?= e($id === 'network' ? __('gilt für: alle Websites (Netzwerk)') : __('gilt für: nur diese Website')) ?></span></span>
         <span class="mk-row__act">
           <span class="adm-badge adm-badge--<?= $ready ? 'ok' : 'warn' ?>"><?= e($ready ? __('bereit') : __('nicht eingerichtet')) ?></span>
           <?php if ($ready): ?>

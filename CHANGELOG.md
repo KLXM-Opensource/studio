@@ -41,6 +41,21 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   (Grundschema, Mehrfachfelder, jeder Ausgabeweg je Ziel, CardDAV/CalDAV, Umwandlung/Zurückdrehen). Handbuch → Daten →
   „Adressbuch“, „Sichtbarkeit“; Entwicklerhandbuch → Daten → „Tabellenarten“, „Freigabe (Exposure)“.
 
+### E-Mail: welche Adresse gilt wofür
+- **Neue Übersicht** Grundeinstellungen → E-Mail-Versand → „Übersicht: welche Adresse gilt wofür“ (`/admin/system/mail/uebersicht`,
+  `Core\Mail\Overview`): je Mailart (Einladung/Passwort, Mails an Netzwerk-Konten, neue Anfrage, Zustellung per E-Mail,
+  Eingangsbestätigung, Integrität, Freigaben, Support, Chat, Newsletter und Zwecke von Erweiterungen) der wirksame Absender mit
+  Herkunft (Konto der Website, Netzwerk-Konto, **Rückfall**), Empfänger mit Quelle, Antwortadresse, Impressum und ob wirklich versendet
+  wird (Test-Umleitung, Testumgebung, Ablage). **Testen** je Mailart schickt eine Testnachricht an die eigene Adresse – mit den
+  Optionen der Mailart, also mit Absender, Antwortadresse und Impressum wie im Ernstfall.
+- **Netzwerk → E-Mail** zeigt zusätzlich „Welche Adresse gilt wofür – alle Websites“: wirksamer Absender je Website und Zweck,
+  Empfänger für Benachrichtigungen, Impressum, Zustellung, Link zur Übersicht der Website.
+- **Geltungsbereich an jedem Feld:** „gilt für: nur diese Website“ bzw. „alle Websites (Netzwerk)“ an Konten, Verwendung, Absender,
+  Empfänger, Test-Umleitung, Impressum und Netzwerk-Konto; der Rückfall aufs Netzwerk-Konto ist genannt.
+- Rangfolge als `Core\Mail\Accounts::resolve()` – Versand und Übersicht nutzen dieselbe Regel. Zweck „Nachrichten an Besucher“
+  beschrieb fälschlich die Zustellung von Anfragen; die läuft über „Benachrichtigungen an die Redaktion“. Selbsttest in
+  `mail:selftest`. Handbuch → Grundeinstellungen → „E-Mail: welche Adresse gilt wofür“, Entwicklerhandbuch → Erweiterungen → E-Mail.
+
 ### Datenschutz: Felder „Nie öffentlich“
 - **Neue Feld-Option „Nie öffentlich“** (`private`) im Tabellen-Designer für Inhaltstabellen. Ein solches Feld erscheint in
   keiner Website-Ausgabe – zentral über `Core\Data\Exposure::publicEntry()`: Block „Personen“ (früher rückte bei leerem „Telefon“
