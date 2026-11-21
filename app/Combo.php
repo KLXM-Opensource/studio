@@ -1,12 +1,16 @@
 <?php
 // SPDX-License-Identifier: MIT
 // KLXM Studio – Copyright (C) 2026 KLXM and contributors (see LICENSE, COPYRIGHT)
+// Beschriftungen der Mehrfachfelder (LABELS, vCard-TYPE): Teile übernommen aus KLXM/contacts (MIT, © 2026 KLXM Crossmedia GmbH)
 declare(strict_types=1);
 
 namespace Core;
 
 /**
- * Kombifelder der Datentabellen: Ansprechperson (person), Fragen & Antworten (faq), Adresse (address), Downloads (downloads).
+ * Kombifelder der Datentabellen: Ansprechperson (person), Fragen & Antworten (faq), Adresse (address), Downloads (downloads) und
+ * die beschrifteten Mehrfachfelder (MULTI: phones, emails, addresses, urls) – je Angabe Beschriftung (Mobil, Arbeit, Privat,
+ * Geschäftsstelle … oder eigene) und Freigabe „Öffentlich“ (public, Standard aus; Adressen zusätzlich „nur Ort“). Auf der Website
+ * erscheinen nur freigegebene Angaben – bereinigt zentral in Core\Data\Exposure::publicEntry(), html()/text() sehen danach nur sie.
  * Gespeichert als JSON-Liste wie die Wiederholbare Gruppe; die Eingabe ist ein Wiederholer mit festen Unterfeldern (schema()),
  * bereinigt über Core\Fields (Unterfelder wie in Blöcken: Bild, Datei, formatierter Text …). Auf der Website eine passende
  * Darstellung mit schema.org-Auszeichnung (Microdata, CSP-sicher) – Klassen ct-*, faq*, adr*, dlf* in css/combo.css,
@@ -14,7 +18,103 @@ namespace Core;
  */
 final class Combo
 {
-    public const TYPES = ['person', 'faq', 'address', 'downloads'];
+    public const TYPES = ['person', 'faq', 'address', 'downloads', 'phones', 'emails', 'addresses', 'urls'];
+    /** Beschriftete Mehrfachfelder mit Freigabe je Angabe (Kontakte, auch in normalen Tabellen nutzbar) */
+    public const MULTI = ['phones', 'emails', 'addresses', 'urls'];
+    /** Einfacher Feldtyp, dem ein Mehrfachfeld entspricht (StructuredData::field, Personen-Block, Visitenkarte) */
+    public const COMPAT = ['phones' => 'tel', 'emails' => 'email', 'urls' => 'url', 'addresses' => 'address'];
+    /** Eigene Beschriftung (Text im Unterfeld label_custom) */
+    public const CUSTOM = 'custom';
+    /**
+     * Vorgegebene Beschriftungen je Mehrfachfeld (Schlüssel → deutscher Text, übersetzt mit __()/lt()). Reihenfolge = Auswahl im
+     * Formular, erste = Standard. Beschriftungen und vCard-TYPE nach KLXM/contacts (ItemKind, VCard/Labels), ergänzt um „Geschäftsstelle“.
+     */
+    public const LABELS = [
+        'phones' => ['mobile' => 'Mobil', 'office' => 'Geschäftsstelle', 'work' => 'Arbeit', 'home' => 'Privat', 'main' => 'Zentrale', 'fax' => 'Fax', 'other' => 'Sonstige'],
+        'emails' => ['work' => 'Arbeit', 'office' => 'Geschäftsstelle', 'home' => 'Privat', 'other' => 'Sonstige'],
+        'addresses' => ['office' => 'Geschäftsstelle', 'work' => 'Arbeit', 'home' => 'Privat', 'other' => 'Sonstige'],
+        'urls' => ['homepage' => 'Website', 'work' => 'Arbeit', 'home' => 'Privat', 'other' => 'Sonstige'],
+    ];
+    /** vCard-TYPE-Werte je Beschriftung; Beschriftungen ohne Eintrag (und eigene) reisen als Apple-Beschriftung X-ABLabel */
+    public const VCARD_TYPES = [
+        'phones' => ['mobile' => ['CELL', 'VOICE'], 'home' => ['HOME', 'VOICE'], 'work' => ['WORK', 'VOICE'], 'main' => ['MAIN'], 'fax' => ['WORK', 'FAX'], 'other' => ['OTHER', 'VOICE']],
+        'emails' => ['home' => ['INTERNET', 'HOME'], 'work' => ['INTERNET', 'WORK'], 'other' => ['INTERNET']],
+        'addresses' => ['home' => ['HOME'], 'work' => ['WORK']],
+        'urls' => ['home' => ['HOME'], 'work' => ['WORK']],
+    ];
+
+    public static function isMulti(string $type): bool
+    {
+        return in_array($type, self::MULTI, true);
+    }
+
+    /** Beschriftung einer Angabe als Text (vorgegeben übersetzt, eigene wie eingegeben); $site = Sprache der Website (lt) */
+    public static function labelText(string $type, array $item, bool $site = false): string
+    {
+        $k = (string) ($item['label'] ?? '');
+        if ($k === self::CUSTOM || ($k !== '' && !isset(self::LABELS[$type][$k]))) {
+            return trim((string) ($item['label_custom'] ?? '')) ?: ($k !== self::CUSTOM ? $k : '');
+        }
+        $de = self::LABELS[$type][$k] ?? (string) (array_values(self::LABELS[$type] ?? [''])[0]);
+        return $site ? lt($de) : __($de);
+    }
+
+    /**
+     * Freigabe einer Angabe: 'full' (öffentlich), 'city' (Adresse: nur Ort) oder '' (intern). Fehlt die Angabe, gilt „intern“ –
+     * neue Angaben (auch aus Adressbuch-Apps) sind nie von selbst öffentlich.
+     */
+    public static function publicScope(string $type, array $item): string
+    {
+        $p = $item['public'] ?? false;
+        if ($type === 'addresses' && $p === 'city') return 'city';
+        return in_array($p, [true, 1, '1', 'on', 'true', 'full'], true) ? 'full' : '';
+    }
+
+    /** Nur die freigegebenen Angaben (Adressen mit „nur Ort“ ohne Straße/PLZ) – für jede Website-Ausgabe */
+    public static function publicItems(string $type, mixed $raw): array
+    {
+        $out = [];
+        foreach (self::items($raw) as $i) {
+            $scope = self::publicScope($type, $i);
+            if ($scope === '') continue;
+            if ($scope === 'city') $i = array_diff_key($i, ['street' => 1, 'zip' => 1]);
+            $out[] = $i;
+        }
+        return $out;
+    }
+
+    /** Wert einer Angabe als Text: Telefon/E-Mail/Web = value, Adresse = „Straße, PLZ Ort, Land“ */
+    public static function itemText(string $type, array $i): string
+    {
+        if ($type !== 'addresses') return trim((string) ($i['value'] ?? ''));
+        return implode(', ', array_filter([trim((string) ($i['street'] ?? '')), trim(trim((string) ($i['zip'] ?? '')) . ' ' . trim((string) ($i['city'] ?? ''))), trim((string) ($i['country'] ?? ''))]));
+    }
+
+    /**
+     * Kontakt-Knöpfe aus einem Mehrfachfeld (Telefon, E-Mail, Web) für Profil-/Porträt-Ansichten: [[href, Symbol, Text], …] –
+     * wie die einfachen Felder tel/email/url. Bekommt den bereinigten Eintrag (nur freigegebene Angaben).
+     */
+    public static function actions(string $type, mixed $raw): array
+    {
+        $out = [];
+        foreach (self::items($raw) as $i) {
+            $v = trim((string) ($i['value'] ?? ''));
+            if ($v === '') continue;
+            $href = match ($type) { 'emails' => filter_var($v, FILTER_VALIDATE_EMAIL) ? 'mailto:' . $v : '', 'phones' => (string) tel_href($v), 'urls' => preg_match('~^https?://~i', $v) ? $v : '', default => '' };
+            if ($href === '') continue;
+            $out[] = [$href, ['emails' => 'envelope-simple', 'phones' => 'phone', 'urls' => 'globe'][$type], $type === 'urls' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
+        }
+        return $out;
+    }
+
+    /** Erster Wert eines Mehrfachfeldes; $prefer: diese Beschriftungen zuerst (z. B. ['work', 'office']) */
+    public static function firstValue(string $type, mixed $raw, array $prefer = []): ?string
+    {
+        $items = self::items($raw);
+        foreach ($prefer as $want) foreach ($items as $i) if (($i['label'] ?? '') === $want && self::itemText($type, $i) !== '') return self::itemText($type, $i);
+        foreach ($items as $i) if (self::itemText($type, $i) !== '') return self::itemText($type, $i);
+        return null;
+    }
 
     public static function is(string $type): bool
     {
@@ -44,6 +144,7 @@ final class Combo
                 ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'required' => true, 'width' => 'half'],
                 ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text'],
             ],
+            'phones', 'emails', 'urls', 'addresses' => self::multiFields($f['type']),
             'downloads' => [
                 ['name' => 'file', 'label' => __('Datei'), 'type' => 'file', 'required' => true],
                 ['name' => 'title', 'label' => __('Titel (optional – sonst der Name der Datei)'), 'type' => 'text'],
@@ -55,10 +156,41 @@ final class Combo
             'person' => [__('Person'), __('Person hinzufügen'), 20],
             'faq' => [__('Frage'), __('Frage hinzufügen'), 60],
             'address' => [__('Adresse'), __('Adresse hinzufügen'), 10],
+            'phones' => [__('Telefon'), __('Nummer hinzufügen'), 20],
+            'emails' => [__('E-Mail'), __('E-Mail hinzufügen'), 20],
+            'addresses' => [__('Adresse'), __('Adresse hinzufügen'), 10],
+            'urls' => [__('Webadresse'), __('Webadresse hinzufügen'), 20],
             default => [__('Datei'), __('Datei hinzufügen'), 60],
         };
         return ['type' => 'repeater', 'fields' => $fields, 'item_label' => $item, 'add_label' => $add, 'max_items' => $max]
-            + ($f['type'] === 'downloads' ? ['pick_many' => 'file'] : []);
+            + ($f['type'] === 'downloads' ? ['pick_many' => 'file'] : [])
+            // Mehrfachfelder: kompakte Zeilen (Beschriftung · Wert · Freigabe · Entfernen) wie in Adressbuch-Apps (Fields 'rows')
+            + (self::isMulti($f['type']) ? ['rows' => true, 'blank_ignore' => ['label', 'public']] : []);
+    }
+
+    /** Unterfelder eines Mehrfachfeldes: Beschriftung (Auswahl + eigene), Wert(e), Freigabe */
+    private static function multiFields(string $type): array
+    {
+        $opts = [];
+        foreach (self::LABELS[$type] as $k => $de) $opts[$k] = __($de);
+        $opts[self::CUSTOM] = __('Eigene Beschriftung …');
+        $fields = [
+            ['name' => 'label', 'label' => __('Beschriftung'), 'type' => 'select', 'options' => $opts, 'required' => true, 'default' => array_key_first(self::LABELS[$type])],
+            ['name' => 'label_custom', 'label' => __('Eigene Beschriftung'), 'type' => 'text', 'max' => 60, 'show_if' => ['label' => [self::CUSTOM]]],
+        ];
+        if ($type === 'addresses') {
+            array_push($fields,
+                ['name' => 'street', 'label' => __('Straße und Hausnummer'), 'type' => 'text', 'max' => 200],
+                ['name' => 'zip', 'label' => __('PLZ'), 'type' => 'text', 'max' => 20, 'width' => 'half'],
+                ['name' => 'city', 'label' => __('Ort'), 'type' => 'text', 'max' => 120, 'width' => 'half'],
+                ['name' => 'country', 'label' => __('Land (optional)'), 'type' => 'text', 'max' => 80],
+                ['name' => 'public', 'label' => __('Freigabe'), 'type' => 'select', 'options' => ['0' => __('Intern'), 'city' => __('Nur Ort öffentlich'), '1' => __('Öffentlich')], 'default' => '0']);
+            return $fields;
+        }
+        $fields[] = ['name' => 'value', 'label' => match ($type) { 'phones' => __('Nummer'), 'emails' => __('E-Mail-Adresse'), default => __('Webadresse') },
+            'type' => match ($type) { 'phones' => 'tel', 'emails' => 'email', default => 'url' }, 'required' => true, 'max' => 255];
+        $fields[] = ['name' => 'public', 'label' => __('Öffentlich'), 'type' => 'bool'];
+        return $fields;
     }
 
     /** Gespeicherter Wert (JSON oder Liste) → Liste der Einträge */
@@ -78,6 +210,7 @@ final class Combo
             'faq' => self::faq($items),
             'address' => self::addresses($items),
             'downloads' => self::downloads($items),
+            'phones', 'emails', 'urls', 'addresses' => self::multi($f['type'], $items),
             default => '',
         };
     }
@@ -92,6 +225,7 @@ final class Combo
             'faq' => count($items) === 1 ? __('1 Frage') : __('{n} Fragen', ['n' => count($items)]),
             'address' => implode(' · ', array_map(fn($i) => trim(($i['zip'] ?? '') . ' ' . ($i['city'] ?? '')), $items)),
             'downloads' => count($items) === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => count($items)]),
+            'phones', 'emails', 'urls', 'addresses' => mb_strimwidth(implode(' · ', array_filter(array_map(fn($i) => self::itemText($f['type'], $i), $items))), 0, 80, '…'),
             default => '',
         };
     }
@@ -106,6 +240,7 @@ final class Combo
                 'faq' => ($i['question'] ?? '') . ' ' . Search\Text::plain((string) ($i['answer'] ?? '')),
                 'address' => implode(' ', [$i['label'] ?? '', $i['street'] ?? '', $i['zip'] ?? '', $i['city'] ?? '', $i['country'] ?? '']),
                 'downloads' => implode(' ', [self::fileTitle($i), $i['note'] ?? '']),
+                'phones', 'emails', 'urls', 'addresses' => self::itemText($f['type'], $i),
                 default => '',
             };
         }
@@ -179,6 +314,31 @@ final class Combo
                 . '</address>';
         }
         return $h . '</div>';
+    }
+
+    /**
+     * Beschriftete Angaben als Liste (Beschriftung + Link): tel:, mailto:, Webadresse, Postanschrift (schema.org PostalAddress).
+     * Bekommt auf der Website nur freigegebene Angaben (Exposure::publicEntry) – die Freigabe selbst steht nicht im HTML.
+     */
+    private static function multi(string $type, array $items): string
+    {
+        $h = '';
+        foreach ($items as $i) {
+            $text = self::itemText($type, $i);
+            if ($text === '') continue;
+            $val = match ($type) {
+                'phones' => ($href = tel_href($text)) ? '<a href="' . e($href) . '">' . e($text) . '</a>' : e($text),
+                'emails' => filter_var($text, FILTER_VALIDATE_EMAIL) ? '<a href="mailto:' . e($text) . '">' . e($text) . '</a>' : e($text),
+                'urls' => preg_match('~^https?://~i', $text) ? '<a href="' . e($text) . '"' . ext_attrs($text) . '>' . e((string) preg_replace('~^https?://(www\.)?~i', '', rtrim($text, '/'))) . '</a>' : e($text),
+                default => '<span itemscope itemtype="https://schema.org/PostalAddress">'
+                    . (($st = trim((string) ($i['street'] ?? ''))) !== '' ? '<span itemprop="streetAddress">' . e($st) . '</span>, ' : '')
+                    . (($z = trim((string) ($i['zip'] ?? ''))) !== '' ? '<span itemprop="postalCode">' . e($z) . '</span> ' : '')
+                    . '<span itemprop="addressLocality">' . e(trim((string) ($i['city'] ?? ''))) . '</span>'
+                    . (($c = trim((string) ($i['country'] ?? ''))) !== '' ? ', <span itemprop="addressCountry">' . e($c) . '</span>' : '') . '</span>',
+            };
+            $h .= '<div class="ctm__item"><dt class="ctm__label">' . e(self::labelText($type, $i, true)) . '</dt><dd class="ctm__value">' . $val . '</dd></div>';
+        }
+        return $h !== '' ? '<dl class="ctm ctm--' . e($type) . '">' . $h . '</dl>' : '';
     }
 
     /** Dateiliste: Titel (PDF im Viewer), Art und Größe, Beschreibung */

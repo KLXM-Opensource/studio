@@ -66,7 +66,7 @@ final class Fields
             if ($type === 'repeater') {
                 $items = [];
                 foreach (array_values(is_array($raw) ? $raw : []) as $i => $item) {
-                    if (!is_array($item) || self::isBlankItem($item)) {
+                    if (!is_array($item) || self::isBlankItem(array_diff_key($item, array_flip((array) ($f['blank_ignore'] ?? []))))) {
                         continue;
                     }
                     [$v, $e] = self::sanitize($f['fields'] ?? [], $item, [], "$p." . count($items));
@@ -704,6 +704,12 @@ final class Fields
         $itemLabel = $f['item_label'] ?? 'Eintrag';
         $title = $f['title_field'] ?? ($sub[0]['name'] ?? null);
         $renderItem = function (array $item, string $idx) use ($f, $sub, $errors, $inputName, $p, $itemLabel, $title) {
+            // 'rows' => true: kompakte Zeile ohne Kopf (beschriftete Mehrfachfelder, Core\Combo) – Unterfelder nebeneinander, Entfernen am Ende
+            if (!empty($f['rows'])) {
+                return '<div class="rep-item rep-row" data-index="' . e($idx) . '"><span class="rep-title" hidden></span>'
+                    . '<div class="rep-fields rep-row__fields">' . self::renderForm($sub, $item, $errors, $inputName . '[' . $idx . ']', "$p.$idx") . '</div>'
+                    . '<div class="rep-tools rep-row__tools"><button type="button" class="icon-btn icon-btn--danger" data-rep="remove" aria-label="' . e(__('{item} entfernen', ['item' => $itemLabel])) . '" title="' . e(__('{item} entfernen', ['item' => $itemLabel])) . '">' . icon('trash') . '</button></div></div>';
+            }
             $head = $title && isset($item[$title]) && is_scalar($item[$title]) && $item[$title] !== '' ? strip_tags((string) $item[$title]) : $itemLabel;
             // Titelfeld ist ein Verweis (page:/entry:/media:) → Name des Ziels statt der Kennung, z. B. Name der gewählten Person
             if ($title && \Core\Links::isRef((string) ($item[$title] ?? ''))) {
