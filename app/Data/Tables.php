@@ -37,6 +37,11 @@ final class Tables
         'faq' => ['Fragen & Antworten', 'text', 'question'],
         'address' => ['Adresse', 'text', 'address-book'],
         'downloads' => ['Downloads', 'text', 'download-simple'],
+        // Beschriftete Mehrfachfelder (Core\Combo::MULTI): je Angabe Beschriftung (Mobil, Arbeit …) und Freigabe „Öffentlich“
+        'phones' => ['Telefonnummern (beschriftet)', 'text', 'phone'],
+        'emails' => ['E-Mail-Adressen (beschriftet)', 'text', 'envelope-simple'],
+        'addresses' => ['Adressen (beschriftet)', 'text', 'map-trifold'],
+        'urls' => ['Webadressen (beschriftet)', 'text', 'globe'],
         // Inhaltsblöcke: eigene Folge von Blöcken des Kits je Eintrag (Core\Data\EntryBlocks) – JSON wie der Inhalt einer Seite
         'blocks' => ['Inhaltsblöcke', 'text', 'squares-four'],
         'link' => ['Link', 'string', 'link'],
@@ -341,21 +346,28 @@ final class Tables
         $s = (array) ($in['settings'] ?? []);
         // Bereich „Verschlüsselung“: eine Wahl für Art der Tabelle und Zustellung (none = normale Tabelle, sonst Eingang mit diesem Modus)
         if (isset($s['protection']) && in_array($p = (string) $s['protection'], ['none', ...Delivery::MODES], true)) {
-            $s['kind'] = $p === 'none' ? 'content' : 'inbox';
+            // „keine Verschlüsselung“ lässt eine Tabellenart mit Grundschema (Core\Data\Kinds, z. B. contacts) stehen
+            $k0 = (string) ($s['kind'] ?? ($existing['settings']['kind'] ?? ''));
+            $s['kind'] = $p === 'none' ? (Kinds::isSpecial($k0) ? $k0 : 'content') : 'inbox';
             if ($p !== 'none') $s['inbox']['delivery']['mode'] = $p;
         }
         unset($s['protection']);
-        $kind = ($s['kind'] ?? ($existing['settings']['kind'] ?? 'content')) === 'inbox' ? 'inbox' : 'content';
+        // Art: content | inbox | Tabellenart mit Grundschema (Core\Data\Kinds); ohne Angabe bleibt die bisherige Art
+        $kind = Kinds::normalize((string) ($s['kind'] ?? ($existing['settings']['kind'] ?? 'content')));
+        if (isset($in['_kind'])) $kind = Kinds::normalize((string) $in['_kind']);   // data:convert (Umwandlung an Ort und Stelle)
         if ($sharedOwner !== null && $kind === 'inbox') {
             $errors['settings.kind'] = __('Geteilte Tabellen können keine Eingangs-Tabellen sein.');
             $kind = 'content';
         }
-        if ($existing && $kind !== ($existing['settings']['kind'] ?? 'content')
+        // Art bei vorhandenen Einträgen nur über data:convert (Probelauf, Feldzuordnung, Zurückdrehen) – sonst gingen Werte verloren
+        if ($existing && $kind !== ($existing['settings']['kind'] ?? 'content') && !isset($in['_kind'])
             && (int) self::db($existing)->fetchValue("SELECT COUNT(*) FROM {$existing['table']}") > 0) {
             $errors['settings.kind'] = 'Die Art der Tabelle lässt sich nur ändern, solange sie keine Einträge hat.';
             $kind = $existing['settings']['kind'] ?? 'content';
         }
         $inbox = $kind === 'inbox';
+        // Grundschema der Art (Kontakte): fehlende System-Felder ergänzen, Typ fest (Core\Data\Kinds::enforceInput)
+        if (Kinds::isSpecial($kind)) $in['fields'] = Kinds::enforceInput($kind, (array) ($in['fields'] ?? []), $errors);
         $fields = [];
         $seen = [];
         $rawFields = [];
@@ -393,10 +405,14 @@ final class Tables
                 'help' => trim(mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 200)),
                 'width' => ($f['width'] ?? '') === 'half' ? 'half' : '',
             ];
-            // Nie öffentlich (Core\Data\Exposure): erscheint in keiner Website-Ausgabe, nur in Verwaltung, API und CardDAV
-            if (!$inbox && !empty($f['private'])) $def['private'] = true;
+            // Freigabe (Core\Data\Exposure): immer | Redaktion entscheidet je Eintrag | nie – je Ziel Website, vCard, ICS; gespeichert
+            // nur abweichend vom Standard (immer, alle Ziele). Ältere Schalter (private, website_only) werden übernommen.
+            if (!$inbox && empty($f['legacy'])) $def += Exposure::fieldDef($f);   // Altfelder sind ohnehin nie öffentlich
             // Bewusst öffentlich (geprüft): Hinweis „sieht privat aus“ in Designer und Health entfällt; schließt „Nie öffentlich“ aus
-            elseif (!$inbox && !empty($f['public_ok'])) $def['public_ok'] = true;
+            if (!$inbox && empty($def['private']) && !empty($f['public_ok'])) $def['public_ok'] = true;
+            // Altfeld nach data:convert (ausgeblendet, nie öffentlich, bleibt für --revert) bzw. Feld des Grundschemas (Kinds)
+            if (!$inbox && !empty($f['legacy'])) $def['legacy'] = true;
+            if (!$inbox && Kinds::isSystem($kind, $fname)) $def['system'] = true;
             if (in_array($type, ['select', 'multiselect'], true)) {
                 $opts = [];
                 foreach (preg_split('~\R~', (string) ($f['options'] ?? '')) as $line) {
@@ -405,7 +421,8 @@ final class Tables
                     [$k, $v] = str_contains($line, '=') ? array_map('trim', explode('=', $line, 2)) : [self::normName($line) ?: $line, $line];
                     $opts[$k] = $v;
                 }
-                if (!$opts) $errors["fields.$i"] = "Feld „{$label}“: Bitte Auswahlmöglichkeiten angeben (eine pro Zeile).";
+                // Listen einer Kontakte-Tabelle dürfen leer beginnen (Listen legt die Redaktion später an)
+                if (!$opts && !Kinds::allowsEmptyOptions($kind, $fname)) $errors["fields.$i"] = "Feld „{$label}“: Bitte Auswahlmöglichkeiten angeben (eine pro Zeile).";
                 $def['options'] = $opts;
             }
             // Übersetzungen der Beschriftung und der Auswahltexte (Frontend in weiteren Sprachen)
@@ -513,6 +530,10 @@ final class Tables
             'form' => DataForms::validateSettings((array) ($s['form'] ?? []), $all, $errors, $existing['settings']['form'] ?? null, $formUploads, $formKnown),
         ];
         $settings['kind'] = $kind;
+        // Version des Grundschemas (nur additiv; data:convert/Upgrade ergänzen neue Grundfelder) und Stand einer Umwandlung
+        if (Kinds::isSpecial($kind)) $settings['kind_version'] = Kinds::version($kind);
+        $conv = $in['_convert'] ?? ($s['convert'] ?? ($existing['settings']['convert'] ?? null));
+        if (is_array($conv) && $conv) $settings['convert'] = $conv;
         // Website-Suche je Tabelle (Core\Search\TableSearch) – ohne Formularabschnitt bleibt die bisherige Einstellung
         $settings['search'] = \Core\Search\TableSearch::validate((array) ($s['search'] ?? ($existing['settings']['search'] ?? [])), $fields, $settings);
         // Push-Benachrichtigungen: Besucher können neue Einträge abonnieren (Core\Push\Topics) – ohne Formularabschnitt bleibt die bisherige Einstellung
@@ -690,8 +711,9 @@ final class Tables
             'settings_json' => json_encode($settings, JSON_UNESCAPED_UNICODE), 'updated_at' => now(),
         ], 'id = :id', ['id' => (int) ($table['shared']['row_id'] ?? $table['id'])]);
         self::flush();
-        if (($def['settings']['kind'] ?? 'content') !== ($table['settings']['kind'] ?? 'content')) {
-            // Art geändert (nur bei leerer Tabelle erlaubt, siehe validate): Datenbanktabelle neu aufbauen
+        if ((($def['settings']['kind'] ?? 'content') === 'inbox') !== self::isInbox($table)) {
+            // Eingang ↔ Inhalt (nur bei leerer Tabelle erlaubt, siehe validate): Datenbanktabelle neu aufbauen. Inhalt ↔ Kontakte
+            // (Kinds) behält die Tabelle – das Grundschema sind normale Spalten
             $sm = self::conn($table)->createSchemaManager();
             if ($sm->tablesExist([$table['table']])) $sm->dropTable($table['table']);
             $renames = [];
@@ -754,11 +776,19 @@ final class Tables
         $name = $table['table'];
         if ($renames && $sm->tablesExist([$name])) {
             $have = array_map(fn($c) => $c->getName(), $sm->listTableColumns($name));
-            foreach ($renames as $from => $to) {
-                if (in_array($from, $have, true) && !in_array($to, $have, true)) {
-                    $conn->executeStatement(sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s', $name, $conn->quoteSingleIdentifier($from), $conn->quoteSingleIdentifier($to)));
+            // Mehrere Durchgänge: ein Name wird erst frei, wenn ein anderes Feld umbenannt ist (z. B. telefon → telefon_alt, dann
+            // telefon_neu → telefon bei data:convert/--revert)
+            do {
+                $moved = false;
+                foreach ($renames as $from => $to) {
+                    if (in_array($from, $have, true) && !in_array($to, $have, true)) {
+                        $conn->executeStatement(sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s', $name, $conn->quoteSingleIdentifier($from), $conn->quoteSingleIdentifier($to)));
+                        $have = [...array_diff($have, [$from]), $to];
+                        unset($renames[$from]);
+                        $moved = true;
+                    }
                 }
-            }
+            } while ($moved && $renames);
         }
         $t = new Table($name);
         $t->addColumn('id', 'integer', ['autoincrement' => true, 'unsigned' => true]);
@@ -779,6 +809,10 @@ final class Tables
         if (isset($table['shared'])) {
             $t->addColumn('origin_site', 'string', ['length' => 40, 'notnull' => false]);
             $t->addColumn('suggest', 'integer', ['default' => 0]);
+        }
+        // Freigabe je Eintrag (Core\Data\Exposure, Modus „Redaktion entscheidet“): JSON {feld: {web, vcard, ics}} – bleibt, wenn einmal da
+        if (Exposure::hasEditorChoice($table) || ($sm->tablesExist([$name]) && in_array(Exposure::STATE, array_map(fn($c) => $c->getName(), $sm->listTableColumns($name)), true))) {
+            $t->addColumn(Exposure::STATE, 'text', ['notnull' => false]);
         }
         foreach ($table['fields'] as $f) {
             $kind = self::TYPES[$f['type']][1] ?? 'string';

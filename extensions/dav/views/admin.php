@@ -103,7 +103,9 @@ $email = strtolower((string) $user['email']);
       </div>
       <p class="f-help" id="dav-org-h-<?= e($t['handle']) ?>"><?= e(__('Gilt, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Leer: Name der Organisation aus den Website-Einstellungen.')) ?></p>
       <?php endif; ?>
-      <?php if (!$isCal): ?>
+      <?php if (\Core\Data\Kinds::isContacts($t)): // Adressbuch (Tabellenart contacts): feste Zuordnung aus dem Grundschema ?>
+      <p class="f-help"><?= e(__('Adressbuch: Die Felder gehen ohne Zuordnung an die Apps – Telefon, E-Mail, Adresse und Web mit ihren Beschriftungen, Listen als Gruppen. Felder, die nur für die Website freigegeben sind, gehen nie an Apps.')) ?></p>
+      <?php elseif (!$isCal): ?>
       <details<?= $s['addressbook'] ? ' open' : '' ?>><summary><?= e(__('Zuordnung der vCard-Felder')) ?></summary>
         <div class="adm-grid2">
         <?php foreach ([

@@ -148,7 +148,9 @@ final class VCard
     /** vCard einer Person aus einem veröffentlichten Eintrag */
     public static function person(array $table, array $e): string
     {
-        $e = Data\Exposure::publicEntry($table, $e);               // „Nie öffentlich“: nie in der Visitenkarte
+        // „Nie öffentlich“, nicht freigegebene Angaben und „Nur Website“-Felder: nie in der Visitenkarte
+        $e = Data\Exposure::publicEntry($table, $e, 'vcard');
+        if (Data\Kinds::isContacts($table)) return self::contact($table, $e);
         $find = fn(array $types, array $names = []) => StructuredData::field($table, $e, $types, $names);
         $img = Tables::imageField($table);
         $tel = $find(['tel']);
@@ -168,10 +170,62 @@ final class VCard
         ]);
     }
 
+    /**
+     * Visitenkarte eines Kontakts (Tabellenart „contacts“, Core\Data\Kinds) aus dem Grundschema: Name (N/FN), Organisation,
+     * Funktion, alle freigegebenen Telefonnummern, E-Mail-, Web- und Postadressen mit Beschriftung (vCard-TYPE bzw. Apple-
+     * Beschriftung item.X-ABLabel), Foto. $e ist schon für das Ziel „vcard“ bereinigt (Exposure::publicEntry).
+     */
+    public static function contact(array $table, array $e): string
+    {
+        $get = fn(string $k) => trim((string) (Tables::field($table, $k) && is_scalar($e[$k] ?? null) ? $e[$k] : ''));
+        $fn = Entries::title($table, $e);
+        $isOrg = !empty($e['ist_firma']) && $get('firma') !== '';
+        $l = ['BEGIN:VCARD', 'VERSION:3.0', 'PRODID:' . ICal::prodId()];
+        $l[] = 'N:' . self::text($isOrg ? '' : $get('nachname')) . ';' . self::text($isOrg ? '' : $get('vorname')) . ';;' . self::text($isOrg ? '' : $get('praefix')) . ';';
+        if (!$isOrg && $get('nachname') === '' && $get('vorname') === '') {
+            [$family, $given, $prefix] = self::splitName($fn);
+            $l[count($l) - 1] = 'N:' . self::text($family) . ';' . self::text($given) . ';;' . self::text($prefix) . ';';
+        }
+        $l[] = 'FN:' . self::text($fn);
+        // Organisation: eigene Angabe, sonst wie bei Personen-Tabellen die Organisation der Website
+        $org = $get('firma') !== '' ? $get('firma') : (string) ((self::orgData()['name'] ?? '') ?: org_name());
+        if ($org !== '') $l[] = 'ORG:' . self::text($org) . ($get('abteilung') !== '' ? ';' . self::text($get('abteilung')) : '');
+        if ($isOrg) $l[] = 'X-ABShowAs:COMPANY';
+        if ($get('position') !== '') $l[] = 'TITLE:' . self::text($get('position'));
+        $n = 0;
+        foreach (['telefon' => ['phones', 'TEL'], 'email' => ['emails', 'EMAIL'], 'adresse' => ['addresses', 'ADR'], 'web' => ['urls', 'URL']] as $field => [$type, $prop]) {
+            if ((Tables::field($table, $field)['type'] ?? '') !== $type) continue;
+            foreach (Combo::items($e[$field] ?? null) as $i) {
+                if (Combo::itemText($type, $i) === '') continue;
+                $val = match ($prop) {
+                    'TEL' => self::text((string) (substr((string) tel_href((string) $i['value']), 4) ?: $i['value'])),
+                    'ADR' => ';;' . self::text(trim((string) ($i['street'] ?? ''))) . ';' . self::text(trim((string) ($i['city'] ?? ''))) . ';;' . self::text(trim((string) ($i['zip'] ?? ''))) . ';' . self::text(trim((string) ($i['country'] ?? ''))),
+                    'URL' => self::uri((string) $i['value']),
+                    default => self::text(trim((string) $i['value'])),
+                };
+                $types = Combo::VCARD_TYPES[$type][(string) ($i['label'] ?? '')] ?? null;
+                if ($types !== null) {
+                    $l[] = $prop . ';TYPE=' . implode(',', $types) . ':' . $val;
+                } else {
+                    // Geschäftsstelle, Zentrale, eigene Beschriftungen: Apple-Beschriftung (verstehen auch andere Apps)
+                    $n++;
+                    $l[] = "item$n.$prop" . ($prop === 'EMAIL' ? ';TYPE=INTERNET' : '') . ':' . $val;
+                    $l[] = "item$n.X-ABLabel:" . self::text(Combo::labelText($type, $i, true));
+                }
+            }
+        }
+        if (($url = Entries::absUrl($table, $e)) !== null) $l[] = 'URL:' . self::uri($url);
+        $img = Tables::imageField($table);
+        if ($img !== '' && !empty($e[$img]) && ($photo = self::imageOf((int) $e[$img]))) $l[] = 'PHOTO;ENCODING=b;TYPE=' . $photo['type'] . ':' . base64_encode((string) $photo['data']);
+        $l[] = 'REV:' . gmdate('Y-m-d\TH:i:s\Z', strtotime((string) ($e['updated_at'] ?? '')) ?: time());
+        $l[] = 'END:VCARD';
+        return implode("\r\n", array_map([self::class, 'fold'], $l)) . "\r\n";
+    }
+
     /** Adresse der Personen-Karte eines Eintrags oder null (Tabelle ohne Schema-Typ „Person“, Entwurf, ohne Slug) */
     public static function personUrl(array $table, array $e): ?string
     {
-        if (StructuredData::typeOf($table) !== 'Person' || Tables::isInbox($table) || empty($e['slug'])) return null;
+        if (StructuredData::typeOf($table) !== 'Person' || Tables::isInbox($table) || empty($e['slug']) || !Data\Exposure::visible($table, $e)) return null;
         if (($e['status'] ?? 'published') !== 'published') return null;
         return url(self::PERSON_PREFIX . '/' . rawurlencode((string) $table['handle']) . '/' . rawurlencode((string) $e['slug']) . '.vcf')
             . (!empty($e['lang']) && $e['lang'] !== Lang::default() ? '?lang=' . rawurlencode((string) $e['lang']) : '');
@@ -417,7 +471,8 @@ final class VCard
         }
         foreach (Tables::content() as $t) {
             if (StructuredData::typeOf($t) !== 'Person') continue;
-            $e = Entries::query($t, ['status' => 'published', 'limit' => 1, 'source' => 'own'])[0] ?? null;
+            // Erster Eintrag, der öffentlich erscheinen darf (Adressbuch: nur mit „Auf der Website zeigen“)
+            $e = Data\Exposure::publicRows($t, Entries::query($t, ['status' => 'published', 'limit' => 20, 'source' => 'own']))[0] ?? null;
             if (!$e) continue;
             $check('Person ' . $t['handle'], self::person($t, $e));
             $eq('Person ' . $t['handle'] . ': Adresse', (bool) self::personUrl($t, $e), !empty($e['slug']));

@@ -84,6 +84,7 @@ $__cmds = [
         ['jobs:from-page <seite> [--title=…] [--slug=…] [--employment=…] [--dry-run]', 'Alte Stellenseite → Eintrag der Stellen-Tabelle; Formular, Links und 301 werden umgestellt (wiederholbar)'],
         ['jobs:selftest', 'Selbsttest Stellenangebote: Vorlage, JSON-LD nach Google-Vorgaben, Ablauf, Gehalt, Remote; prüft alle laufenden Stellen'],
         ['data:selftest [--roundtrip]', 'Selbsttest Tabellen-Definition: Rundlauf aller Tabellen und „Felder bearbeiten“ im Seiten-Editor (vorübergehende Tabellen); --roundtrip: nur Rundlauf, ändert nichts'],
+        ['data:convert <tabelle> --kind=contacts [--map=quelle:ziel[beschriftung+|-]] [--apply] | --revert | --drop-legacy', 'Tabelle an Ort und Stelle in ein Adressbuch umwandeln: ohne --apply nur Probelauf mit Bericht (Zuordnung, Namensaufteilung, Freigabe, betroffene Blöcke); --revert dreht zurück, --drop-legacy entfernt die Altfelder (Kapitel „Daten“ → Tabellenarten)'],
         ['shared:list', 'Geteilte Tabellen, Eigentümer, Mitglieder, Einträge je Website'],
         ['inbox:migrate [--all]', 'Alte Online-Anfragen → Eingangs-Tabellen (idempotent, läuft sonst automatisch)'],
         ['inbox:purge [--all]', 'Aufbewahrungsfristen anwenden (Cron, täglich)'],

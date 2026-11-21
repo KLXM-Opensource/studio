@@ -173,9 +173,11 @@
  *   data:selftest [--roundtrip]                       Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor,
  *                                                     Zweck (Ableitung) und Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen);
  *                                                     --roundtrip: nur Rundlauf und Zweck, ändert nichts
+ *   data:convert <tabelle> --kind=contacts [--map=quelle:ziel[beschriftung+|-],…] [--apply] | --revert | --drop-legacy
+ *                                                     Tabelle an Ort und Stelle in ein Adressbuch umwandeln (Standard: Probelauf mit Bericht)
  *   data:template <vorlage> [--handle=…] [--name="…"] [--slug=adresse] [--form=bewerbungen|new|none] [--with-detail-page]
  *                 [--with-list-page] [--dry-run]     Tabelle aus Vorlage anlegen bzw. ergänzen (wie „Neue Tabelle aus Vorlage“; wiederholbar):
- *                                                     blog, team, products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
+ *                                                     blog, team, contacts (Adressbuch), products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
  *                                                     „Bewerbungen“, faq, inbox, applications
  *   jobs:from-page <seite-id|pfad> [--table=…] [--title="…"] [--slug=…] [--employment=vollzeit,teilzeit] [--posted=JJJJ-MM-TT]
  *                 [--no-redirect] [--no-links] [--dry-run]
@@ -1452,13 +1454,38 @@ switch ($cmd) {
         $res = Core\Data\SchemaPanel::selftest(in_array('--roundtrip', $args, true));
         // Verwendungszweck (Ableitung, Passung) und – ohne --roundtrip – der Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen)
         // … dazu Abschnitte und Freitext im Formular (Core\Data\LayoutSelfTest, vorübergehende Tabelle)
-        foreach (in_array('--roundtrip', $args, true) ? [Core\Data\Purpose::selftest()] : [Core\Data\Purpose::selftest(), Core\Data\Wizard::selftest(), Core\Data\LayoutSelfTest::run(), Core\Combo::selftest(), Core\Data\EntryBlocks::selftest(), Core\Data\Feed::selftest(), Core\Data\Calendar::titleSelftest(), Core\Data\ExposureSelfTest::run()] as $x) {
+        foreach (in_array('--roundtrip', $args, true) ? [Core\Data\Purpose::selftest()] : [Core\Data\Purpose::selftest(), Core\Data\Wizard::selftest(), Core\Data\LayoutSelfTest::run(), Core\Combo::selftest(), Core\Data\EntryBlocks::selftest(), Core\Data\Feed::selftest(), Core\Data\Calendar::titleSelftest(), Core\Data\ExposureSelfTest::run(), Core\Data\Kinds::selftest(), Core\Data\ContactsSelfTest::run()] as $x) {
             $res['ok'] += $x['ok'];
             array_push($res['fails'], ...$x['fails']);
         }
         foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
         echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
         exit($res['fails'] ? 1 : 0);
+
+    case 'data:convert':
+        // Tabelle an Ort und Stelle in eine Tabellenart mit Grundschema umwandeln (Core\Data\Convert) – Standard: Probelauf
+        $handle = (string) ($args[0] ?? '');
+        if ($handle === '' || str_starts_with($handle, '--')) {
+            fwrite(STDERR, "Aufruf: data:convert <tabelle> --kind=contacts [--map=quelle:ziel[beschriftung+|-],quelle:-] [--apply] | --revert | --drop-legacy\n"); exit(1);
+        }
+        $t = Core\Data\Tables::find($handle) ?? (fwrite(STDERR, "Tabelle „{$handle}“ gibt es nicht.\n") && exit(1));
+        try {
+            if (in_array('--revert', $args, true)) { foreach (Core\Data\Convert::revert($t) as $l) echo "$l\n"; break; }
+            if (in_array('--drop-legacy', $args, true)) { foreach (Core\Data\Convert::dropLegacy($t) as $l) echo "$l\n"; break; }
+            $kind = 'contacts';
+            $map = [];
+            foreach ($args as $a) {
+                if (str_starts_with($a, '--kind=')) $kind = substr($a, 7);
+                if (str_starts_with($a, '--map=')) $map = Core\Data\Convert::parseMap(substr($a, 6));
+            }
+            $plan = Core\Data\Convert::plan($t, $kind, $map);
+            foreach (Core\Data\Convert::report($plan, $t) as $l) echo "$l\n";
+            if (!$plan['ok']) exit(1);
+            if (!in_array('--apply', $args, true)) { echo "\nProbelauf – nichts geändert. Mit --apply umwandeln.\n"; break; }
+            echo "\n";
+            foreach (Core\Data\Convert::apply($t, $plan) as $l) echo "$l\n";
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        break;
 
     case 'data:template':
         // Tabelle aus Vorlage (Core\Data\Templates::install) – vorhandene Tabelle bleibt, fehlende Teile werden ergänzt

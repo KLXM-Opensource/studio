@@ -27,9 +27,9 @@ final class TableSearch
 {
     public const WEIGHTS = ['high' => 'hoch', 'normal' => 'normal', 'low' => 'niedrig', 'off' => 'nicht durchsuchen'];
     /** Feldtypen, die durchsucht werden können */
-    public const TYPES = ['text', 'textarea', 'richtext', 'mediatext', 'person', 'faq', 'address', 'downloads', 'select', 'multiselect', 'relation', 'relations', 'group', 'email', 'tel', 'url', 'link', 'number'];
+    public const TYPES = ['text', 'textarea', 'richtext', 'mediatext', 'person', 'faq', 'address', 'downloads', 'select', 'multiselect', 'relation', 'relations', 'group', 'email', 'tel', 'url', 'link', 'number', 'phones', 'emails', 'addresses', 'urls'];
     /** Nur ausdrücklich (personenbezogen) */
-    public const OPT_IN = ['email', 'tel', 'url', 'link', 'number'];
+    public const OPT_IN = ['email', 'tel', 'url', 'link', 'number', 'phones', 'emails', 'addresses', 'urls'];
     public const FACET_TYPES = ['select', 'multiselect', 'relation', 'relations'];
     /** Unterfelder wiederholbarer Gruppen, die nie in die Suche gehen */
 

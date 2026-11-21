@@ -164,6 +164,9 @@ final class Entries
             $where[] = 'status = ?';
             $params[] = $status === 'draft' ? 'draft' : 'published';
         }
+        // Kontakte (Core\Data\Exposure): auf der Website nur Kontakte mit „Auf der Website zeigen“ – in jeder Abfrage (Blöcke, Kits mit
+        // eigenen Abfragen, Detailseite, Feeds, Sitemap); Verwaltung, API, MCP, CardDAV und 'internal' => true sehen alle
+        if (empty($o['internal']) && ($vis = Exposure::visibleSql($table)) !== '') $where[] = $vis;
         if (!empty($o['exclude'])) {
             $where[] = 'id != ?';
             $params[] = (int) $o['exclude'];
@@ -175,8 +178,9 @@ final class Entries
         $q = trim((string) ($o['q'] ?? ''));
         if ($q !== '') {
             // q_public (Besucher-Suche in Blöcken): „Nie öffentlich“-Felder (Core\Data\Exposure) nicht durchsuchen – sonst verriete ein Treffer den Wert
+            // Mehrfachfelder (Telefon, E-Mail …) nur in der Verwaltung: ihr JSON enthält auch interne Angaben
             $cols = array_column(array_filter($table['fields'], fn($f) => (!empty($f['searchable']) || in_array($f['type'], ['text', 'mediatext', 'person', 'faq', 'address', 'downloads'], true))
-                && (empty($o['q_public']) || !Exposure::isPrivate($f))), 'name');
+                && (empty($o['q_public']) || (Exposure::alwaysFor($f, 'web') && !\Core\Combo::isMulti($f['type'])))), 'name');
             $cols[] = 'slug';
             $or = array_map(fn($c) => "$c LIKE ?", $cols);
             array_push($params, ...array_fill(0, count($cols), '%' . $q . '%'));
@@ -279,7 +283,8 @@ final class Entries
     {
         self::guard($table);
         $params = [];
-        $sql = 'SELECT ' . self::select($table, $params) . " FROM {$table['table']} WHERE slug = ?" . ($publishedOnly ? " AND status = 'published'" : '');
+        $sql = 'SELECT ' . self::select($table, $params) . " FROM {$table['table']} WHERE slug = ?" . ($publishedOnly ? " AND status = 'published'" : '')
+            . (($vis = Exposure::visibleSql($table)) !== '' ? ' AND ' . $vis : '');   // Kontakte: Detailseite/Visitenkarte nur mit Freigabe
         $params[] = $slug;
         if ($lang !== null) {
             $sql .= ' AND ' . \Core\Lang::sql();
@@ -318,6 +323,8 @@ final class Entries
             }
         }
         $r['id'] = (int) $r['id'];
+        // Freigabe je Eintrag (Core\Data\Exposure, Modus „Redaktion entscheidet“)
+        if (array_key_exists(Exposure::STATE, $r)) $r[Exposure::STATE] = Exposure::entryState($r);
         if ($shared) {
             $r['suggest'] = !empty($r['suggest']);
             $r['_pick'] ??= null;
@@ -339,6 +346,12 @@ final class Entries
             }
             if ($f['type'] === 'group') {
                 $def = self::groupSchema($f) + $def;
+            }
+            // Freigabe je Eintrag (Exposure, Modus „Redaktion entscheidet“): Schalter am Feld mit den Zielen dieser Tabelle
+            if (Exposure::isEditorChoice($f)) {
+                $tg = Exposure::targets($table);
+                $def['expose'] = ['targets' => $tg, 'defaults' => array_intersect_key(Exposure::rule($f), array_flip($tg)),
+                    'labels' => array_combine($tg, array_map([Exposure::class, 'targetLabel'], $tg))];
             }
             if ($f['type'] === 'media') $def['accept'] = 'visual';   // Medienfelder: Bild oder Video (Media::visual)
             if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
@@ -378,13 +391,19 @@ final class Entries
     {
         $data = array_column(self::schema($table), null, 'name');
         $out = [];
+        // Kontakte (Core\Data\Kinds): Felder „Nur Website“ (Vita, Über mich …) gesammelt im Abschnitt „Für die Website“ am Ende
+        $web = [];
+        $contacts = Kinds::isContacts($table);
         foreach (Tables::allFields($table) as $f) {
             $type = $f['type'] ?? '';
+            if (!empty($f['legacy'])) continue;            // Altfelder nach data:convert: ausgeblendet (Werte bleiben für --revert)
             if ($type === 'section') $out[] = ['type' => 'heading', 'label' => (string) $f['label'], 'help' => (string) ($f['help'] ?? '')]
                 + (($f['style'] ?? '') === 'collapsed' ? ['collapse' => true, 'count' => true] : []);   // eingeklappt mit Zählung (Core\Fields)
             elseif ($type === 'content') $out[] = ['type' => 'heading', 'label' => '', 'html' => \Core\Sanitizer::block((string) ($f['text'] ?? ''))];
+            elseif ($contacts && Exposure::isWebsiteOnly($f) && isset($f['name'], $data[$f['name']])) $web[] = $data[$f['name']];
             elseif (isset($f['name'], $data[$f['name']])) $out[] = $data[$f['name']];
         }
+        if ($web) $out = [...$out, ['type' => 'heading', 'label' => __('Für die Website'), 'help' => __('Erscheint nur auf der Website (je nach Freigabe des Kontakts) – nicht in Adressbuch-Apps, Visitenkarten oder Exporten.')], ...$web];
         return $out;
     }
 
@@ -492,6 +511,8 @@ final class Entries
                 if (!array_key_exists($f['name'], $in)) $in[$f['name']] = $current[$f['name']];
             }
         }
+        // Tabellenarten (Core\Data\Kinds): Kontakte – Anzeigename aus Vor-/Nachname, neue Kontakte zuerst nicht öffentlich
+        $in = Kinds::beforeSave($table, $current, $in);
         [$values, $errors] = Fields::sanitize(self::schema($table), $in, $current ?? []);
         // Bedingungen: ausgeblendete Felder leeren, „Pflicht wenn“ und Vergleiche prüfen (gilt für Verwaltung, API, MCP, DAV, Formulare)
         [$values, $errors] = Rules::apply($table['fields'], $values, $errors);
@@ -550,6 +571,10 @@ final class Entries
         $row['updated_at'] = now();
         if ($status === 'published' && empty($current['published_at'])) {
             $row['published_at'] = now();
+        }
+        // Freigabe je Eintrag: Schalter an den Feldern („Redaktion entscheidet“); ohne Angabe bleibt der Stand, neue Einträge den Standard
+        if (Exposure::hasEditorChoice($table)) {
+            $row[Exposure::STATE] = json_encode(Exposure::cleanState($table, $in[Exposure::STATE] ?? null, $current), JSON_UNESCAPED_UNICODE);
         }
         if ($shared && array_key_exists('_suggest', $in)) {
             // „Dem Verband vorschlagen“ – nur Mitglieder, nicht die Eigentümer-Website
@@ -871,7 +896,7 @@ final class Entries
             'relation', 'relations' => self::relationHtml($f, is_array($v) ? $v : [(int) $v], $o),
             'group' => self::groupHtml($f, $v),
             EntryBlocks::TYPE => !empty($o['plain']) ? e(EntryBlocks::summary($v)) : EntryBlocks::render(EntryBlocks::items($v)),
-            'person', 'faq', 'address', 'downloads' => !empty($o['plain']) ? e(\Core\Combo::summary($f, $v)) : \Core\Combo::html($f, $v),
+            'person', 'faq', 'address', 'downloads', 'phones', 'emails', 'addresses', 'urls' => !empty($o['plain']) ? e(\Core\Combo::summary($f, $v)) : \Core\Combo::html($f, $v),
             'mediatext' => !empty($o['plain']) ? implode("\n", array_map(fn($s) => ($s['title'] !== '' ? '<p>' . e($s['title']) . '</p>' : '') . $s['text'], \Core\Fields::mediaTextSections($v)))
                 : \Core\MediaText::sections(\Core\Fields::mediaTextSections($v, !empty($f['sections'])), ['label' => self::title($table, $e)]),
             default => e((string) $v),

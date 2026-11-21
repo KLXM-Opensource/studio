@@ -128,6 +128,27 @@
   <p>In der Verwaltung, über die Schnittstelle (mit Zugangsschlüssel) und in Adressbuch-Apps sehen Berechtigte die Angabe weiter. Nichts wird automatisch umgestellt: Felder wie „Mobil“, „Handy“, „privat“ oder „Geburtstag“ markiert der Designer mit einem Hinweis, und die Systemprüfung (Health) meldet öffentliche Tabellen mit Detailseite oder Personen, in denen ein solches Feld noch nicht „Nie öffentlich“ ist. Textfelder mit diesen Namen durchsucht die Website-Suche von sich aus nicht.</p>
   <p><b>Bewusst öffentlich:</b> Soll eine solche Angabe absichtlich auf der Website stehen – etwa weil die Ansprechpersonen ihre Mobilnummer selbst veröffentlicht haben –, setzen Sie am Feld <b>„Bewusst öffentlich“</b>. Damit ist der Datenschutz-Hinweis im Tabellen-Designer und in der Systemprüfung als geprüft quittiert; an der Ausgabe ändert sich nichts.</p>
 
+  <h3 id="sichtbarkeit">Sichtbarkeit je Feld: Website, Visitenkarte, Kalender</h3>
+  <p>Im Tabellen-Designer legen Sie an jedem Feld unter <b>Sichtbarkeit</b> fest, wo eine Angabe öffentlich erscheint – getrennt für drei Ziele:</p>
+  <ul>
+    <li><b>Website</b> – Blöcke, Detailseite, Angaben für Suchmaschinen, Website-Suche und KI-Chat, RSS,</li>
+    <li><b>Visitenkarte (vCard)</b> – „Kontakt speichern“ auf der Website,</li>
+    <li><b>Kalender (ICS)</b> – Kalender-Datei, Kalender-Abo und „Termin speichern“.</li>
+  </ul>
+  <p>Drei Möglichkeiten: <b>Immer öffentlich</b> (in den angehakten Zielen – so verhalten sich alle Felder, für die Sie nichts einstellen), <b>Redaktion entscheidet je Eintrag</b> und <b>Nie öffentlich</b> (wie oben). Bei „Redaktion entscheidet“ legen die Häkchen den Standard für neue Einträge fest; im Eintrag steht dann direkt unter dem Feld ein kleiner Schalter mit Weltkugel („Öffentlich“ bzw. „Intern“). Ein Klick öffnet die Ziele – so steht z. B. die Mobilnummer der Vorsitzenden in ihrer Visitenkarte, aber nicht auf der Website. Bestehende Einträge behalten den Standard, bis Sie den Schalter ändern.</p>
+  <p>Beispiele: Mobilnummer „Redaktion entscheidet“ (Website aus, Visitenkarte an); interne Notiz „Nie öffentlich“; „Vita“ oder „Über mich“ „Immer öffentlich“ nur mit Haken bei Website – solche Felder erscheinen auf der Detailseite, gehen aber nie in Visitenkarten, Kalender-Dateien oder Adressbuch- und Kalender-Apps. In der Verwaltung, über die Schnittstelle und in den Apps der Redaktion sehen Berechtigte alle übrigen Angaben weiter.</p>
+
+  <h3 id="adressbuch">Adressbuch: Kontakte mit Telefon, E-Mail und Freigabe</h3>
+  <p>Für Ansprechpersonen, Vorstand, Mitglieder oder Partner gibt es die Vorlage <b>Adressbuch</b> (Daten → Neue Tabelle). Sie bringt feste Grundfelder mit, wie Sie sie aus Kontakte-Apps kennen: Titel, Vor- und Nachname, Funktion, Organisation, Foto, <b>Telefon, E-Mail, Adresse und Web</b> – jeweils beliebig oft mit Beschriftung (Mobil, Geschäftsstelle, Arbeit, Privat … oder eine eigene) –, Geburtstag, Listen (z. B. „Vorstand“, „Presse“) und Notiz. Eigene Felder ergänzen Sie wie gewohnt; die Grundfelder lassen sich umbenennen, aber nicht löschen.</p>
+  <ul>
+    <li><b>Auf der Website zeigen:</b> Nur Kontakte mit diesem Haken erscheinen auf der Website – neue Kontakte sind zuerst intern.</li>
+    <li><b>Freigabe je Angabe:</b> Jede Nummer, E-Mail-Adresse und Anschrift hat ihren eigenen Schalter „Öffentlich“ (bei Adressen auch „Nur Ort öffentlich“). Die Dienstnummer kann auf der Website stehen, die Mobilnummer bleibt intern.</li>
+    <li><b>Überall von selbst:</b> Die Blöcke „Personen“, „Datenliste“ und „Datensatz-Felder“, die Detailseite und „Kontakt speichern“ nutzen das Adressbuch ohne weitere Einstellung – mit Name, Funktion, Foto und den freigegebenen Angaben.</li>
+    <li><b>Für die Website:</b> Felder, die nur auf der Website erscheinen (z. B. „Vita“), stehen im Eintrag im Abschnitt „Für die Website“.</li>
+    <li><b>Kontakt-Feld:</b> In anderen Tabellen verknüpfen Sie Einträge mit Kontakten über ein Feld „Verknüpfung“ mit einer Tabelle aus der Gruppe „Adressbücher“.</li>
+  </ul>
+  <p><b>Bestehende Personen-Tabelle umwandeln:</b> Eine vorhandene Tabelle (z. B. „Team“) lässt sich an Ort und Stelle in ein Adressbuch umwandeln – Einträge, Verknüpfungen und Detailseiten bleiben. Das erledigt die Technik mit dem Befehl <code>data:convert</code>: zuerst ein Probelauf mit Bericht (welches Feld wohin, wie Namen aufgeteilt werden, was danach nicht mehr öffentlich ist), erst dann die Umwandlung; sie lässt sich zurückdrehen.</p>
+
   <h3 id="gruppe">Mehrere gleichartige Angaben (Wiederholbare Gruppe)</h3>
   <p>Der Feldtyp <b>Wiederholbare Gruppe</b> fasst mehrere Unterfelder zu einer Zeile zusammen, die sich im Formular beliebig oft hinzufügen lässt – z. B. mehrere Medikamente mit Stärke und Packungsgröße oder mehrere Ansprechpersonen. Im Tabellen-Designer legen Sie die Unterfelder (Text, Zahl, Auswahl, Datum, E-Mail, Telefon, Ja/Nein, IBAN …), die Mindest- und Höchstzahl sowie die Beschriftungen („Medikament“, „+ Weiteres Medikament“) fest. Leere Zeilen werden beim Speichern ignoriert; in der Liste steht eine Kurzfassung wie „Ibuprofen, Paracetamol +1“.</p>
 
@@ -167,6 +188,7 @@
     <tr><td><b>Fragen &amp; Antworten</b></td><td>Frage, formatierte Antwort</td><td>Aufklappliste – ohne Skript, mit Tastatur bedienbar; Suchmaschinen erkennen sie als FAQ</td></tr>
     <tr><td><b>Adresse</b></td><td>Bezeichnung (optional), Straße, PLZ, Ort, Land</td><td>Anschrift mit Link „Auf der Karte ansehen“ (OpenStreetMap, öffnet erst beim Klick). Eine eingebettete Karte liefert weiterhin das Feld <a href="#ort">Ort (Karte)</a>.</td></tr>
     <tr><td><b>Downloads</b></td><td>Datei, Titel (sonst Dateiname), Beschreibung</td><td>Dateiliste mit Art und Größe; PDFs öffnen im Viewer. <b>Dateien auswählen …</b> übernimmt mehrere Dateien auf einmal.</td></tr>
+    <tr><td><b>Telefonnummern, E-Mail-Adressen, Adressen, Webadressen (beschriftet)</b></td><td>je Zeile Beschriftung (Mobil, Geschäftsstelle, Arbeit, Privat … oder eigene), Wert, Schalter „Öffentlich“ (Adressen: Intern / Nur Ort / Öffentlich)</td><td>nur die freigegebenen Angaben mit Beschriftung, Telefon und E-Mail anklickbar – siehe <a href="#adressbuch">Adressbuch</a></td></tr>
   </table>
   <p>Alle Angaben sind in der Website-Suche und in der Suche der Liste auffindbar; Suchmaschinen erhalten die passende Auszeichnung (schema.org). Auf der Website öffnet <b>Bearbeiten</b> am Feld die Seitenleiste genau dort – nach dem Speichern zeigt die Seite die Änderung sofort.</p>
 

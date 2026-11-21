@@ -270,6 +270,15 @@ final class Wizard
             }
             if (!empty($st['push']) && \Core\Push\Push::on() && $route !== '') $s['push'] = ['enabled' => '1'];
         }
+        // Tabellenart mit Grundschema (Vorlage „Adressbuch“, Core\Data\Kinds): Grundfelder samt Abschnitten fest, eigene Felder des
+        // Assistenten (andere Bezeichnungen als die Grundfelder) dahinter
+        if ($preset !== '' && Kinds::isSpecial($k = (string) (DataController::presets()[$preset]['kind'] ?? ''))) {
+            $base = Kinds::presetFields($k);
+            $known = array_map('mb_strtolower', array_column($base, 'label'));
+            $extra = array_values(array_filter($fields, fn($f) => !in_array(mb_strtolower((string) $f['label']), $known, true) && !Kinds::isSystem($k, (string) $f['name'])));
+            $d['fields'] = [...$base, ...$extra];
+            $s['kind'] = $k;
+        }
         $d['settings'] = $s;
         return $d;
     }

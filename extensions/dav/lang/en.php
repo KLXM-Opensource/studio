@@ -83,4 +83,5 @@ return [
     'Organisation (ORG) ohne Feld' => 'Organisation (ORG) without field',
     'Keine Organisation ausgeben' => 'Do not output an organisation',
     'Gilt, wenn kein Feld „Firma (ORG)“ zugeordnet ist. Leer: Name der Organisation aus den Website-Einstellungen.' => 'Applies when no “Company (ORG)” field is mapped. Empty: organisation name from the website settings.',
+    'Adressbuch: Die Felder gehen ohne Zuordnung an die Apps – Telefon, E-Mail, Adresse und Web mit ihren Beschriftungen, Listen als Gruppen. Felder, die nur für die Website freigegeben sind, gehen nie an Apps.' => 'Address book: the fields go to the apps without any mapping – phone, email, address and web with their labels, lists as groups. Fields released only for the website never go to apps.',
 ];

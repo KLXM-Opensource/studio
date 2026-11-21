@@ -116,6 +116,10 @@ final class DataController extends AdminController
         foreach (self::PRESETS as $k => $p) {
             $all[$k] = $p;
             if ($k === 'events') $all['jobs'] = \Core\Data\Jobs::preset();
+            // Adressbuch: Tabellenart „contacts“ mit festem Grundschema (Core\Data\Kinds) – Freigabe je Kontakt und je Angabe
+            if ($k === 'team') $all['contacts'] = ['name' => 'Adressbuch', 'singular' => 'Kontakt', 'icon' => 'address-book', 'route' => 'kontakte', 'sort' => ['nachname', 'asc'],
+                'kind' => \Core\Data\Kinds::CONTACTS, 'schema_type' => 'Person', 'fields' => \Core\Data\Kinds::presetFields(\Core\Data\Kinds::CONTACTS),
+                'title' => 'name', 'image' => 'foto', 'desc' => 'position'];
         }
         $all['applications'] = \Core\Data\Jobs::applicationsPreset() + ['purpose' => 'registration'];
         // Eingänge nur mit Funktion „requests“, „nur per E-Mail“ zusätzlich mit „requests.mail“, Anmeldung mit Formularen für Datentabellen
@@ -350,7 +354,7 @@ final class DataController extends AdminController
             $def['settings']['search'] = ['enabled' => '0'];
         }
         foreach ($def['fields'] as &$f) {
-            $f['name'] = Tables::normName($f['label']);
+            $f['name'] = (string) ($f['name'] ?? '') !== '' ? (string) $f['name'] : Tables::normName($f['label']);   // Grundschema (Kinds): feste Namen
         }
         unset($f);
         return $def;
@@ -498,6 +502,14 @@ final class DataController extends AdminController
     public static function makeTemplate(array $t): int
     {
         if (\Core\Data\Jobs::is($t)) return \Core\Data\Jobs::makeTemplate($t);   // Stellen: Eckdaten + Bewerbungsformular
+        // Adressbuch (Core\Data\Kinds): Porträt mit allen Feldern – Foto, Funktion, Kontakt-Knöpfe aus freigegebenen Angaben, Vita …
+        if (\Core\Data\Kinds::isContacts($t)) {
+            $id = Pages::create(['slug' => '_vorlage-' . $t['handle'], 'title' => $t['name'] . ' – Detailseite', 'type' => 'template',
+                'template_for' => $t['handle'], 'status' => 'published', 'noindex' => 0], Pages::sanitizeBlocks([['id' => bin2hex(random_bytes(5)), 'type' => 'data_fields',
+                'data' => ['table' => $t['handle'], 'layout' => 'portrait', 'fields' => [], 'ratio' => '3:4', 'back_label' => 'Zur Übersicht', 'back_link' => '/' . $t['settings']['route']]]]));
+            Tables::setDetailPage($t, $id);
+            return $id;
+        }
         // Kopf: Titel, Datum (erstes Datumsfeld, sonst Veröffentlichung), Auswahlfelder, Bild – darunter die übrigen Felder
         $h = $t['handle'] . '.';
         $st = $t['settings'];

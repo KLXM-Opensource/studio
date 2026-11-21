@@ -17,7 +17,7 @@ final class ICal
     /** Kompletter Kalender (VCALENDAR) mit allen übergebenen Einträgen – öffentliche Ausgabe: ohne „Nie öffentlich“-Felder (Exposure) */
     public static function calendar(array $table, array $entries, array $o = []): string
     {
-        $entries = Exposure::publicRows($table, $entries);
+        $entries = Exposure::publicRows($table, $entries, 'ics');   // Freigabe für das Ziel „ics“ (öffentliche Kalender-Datei)
         $tz = Calendar::tz();
         $events = [];
         $years = [];

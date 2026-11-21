@@ -48,7 +48,7 @@ if (!empty($d['show_toc']) && !is_editing() && !app()->entryEdit) [$body, $toc] 
 $author = '';
 if ($af !== '' && !empty($e[$af])) {
     $f = Tables::field($t, $af);
-    if (($f['type'] ?? '') === 'relation' && ($target = Tables::findContent((string) ($f['target'] ?? ''))) && ($p = Entries::find($target, (int) (is_array($e[$af]) ? ($e[$af][0] ?? 0) : $e[$af])))) {
+    if (($f['type'] ?? '') === 'relation' && ($target = Tables::findContent((string) ($f['target'] ?? ''))) && ($p = Entries::find($target, (int) (is_array($e[$af]) ? ($e[$af][0] ?? 0) : $e[$af]))) && \Core\Data\Exposure::visible($target, $p)) {
         $url = Entries::href($target, $p);
         $author = $url ? '<a href="' . e($url) . '" rel="author">' . e(Entries::title($target, $p)) . '</a>' : e(Entries::title($target, $p));
     } else {

@@ -68,7 +68,7 @@ final class Fields
             if ($type === 'repeater') {
                 $items = [];
                 foreach (array_values(is_array($raw) ? $raw : []) as $i => $item) {
-                    if (!is_array($item) || self::isBlankItem($item)) {
+                    if (!is_array($item) || self::isBlankItem(array_diff_key($item, array_flip((array) ($f['blank_ignore'] ?? []))))) {
                         continue;
                     }
                     [$v, $e] = self::sanitize($f['fields'] ?? [], $item, [], "$p." . count($items));
@@ -337,6 +337,29 @@ final class Fields
 
     // ---------------------------------------------------------------- Rendering (Admin)
 
+    /**
+     * Feld mit Freigabe-Schalter ('expose' => ['targets' => [web, vcard, ics], 'defaults' => [ziel => bool], 'labels' => [ziel => Text]]):
+     * Weltkugel mit kleinem Menü (<details>, ohne Skript) und je Ziel ein Häkchen; gesendet als {prefix}[_exposure][feld][ziel].
+     * Stand aus $values['_exposure'][feld], sonst der Standard des Feldes (neuer Eintrag).
+     */
+    private static function renderExpose(array $f, array $values, string $prefix, string $field): string
+    {
+        $n = (string) $f['name'];
+        $cur = (array) ($values[\Core\Data\Exposure::STATE][$n] ?? []);
+        $boxes = '';
+        foreach ((array) ($f['expose']['targets'] ?? ['web']) as $k) {
+            $checked = array_key_exists($k, $cur) ? (bool) $cur[$k] : !empty($f['expose']['defaults'][$k]);
+            $name = $prefix . '[' . \Core\Data\Exposure::STATE . '][' . e($n) . '][' . e((string) $k) . ']';
+            $boxes .= '<input type="hidden" name="' . $name . '" value="0"><label class="f-check"><input type="checkbox" name="' . $name . '" value="1"' . ($checked ? ' checked' : '')
+                . ' data-expose-target> <span>' . e((string) ($f['expose']['labels'][$k] ?? $k)) . '</span></label>';
+        }
+        // Zustand ohne Skript: CSS (:has) zeigt „Öffentlich“ bzw. „Intern“ je nach Häkchen
+        return '<div class="f-exp' . (($f['width'] ?? '') === 'half' ? ' f--half' : '') . '" data-expose>' . $field
+            . '<details class="f-exp__menu"><summary class="f-exp__btn" title="' . e(__('Freigabe dieses Feldes für diesen Eintrag')) . '">'
+            . icon('globe') . '<span class="f-exp__on">' . e(__('Öffentlich')) . '</span><span class="f-exp__off">' . e(__('Intern')) . '</span></summary>'
+            . '<fieldset class="f-exp__pop"><legend>' . e(__('„{label}“ erscheint in', ['label' => (string) ($f['label'] ?? $n)])) . '</legend>' . $boxes . '</fieldset></details></div>';
+    }
+
     public static function renderForm(array $fields, array $values, array $errors = [], string $prefix = 'f', string $path = ''): string
     {
         $html = '';
@@ -366,6 +389,8 @@ final class Fields
             $v = $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f));
             if (!empty($f['date_only_if'])) $f['_date_only'] = !empty($values[$f['date_only_if']]);   // Datum/Uhrzeit: „ganztägig“ gesetzt
             $one = self::renderField($f, $v, $errors, $prefix, $path);
+            // Freigabe je Eintrag (Core\Data\Exposure, Feld im Modus „Redaktion entscheidet“): Schalter direkt am Feld
+            if (!empty($f['expose']) && isset($f['name']) && $path === '') $one = self::renderExpose($f, $values, $prefix, $one);
             if ($open !== null) {
                 $open[1] .= $one;
                 $n = $f['name'] ?? null;
@@ -737,6 +762,12 @@ final class Fields
         $itemLabel = $f['item_label'] ?? 'Eintrag';
         $title = $f['title_field'] ?? ($sub[0]['name'] ?? null);
         $renderItem = function (array $item, string $idx) use ($f, $sub, $errors, $inputName, $p, $itemLabel, $title) {
+            // 'rows' => true: kompakte Zeile ohne Kopf (beschriftete Mehrfachfelder, Core\Combo) – Unterfelder nebeneinander, Entfernen am Ende
+            if (!empty($f['rows'])) {
+                return '<div class="rep-item rep-row" data-index="' . e($idx) . '"><span class="rep-title" hidden></span>'
+                    . '<div class="rep-fields rep-row__fields">' . self::renderForm($sub, $item, $errors, $inputName . '[' . $idx . ']', "$p.$idx") . '</div>'
+                    . '<div class="rep-tools rep-row__tools"><button type="button" class="icon-btn icon-btn--danger" data-rep="remove" aria-label="' . e(__('{item} entfernen', ['item' => $itemLabel])) . '" title="' . e(__('{item} entfernen', ['item' => $itemLabel])) . '">' . icon('trash') . '</button></div></div>';
+            }
             $head = $title && isset($item[$title]) && is_scalar($item[$title]) && $item[$title] !== '' ? strip_tags((string) $item[$title]) : $itemLabel;
             // Titelfeld ist ein Verweis (page:/entry:/media:) → Name des Ziels statt der Kennung, z. B. Name der gewählten Person
             if ($title && \Core\Links::isRef((string) ($item[$title] ?? ''))) {
@@ -763,7 +794,7 @@ final class Fields
 
         $h = '<div class="f f--repeater"><div class="rep" data-name="' . e($inputName) . '">'
             . '<div class="rep-head"><span class="f-label">' . $label . '</span>'
-            . (count($items) > 1 ? ' <button type="button" class="adm-link rep-all" data-rep="all">' . e(__('Alle aufklappen')) . '</button>' : '')
+            . (count($items) > 1 && empty($f['rows']) ? ' <button type="button" class="adm-link rep-all" data-rep="all">' . e(__('Alle aufklappen')) . '</button>' : '')
             . (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '') . '</div><div class="rep-items">';
         foreach (array_values($items) as $i => $item) {
             $h .= $renderItem(is_array($item) ? $item : [], (string) $i);

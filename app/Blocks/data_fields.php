@@ -32,8 +32,9 @@ $layout = $d['layout'] ?? 'prose';
 $fields = Exposure::publicNames($t, $fields);
 $e = Exposure::publicEntry($t, $e);
 if (!$fields) {
-    $fields = $layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
-        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks' && !Exposure::isPrivate($f)), 'name'), fn($n) => $n !== $t['settings']['title_field']));   // Inhaltsblöcke: eigener Block entry_blocks
+    // Adressbuch (Kinds): Titel, Foto, Funktion, Kontaktangaben, eigene Felder – ohne Namensteile und Schalter
+    $fields = \Core\Data\Kinds::isContacts($t) && $layout !== 'head' ? ['_title', ...\Core\Data\Kinds::detailFields($t)] : ($layout === 'head' ? array_values(array_filter(['_title', 'published_at', Tables::imageField($t)]))
+        : array_values(array_filter(array_column(array_filter($t['fields'], fn($f) => $f['type'] !== 'blocks' && Exposure::publicNames($t, [$f['name']]) !== []), 'name'), fn($n) => $n !== $t['settings']['title_field'])));   // Inhaltsblöcke: eigener Block entry_blocks
 }
 $label = fn(string $f) => $f === '_title' ? lt('Titel') : ($f === '_when' ? lt('Termin') : ($f === 'published_at' ? lt('Veröffentlicht') : Tables::label(Tables::field($t, $f) ?? ['label' => $f])));
 $type = fn(string $f) => Tables::field($t, $f)['type'] ?? ($f === '_title' ? 'title' : 'date');
@@ -77,6 +78,13 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
               if ($v === '') continue;
               $href = match ($tp) { 'email' => 'mailto:' . $v, 'tel' => (string) tel_href($v), default => $v };
               if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
+              continue;
+          }
+          // Beschriftete Mehrfachfelder (Kontakte): freigegebene Nummern/E-Mails/Webadressen als Knöpfe, Anschrift als Fakt
+          if (in_array($tp, ['phones', 'emails', 'urls'], true)) { array_push($acts, ...\Core\Combo::actions($tp, $e[$f] ?? null)); continue; }
+          if ($tp === 'addresses') {
+              $adr = array_filter(array_map(fn($i) => e(\Core\Combo::itemText($tp, $i)), \Core\Combo::items($e[$f] ?? null)));
+              if ($adr) $facts[] = [$f, implode('<br>', $adr)];
               continue;
           }
           $h = Entries::html($t, $e, $f);
@@ -125,6 +133,7 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
           if ($href !== '') $acts[] = [$href, ['email' => 'envelope-simple', 'tel' => 'phone', 'url' => 'globe'][$tp], $tp === 'url' ? (string) preg_replace('~^https?://(www\.)?~', '', rtrim($v, '/')) : $v];
           continue;
       }
+      if (in_array($tp, ['phones', 'emails', 'urls'], true)) { array_push($acts, ...\Core\Combo::actions($tp, $e[$f] ?? null)); continue; }
       if ($f !== '_title' && ($h = Entries::html($t, $e, $f)) !== '') $lead[] = [$f, $tp, $h];
   }
   // Visitenkarte (Schema-Typ „Person“): „Kontakt speichern“ als vCard mit Foto
@@ -154,6 +163,15 @@ if ($layout === 'dl' && !is_editing() && !array_filter($fields, fn($f) => $f ===
           if ($h === '') continue;
           if ($tp === 'geo') { $map = $h; continue; }
           if (isset($icons[$tp])) { $rows[] = [$f, $tp, $h]; continue; }
+          // Mehrfachfelder: je freigegebener Angabe eine Zeile (Anschrift als Adresszeilen)
+          if (in_array($tp, ['phones', 'emails', 'urls'], true)) {
+              foreach (\Core\Combo::actions($tp, $e[$f] ?? null) as [$href, $ico, $txt]) $rows[] = [$f, \Core\Combo::COMPAT[$tp], '<a href="' . e($href) . '">' . e($txt) . '</a>'];
+              continue;
+          }
+          if ($tp === 'addresses') {
+              foreach (\Core\Combo::items($e[$f] ?? null) as $i) $lines[] = [e(\Core\Combo::itemText($tp, $i)), \Core\Combo::itemText($tp, $i)];
+              continue;
+          }
           // Adresse: Textzeilen untereinander; eine Postleitzahl steht mit der folgenden Zeile (Ort) zusammen
           $plain = trim(strip_tags($h));
           if ($lines && preg_match('~^\d{4,5}$~', $lines[count($lines) - 1][1])) { $lines[count($lines) - 1][0] .= ' ' . $h; $lines[count($lines) - 1][1] = $plain . 'x'; continue; }

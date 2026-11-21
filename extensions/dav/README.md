@@ -46,6 +46,18 @@ Pfade: `/dav/principals/{e-mail}/`, `/dav/calendars/{e-mail}/{tabelle}/`, `/dav/
 
 ## Abbildung
 
+### Adressbücher (Tabellenart „contacts“)
+
+Tabellen der Art „Adressbuch“ (Core `Core\Data\Kinds`, z. B. aus der Vorlage „Adressbuch“ oder per `data:convert … --kind=contacts`)
+brauchen keine Zuordnung: N (Nachname;Vorname;;Titel), FN (Anzeigename), ORG (Organisation;Abteilung), TITLE (Funktion), PHOTO, BDAY,
+NOTE, CATEGORIES (Listen) und die Mehrfachfelder Telefon, E-Mail, Adresse, Web – Standard-Beschriftungen als `TYPE`
+(CELL, WORK, HOME, FAX, MAIN …), alle übrigen (z. B. „Geschäftsstelle“, eigene) als Apple-Beschriftung `itemN.X-ABLabel`. Aus der
+App kommt die Beschriftung zurück; eine neue oder geänderte Angabe ist **nie von selbst öffentlich**, „Öffentlich“ bleibt nur bei
+unverändertem Wert. Eigene Zusatzfelder reisen wie bisher als `X-MYCMS-*`.
+
+Freigabe je Feld (Core `Exposure`): Felder, die bewusst nur anderen Zielen gehören (z. B. „Nur Website“: Vita), gehen nie an Apps und
+werden von Apps nie geschrieben; „Nie öffentlich“ und „Redaktion entscheidet“ sehen die Apps der Redaktion vollständig.
+
 ### Einstellungen je Tabelle
 
 Website-Einstellung `ext.dav.tables` (je Tabelle ein Eintrag, Kurzname der Tabelle als Schlüssel), gepflegt auf `/admin/dav`:
