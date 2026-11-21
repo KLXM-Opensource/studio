@@ -319,7 +319,7 @@ final class Accounts
     }
 
     /**
-     * Prüfungen für health (null = Warnung, blockiert nichts): Netzwerk-Konto in Installationen mit mehreren Websites, Zwecke
+     * Prüfungen für health: Netzwerk-Konto in Installationen mit mehreren Websites (fehlt es: Fehler), Zwecke
      * mit fehlendem Konto. Bezeichnungen ohne Geheimnisse.
      */
     public static function health(): array
@@ -328,8 +328,9 @@ final class Accounts
         try {
             if (\Core\Sites::multi() && Network::isNetworkSite()) {
                 $n = self::network();
-                $out[$n ? 'E-Mail: Netzwerk-Konto eingerichtet (' . $n['from'] . ')' : 'E-Mail: Netzwerk-Konto fehlt – Mails an Netzwerk-Konten gehen über das Konto dieser Website (Netzwerk-Dashboard → E-Mail-Konto des Netzwerks)']
-                    = $n ? self::ready($n) : null;
+                // Mehrere Websites ohne Netzwerk-Konto: Fehler – Netzwerk-Mails und Systemmeldungen hätten keinen neutralen Absender
+                $out[$n ? 'E-Mail: Netzwerk-Konto eingerichtet (' . $n['from'] . ')' : 'E-Mail: Netzwerk-Konto fehlt – bei mehreren Websites erforderlich (Netzwerk → E-Mail); bis dahin gehen Mails an Netzwerk-Konten über das Konto dieser Website']
+                    = $n ? self::ready($n) : false;
             }
             $all = self::all();
             foreach (self::routes() as $purpose => $id) {

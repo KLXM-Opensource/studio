@@ -171,7 +171,8 @@ final class Overview
             'delivery' => self::deliveryRecipients(),
             'visitor' => [__('Adresse aus dem Formular'), __('Einstellung der Tabelle (Eingangsbestätigung)'), '/admin/data'],
             'admins' => [implode(', ', self::admins()) ?: $none, app()->settings->get('sys.integrity_mail', true)
-                ? __('alle Konten mit allen Rechten dieser Website') : __('ausgeschaltet (Grundeinstellungen → Integrität)'), '/admin/system/integritaet'],
+                ? (\Core\Sites::multi() ? __('Administration dieser Website (Datenbank)') : __('alle Konten mit allen Rechten dieser Website'))
+                : __('ausgeschaltet (Grundeinstellungen → Integrität)'), '/admin/system/integritaet'],
             'reviewers' => self::reviewRecipients($none),
             'support' => [__('Support-Team bzw. die meldende Person'), __('Support'), null],
             'mention' => [__('die erwähnte Person'), __('Chat'), null],
@@ -225,9 +226,10 @@ final class Overview
         }
     }
 
-    /** @return list<string> Adressen der Konten mit allen Rechten (wie Integrity::notify) */
+    /** @return list<string> Empfänger der Integritäts-Hinweise dieser Website (wie Integrity::notify) */
     private static function admins(): array
     {
+        if (\Core\Sites::multi()) return \Core\Integrity::recipients('db');
         $roles = array_keys(array_filter(\Core\Permissions::roles(), fn($r) => in_array('*', (array) $r['permissions'], true)));
         if (!$roles) return [];
         $in = implode(',', array_fill(0, count($roles), '?'));
