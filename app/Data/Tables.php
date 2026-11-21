@@ -405,12 +405,11 @@ final class Tables
                 'help' => trim(mb_substr(trim(strip_tags((string) ($f['help'] ?? ''))), 0, 200)),
                 'width' => ($f['width'] ?? '') === 'half' ? 'half' : '',
             ];
-            // Nie öffentlich (Core\Data\Exposure): erscheint in keiner Website-Ausgabe, nur in Verwaltung, API und CardDAV
-            if (!$inbox && !empty($f['private'])) $def['private'] = true;
+            // Freigabe (Core\Data\Exposure): immer | Redaktion entscheidet je Eintrag | nie – je Ziel Website, vCard, ICS; gespeichert
+            // nur abweichend vom Standard (immer, alle Ziele). Ältere Schalter (private, website_only) werden übernommen.
+            if (!$inbox && empty($f['legacy'])) $def += Exposure::fieldDef($f);   // Altfelder sind ohnehin nie öffentlich
             // Bewusst öffentlich (geprüft): Hinweis „sieht privat aus“ in Designer und Health entfällt; schließt „Nie öffentlich“ aus
-            elseif (!$inbox && !empty($f['public_ok'])) $def['public_ok'] = true;
-            // Nur Website (Gegenstück): erscheint auf der Website, geht aber nie an Adressbuch-/Kalender-Apps, vCard oder ICS
-            if (!$inbox && !empty($f['website_only']) && empty($def['private'])) $def['website_only'] = true;
+            if (!$inbox && empty($def['private']) && !empty($f['public_ok'])) $def['public_ok'] = true;
             // Altfeld nach data:convert (ausgeblendet, nie öffentlich, bleibt für --revert) bzw. Feld des Grundschemas (Kinds)
             if (!$inbox && !empty($f['legacy'])) $def['legacy'] = true;
             if (!$inbox && Kinds::isSystem($kind, $fname)) $def['system'] = true;
@@ -810,6 +809,10 @@ final class Tables
         if (isset($table['shared'])) {
             $t->addColumn('origin_site', 'string', ['length' => 40, 'notnull' => false]);
             $t->addColumn('suggest', 'integer', ['default' => 0]);
+        }
+        // Freigabe je Eintrag (Core\Data\Exposure, Modus „Redaktion entscheidet“): JSON {feld: {web, vcard, ics}} – bleibt, wenn einmal da
+        if (Exposure::hasEditorChoice($table) || ($sm->tablesExist([$name]) && in_array(Exposure::STATE, array_map(fn($c) => $c->getName(), $sm->listTableColumns($name)), true))) {
+            $t->addColumn(Exposure::STATE, 'text', ['notnull' => false]);
         }
         foreach ($table['fields'] as $f) {
             $kind = self::TYPES[$f['type']][1] ?? 'string';

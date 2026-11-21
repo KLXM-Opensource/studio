@@ -3821,3 +3821,38 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 @media (pointer:coarse){.adm-find__search kbd{display:none}.adm-find__search,.adm-find__ai{height:42px}.adm-find__ai{width:42px}}
 .adm-nav-site a{display:flex}
 .adm-nav-site__ext{width:14px;height:14px;margin-left:auto;color:var(--adm-t3)}
+
+/* Beschriftete Mehrfachfelder (Core\Combo, Fields 'rows'): Zeile Beschriftung · Wert · Freigabe · Entfernen – wie Adressbuch-Apps */
+.rep-row{display:flex;align-items:flex-start;gap:8px;border:0;padding:0;margin:0 0 6px;background:none}
+.rep-row .rep-row__fields{flex:1;display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,2fr) auto;gap:0 8px;align-items:start}
+.rep-row .rep-row__fields>.f,.rep-row .rep-row__fields>.f-vis>.f{grid-column:auto;margin:0}
+.rep-row .rep-row__fields>.f-vis{grid-column:1/2}
+.rep-row .rep-row__fields .f>label:not(.f-check),.rep-row .rep-row__fields .f>.f-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.rep-row .rep-row__fields>.f--bool{align-self:center;padding:6px 10px;border:1px solid var(--adm-line);border-radius:var(--adm-ctl-r,8px);white-space:nowrap}
+.rep-row .rep-row__fields>.f--bool:has(input:checked){background:var(--adm-ok-bg);border-color:var(--adm-ok);color:var(--adm-ok)}
+.rep-row .rep-row__tools{position:static;display:flex;align-self:center}
+.rep-row .rep-row__fields:has([name$="[street]"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+.rep-row .rep-row__fields:has([name$="[street]"])>.f{grid-column:1/-1}
+.rep-row .rep-row__fields:has([name$="[street]"])>.f--half{grid-column:auto}
+@media (max-width:700px){.rep-row .rep-row__fields{grid-template-columns:1fr}.rep-row .rep-row__fields>.f-vis{grid-column:auto}}
+
+/* Freigabe je Eintrag (Core\Data\Exposure, Modus „Redaktion entscheidet“): Weltkugel mit Menü am Feld, Zustand per :has ohne Skript */
+.f-exp{position:relative}
+.f-exp>.f{margin-bottom:4px}
+.f-exp__menu{margin:0 0 14px}
+.f-exp__btn{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--adm-line);border-radius:999px;font-size:12px;font-weight:600;color:var(--adm-t2);cursor:pointer;list-style:none}
+.f-exp__btn::-webkit-details-marker{display:none}
+.f-exp__btn .ico{width:14px;height:14px}
+.f-exp__on{display:none}
+.f-exp:has([data-expose-target]:checked) .f-exp__btn{background:var(--adm-ok-bg);border-color:var(--adm-ok);color:var(--adm-ok)}
+.f-exp:has([data-expose-target]:checked) .f-exp__on{display:inline}
+.f-exp:has([data-expose-target]:checked) .f-exp__off{display:none}
+.f-exp__pop{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0;padding:10px 12px;border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface)}
+.f-exp__pop legend{padding:0 4px;font-size:12px;color:var(--adm-t2)}
+
+/* Tabellen-Designer: Freigabe je Feld */
+.dt-field__expose{flex-wrap:wrap;align-items:flex-end;gap:8px 16px}
+.dt-expose__targets{display:flex;flex-wrap:wrap;gap:4px 14px;border:0;margin:0;padding:0}
+.dt-expose__targets legend{font-size:12px;color:var(--adm-t2);padding:0;margin-bottom:4px}
+.dt-field__expose .f-help{flex-basis:100%;margin:0}
+.dt-field__system{display:flex;gap:6px;align-items:center}

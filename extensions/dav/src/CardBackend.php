@@ -27,7 +27,8 @@ use Sabre\VObject\Reader;
  * Kontakte-Tabellen (Core\Data\Kinds, Art contacts) brauchen keine Zuordnung: das Grundschema geht fest auf die vCard
  * (contactCard/contactIn) – Mehrfachfelder mit vCard-TYPE bzw. Apple-Beschriftung (item.X-ABLabel), Listen als CATEGORIES.
  * Eine in der App neue oder geänderte Angabe ist nie von selbst öffentlich: „Öffentlich“ bleibt nur bei unverändertem Wert.
- * Felder „Nur Website“ (Exposure::isWebsiteOnly) und Altfelder gehen nie an Apps und werden von Apps nie geschrieben.
+ * Felder, die bewusst nur für andere Ziele freigegeben sind (Exposure::appFields, z. B. „Nur Website“), und Altfelder gehen nie an
+ * Apps und werden von Apps nie geschrieben.
  */
 final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
 {
@@ -228,10 +229,9 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
                     continue;
                 }
                 $n++;
-                $p = $card->add($prop, $val, $prop === 'EMAIL' ? ['TYPE' => ['INTERNET']] : []);
-                $p->group = "item$n";
-                $l = $card->add('X-ABLABEL', \Core\Combo::labelText($type, $i, true));
-                $l->group = "item$n";
+                // Gruppe „itemN.“: Wert und Apple-Beschriftung gehören zusammen
+                $card->add("item$n.$prop", $val, $prop === 'EMAIL' ? ['TYPE' => ['INTERNET']] : []);
+                $card->add("item$n.X-ABLABEL", \Core\Combo::labelText($type, $i, true));
             }
         }
         if (($note = $s('notiz')) !== '' && Tables::field($t, 'notiz')) $card->add('NOTE', $note);
@@ -539,7 +539,8 @@ final class CardBackend extends \Sabre\CardDAV\Backend\AbstractBackend
             };
         }
         // „Nur Website“-Felder und Altfelder schreiben Apps nie (sie bekommen sie auch nicht)
-        foreach ($t['fields'] as $f) if (\Core\Data\Exposure::isWebsiteOnly($f) || !empty($f['legacy'])) unset($in[$f['name']]);
+        $apps = array_column(\Core\Data\Exposure::appFields($t, 'vcard'), 'name');
+        foreach ($t['fields'] as $f) if (!in_array($f['name'], $apps, true)) unset($in[$f['name']]);
         $tf = $t['settings']['title_field'];
         $fn = trim((string) ($card->FN ?? ''));
         $org = isset($card->ORG) ? (string) ($card->ORG->getParts()[0] ?? '') : '';

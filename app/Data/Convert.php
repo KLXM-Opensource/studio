@@ -142,8 +142,10 @@ final class Convert
             'urls' => 'homepage',
             default => (bool) preg_match('~privat|home|wohn~', $s) ? 'home' : 'work',
         };
-        // Freigabe-Vorschlag: bisher sichtbar = öffentlich; „Nie öffentlich“ und mobil/privat = intern
-        $public ??= !Exposure::isPrivate($f) && !preg_match(Exposure::PRIVATE_HINT, $s);
+        // Freigabe-Vorschlag: bisher sichtbar = öffentlich; „Nie öffentlich“ und mobil/privat = intern; „Redaktion entscheidet“ = wie je
+        // Eintrag entschieden ('entry')
+        if ($public === null && Exposure::isEditorChoice($f)) return ['action' => 'combine', 'to' => $to, 'label' => $label, 'public' => 'entry'];
+        $public ??= !Exposure::isPrivate($f) && (!empty($f['public_ok']) || !preg_match(Exposure::PRIVATE_HINT, $s));
         return ['action' => 'combine', 'to' => $to, 'label' => $label, 'public' => $public];
     }
 
@@ -205,7 +207,7 @@ final class Convert
             $l[] = sprintf('  %-16s %-10s → %s', $n, '(' . $by[$n]['type'] . ')', match ($p['action']) {
                 'keep' => "{$p['to']} (bleibt, wird Grundfeld)",
                 'rename' => "{$p['to']} (umbenannt, Werte bleiben)",
-                'combine' => "{$p['to']}[" . $lbl($type, $p['label']) . ', ' . ($p['public'] === true ? 'öffentlich' : 'intern') . ']'
+                'combine' => "{$p['to']}[" . $lbl($type, $p['label']) . ', ' . ($p['public'] === 'entry' ? 'wie je Eintrag freigegeben' : ($p['public'] === true ? 'öffentlich' : 'intern')) . ']'
                     . ($type === 'addresses' ? ' (Teil der Anschrift)' : '') . ' · Altfeld bleibt ausgeblendet' . ($p['legacy_name'] !== $n ? " als „{$p['legacy_name']}“" : ''),
                 default => ($p['to'] !== $n ? "{$p['to']} (eigenes Feld, umbenannt)" : 'bleibt eigenes Feld'),
             } . ($p['note'] !== '' ? ' – ' . $p['note'] : ''));
@@ -213,7 +215,8 @@ final class Convert
         $adr = array_filter($plan['fields'], fn($p) => $p['action'] === 'combine' && $p['to'] === 'adresse');
         if ($adr) {
             $scope = self::addressScope($t, $adr);
-            $l[] = '  Anschrift: ' . match ($scope) { '1' => 'öffentlich (alle Teile waren öffentlich)', 'city' => 'nur Ort öffentlich (Straße/PLZ waren nicht öffentlich)', default => 'intern' };
+            if (array_filter($adr, fn($p) => $p['public'] === 'entry')) $scope = 'entry';
+            $l[] = '  Anschrift: ' . match ($scope) { 'entry' => 'je Eintrag wie freigegeben (Redaktion entscheidet)', '1' => 'öffentlich (alle Teile waren öffentlich)', 'city' => 'nur Ort öffentlich (Straße/PLZ waren nicht öffentlich)', default => 'intern' };
         }
         if ($plan['added']) $l[] = '  Neue Grundfelder (leer): ' . implode(', ', $plan['added']);
         if ($plan['split']) $l[] = "  Vor-/Nachname: aus „{$plan['split']}“ aufgeteilt (letztes Wort = Nachname, Titel wie „Dr.“ → Titel) – Beispiele unten prüfen";
@@ -223,8 +226,9 @@ final class Convert
         $lost = [];
         foreach (Entries::query($t, ['status' => 'published', 'lang' => 'all', 'source' => 'all', 'internal' => true]) as $e) {
             foreach ($plan['fields'] as $n => $p) {
-                if ($p['action'] !== 'combine' || $p['public'] === true || Exposure::isPrivate($by[$n]) || trim((string) ($e[$n] ?? '')) === '') continue;
-                if ($p['to'] === 'adresse' && self::addressScope($t, $adr) === 'city' && preg_match(self::ADR['city'], $n)) continue;
+                if ($p['action'] !== 'combine' || $p['public'] === true || !Exposure::allowed($by[$n], $e) || trim((string) ($e[$n] ?? '')) === '') continue;
+                if ($p['public'] === 'entry' && $p['to'] !== 'adresse') continue;
+                if ($p['to'] === 'adresse' && self::addressScope($t, $adr, $e) !== '0' && (self::addressScope($t, $adr, $e) === '1' || preg_match(self::ADR['city'], $n))) continue;
                 $lost[$n] = ($lost[$n] ?? 0) + 1;
             }
         }
@@ -248,13 +252,18 @@ final class Convert
         return $l;
     }
 
-    /** Freigabe der übernommenen Anschrift: '1' (alle Teile öffentlich), 'city' (nur Ort öffentlich), '0' */
-    private static function addressScope(array $t, array $adrPlan): string
+    /**
+     * Freigabe der übernommenen Anschrift: '1' (alle Teile öffentlich), 'city' (nur Ort öffentlich), '0'. Teile mit „Redaktion
+     * entscheidet“ zählen je Eintrag ($e; ohne Eintrag: Standard des Feldes).
+     */
+    private static function addressScope(array $t, array $adrPlan, ?array $e = null): string
     {
         $by = array_column($t['fields'], null, 'name');
         $pub = [];
         foreach ($adrPlan as $n => $p) {
-            foreach (self::ADR as $part => $re) if (preg_match($re, $n)) $pub[$part] = $p['public'] === true && !Exposure::isPrivate($by[$n] ?? null);
+            foreach (self::ADR as $part => $re) if (preg_match($re, $n)) {
+                $pub[$part] = $p['public'] === 'entry' ? Exposure::allowed($by[$n], $e ?? []) : ($p['public'] === true && !Exposure::isPrivate($by[$n] ?? null));
+            }
         }
         if ($pub && !in_array(false, $pub, true)) return '1';
         return !empty($pub['city']) ? 'city' : '0';
@@ -335,7 +344,6 @@ final class Convert
         // 5. Werte übernehmen (direkt, ohne Prüfung der Formate – Altwerte bleiben unverändert in den Altfeldern)
         $by = array_column($t['fields'], null, 'name');
         $adr = array_filter($plan['fields'], fn($p) => $p['action'] === 'combine' && $p['to'] === 'adresse');
-        $scope = $adr ? self::addressScope($t, $adr) : '0';
         $db = Tables::db($nt);
         $n = 0;
         foreach ($rows as $e) {
@@ -350,10 +358,10 @@ final class Convert
                     foreach (self::ADR as $part => $re) if (preg_match($re, $src)) $address[$part] = $v;
                     continue;
                 }
-                $multi[$p['to']][] = ['label' => $p['label'], 'value' => $v, 'public' => $p['public'] === true];
+                $multi[$p['to']][] = ['label' => $p['label'], 'value' => $v, 'public' => $p['public'] === 'entry' ? Exposure::allowed($by[$src], $e) : $p['public'] === true];
             }
             if ($address) $multi['adresse'][] = ['label' => 'work', 'street' => $address['street'] ?? '', 'zip' => $address['zip'] ?? '', 'city' => $address['city'] ?? '',
-                'country' => $address['country'] ?? '', 'public' => $scope];
+                'country' => $address['country'] ?? '', 'public' => self::addressScope($t, $adr, $e)];
             foreach ($multi as $field => $items) $set[$field] = json_encode($items, JSON_UNESCAPED_UNICODE);
             if ($plan['split']) {
                 [$pre, $given, $family] = self::splitName((string) ($e[$plan['split']] ?? ''));

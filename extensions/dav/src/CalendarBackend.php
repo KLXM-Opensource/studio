@@ -199,6 +199,7 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
     /** iCalendar eines Eintrags; vorhandene Rohdaten des Clients bleiben erhalten, abgebildete Eigenschaften kommen aus dem Eintrag */
     public static function render(array $t, array $e, ?array $o): string
     {
+        $e = \Core\Data\Exposure::forApps($t, $e, 'ics');   // Felder, die bewusst nur für andere Ziele freigegeben sind (z. B. „Nur Website“): nie an Apps
         $uid = $o['uid'] ?? Calendar::uid($t, $e);
         $lines = array_merge(['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:' . ICal::prodId(), 'CALSCALE:GREGORIAN'],
             ICal::vtimezone(Calendar::tz(), (int) date('Y')), ICal::vevent($t, $e, ['uid' => $uid]), ['END:VCALENDAR']);
@@ -311,7 +312,8 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
             $in[$c['category']] = $cf['type'] === 'multiselect' ? $keys : ($keys[0] ?? '');
         }
         // „Nur Website“-Felder (Core\Data\Exposure): gehen nie an Apps – und Apps schreiben sie nie
-        foreach ($t['fields'] as $f) if (\Core\Data\Exposure::isWebsiteOnly($f)) unset($in[$f['name']]);
+        $apps = array_column(\Core\Data\Exposure::appFields($t, 'ics'), 'name');
+        foreach ($t['fields'] as $f) if (!in_array($f['name'], $apps, true)) unset($in[$f['name']]);
         return [$in, trim((string) ($ev->UID ?? '')) ?: bin2hex(random_bytes(16))];
     }
 }

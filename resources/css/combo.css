@@ -46,3 +46,10 @@
 .dlf__meta{font-size:.85em;opacity:.7}
 .dlf__note{font-size:.92em}
 .dlf__thumb{flex:none;width:2.8em;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:top;border-radius:3px;box-shadow:0 1px 3px rgb(0 0 0/.18);background:#fff}
+
+/* Beschriftete Mehrfachfelder (Telefon, E-Mail, Adresse, Web): nur freigegebene Angaben, Beschriftung klein davor */
+.ctm{display:grid;gap:.35em;margin:0}
+.ctm__item{display:grid;grid-template-columns:minmax(6em,auto) 1fr;gap:.2em 1em;align-items:baseline}
+.ctm__label{font-size:.85em;opacity:.7;margin:0}
+.ctm__value{margin:0;overflow-wrap:anywhere}
+@media (max-width:480px){.ctm__item{grid-template-columns:1fr;gap:0}}

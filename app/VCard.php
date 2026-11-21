@@ -149,7 +149,7 @@ final class VCard
     public static function person(array $table, array $e): string
     {
         // „Nie öffentlich“, nicht freigegebene Angaben und „Nur Website“-Felder: nie in der Visitenkarte
-        $e = Data\Exposure::forApps($table, Data\Exposure::publicEntry($table, $e));
+        $e = Data\Exposure::publicEntry($table, $e, 'vcard');
         if (Data\Kinds::isContacts($table)) return self::contact($table, $e);
         $find = fn(array $types, array $names = []) => StructuredData::field($table, $e, $types, $names);
         $img = Tables::imageField($table);
@@ -173,7 +173,7 @@ final class VCard
     /**
      * Visitenkarte eines Kontakts (Tabellenart „contacts“, Core\Data\Kinds) aus dem Grundschema: Name (N/FN), Organisation,
      * Funktion, alle freigegebenen Telefonnummern, E-Mail-, Web- und Postadressen mit Beschriftung (vCard-TYPE bzw. Apple-
-     * Beschriftung item.X-ABLabel), Foto. $e ist schon bereinigt (publicEntry + forApps). Geburtstag/Notiz sind „Nie öffentlich“.
+     * Beschriftung item.X-ABLabel), Foto. $e ist schon für das Ziel „vcard“ bereinigt (Exposure::publicEntry).
      */
     public static function contact(array $table, array $e): string
     {

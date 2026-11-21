@@ -38,14 +38,24 @@ $type = $f['type'] ?? 'text';
       <?php endforeach; ?>
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[width]" value="half"<?= ($f['width'] ?? '') === 'half' ? ' checked' : '' ?>> <span>Halbe Breite</span></label>
       <?php if (!$inbox): // Core\Data\Exposure: nie in einer Website-Ausgabe (Blöcke, Detailseite, Visitenkarte, JSON-LD, Suche, Feeds) ?>
-      <label class="f-check" title="<?= e(__('Erscheint nirgends auf der Website – nicht in Blöcken, auf der Detailseite, in der Visitenkarte, den strukturierten Daten, der Suche oder Feeds. Verwaltung, API und Adressbuch-Apps sehen es weiter.')) ?>"><input type="checkbox" name="<?= $n ?>[private]" value="1"<?= !empty($f['private']) ? ' checked' : '' ?>> <span><?= icon('lock') ?> <?= e(__('Nie öffentlich')) ?></span></label>
-      <label class="f-check" title="<?= e(__('Erscheint auf der Website (Detailseite, Blöcke), geht aber nie an Adressbuch- und Kalender-Apps (CardDAV/CalDAV), Visitenkarten oder ICS-Kalender – z. B. für „Vita“ oder „Über mich“.')) ?>"><input type="checkbox" name="<?= $n ?>[website_only]" value="1"<?= !empty($f['website_only']) ? ' checked' : '' ?>> <span><?= icon('globe') ?> <?= e(__('Nur Website')) ?></span></label>
       <?php if (!empty($f['public_ok']) || \Core\Data\Exposure::looksPrivate($f)): ?>
       <label class="f-check" title="<?= e(__('Geprüft: Die Angabe soll auf der Website erscheinen (z. B. mit Einverständnis der Personen). Der Datenschutz-Hinweis entfällt.')) ?>"><input type="checkbox" name="<?= $n ?>[public_ok]" value="1"<?= !empty($f['public_ok']) ? ' checked' : '' ?>> <span><?= icon('check') ?> <?= e(__('Bewusst öffentlich')) ?></span></label>
       <?php endif; ?>
       <?php endif; ?>
     </div>
-    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint; „Bewusst öffentlich“ bestätigt, dass sie erscheinen soll.')) ?></p><?php endif; ?>
+    <?php if (!$inbox): // Freigabe je Feld (Core\Data\Exposure): Modus + Ziele (Website, öffentliche vCard, öffentliche Kalender-Datei)
+      $xr = \Core\Data\Exposure::rule($f); ?>
+    <div class="dt-field__row dt-field__expose" data-hide-for="<?= e(implode(' ', Tables::LAYOUT)) ?>"<?= Tables::isLayout($f) ? ' hidden' : '' ?>>
+      <label class="dt-in dt-in--expose"><span><?= icon('globe') ?> <?= e(__('Freigabe')) ?></span><select name="<?= $n ?>[exposure][mode]" data-expose-mode>
+        <?php foreach (['always' => __('Immer öffentlich'), 'editor' => __('Redaktion entscheidet je Eintrag'), 'never' => __('Nie öffentlich')] as $k => $l): ?><option value="<?= $k ?>"<?= $xr['mode'] === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?>
+      </select></label>
+      <fieldset class="dt-expose__targets"><legend><?= e($xr['mode'] === 'editor' ? __('Standard für neue Einträge') : __('Erscheint in')) ?></legend>
+        <?php foreach (\Core\Data\Exposure::TARGETS as $k): ?><input type="hidden" name="<?= $n ?>[exposure][<?= $k ?>]" value="0"><label class="f-check"><input type="checkbox" name="<?= $n ?>[exposure][<?= $k ?>]" value="1"<?= $xr[$k] ? ' checked' : '' ?>> <span><?= e(\Core\Data\Exposure::targetLabel($k)) ?></span></label><?php endforeach; ?>
+      </fieldset>
+      <p class="f-help"><?= e(__('Immer: erscheint in den gewählten Zielen. Redaktion entscheidet: je Eintrag ein Schalter am Feld (Standard wie gewählt). Nie: nur Verwaltung, API und Apps der Redaktion. Website = Blöcke, Detailseite, strukturierte Daten, Suche/KI, RSS; vCard = „Kontakt speichern“; ICS = Kalender-Datei und Abo.')) ?></p>
+    </div>
+    <?php endif; ?>
+    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – Freigabe „Nie öffentlich“ oder „Redaktion entscheidet“ wählen; „Bewusst öffentlich“ bestätigt, dass sie immer erscheinen soll.')) ?></p><?php endif; ?>
     <?php
     // Gestaltung des Formulars (keine Spalte): Abschnitt – Darstellung; Freitext – formatierter Text (Formatierungsleiste wie im Rich-Text-Feld)
     $sid = 'dts-' . preg_replace('~[^a-z0-9_]~i', '', (string) $i);
