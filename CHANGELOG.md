@@ -10,6 +10,16 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Kalender: Datum im Seitentitel der Detailseiten
+- **Termine gleichen Namens haben verschiedene `<title>`:** Auf Detailseiten von Kalender-Tabellen ergänzt `Seo::forEntry()` den
+  Titel um das Datum (`Calendar::titleWithDate()`/`titleFor()`, über `fmt()` in der Sprache des Eintrags): „Schießtraining am
+  14.03.2027 | Website“, englisch „Shooting training on 14 Mar 2027“ (neuer Datumsstil `medium` in `Core\Format`), mehrtägig
+  „Sommerfest ab 03.10.2027“ (erster Tag), nie mit Uhrzeit. `og:title` folgt; die Beschreibung nur, wenn sie genau dem Titel
+  entspricht. Unverändert: Serien (Wiederholung), Titel mit dem Jahr des Beginns, Filter `seo.meta` hat weiter das letzte Wort.
+- **`seo:check`** nutzt dieselbe Funktion – Terminreihen zählen nicht mehr als „Gleicher Titel“.
+- Standard an; abschaltbar je Tabelle unter Kalender › „Datum im Seitentitel der Detailseite“ (`settings.calendar.title_date`).
+  Selbsttest in `data:selftest`, Doku im Handbuch (Daten › Termine) und Entwicklerhandbuch (Kalender).
+
 ### Agentur Hub: offene Spezifikationen für andere Systeme
 - **`docs/agentur-hub/`** beschreibt, wie KLXM Studio, REDAXO 6 (AddOn `klxm_hub`), REDAXO 5 (AddOn in Arbeit) und eigene
   Lösungen am Agentur Hub teilnehmen: `oidc-profil.md` (Discovery inkl. optionalem `logo_uri`, Code-Flow mit PKCE S256, `state`,

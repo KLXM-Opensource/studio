@@ -9,7 +9,7 @@ namespace Core;
  * Werte für die Anzeige formatieren – eine Stelle für Datum, Zahl, Größe, Dauer, Telefon, Adresse und Auszug (nach rex_formatter).
  * Sprache: Website-Sprache (Lang::current()) bzw. ausdrücklich Format::for('en'); die Verwaltung nutzt Format::admin() (I18n::locale()).
  *
- *   fmt()->date($e['beginn'])                 24.09.2026 | 24/09/2026      Stile: short, long, weekday, day_month
+ *   fmt()->date($e['beginn'])                 24.09.2026 | 24/09/2026      Stile: short, long, medium (24 Sept 2026), weekday, day_month
  *   fmt()->time('2026-09-24 14:05')           14:05
  *   fmt()->datetime($ts)                      24.09.2026, 14:05
  *   Datum und Zeit kommen aus ICU (intl, IntlDatePatternGenerator): Reihenfolge, Trenner und Monatsnamen je Sprache, Englisch nach
@@ -64,7 +64,7 @@ final class Format
     // ------------------------------------------------------------------ Datum und Zeit
 
     /** ICU-Skelette je Stil (die Sprache bestimmt Reihenfolge, Trenner und Monatsnamen) */
-    private const SKELETONS = ['short' => 'ddMMyyyy', 'long' => 'dMMMMy', 'weekday' => 'EEEE', 'day_month' => 'dMMMM', 'dm' => 'ddMM', 'time' => 'jjmm'];
+    private const SKELETONS = ['short' => 'ddMMyyyy', 'long' => 'dMMMMy', 'medium' => 'dMMMy', 'weekday' => 'EEEE', 'day_month' => 'dMMMM', 'dm' => 'ddMM', 'time' => 'jjmm'];
     /** Sprache → Gebietsschema für ICU: Englisch nach britischen Regeln (24/09/2026, 14:05) */
     private const LOCALES = ['en' => 'en_GB'];
 
@@ -92,7 +92,7 @@ final class Format
         return is_string($out) ? $out : null;
     }
 
-    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), weekday (Donnerstag), day_month (24. September), dm (24.09. / 24/09) – über ICU */
+    /** Datum: short (24.09.2026 / 24/09/2026), long (24. September 2026), medium (24. Sept. 2026 / 24 Sept 2026), weekday (Donnerstag), day_month (24. September), dm (24.09. / 24/09) – über ICU */
     public function date(int|string|\DateTimeInterface|null $when, string $style = 'short'): string
     {
         $ts = self::ts($when);
@@ -105,6 +105,7 @@ final class Format
         $m = isset($months[$this->lang]) ? $months[$this->lang][(int) date('n', $ts) - 1] : date('F', $ts);
         return match ($style) {
             'long' => date('j', $ts) . ($de ? '. ' : ' ') . $m . ' ' . date('Y', $ts),
+            'medium' => $de ? date('d.m.Y', $ts) : date('j M Y', $ts),
             'weekday' => isset($days[$this->lang]) ? $days[$this->lang][(int) date('w', $ts)] : date('l', $ts),
             'day_month' => date('j', $ts) . ($de ? '. ' : ' ') . $m,
             'dm' => date($de ? 'd.m.' : 'd/m', $ts),

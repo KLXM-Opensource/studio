@@ -17,7 +17,8 @@ use RRule\RRule;
  * Tabellen-Einstellung settings.calendar (Tabellen-Designer → „Als Kalender nutzen“):
  *   enabled, start (date|datetime), end (date|datetime, optional), all_day (bool), recurrence (recurrence),
  *   location (text|textarea|geo), description (text|textarea|richtext), category (select|multiselect),
- *   duration (Minuten, wenn kein Ende gepflegt ist), feed (öffentlicher iCal-Feed /kalender/{handle}.ics)
+ *   duration (Minuten, wenn kein Ende gepflegt ist), feed (öffentlicher iCal-Feed /kalender/{handle}.ics),
+ *   title_date (Datum im Seitentitel der Detailseite, Standard an – siehe titleWithDate())
  *
  * Feldtyp „recurrence“ speichert eine RRULE ohne Präfix, optional gefolgt von einer Zeile mit Ausnahmen:
  *   FREQ=WEEKLY;BYDAY=MO,WE;UNTIL=20261231T225959Z
@@ -28,7 +29,7 @@ use RRule\RRule;
 final class Calendar
 {
     public const DEFAULTS = ['enabled' => false, 'start' => '', 'end' => '', 'all_day' => '', 'recurrence' => '', 'location' => '',
-        'description' => '', 'category' => '', 'duration' => 60, 'feed' => true];
+        'description' => '', 'category' => '', 'duration' => 60, 'feed' => true, 'title_date' => true];
 
     /** Zuordnung → erlaubte Feldtypen */
     public const MAP = [
@@ -57,6 +58,7 @@ final class Calendar
         }
         $out['duration'] = max(0, min(10080, (int) ($in['duration'] ?? 60)));
         $out['feed'] = !array_key_exists('feed', $in) || !empty($in['feed']);
+        $out['title_date'] = !array_key_exists('title_date', $in) || !empty($in['title_date']);
         if ($out['enabled'] && $out['start'] === '') {
             $errors['settings.calendar'] = 'Kalender: Bitte das Feld für den Beginn wählen (Typ „Datum“ oder „Datum & Uhrzeit“).';
         }
@@ -368,6 +370,77 @@ final class Calendar
     {
         $wd = date_local($d->getTimestamp(), 'weekday');
         return ($style === 'long' ? $wd : mb_substr($wd, 0, 2) . '.') . ', ' . date_local($d->getTimestamp(), $style === 'long' ? 'long' : 'short');
+    }
+
+    /**
+     * Seitentitel der Detailseite eines Termins mit Datum (Seo::forEntry, damit auch seo:check): Termine mit gleichem Namen
+     * bekommen so verschiedene <title>. Unverändert bleibt der Titel ohne Kalender, bei „Datum im Seitentitel“ aus (title_date),
+     * ohne gültigen Beginn und bei Serien (Wiederholung – eine Detailseite für alle Termine). Sprache: die des Eintrags.
+     */
+    public static function titleWithDate(array $table, array $e, string $title): string
+    {
+        if (!self::enabled($table) || empty(self::config($table)['title_date']) || self::recurrence($table, $e)['rrule'] !== '') return $title;
+        $lang = isset($e['lang']) && Lang::valid((string) $e['lang']) ? (string) $e['lang'] : Lang::current();
+        return self::titleFor($title, self::span($table, $e), $lang);
+    }
+
+    /**
+     * Titel + Datum ohne Uhrzeit: „Schießtraining am 14.03.2027“, EN „Shooting training on 14 Mar 2027“ (Monatskürzel, weil
+     * 14/03/2027 im amerikanischen Englisch anders gelesen wird); mehrtägig nur der erste Tag: „Sommerfest ab 03.10.2027“ – kurz,
+     * damit der Titel in die etwa 60 Zeichen passt, die Google zeigt. Steht das Jahr des Beginns (und damit auch ein Datum) schon
+     * im Titel, z. B. „Jahrestreffen 2027“, bleibt er, wie er ist.
+     * @param ?array{start: DateTimeImmutable, end: DateTimeImmutable, all_day: bool, has_end: bool} $span aus span()
+     */
+    public static function titleFor(string $title, ?array $span, string $lang): string
+    {
+        if (!$span || trim($title) === '') return $title;
+        $f = \Core\Format::for($lang);
+        $start = $span['start'];
+        $date = $f->date($start, str_starts_with($lang, 'en') ? 'medium' : 'short');
+        // Datum oder Jahr des Beginns steht schon im Titel („Jahrestreffen 2027“) → unterscheidet sich schon, bleibt kurz
+        if (preg_match('~(?<!\d)' . $start->format('Y') . '(?!\d)~', $title)) return $title;
+        $last = $span['all_day'] ? $span['end']->modify('-1 day') : $span['end'];
+        $multi = $span['has_end'] && $last->format('Y-m-d') !== $start->format('Y-m-d');
+        $prev = app()->lang;
+        app()->lang = $lang;                                     // lt() in der Sprache des Eintrags (auch in seo:check)
+        try {
+            return $multi ? lt('{title} ab {date}', ['title' => $title, 'date' => $date]) : lt('{title} am {date}', ['title' => $title, 'date' => $date]);
+        } finally {
+            app()->lang = $prev;
+        }
+    }
+
+    /** Selbsttest „Datum im Seitentitel“ (data:selftest) */
+    public static function titleSelftest(): array
+    {
+        $ok = 0; $fails = [];
+        $eq = function (string $what, mixed $got, mixed $want) use (&$ok, &$fails) {
+            $got === $want ? $ok++ : $fails[] = "Kalender-Titel – $what: " . var_export($got, true) . ' statt ' . var_export($want, true);
+        };
+        $tz = self::tz();
+        $d = fn(string $s) => new DateTimeImmutable($s, $tz);
+        $one = ['start' => $d('2027-03-14 18:00'), 'end' => $d('2027-03-14 20:00'), 'all_day' => false, 'has_end' => true];
+        $eq('ein Tag de', self::titleFor('Schießtraining', $one, 'de'), 'Schießtraining am 14.03.2027');
+        $eq('keine Uhrzeit', str_contains(self::titleFor('Training', $one, 'de'), '18'), false);
+        if (class_exists(\IntlDatePatternGenerator::class)) {
+            $eq('ein Tag en', self::titleFor('Shooting training', $one, 'en'), 'Shooting training on 14 Mar 2027');
+        }
+        $allDay = ['start' => $d('2027-10-03'), 'end' => $d('2027-10-04'), 'all_day' => true, 'has_end' => true];
+        $eq('ganztägig, ein Tag', self::titleFor('Tag der offenen Tür', $allDay, 'de'), 'Tag der offenen Tür am 03.10.2027');
+        $multi = ['start' => $d('2027-10-03'), 'end' => $d('2027-10-06'), 'all_day' => true, 'has_end' => true];
+        $eq('mehrtägig: erster Tag', self::titleFor('Sommerfest', $multi, 'de'), 'Sommerfest ab 03.10.2027');
+        $night = ['start' => $d('2027-10-03 20:00'), 'end' => $d('2027-10-04 02:00'), 'all_day' => false, 'has_end' => true];
+        $eq('über Mitternacht = mehrtägig', self::titleFor('Nachtlauf', $night, 'de'), 'Nachtlauf ab 03.10.2027');
+        $eq('Datum schon im Titel', self::titleFor('Training 14.03.2027', $one, 'de'), 'Training 14.03.2027');
+        $eq('Jahr schon im Titel', self::titleFor('Jahrestreffen 2027', $multi, 'de'), 'Jahrestreffen 2027');
+        $eq('anderes Jahr im Titel', self::titleFor('Rückblick 2026', $one, 'de'), 'Rückblick 2026 am 14.03.2027');
+        $eq('Jahr als Teil einer Zahl', self::titleFor('Saal 120279', $one, 'de'), 'Saal 120279 am 14.03.2027');
+        $eq('ohne Beginn', self::titleFor('Training', null, 'de'), 'Training');
+        $errors = [];
+        $eq('Standard an', self::validateSettings(['enabled' => '1', 'start' => ''], [], $errors)['title_date'], true);
+        $eq('abschaltbar', self::validateSettings(['enabled' => '1', 'title_date' => '0'], [], $errors)['title_date'], false);
+        $eq('Standard in DEFAULTS', self::DEFAULTS['title_date'], true);
+        return ['ok' => $ok, 'fails' => $fails];
     }
 
     /** Datum nach ICU-Muster in der Sprache der Seite, z. B. fmt($d, 'LLLL y') → „Oktober 2026“, 'EEEEEE' → „Mo“ */

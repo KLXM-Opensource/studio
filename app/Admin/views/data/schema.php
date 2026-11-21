@@ -403,6 +403,9 @@ $fm = (array) ($s['form'] ?? []) + \Core\Data\DataForms::DEFAULTS;
           <div class="f f--bool"><input type="hidden" name="settings[calendar][feed]" value="0">
             <label class="f-check"><input type="checkbox" name="settings[calendar][feed]" value="1"<?= $c['feed'] ? ' checked' : '' ?>> <span><?= e(__('Öffentlicher iCal-Feed (Abonnieren)')) ?></span></label>
             <?php if (!$isNew && $c['feed']): ?><p class="f-help"><code><?= e(\Core\Data\Calendar::feedUrls($table)['https']) ?></code></p><?php endif; ?></div>
+          <div class="f f--bool"><input type="hidden" name="settings[calendar][title_date]" value="0">
+            <label class="f-check"><input type="checkbox" name="settings[calendar][title_date]" value="1"<?= $c['title_date'] ? ' checked' : '' ?>> <span><?= e(__('Datum im Seitentitel der Detailseite')) ?></span></label>
+            <p class="f-help"><?= e(__('Für Suchmaschinen, z. B. „Training am 14.03.2027“ – Termine mit gleichem Namen haben so verschiedene Titel. Nicht bei Serienterminen.')) ?></p></div>
         </div>
       </div>
       <?= $err('settings.calendar') ?>

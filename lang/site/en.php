@@ -98,6 +98,8 @@ return [
     'Vorheriger Monat' => 'Previous month',
     'Zurzeit sind keine Termine geplant.' => 'No events are currently scheduled.',
     'ganztägig' => 'all day',
+    '{title} am {date}' => '{title} on {date}',
+    '{title} ab {date}' => '{title} from {date}',
     'heute' => 'today',
     'oder als Datei' => 'or as a file',
     'Termin' => 'Event',
