@@ -342,6 +342,11 @@ final class Entries
             if ($f['type'] === 'mediatext') $def['sections'] = !empty($f['sections']);   // „Mehrere Abschnitte“
             if (\Core\Combo::is($f['type'])) $def = \Core\Combo::schema($f) + $def;
             if ($f['type'] === EntryBlocks::TYPE) $def['blocks'] = (array) ($f['blocks'] ?? []);   // erlaubte Blocktypen   // Kombifeld: Eingabe als Wiederholer mit festen Unterfeldern
+            if ($f['type'] === 'datetime' && Calendar::enabled($table)) {
+                // Kalender: Beginn/Ende zeigen bei „ganztägig“ nur das Datum (Core\Fields 'date_only_if', resources/js/_dateonly.js)
+                $cal = Calendar::config($table);
+                if ((string) $cal['all_day'] !== '' && in_array($f['name'], [$cal['start'], $cal['end']], true)) $def['date_only_if'] = (string) $cal['all_day'];
+            }
             if ($f['type'] === 'recurrence') {
                 // Regel-Editor liest Beginn (Wochentag, Tag im Monat) und „ganztägig“ aus dem Formular
                 $cal = Calendar::config($table);
@@ -363,7 +368,8 @@ final class Entries
 
     /**
      * Eingabemaske der Redaktion (Verwaltung, Seitenleiste „Eintrag bearbeiten“): Datenfelder wie schema(), dazwischen die
-     * Abschnitte als Zwischenüberschrift (Beschreibung als Hilfe) und Freitext als Hinweis – gleiche Gliederung wie das Formular.
+     * Abschnitte als Zwischenüberschrift (Beschreibung als Hilfe; Darstellung „eingeklappt“ als aufklappbarer Abschnitt mit
+     * „3 von 7 ausgefüllt“) und Freitext als Hinweis – gleiche Gliederung wie das Formular.
      * Gespeichert und geprüft wird weiter mit schema() (Gestaltung hat keine Werte; Fields überspringt 'heading').
      */
     public static function formSchema(array $table): array
@@ -372,7 +378,8 @@ final class Entries
         $out = [];
         foreach (Tables::allFields($table) as $f) {
             $type = $f['type'] ?? '';
-            if ($type === 'section') $out[] = ['type' => 'heading', 'label' => (string) $f['label'], 'help' => (string) ($f['help'] ?? '')];
+            if ($type === 'section') $out[] = ['type' => 'heading', 'label' => (string) $f['label'], 'help' => (string) ($f['help'] ?? '')]
+                + (($f['style'] ?? '') === 'collapsed' ? ['collapse' => true, 'count' => true] : []);   // eingeklappt mit Zählung (Core\Fields)
             elseif ($type === 'content') $out[] = ['type' => 'heading', 'label' => '', 'html' => \Core\Sanitizer::block((string) ($f['text'] ?? ''))];
             elseif (isset($f['name'], $data[$f['name']])) $out[] = $data[$f['name']];
         }

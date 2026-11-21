@@ -58,10 +58,11 @@ $row = function (int|string $i, array $f, ?string $err) use ($t, $inbox, $kindLa
     </div>
     <div class="dt-field__extra" data-show-for="section"<?= $type === 'section' ? '' : ' hidden' ?>>
       <label class="dt-in"><span><?= e(__('Darstellung')) ?></span><select name="<?= $n ?>[style]"<?= $type === 'section' ? '' : ' disabled' ?>>
-        <option value="heading"<?= ($f['style'] ?? 'heading') !== 'fieldset' ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
+        <option value="heading"<?= !in_array($f['style'] ?? 'heading', ['fieldset', 'collapsed'], true) ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
         <option value="fieldset"<?= ($f['style'] ?? '') === 'fieldset' ? ' selected' : '' ?>><?= e(__('Gruppe mit Rahmen')) ?></option>
+        <option value="collapsed"<?= ($f['style'] ?? '') === 'collapsed' ? ' selected' : '' ?>><?= e(__('Eingeklappt (zeigt die Anzahl ausgefüllter Felder)')) ?></option>
       </select></label>
-      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?></p>
+      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?> <?= e(__('„Eingeklappt“ gilt für die Eingabe der Redaktion: Der Abschnitt öffnet sich per Klick, bei Fehlern und bei leeren Pflichtfeldern von selbst; im öffentlichen Formular erscheint er als Zwischenüberschrift.')) ?></p>
     </div>
     <p class="f-help" data-show-for="content"<?= $type === 'content' ? '' : ' hidden' ?>><?= e(__('Den Text des Freitexts ändern Sie unter „Alle Einstellungen der Tabelle“.')) ?></p>
     <p class="f-help" data-show-for="group"<?= $type === 'group' ? '' : ' hidden' ?>><?= e(__('Unterfelder, Anzahl und Beschriftungen der Gruppe ändern Sie unter „Alle Einstellungen der Tabelle“.')) ?></p>

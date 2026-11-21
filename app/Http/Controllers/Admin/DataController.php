@@ -46,8 +46,9 @@ final class DataController extends AdminController
         'events' => ['name' => 'Termine', 'singular' => 'Termin', 'icon' => 'calendar-dots', 'route' => 'termine', 'sort' => ['beginn', 'asc'], 'fields' => [
             ['label' => 'Titel', 'type' => 'text', 'required' => 1, 'in_list' => 1, 'searchable' => 1],
             ['label' => 'Beginn', 'type' => 'datetime', 'required' => 1, 'in_list' => 1, 'width' => 'half'],
-            ['label' => 'Ende', 'type' => 'datetime', 'width' => 'half'],
-            ['label' => 'Ganztägig', 'type' => 'bool', 'width' => 'half'],
+            ['label' => 'Ende', 'type' => 'datetime', 'width' => 'half',
+                'compare' => [['op' => '>=', 'field' => 'beginn', 'message' => 'Das Ende liegt vor dem Beginn.']]],   // Bedingung (Core\Data\Rules)
+            ['label' => 'Ganztägig', 'type' => 'bool', 'width' => 'half', 'help' => 'Beginn und Ende dann ohne Uhrzeit.'],
             ['label' => 'Wiederholung', 'type' => 'recurrence'],
             ['label' => 'Ort', 'type' => 'text', 'in_list' => 1],
             ['label' => 'Beschreibung', 'type' => 'richtext'],
