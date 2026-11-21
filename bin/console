@@ -152,6 +152,9 @@
  *   backup:key                                        Schlüssel der Sicherungen anzeigen (an einem anderen Ort aufbewahren!)
  *   backup:selftest                                   Selbsttest (Verschlüsselung, Auswahl der Dateien, Ziel „Ordner“)
  *   security-log:selftest                             Selbsttest Sicherheits-Log für fail2ban (Angriffsadressen, Format, Filter)
+ *   oidc:selftest                                     Selbsttest Anmeldung per OpenID Connect (JWT, PKCE, Test-Anbieter, Fehlerfälle, Konten)
+ *   oidc:allow <email> [name]                         Konto für die Anmeldung über den Anbieter vorab freigeben (ohne Just-in-time)
+ *   monitor:selftest                                  Selbsttest Überwachung (Signatur status-v1, Antwort)
  *
  * Medien & Daten
  *   pool:create <key> "Name"                          Geteilten Medien-Pool anlegen (Websites: 'media_pools' => [...])
@@ -1083,33 +1086,7 @@ switch ($cmd) {
         }
         if ($cmd === 'health') {
             Core\Ffmpeg::refresh();   // ffmpeg frisch erkennen (per Aufruf) und den Zwischenspeicher erneuern
-            $checks = [
-                'PHP >= 8.4' => version_compare(PHP_VERSION, '8.4.0', '>='),
-                'Datenbank' => (function () use ($app) { try { return $app->db->fetchValue('SELECT 1') == 1; } catch (Throwable) { return false; } })(),
-                'Datenordner beschreibbar' => is_writable(site()->storage()),
-                'Medienordner beschreibbar' => is_writable(site()->mediaDir()),
-                'Erweiterungen gd, sodium, pdo, mbstring' => extension_loaded('gd') && extension_loaded('sodium') && extension_loaded('pdo') && extension_loaded('mbstring'),
-                // pdo_sqlite immer nötig (Suche, Chat, Pools, Support …); ≥ 3.35 für die Suche (RETURNING), ≥ 3.27 für site:backup (VACUUM INTO).
-                // PHP nutzt die SQLite-Bibliothek des Betriebssystems – z. B. AlmaLinux/RHEL 8: 3.26 → zu alt
-                'pdo_sqlite mit SQLite >= 3.35 (' . (function () { try { return (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(); } catch (Throwable) { return 'fehlt'; } })() . ')'
-                    => (function () { try { return version_compare((string) (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(), '3.35.0', '>='); } catch (Throwable) { return false; } })(),
-                'app_key gesetzt' => strlen((string) $app->config->get('app_key')) >= 32,
-                'network_key gesetzt (Netzwerk-Anmeldung)' => !Core\Sites::multi() || strlen((string) (Core\Network\Network::install()['network_key'] ?? '')) >= 32,
-                'Kit kompatibel' => app()->theme->compatible(),
-            ] + ['Verwaltung unter ' . Core\AdminPath::prefix() . (Core\AdminPath::custom() ? ' (eigene Adresse)' : '') => true]
-              + Core\Data\Shared::health() + Core\Search\Search::health() + Core\AI\Ai::health() + Core\Sources\Sources::health() + Core\Push\Push::health()
-                + Core\Ffmpeg::health()        // optional: Vorschaubilder für Videos (nur Warnung, nie Fehler)
-                + Core\Ffmpeg::pdfHealth()     // optional: Vorschaubild der 1. Seite von PDFs (poppler-utils)
-                + Core\Extensions::health()    // Prüfungen aktiver Erweiterungen (Extension::health)
-                + Core\Cron::health()          // Geplante Aufgaben: Cronjob läuft, fehlgeschlagene Aufgaben (nur Hinweise)
-                + Core\Integrity::health()     // Integrität: unerwartete Dateien/Daten (letzte Prüfung, Core\Integrity)
-                + (site()->isDefault() ? Core\Backup\Offsite::health() : [])   // Sicherung außer Haus: je Ziel (gehört zur Installation, einmal)
-                + Core\SeoCheck::health()      // Suchmaschinen gesperrt (Fehler), Domains, Titel/Beschreibungen (Hinweise, Core\SeoCheck)
-                + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
-                + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
-                + Core\Fonts::health()         // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)
-                + Core\Mail\Accounts::health()  // E-Mail-Konten: Netzwerk-Konto, Zwecke mit fehlendem Konto (nur Hinweise)
-                + Core\Mail\Imprint::health();  // Impressum für E-Mails: weder Text noch Impressum-Seite = Fehler
+            $checks = Core\Health::checks();   // gemeinsam mit der Überwachung (Core\Monitoring\Status)
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }
@@ -1309,6 +1286,23 @@ switch ($cmd) {
     case 'backup:key':
         if (!Core\Backup\Vault::hasKey()) { echo "Noch kein Schlüssel – er entsteht mit der ersten Sicherung außer Haus.\n"; break; }
         echo Core\Backup\Vault::export(Core\Backup\Vault::key()) . "\n  Fingerabdruck: " . Core\Backup\Vault::fingerprint() . " – an einem anderen Ort aufbewahren, ohne ihn lässt sich nichts entschlüsseln.\n";
+        break;
+
+    case 'oidc:selftest':
+    case 'monitor:selftest':
+        $res = $cmd === 'oidc:selftest' ? Core\Oidc\SelfTest::run() : Core\Monitoring\SelfTest::run();
+        foreach ($res['fails'] as $f) echo "  FEHLER: $f\n";
+        echo "  {$res['ok']} Prüfungen bestanden, " . count($res['fails']) . " fehlgeschlagen\n";
+        exit($res['fails'] ? 1 : 0);
+
+    case 'oidc:allow':
+        // Konto vorab freigeben: verknüpft sich bei der ersten Anmeldung über den Anbieter (E-Mail bestätigt), auch ohne Just-in-time
+        $p = Core\Oidc\Providers::all()['main'] ?? null;
+        if (!$p || ($args[0] ?? '') === '') { fwrite(STDERR, "Aufruf: oidc:allow <email> [name] --site=<key> (Anbieter in Benutzer & Rollen → Anmeldung & Sicherheit einrichten)\n"); exit(1); }
+        try {
+            $id = Core\Oidc\Accounts::allow($p, (string) $args[0], (string) ($args[1] ?? ''));
+        } catch (Throwable $e) { fwrite(STDERR, $e->getMessage() . "\n"); exit(1); }
+        echo "Freigegeben: {$args[0]} (Konto $id, Rolle {$p['role']}, " . site()->key . ")\n";
         break;
 
     case 'security-log:selftest':

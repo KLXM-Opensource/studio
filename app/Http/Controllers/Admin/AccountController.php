@@ -57,6 +57,7 @@ final class AccountController extends AdminController
     {
         $user = $this->auth($r);
         if (!empty($user['network_uid'])) return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwalten Sie in der Netzwerk-Verwaltung.'));
+        if (\Core\Oidc\Accounts::managed($user)) return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwaltet der Identitätsanbieter.'));
         $name = Invites::clean($r->str('name'), Invites::NAME_MAX);
         app()->db->update('users', ['name' => $name], 'id = :id', ['id' => (int) $user['id']]);
         return $this->back('/admin/account#profil', 'success', __('Name gespeichert.'));
@@ -67,6 +68,7 @@ final class AccountController extends AdminController
     {
         $user = $this->auth($r);
         if (!empty($user['network_uid'])) return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwalten Sie in der Netzwerk-Verwaltung.'));
+        if (\Core\Oidc\Accounts::managed($user)) return $this->back('/admin/account', 'error', __('Ihre Anmeldedaten verwaltet der Identitätsanbieter.'));
         $row = app()->db->fetch('SELECT * FROM users WHERE id = ?', [(int) $user['id']]);
         $new = strtolower(trim($r->str('email')));
         $old = ['email_new' => $new];

@@ -80,9 +80,9 @@ final class PasskeyController extends AdminController
         $limiter->clear($key);
         Mfa::remember($db, (int) $row['id'], 'passkey');
         if ($net) {
-            if ($err = Network::loginShadow($row, 'login')) return Response::json(['error' => $err], 403);
+            if ($err = Network::loginShadow($row, 'login', ['hwk', 'user', 'mfa'])) return Response::json(['error' => $err], 403);
         } else {
-            app()->auth->login((int) $row['id']);
+            app()->auth->login((int) $row['id'], ['amr' => ['hwk', 'user', 'mfa']]);
             if (Network::isNetworkUser()) Network::log('login', site()->key, (string) $row['email'], 'passkey');
         }
         $next = $r->str('next');
@@ -98,7 +98,7 @@ final class PasskeyController extends AdminController
     {
         $user = $this->auth($r);
         $row = Mfa::row($user);
-        if (!$row) throw new HttpException(404);
+        if (!$row || \Core\Oidc\Accounts::managed($row)) throw new HttpException(404);   // Anbieter-Konten: Passkeys beim Anbieter
         [$db, $uid] = Mfa::store($user);
         return ['user' => $user, 'row' => $row, 'db' => $db, 'uid' => $uid, 'local' => $db === app()->db, 'pol' => Mfa::allowed($user)];
     }

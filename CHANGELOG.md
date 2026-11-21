@@ -10,6 +10,22 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Anmeldung per OpenID Connect und signierte Überwachung (Standard aus)
+- **OpenID Connect** (`Core\Oidc`): Anmeldung über einen Identitätsanbieter (z. B. den Hub einer Agentur) – Authorization Code Flow
+  mit PKCE S256, `state`, `nonce`, Discovery, JWKS mit Schlüsselwechsel, ID-Token RS256/EdDSA ohne neue Abhängigkeit (openssl,
+  libsodium), strenge Prüfung von iss/aud/azp/exp/iat/nonce/at_hash. Einstellung unter Benutzer & Rollen → Anmeldung & Sicherheit
+  (Client-Geheimnis verschlüsselt) oder `'oidc'` in der Website-Konfiguration; Rolle automatisch (Netzwerk-Administration im Netzwerk,
+  sonst Administration) oder wählbar, Claim- und Domain-Bedingung, Pflicht zum zweiten Faktor (`amr`), Just-in-time-Anlage oder
+  `oidc:allow`. Konten des Anbieters (`users.idp`, Tabelle `user_identities`) ohne lokales Passwort, gekennzeichnet („Agentur-Konto“),
+  lokal sperrbar; bestehende Konten mit Passwort werden nie übernommen; der lokale Notfall-Admin bleibt. Im Netzwerk gilt die Anmeldung
+  per Einmal-Anmeldung für alle Websites; vom Anbieter ausgelöste Anmeldung (`?iss=`), Abmelden beim Anbieter (RP-initiated logout).
+  `Auth::amr()`/`Auth::strong()` nennen das Verfahren der Anmeldung. Selbsttest `oidc:selftest`.
+- **Überwachung** (`Core\Monitoring`, Grundeinstellungen → Überwachung): `GET /api/monitoring/status` nach Protokoll `status-v1` –
+  nur mit Ed25519-signierter Anfrage (Zeitstempel, Nonce gegen Wiederholung): Versionen, Kit, Erweiterungen, Ampel der Prüfungen
+  (`Core\Health`, gemeinsam mit `health`), letzte Sicherung, Integrität; keine Inhalte oder Personendaten. Selbsttest `monitor:selftest`.
+- `Core\Http\Fetch::post()` (Token-Endpunkte), Optionen `any_status` und `certinfo` (Ablauf des TLS-Zertifikats); `SecurityLog`-Ereignisse
+  `oidc-failed` und `monitor-denied` (fail2ban-Filter ergänzt). Rückweg-Links der Einstellungsseiten im Dunkelmodus mit genug Kontrast.
+
 ### Weniger Bytes: Teile der Verwaltung bei Bedarf, kleinere Demo-Medien und Downloads
 - `admin.js` lädt selten gebrauchte Teile erst bei Bedarf (`resources/js/admin-*.mjs`, `_lazy.js`): KI-Oberfläche nur mit
   KI-Konfiguration, Block-Designer, Externe Quellen, Grundeinstellungen → KI, Feldtyp „Wiederholung“. `admin.js` schrumpft von

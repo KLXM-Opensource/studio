@@ -28,7 +28,7 @@ final class Auth
                 $id = null;
             }
             if ($id) {
-                $this->user = $this->db->fetch('SELECT id, email, name, role, locale, appearance, ui_prefs, network_uid, auth_ver, disabled, totp_enabled FROM users WHERE id = ?', [$id]);
+                $this->user = $this->db->fetch('SELECT id, email, name, role, locale, appearance, ui_prefs, network_uid, auth_ver, disabled, totp_enabled, idp FROM users WHERE id = ?', [$id]);
                 // Konto gesperrt, Passwort/2FA geändert (auth_ver) oder Netzwerk-Konto nicht mehr gültig → Sitzung endet sofort
                 if ($this->user && !$this->sessionValid($this->user)) {
                     $this->logout();
@@ -93,6 +93,9 @@ final class Auth
         $this->session->set('site', self::siteMark());
         $this->session->set('login_at', time());
         $this->session->set('auth_ver', (int) $this->db->fetchValue('SELECT auth_ver FROM users WHERE id = ?', [$uid]));
+        // Verfahren der Anmeldung (Werte nach RFC 8176: pwd, otp, hwk, mfa …) – z. B. für einen Anbieter, der den zweiten Faktor verlangt
+        $this->session->set('amr', array_values(array_filter(array_map('strval', (array) ($extra['amr'] ?? [])), fn($v) => preg_match('~^[a-z]{2,10}$~', $v))));
+        unset($extra['amr']);
         foreach ($extra as $k => $v) $this->session->set($k, $v);
         $this->db->update('users', ['last_login' => now()], 'id = :id', ['id' => $uid]);
         $this->loaded = false;
@@ -102,6 +105,18 @@ final class Auth
         if (Extensions::listens('user.login') && ($u = $this->db->fetch('SELECT email, role FROM users WHERE id = ?', [$uid]))) {
             Extensions::emit(new Events\UserLoggedIn($uid, (string) $u['email'], (string) $u['role'], (string) (app()->request?->ip() ?? '')));
         }
+    }
+
+    /** Verfahren der laufenden Anmeldung (RFC 8176), z. B. ['pwd', 'otp'] – leer = unbekannt (Einladung, Domainwechsel) */
+    public function amr(): array
+    {
+        return array_values(array_map('strval', (array) $this->session->get('amr', [])));
+    }
+
+    /** Sitzung mit zweitem Faktor bzw. Passkey begonnen? */
+    public function strong(): bool
+    {
+        return (bool) array_intersect($this->amr(), ['otp', 'hwk', 'swk', 'mfa']);
     }
 
     /** Abgelehnte Anmeldung an Erweiterungen melden (Extension::on 'user.login_failed') */
@@ -213,7 +228,7 @@ final class Auth
         if (Mfa::hasFactor($row, $this->db)) {
             return $this->pendingSecondFactor(['uid' => (int) $row['id']]);
         }
-        $this->login((int) $row['id']);
+        $this->login((int) $row['id'], ['amr' => ['pwd']]);
         return null;
     }
 

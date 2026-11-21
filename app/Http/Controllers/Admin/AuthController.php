@@ -53,7 +53,17 @@ final class AuthController extends AdminController
     public function logout(Request $r): Response
     {
         if (Csrf::valid($r)) {
+            // Beim Anbieter mit abmelden (OpenID Connect, falls eingestellt) – Adresse vor dem Ende der Sitzung ermitteln
+            $idp = OidcController::providerLogout();
             app()->auth->logout();
+            // Weiter zum Anbieter über eine kleine Zwischenseite: form-action 'self' der Verwaltung würde eine Weiterleitung
+            // nach dem Formular auf eine fremde Adresse sperren
+            if ($idp !== null) {
+                $html = '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="robots" content="noindex">'
+                    . '<meta http-equiv="refresh" content="0;url=' . e($idp) . '"><title>' . e(__('Abmelden')) . '</title></head><body>'
+                    . '<p><a href="' . e($idp) . '">' . e(__('Weiter zur Abmeldung beim Anbieter')) . '</a></p></body></html>';
+                return self::secure(new Response($html, 200))->header('Referrer-Policy', 'no-referrer');
+            }
             // Abmelden aus der Leiste der Website: auf derselben Seite bleiben – ohne Leiste, mit kurzer Meldung (?abgemeldet,
             // SiteController::render). Nur eigene Pfade, nie die Verwaltung (sonst wie bisher zur Anmeldung)
             $back = $r->str('back');
