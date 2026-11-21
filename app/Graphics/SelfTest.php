@@ -111,6 +111,19 @@ final class SelfTest
         $w = Svg::clean($src, ['keep_ids' => true]);
         self::t(!str_contains($w['svg'], 'data-ge-') && !str_contains($w['svg'], 'data-locked'), 'ohne editor: keine Editor-Daten');
         self::t(($w['images'] ?? 0) === 1 && !str_contains($w['svg'], '<image'), 'Pixelbild entfernt und gezählt (Meldung im Editor)');
+        // Formatvorlagen (data-ge-styles): nur Base64; Typografie bleibt in beiden Fassungen (Ausbaustufe 3a)
+        $b64 = base64_encode('{"p":[{"n":"Titel","props":{"font-size":"32"}}],"c":[]}');
+        $t = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-ge-styles="' . $b64 . '"><g data-ge-styles="x&lt;script&gt;"/>'
+            . '<text x="1" y="9" data-ge-para="al:justify;hy:de" style="font-feature-settings:&quot;smcp&quot;, &quot;liga&quot; 0;font-variation-settings:\'wdth\' 80" word-spacing="2">A<tspan baseline-shift="super" font-size="60%">2</tspan></text></svg>';
+        $e = Svg::clean($t, ['editor' => true]);
+        self::t(str_contains($e['svg'], 'data-ge-styles="' . $b64 . '"') && substr_count($e['svg'], 'data-ge-styles') === 1, 'Formatvorlagen: Base64 bleibt, anderes wird verworfen');
+        self::t(str_contains($e['svg'], 'data-ge-para="al:justify;hy:de"'), 'Absatz-Einstellungen in der Arbeitsfassung');
+        $w = Svg::clean($t, ['keep_ids' => true]);
+        self::t(str_contains($w['svg'], 'font-feature-settings') && str_contains($w['svg'], 'font-variation-settings') && str_contains($w['svg'], 'baseline-shift="super"') && str_contains($w['svg'], 'word-spacing="2"'),
+            'OpenType, Achsen, Grundlinienversatz und Wortabstand bleiben in der Web-Fassung');
+        // Persönliche Einstellungen: nur bekannte Werte
+        $p = Graphics::prefs(['ui_prefs' => json_encode(['grafik' => ['fontFav' => ['Lato, sans-serif', '<b>x</b>', str_repeat('a', 200)], 'colorMode' => 'cmyk']])]);
+        self::t($p['fontFav'] === ['Lato, sans-serif'] && $p['colorMode'] === 'hex', 'Einstellungen: Schriftnamen ohne Markup, unbekannter Farbmodus → hex');
     }
 
     /** Rolle vorübergehend setzen (wie ExtensionsSelfTest::actAs) */

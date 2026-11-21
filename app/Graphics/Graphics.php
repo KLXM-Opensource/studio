@@ -399,6 +399,52 @@ final class Graphics
         return $out;
     }
 
+    // ================================================================= Formatvorlagen für Text (Bibliothek der Website)
+
+    /** Eigenschaften, die eine Vorlage tragen darf (Zeichen bzw. Absatz) */
+    private const STYLE_PROPS = ['font-family', 'font-weight', 'font-style', 'font-size', 'fill', 'letter-spacing', 'text-decoration', 'font-feature-settings', 'font-variation-settings'];
+    private const STYLE_PARA = ['data-ge-para', 'data-ge-lh', 'text-anchor', 'word-spacing'];
+
+    /** @return array{p: list<array<string, mixed>>, c: list<array<string, mixed>>} Absatz- und Zeichenvorlagen der Website */
+    public static function textStyles(): array
+    {
+        return self::cleanStyles(app()->settings->get('graphic_text_styles', []));
+    }
+
+    /** Vorlagen der Website speichern (bereinigt: bekannte Eigenschaften, Werte ohne Markup, url(), Ausdrücke) */
+    public static function saveTextStyles(mixed $styles): array
+    {
+        $clean = self::cleanStyles($styles);
+        app()->settings->set('graphic_text_styles', $clean);
+        return $clean;
+    }
+
+    /** @return array{p: list<array<string, mixed>>, c: list<array<string, mixed>>} */
+    public static function cleanStyles(mixed $in): array
+    {
+        $out = ['p' => [], 'c' => []];
+        $val = fn(mixed $v): ?string => is_scalar($v) && ($s = trim((string) $v)) !== '' && mb_strlen($s) <= 300
+            && !preg_match('~[<>{}@\\\\]|url\(|expression|javascript:|data:~i', $s) ? $s : null;
+        foreach (['p', 'c'] as $kind) {
+            foreach (is_array($in[$kind] ?? null) ? $in[$kind] : [] as $st) {
+                if (!is_array($st)) continue;
+                $n = trim(strip_tags((string) ($st['n'] ?? '')));
+                if ($n === '' || mb_strlen($n) > 60) continue;
+                $props = [];
+                foreach (self::STYLE_PROPS as $k) if (($v = $val($st['props'][$k] ?? null)) !== null) $props[$k] = $v;
+                $row = ['n' => $n, 'props' => $props];
+                if ($kind === 'p') {
+                    $para = [];
+                    foreach (self::STYLE_PARA as $k) if (($v = $val($st['para'][$k] ?? null)) !== null) $para[$k] = $v;
+                    $row['para'] = $para;
+                }
+                $out[$kind][] = $row;
+                if (count($out[$kind]) >= 100) break;
+            }
+        }
+        return $out;
+    }
+
     // ================================================================= Persönliche Einstellungen (Core\UiPrefs, Schlüssel „grafik“)
 
     /** Farbmodi des Bereichs „Farbe“ */

@@ -391,3 +391,14 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-ot__grp legend { padding: 0; margin: 4px 0 2px }
 .ge-ot__tag { margin-left: auto; font: 600 10.5px var(--adm-mono, monospace); color: var(--adm-t3) }
 .ge-row4 .ge-cp__num { width: auto }
+
+/* Formatvorlagen (styles.js) */
+.ge-sty__head { display: flex; align-items: center; justify-content: space-between; gap: 8px }
+.ge-sty__head .ge-h3 { margin: 6px 0 }
+.ge-stys { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px }
+.ge-sty { display: flex; align-items: center; gap: 2px; border-radius: 7px }
+.ge-sty.is-on { background: var(--adm-accent-bg); box-shadow: inset 0 0 0 1.5px var(--adm-a) }
+.ge-sty__apply { flex: 1; min-width: 0; display: grid; gap: 1px; padding: 5px 8px; border: 0; border-radius: 7px; background: none; color: var(--adm-ink); text-align: left; cursor: pointer }
+.ge-sty__apply:hover { background: var(--adm-hover) }
+.ge-sty__name { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ge-sty__meta { color: var(--adm-t3); font: 500 11px var(--adm-font) }

@@ -5,6 +5,7 @@
  *            Grundlinienversatz, horizontal/vertikal skalieren
  *   Absatz   Ausrichtung inkl. Blocksatz, Zeilen- und Wortabstand, Abstand vor/nach Absätzen, Einzüge, Silbentrennung (DE/EN),
  *            Textrahmen-Breite (Umbruch), Text auf Pfad (Startversatz, lösen)
+ *   Vorlagen Absatz- und Zeichenvorlagen (styles.js)
  *   OpenType Ligaturen, Kapitälchen, Ziffern, Brüche, Hoch-/Tiefstellen, Stilsätze und Zeichenvarianten der Schrift (typo.js)
  * Während der Bearbeitung auf der Fläche wirken Zeichen-Eigenschaften auf die Auswahl im Text; sonst auf die ganzen Texte. MIT
  */
@@ -19,6 +20,7 @@ import { fontPicker, firstFamily, styleLabel, fontItems, itemFor } from './fontp
 import { fontInfo, parseVariations, fmtVariations } from './outline.js';
 import { FEATURES, RADIO_TAGS, parseFeatures, featureOn, paraOf } from './typo.js';
 import { toChars } from './text.js';
+import { buildStylesPanel } from './styles.js';
 
 export { SYSTEM_FONTS, firstFamily } from './fontpicker.js';
 
@@ -27,11 +29,12 @@ const normW = w => w === 'bold' ? 700 : w === 'normal' || !w ? 400 : parseInt(w,
 const AXIS_LABEL = { wght: () => t('Gewicht'), wdth: () => t('Breite'), slnt: () => t('Neigung'), ital: () => t('Kursiv'), opsz: () => t('Optische Größe'), GRAD: () => t('Strichstärke (Grade)') };
 
 export function buildTextPanel(ed) {
-  const G = tabGroup(ed.uid + '-d', [{ id: 'char', label: t('Zeichen') }, { id: 'para', label: t('Absatz') }, { id: 'ot', label: t('OpenType') }], () => api.refresh());
+  const G = tabGroup(ed.uid + '-d', [{ id: 'char', label: t('Zeichen') }, { id: 'para', label: t('Absatz') }, { id: 'ot', label: t('OpenType') }, { id: 'sty', label: t('Vorlagen') }], () => api.refresh());
   G.el.classList.add('ge-pg--text');
   const files = ed.boot.fontFiles || {};
   const items = fontItems(ed.boot);
   const charP = G.panel('char'), paraP = G.panel('para'), otP = G.panel('ot');
+  const SP = buildStylesPanel(ed, G.panel('sty'));
   charP.innerHTML = `<div class="ge-form">
     <div class="ge-lbl ge-lbl--wide"><span aria-hidden="true">${esc(t('Schrift'))}</span><span data-fpslot></span></div>
     <label class="ge-lbl">${esc(t('Schnitt'))} <select class="ge-in" data-tp="face"></select></label>
@@ -212,6 +215,7 @@ export function buildTextPanel(ed) {
     if (document.activeElement !== face) face.innerHTML = styles.map(s => `<option value="${s.w}|${s.i ? 1 : 0}"${s.w === fw && s.i === ital ? ' selected' : ''}>${s.w} ${esc(styleLabel(s))}</option>`).join('');
     refreshAxes(el, fam);
     refreshOT(el, fam);
+    if (G.current() === 'sty') SP.render();
     const pa = el ? paraOf(el) : { al: '', pb: 0, pa: 0, li: 0, ri: 0, fi: 0, hy: '' };
     for (const k of ['pb', 'pa', 'li', 'ri', 'fi']) { const i = q(`[data-tp=${k}]`); if (document.activeElement !== i) i.value = num(pa[k], 2); }
     q('[data-tp=hy]').value = pa.hy || '';

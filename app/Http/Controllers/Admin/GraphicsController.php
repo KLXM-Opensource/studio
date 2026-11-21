@@ -130,11 +130,13 @@ final class GraphicsController extends AdminController
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
                 'clean' => url('/admin/api/grafik/clean'),
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
-                'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'),
+                'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'),
             ],
             'canMediaSvg' => \Core\Features::on('media.svg', false),
             // persönlich (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
             'prefs' => Graphics::prefs(app()->auth->user()),
+            // Formatvorlagen für Text aus der Bibliothek der Website
+            'textStyles' => Graphics::textStyles(),
         ];
     }
 
@@ -203,6 +205,14 @@ final class GraphicsController extends AdminController
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }
+    }
+
+    /** Formatvorlagen für Text in der Bibliothek der Website speichern (Recht wie eigene Bausteine): POST {styles: {p, c}} */
+    public function styles(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'part')) return $deny;
+        return Response::json(['ok' => true, 'styles' => Graphics::saveTextStyles($r->post['styles'] ?? [])]);
     }
 
     /** Eigenen Baustein speichern: POST {svg, name} */
