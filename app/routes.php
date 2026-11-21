@@ -205,6 +205,8 @@ return function (Router $r): void {
     $r->get('/admin/api/geocode', [Admin\SearchController::class, 'geocode']);
     // E-Mail-Konten (Core\Mail\Accounts): weitere Konten, Verwendung je Zweck, Testnachricht, Netzwerk-Konto
     $r->get('/admin/system/mail', [Admin\MailAccountsController::class, 'index']);
+    $r->get('/admin/system/mail/uebersicht', [Admin\MailAccountsController::class, 'overview']);   // Welche Adresse gilt wofür (Core\Mail\Overview)
+    $r->post('/admin/system/mail/uebersicht/test/{type}', [Admin\MailAccountsController::class, 'overviewTest']);
     $r->post('/admin/system/mail/konto', [Admin\MailAccountsController::class, 'save']);
     $r->post('/admin/system/mail/konto/{id}/loeschen', [Admin\MailAccountsController::class, 'delete']);
     $r->post('/admin/system/mail/verwendung', [Admin\MailAccountsController::class, 'routes']);

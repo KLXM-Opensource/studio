@@ -65,6 +65,15 @@ final class SelfTest
                 $eq('Website ohne gültigen Absender → Netzwerk-Konto', Accounts::route('notify')['id'], 'network');
                 $s->set('sys.mail_from', 'web@example.org');
                 $eq('Website mit eigenem Konto bleibt bei ihrem Konto', Accounts::route('notify')['id'], 'standard');
+                // Übersicht „Welche Adresse gilt wofür“ (Core\Mail\Overview): Herkunft aus derselben Rangfolge
+                $std = Accounts::standard();
+                $eq('Herkunft: Netzwerk-Mail über das Netzwerk-Konto', Accounts::resolve('account', true, Accounts::all(), [], $n, $std)['origin'], 'network');
+                $eq('Herkunft: Rückfall aufs Netzwerk-Konto', Accounts::resolve('notify', false, ['standard' => ['from' => ''] + $std], [], $n, ['from' => ''] + $std)['origin'], 'fallback');
+                $eq('Herkunft: fehlendes Konto → Standard', Accounts::resolve('visitor', false, Accounts::all(), ['visitor' => 'fehlt'], null, $std)['origin'], 'missing');
+                $rows = array_column(Overview::rows(true, false), null, 'key');
+                $eq('Übersicht: Anfragen über Konto der Website, Netzwerk-Mails über das Netzwerk-Konto',
+                    [$rows['requests']['acc']['id'] ?? null, \Core\Sites::multi() ? ($rows['network']['acc']['id'] ?? null) : 'network'], ['standard', 'network']);
+                $eq('Übersicht: Netzwerk-Mails nur für die Netzwerk-Administration', isset(Overview::types(false)['network']), false);
             }
 
             // Erweiterung: eigener Zweck und Versandweg
