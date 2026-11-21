@@ -22,6 +22,9 @@ export class TextEditor {
     ta.hidden = false;
     ta.value = plainOf(this.model);
     ta.oninput = () => this.input();
+    // eigenes Rückgängig während der Bearbeitung: das Textfeld kennt nur Getipptes, nicht ⌘B/Farbe/Schreibweise
+    this.ustack = []; this.rstack = [];
+    ta.onbeforeinput = e => this.push(/^insertText|^insertCompositionText/.test(e.inputType) ? 'type' : e.inputType);
     ta.onkeydown = e => this.key(e);
     ta.onkeyup = ta.onselect = () => this.ed.draw();
     this.onSelChange = () => { if (document.activeElement === ta) this.ed.draw(); };
@@ -52,6 +55,7 @@ export class TextEditor {
     const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
     if (e.key === 'Escape') { e.preventDefault(); this.ed.endText(); this.ed.stage.focus(); return; }
     if (e.key === 'Enter' && this.model.path) { e.preventDefault(); return; }   // Text auf Pfad: eine Zeile
+    if (mod && (k === 'z' || k === 'y')) { e.preventDefault(); this.undo(k === 'y' || e.shiftKey); return; }
     if (mod && ['b', 'i', 'u'].includes(k)) {
       e.preventDefault();
       if (k === 'b') this.toggle('font-weight', v => +v >= 600 || v === 'bold', '700', '400');
@@ -115,10 +119,38 @@ export class TextEditor {
     this.format({ [prop]: all ? (isOn(off) === isOn(base) ? null : off) : (isOn(base) ? null : on) });
   }
 
+  /** Stand vor einer Änderung merken (Tippen in einem Zug = ein Schritt) */
+  push(kind) {
+    const now = Date.now();
+    if (kind === 'type' && this.lastKind === 'type' && now - this.lastAt < 1500) { this.lastAt = now; return; }
+    this.ustack.push(this.state());
+    if (this.ustack.length > 200) this.ustack.shift();
+    this.rstack = []; this.lastKind = kind; this.lastAt = now;
+  }
+  state() {
+    return { paras: JSON.parse(JSON.stringify(this.model.paras)), value: this.ta.value, a: this.ta.selectionStart, b: this.ta.selectionEnd, pending: this.pending };
+  }
+  /** ⌘Z / ⇧⌘Z während der Bearbeitung: Text und Formatierung Schritt für Schritt */
+  undo(redo = false) {
+    const from = redo ? this.rstack : this.ustack, to = redo ? this.ustack : this.rstack;
+    if (!from.length) return false;
+    to.push(this.state());
+    const s = from.pop();
+    this.model = { ...this.model, paras: s.paras };
+    this.ta.value = s.value; this.pending = s.pending; this.dirty = true; this.lastKind = null;
+    this.relayout();
+    this.ta.setSelectionRange(s.a, s.b);
+    this.place();
+    this.ed.draw();
+    this.ed.panels?.refresh();
+    return true;
+  }
+
   /** Stil auf die Auswahl anwenden (Farbe, Gewicht …) – Rückgabe: true, wenn es eine Auswahl gab */
   format(patch) {
     const [a, b] = this.range;
     if (a === b) { this.pending = { ...(this.pending || {}), ...patch }; return false; }
+    this.push('format');
     this.model = styleRange(this.model, a, b, patch);
     this.dirty = true;
     this.relayout();
@@ -131,6 +163,7 @@ export class TextEditor {
   setCase(mode) {
     let [a, b] = this.range;
     if (a === b) { a = 0; b = Infinity; }
+    this.push('case');
     this.model = transformCase(this.model, mode, a, b);
     this.ta.value = plainOf(this.model);
     this.dirty = true;
@@ -260,7 +293,7 @@ export class TextEditor {
   end() {
     document.removeEventListener('selectionchange', this.onSelChange);
     const ta = this.ta;
-    ta.hidden = true; ta.oninput = ta.onkeydown = ta.onkeyup = ta.onselect = null;
+    ta.hidden = true; ta.oninput = ta.onkeydown = ta.onkeyup = ta.onselect = ta.onbeforeinput = null;
     const now = JSON.stringify(this.model.paras) + (this.el.getAttribute('data-ge-frame') || '');
     const changed = this.dirty && now !== this.before;
     if (!changed && !this.fresh) {

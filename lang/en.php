@@ -8719,4 +8719,5 @@ return [
     '{n} Bausteine in „{file}“.' => '{n} building blocks in “{file}”.',
     '„{name}“ wird aus der Bibliothek dieser Website gelöscht. Grafiken, die ihn schon enthalten, bleiben unverändert.' => '“{name}” will be deleted from the library of this website. Graphics that already contain it stay unchanged.',
     '„{name}“ wird für alle Websites der Installation gelöscht. Grafiken, die ihn schon enthalten, bleiben unverändert.' => '“{name}” will be deleted for all websites of the installation. Graphics that already contain it stay unchanged.',
+    'Gruppen mit Beschneidung, Maske, Effekt oder Alternativen (switch) bleiben als Gruppe erhalten – Beschneidung und Maske lassen sich unter Objekt → Maske freigeben lösen.' => 'Groups with a clipping path, mask, effect or alternatives (switch) stay grouped – clipping and masks can be released under Object → Release mask.',
 ];

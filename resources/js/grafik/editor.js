@@ -21,7 +21,7 @@ import {
 import { nearestSeg, insertNode, splitAt, joinEnds, nearestEnds, closeSub, reverseSub, nodeKind, setNodeKind } from './pathops.js';
 import {
   isDrawn, drawnChildren, nameOf, typeLabel, isLocked, isHidden, getProp, setProp, eachShape, snapshot, restore,
-  applyTransform, defs, uid, getText, setText, remapIds, paintEl,
+  applyTransform, defs, uid, getText, setText, remapIds, remapClasses, paintEl,
 } from './doc.js';
 import { parseColor, hex } from './color.js';
 import { h, iconBtn, menu, closeMenus, modal, MOD, ALT, SHIFT, isMac } from './ui.js';
@@ -40,6 +40,11 @@ import { optimizeSvg, checkSame, desktopSvg, pdfBlob } from './export.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
+
+/** Vererbte Darstellungseigenschaften (Gruppe aufheben, Kopieren aus einer Gruppe) – opacity wird multipliziert, nicht geerbt */
+const INHERITED = ['fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity', 'stroke-linecap', 'stroke-linejoin',
+  'stroke-miterlimit', 'stroke-dasharray', 'stroke-dashoffset', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor',
+  'letter-spacing', 'color', 'visibility', 'clip-rule'];
 
 /** Formen mit Knoten (Knoten-Werkzeug, Pfad-Befehle) */
 const NODE_SHAPES = ['path', 'rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'];
@@ -159,7 +164,10 @@ export class GraphicEditor {
     this.paper = this.$('.ge-paper');
     this.ov = this.$('.ge-ov');
     this.shadow = this.paper.attachShadow({ mode: 'open' });
-    this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
+    // Die Zeichenfläche erbt nichts von der Verwaltung (Schrift, Größe, Glättung, dunkle Textfarbe): Texte ohne eigene Schrift
+    // sehen aus wie in der Mediathek bzw. auf der Website; currentColor = Tinte (wie das Farbfeld „Schriftfarbe“).
+    // Eigene Eigenschaften (var(--token) der Design-Farben) erben weiter – all betrifft sie nicht.
+    this.shadow.innerHTML = '<style>:host{all:initial;display:block;color:#1F2430}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -266,6 +274,7 @@ export class GraphicEditor {
     this.root = root;
     this.scope = root;
     this.sel = [];
+    this.selMark = [];
     if (label) { this.history = []; this.hi = -1; this.commit(label); this.savedAt = this.hi; }
     this.fitted = false;
     this.fit();
@@ -290,12 +299,24 @@ export class GraphicEditor {
   setSvg(svg, label = t('Grafik ersetzt')) { this.load(svg); this.commit(label); }
 
   // ================================================================= Protokoll (Rückgängig / Wiederholen)
+  /** Pfeiltasten-Schritt, der noch auf weitere Tasten wartet, sofort ins Protokoll (vor ⌘Z oder einem anderen Schritt) */
+  flushNudge() {
+    if (!this.nudgeT) return;
+    clearTimeout(this.nudgeT);
+    this.nudgeT = null;
+    this.commit(this.nudgeLabel);
+  }
+
   commit(label) {
+    this.flushNudge();
+    this.lastDown = null;
     this.conn?.update();
     const svg = this.getSvg();
     if (this.hi >= 0 && this.history[this.hi].svg === svg) return;
     this.history.length = this.hi + 1;
-    this.history.push({ label, svg, sel: this.sel.map(el => this.pathOf(el)), at: Date.now() });
+    // selBefore: Auswahl vor dem Schritt (Pfade im vorigen Stand) – Rückgängig wählt wieder, was vorher gewählt war
+    this.history.push({ label, svg, sel: this.sel.map(el => this.pathOf(el)), selBefore: this.selMark || [], at: Date.now() });
+    this.selMark = this.sel.map(el => this.pathOf(el));
     // höchstens 200 Schritte bzw. ca. 40 MB
     let total = this.history.reduce((s, x) => s + x.svg.length, 0);
     while (this.history.length > 200 || (total > 40e6 && this.history.length > 2)) { total -= this.history.shift().svg.length; if (this.savedAt >= 0) this.savedAt--; }
@@ -304,23 +325,31 @@ export class GraphicEditor {
   }
 
   goto(i) {
+    this.flushNudge();
     if (i < 0 || i >= this.history.length || i === this.hi) return;
     this.finishPen(); this.endText();
+    this.lastDown = null;
+    const back = i < this.hi;
+    const scopePath = this.scope && this.scope !== this.root ? this.pathOf(this.scope) : null;
     this.hi = i;
     const st = this.history[i];
     const parsed = document.importNode(new DOMParser().parseFromString(st.svg, 'image/svg+xml').documentElement, true);
     this.root.replaceWith(parsed);
     this.root = parsed;
-    this.scope = parsed;
-    this.sel = st.sel.map(p => this.byPath(p)).filter(Boolean);
+    // betretene Gruppe bleibt betreten, solange es sie noch gibt
+    const sc = scopePath && this.byPath(scopePath);
+    this.scope = sc && ['g', 'switch'].includes(sc.localName) ? sc : parsed;
+    this.sel = ((back && this.history[i + 1]?.selBefore) || st.sel).map(p => this.byPath(p)).filter(Boolean);
+    if (this.sel[0] && !this.scope.contains(this.sel[0])) this.scope = parsed;
+    this.selMark = this.sel.map(el => this.pathOf(el));
     this.layout();
     this.changed();
   }
-  undo() { this.goto(this.hi - 1); }
-  redo() { this.goto(this.hi + 1); }
+  undo() { this.flushNudge(); this.goto(this.hi - 1); }
+  redo() { this.flushNudge(); this.goto(this.hi + 1); }
   get dirty() { return this.hi !== this.savedAt; }
 
-  pathOf(el) { const p = []; for (let n = el; n && n !== this.root; n = n.parentNode) p.unshift([...n.parentNode.children].indexOf(n)); return p; }
+  pathOf(el) { const p = []; for (let n = el; n && n !== this.root && n.parentNode; n = n.parentNode) p.unshift([...n.parentNode.children].indexOf(n)); return p; }
   byPath(p) { let n = this.root; for (const i of p) { n = n?.children[i]; } return n && n !== this.root ? n : null; }
 
   /** Nach jeder Änderung: Bereiche, Überlagerung, Titel */
@@ -372,6 +401,14 @@ export class GraphicEditor {
     this.draw();
   }
 
+  /** Zweiter Druck auf dasselbe Element der Überlagerung kurz nacheinander (Doppelklick, auch wenn neu gezeichnet wurde) */
+  second(key, e) {
+    const now = Date.now(), last = this.lastDown;
+    const dbl = !!last && last.key === key && now - last.at < 450 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 5;
+    this.lastDown = dbl ? null : { key, at: now, x: e.clientX, y: e.clientY };
+    return dbl;
+  }
+
   /** Bildschirm (clientX/Y) → Dokument */
   toDoc(x, y) {
     const m = this.root.getScreenCTM();
@@ -388,6 +425,7 @@ export class GraphicEditor {
   select(list, add = false) {
     list = (Array.isArray(list) ? list : [list]).filter(Boolean);
     this.sel = add ? [...new Set([...this.sel, ...list])] : list;
+    this.selMark = this.sel.map(el => this.pathOf(el));
     this.nodeSel.clear();
     if (this.sel[0] && this.scope !== this.root && !this.scope.contains(this.sel[0])) this.scope = this.root;
     this.changed(false);
@@ -469,8 +507,9 @@ export class GraphicEditor {
     if (tf && tf.hasAttribute('data-ge-frame')) out.push(this.drawTextFrame(tf));
     ov.innerHTML = out.join('');
     for (const el of ov.querySelectorAll('[data-h]')) el.addEventListener('pointerdown', e => this.handleDown(e, el.dataset.h));
-    for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.nodeDown(e, el.dataset.node));
-    for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('dblclick', e => this.nodeToggle(e, el.dataset.node));
+    // Doppelklick auf Überlagerungs-Elemente: der erste Klick zeichnet die Überlagerung neu, ein dblclick-Ereignis käme dann
+    // nicht mehr an – deshalb zweiten Druck auf dasselbe Element erkennen
+    for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.second('n' + el.dataset.node, e) ? this.nodeToggle(e, el.dataset.node) : this.nodeDown(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-gh]')) el.addEventListener('pointerdown', e => this.grad.down(e, el.dataset.gh));
     for (const el of ov.querySelectorAll('[data-ch]')) el.addEventListener('pointerdown', e => this.connHandleDown(e, el.dataset.ch));
     for (const el of ov.querySelectorAll('[data-guide]')) {
@@ -546,7 +585,7 @@ export class GraphicEditor {
       const f = e.dataTransfer.files?.[0];
       if (f) {
         e.preventDefault();
-        if (/svg/i.test(f.type) || /[.]svg$/i.test(f.name)) f.text().then(tx => this.importSvg(tx, f.name.replace(/[.]svg$/i, '')));
+        if (/svg/i.test(f.type) || /[.]svg$/i.test(f.name)) { const at = this.toDoc(e.clientX, e.clientY); f.text().then(tx => this.importSvg(tx, f.name.replace(/[.]svg$/i, ''), { at })); }
         else toast(t('Der Grafik-Editor arbeitet nur mit Vektoren – Pixelbilder (PNG, JPG …) lassen sich nicht einfügen.'), 'warn');
         return;
       }
@@ -628,15 +667,19 @@ export class GraphicEditor {
       }, () => { this.marquee = null; this.select(this.sel); });
       return;
     }
+    // ⇧: Klick nimmt hinzu bzw. heraus, ⇧+Ziehen verschiebt waagerecht/senkrecht (wie Illustrator/Affinity)
     if (e.shiftKey) {
-      this.select(this.sel.includes(hit) ? this.sel.filter(x => x !== hit) : [...this.sel, hit]);
+      if (!this.sel.includes(hit)) { this.select([...this.sel, hit]); this.moveDrag(e, p); }
+      else this.moveDrag(e, p, () => this.select(this.sel.filter(x => x !== hit)));
       return;
     }
-    if (!this.sel.includes(hit)) this.select([hit]);
-    this.moveDrag(e, p);
+    // Klick ohne Ziehen auf ein Objekt einer Mehrfachauswahl wählt nur dieses; Ziehen verschiebt alle
+    const wasIn = this.sel.includes(hit), many = this.sel.length > 1;
+    if (!wasIn) this.select([hit]);
+    this.moveDrag(e, p, wasIn && many ? () => this.select([hit]) : null);
   }
 
-  moveDrag(e, p0) {
+  moveDrag(e, p0, onClick = null) {
     if (this.sel.some(isLocked)) return;
     let list = this.sel, copied = false;
     let snaps = list.map(snapshot);
@@ -661,6 +704,7 @@ export class GraphicEditor {
     }, () => {
       this.guides = null;
       if (moved) this.commit(copied ? t('Kopie verschoben') : t('Verschoben'));
+      else if (onClick) onClick();
       else this.draw();
     });
   }
@@ -1178,6 +1222,8 @@ export class GraphicEditor {
     if (!this.sel.length) { this.style.fill = fill; this.style.stroke = stroke; this.paintFs(); this.panels.refresh(); return; }
     for (const el of this.sel) eachShape(el, s => {
       setProp(s, 'fill', fill); setProp(s, 'stroke', stroke); if (stroke && stroke !== 'none') setProp(s, 'stroke-width', sw);
+      // Deckkraft von Füllung und Kontur gehört zur Farbe (sonst wird aus 50 % Rot volles Rot)
+      for (const a of ['fill-opacity', 'stroke-opacity']) setProp(s, a, getProp(src, a, false) || null);
       // Farbe des Designs (Token) wandert mit
       for (const a of ['data-ge-ftoken', 'data-ge-stoken']) { const v = src.getAttribute(a); if (v) s.setAttribute(a, v); else s.removeAttribute(a); }
     });
@@ -1203,10 +1249,10 @@ export class GraphicEditor {
     const hit = this.hitAt(e);
     const raw = hit?.raw;
     if (raw && NODE_SHAPES.includes(raw.localName) && !isLocked(hit.el)) {
-      if (this.sel[0] !== raw) { this.sel = [raw]; this.nodeSel.clear(); this.changed(false); }
+      if (this.sel[0] !== raw) { this.sel = [raw]; this.selMark = [this.pathOf(raw)]; this.nodeSel.clear(); this.changed(false); }
       return;
     }
-    if (!e.shiftKey) { this.nodeSel.clear(); if (!raw) this.sel = []; this.changed(false); }
+    if (!e.shiftKey) { this.nodeSel.clear(); if (!raw) { this.sel = []; this.selMark = []; } this.changed(false); }
     void p;
   }
 
@@ -2010,26 +2056,40 @@ export class GraphicEditor {
 
   ungroup() {
     const out = [];
+    let kept = 0;
     for (const g of this.sel) {
       if (!['g', 'switch'].includes(g.localName)) { out.push(g); continue; }
-      // Eigenschaften der Gruppe (transform, Darstellung) an die Kinder weitergeben
+      // Beschneidung, Maske, Filter und <switch> wirken nur auf die Gruppe als Ganzes – Auflösen würde das Bild verändern
+      if (g.localName === 'switch' || ['clip-path', 'mask', 'filter'].some(a => { const v = getProp(g, a, false); return v && v !== 'none'; })) { kept++; out.push(g); continue; }
+      // Eigenschaften der Gruppe (transform, Darstellung) an die Kinder weitergeben – auch aus Klassenregeln (<style>)
       const T = g.hasAttribute('transform') ? docMatrix(g, this.root).multiply(docMatrix(g.parentNode, this.root).inverse()) : null;
-      const inherit = ['fill', 'stroke', 'stroke-width', 'opacity', 'font-family', 'font-size', 'font-weight', 'stroke-linecap', 'stroke-linejoin', 'color'];
+      const cs = g.hasAttribute('class') ? getComputedStyle(g) : null, ps = cs ? getComputedStyle(g.parentNode) : null;
+      const vals = {};
+      for (const a of INHERITED) {
+        let v = getProp(g, a, false);
+        if (!v && cs && cs.getPropertyValue(a) !== ps.getPropertyValue(a)) v = cs.getPropertyValue(a).trim();
+        if (v && v !== 'inherit') vals[a] = v;
+      }
+      const go = parseFloat(cs ? cs.opacity : getProp(g, 'opacity', false));
+      const hidden = isHidden(g);
       for (const c of [...g.children]) {
         g.before(c);
         if (!isDrawn(c)) continue;
-        for (const a of inherit) {
-          const v = getProp(g, a, false);
-          if (!v || getProp(c, a, false)) continue;
-          if (a === 'opacity') setProp(c, a, num((parseFloat(v) || 1) * (parseFloat(getProp(c, 'opacity', false)) || 1)));
-          else c.setAttribute(a, v);
+        for (const [a, v] of Object.entries(vals)) if (!getProp(c, a, false)) c.setAttribute(a, v);
+        if (Number.isFinite(go) && go !== 1) {
+          const co = parseFloat(getProp(c, 'opacity', false));
+          setProp(c, 'opacity', num(go * (Number.isFinite(co) ? co : 1), 4));
         }
+        if (hidden) c.setAttribute('display', 'none');
         if (T) { const pm = parentMatrix(c, this.root); applyTransform(c, pm.multiply(localMatrixOf(g)).multiply(pm.inverse()), this.root); }
         out.push(c);
       }
       g.remove();
     }
-    this.sel = out.filter(isDrawn);
+    if (kept) toast(t('Gruppen mit Beschneidung, Maske, Effekt oder Alternativen (switch) bleiben als Gruppe erhalten – Beschneidung und Maske lassen sich unter Objekt → Maske freigeben lösen.'), 'warn');
+    if (out.length === this.sel.length && out.every((el, i) => el === this.sel[i])) return;
+    // verschachtelte Gruppen in der Auswahl: aufgelöste innere Gruppen sind nicht mehr im Dokument
+    this.sel = [...new Set(out)].filter(el => isDrawn(el) && el.isConnected);
     this.commit(t('Gruppierung aufgehoben'));
   }
 
@@ -2099,7 +2159,8 @@ export class GraphicEditor {
     this.draw();
     this.panels.refresh();
     // mehrere Pfeiltasten hintereinander = ein Schritt im Protokoll
-    this.nudgeT = setTimeout(() => this.commit(t('Verschoben')), 400);
+    this.nudgeLabel = t('Verschoben');
+    this.nudgeT = setTimeout(() => this.flushNudge(), 400);
   }
 
   async toCurves() {
@@ -2132,13 +2193,33 @@ export class GraphicEditor {
     if (!this.sel.length) return;
     this.clip = this.sel.map(el => {
       const c = el.cloneNode(true);
-      const P = parentMatrix(el, this.root);
-      if (!P.isIdentity) { const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `matrix(${[P.a, P.b, P.c, P.d, P.e, P.f].map(v => num(v, 6)).join(' ')})`); g.append(c); return new XMLSerializer().serializeToString(g); }
+      // geerbte Darstellung aus Gruppen mitnehmen (sonst ist die Kopie außerhalb der Gruppe schwarz)
+      for (let p = el.parentNode; p && p !== this.root && p.nodeType === 1; p = p.parentNode) {
+        for (const a of INHERITED) { const v = getProp(p, a, false); if (v && !getProp(c, a, false)) c.setAttribute(a, v); }
+      }
+      const P = parentMatrix(el, this.root), m = [P.a, P.b, P.c, P.d, P.e, P.f].map(v => num(v, 6)).join(' ');
+      if (m !== '1 0 0 1 0 0') { const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `matrix(${m})`); g.append(c); return new XMLSerializer().serializeToString(g); }
       return new XMLSerializer().serializeToString(c);
     });
+    // Verläufe, Pfeilspitzen, Schatten, Masken … gehören zur Kopie, damit sie in einer anderen Grafik genauso aussieht
+    const refs = new Map(), re = /url\(\s*['"]?#([^'")\s]+)/g;
+    const scan = n => {
+      for (const x of [n, ...n.querySelectorAll('*')]) {
+        const ids = [];
+        for (const a of x.attributes) { for (const m of a.value.matchAll(re)) ids.push(m[1]); if (a.localName === 'href' && a.value.startsWith('#')) ids.push(a.value.slice(1)); }
+        for (const id of ids) {
+          if (refs.has(id)) continue;
+          const d = this.root.querySelector('#' + CSS.escape(id));
+          if (!d || this.sel.some(s => s === d || s.contains(d))) continue;
+          refs.set(id, d); scan(d);
+        }
+      }
+    };
+    this.sel.forEach(scan);
+    const defsText = refs.size ? `<defs>${[...refs.values()].map(d => new XMLSerializer().serializeToString(d)).join('')}</defs>` : '';
     if (cut) { this.sel.forEach(el => el.remove()); this.sel = []; this.commit(t('Ausgeschnitten')); }
     // auch als SVG-Text in die Zwischenablage des Systems (für Desktop-Programme und andere Grafiken)
-    this.clipText = `<svg xmlns="${NS}" viewBox="${[this.vb.x, this.vb.y, this.vb.w, this.vb.h].map(v => num(v)).join(' ')}">${this.clip.join('')}</svg>`;
+    this.clipText = `<svg xmlns="${NS}" data-ge-clip="1" viewBox="${[this.vb.x, this.vb.y, this.vb.w, this.vb.h].map(v => num(v)).join(' ')}">${defsText}${this.clip.join('')}</svg>`;
     navigator.clipboard?.writeText?.(this.clipText).catch(() => { /* ohne Berechtigung: nur intern */ });
     toast(cut ? t('Ausgeschnitten') : t('Kopiert'));
   }
@@ -2239,7 +2320,8 @@ export class GraphicEditor {
       const raster = [...(dt?.items || [])].some(it => it.kind === 'file' && /^image\/(?!svg)/.test(it.type));
       e.preventDefault();
       if (text && this.clipText && text.trim() === this.clipText.trim() && this.clip?.length) { this.paste(); return; }
-      if (/<svg[\s>]/i.test(text)) { this.importSvg(text); return; }
+      // Kopie aus einer anderen Grafik (anderer Tab/Editor): an derselben Stelle, ohne Hülle
+      if (/<svg[\s>]/i.test(text)) { this.importSvg(text, '', { inPlace: /^<svg[^>]*\sdata-ge-clip="1"/.test(text.trim()) }); return; }
       if (raster) { toast(t('Der Grafik-Editor arbeitet nur mit Vektoren – Pixelbilder (PNG, JPG …) lassen sich nicht einfügen.'), 'warn'); return; }
       if (this.clip?.length) this.paste();
     };
@@ -2262,7 +2344,8 @@ export class GraphicEditor {
     el.setAttribute('d', pathToString(fromNodes(subs)));
     this.draw();
     clearTimeout(this.nudgeT);
-    this.nudgeT = setTimeout(() => this.commit(t('Knoten bearbeitet')), 400);
+    this.nudgeLabel = t('Knoten bearbeitet');
+    this.nudgeT = setTimeout(() => this.flushNudge(), 400);
   }
 
   swapFs() {
@@ -2577,8 +2660,11 @@ export class GraphicEditor {
     inp.click();
   }
 
-  /** SVG-Text einfügen: erst über den Server bereinigen, dann als Gruppe in die Mitte */
-  async importSvg(text, name = '') {
+  /**
+   * SVG-Text einfügen: erst über den Server bereinigen, dann als Gruppe in die Mitte (bzw. an die Stelle at = Dokumentpunkt).
+   * inPlace: eigene Kopie aus einem anderen Grafik-Editor – Objekte ohne Hülle an derselben Stelle wie im Original.
+   */
+  async importSvg(text, name = '', { at = null, inPlace = false } = {}) {
     const res = await this.api('POST', this.boot.urls.clean, { svg: text });
     if (!res) return;
     if (res.images) toast(t('Pixelbilder in der SVG wurden nicht übernommen – der Grafik-Editor arbeitet nur mit Vektoren.'), 'warn');
@@ -2586,11 +2672,28 @@ export class GraphicEditor {
     const vb = (doc.getAttribute('viewBox') || '0 0 100 100').split(/[\s,]+/).map(Number);
     const g = document.createElementNS(NS, 'g');
     if (name) g.setAttribute('data-name', name);
+    // Darstellung der Wurzel (z. B. fill="none" stroke="currentColor" bei Strich-Symbolen) gilt für alle Kinder → auf die Gruppe
+    const ROOT_ONLY = ['xmlns', 'version', 'baseProfile', 'viewBox', 'width', 'height', 'x', 'y', 'id', 'preserveAspectRatio', 'zoomAndPan', 'data-name', 'data-ge-clip'];
+    for (const a of [...doc.attributes]) if (!a.name.startsWith('xmlns') && !ROOT_ONLY.includes(a.name)) g.setAttribute(a.name, a.value);
     for (const c of [...doc.children]) if (!['title', 'desc', 'metadata'].includes(c.localName)) g.append(document.importNode(c, true));
     this.freshIds(g);
-    const tvb = this.vb, sc = Math.min(1, tvb.w * 0.8 / (vb[2] || 1), tvb.h * 0.8 / (vb[3] || 1));
-    g.setAttribute('transform', `translate(${num(tvb.x + (tvb.w - vb[2] * sc) / 2 - vb[0] * sc)} ${num(tvb.y + (tvb.h - vb[3] * sc) / 2 - vb[1] * sc)})${sc !== 1 ? ` scale(${num(sc, 5)})` : ''}`);
+    remapClasses(g, this.root);
+    const own = inPlace && !g.attributes.length;
+    if (!own) {
+      const tvb = this.vb, sc = Math.min(1, tvb.w * 0.8 / (vb[2] || 1), tvb.h * 0.8 / (vb[3] || 1));
+      const cx = at ? at.x : tvb.x + tvb.w / 2, cy = at ? at.y : tvb.y + tvb.h / 2;
+      g.setAttribute('transform', `translate(${num(cx - vb[2] * sc / 2 - vb[0] * sc)} ${num(cy - vb[3] * sc / 2 - vb[1] * sc)})${sc !== 1 ? ` scale(${num(sc, 5)})` : ''}`);
+    }
     this.target.append(g);
+    if (own) {
+      // Kopie aus einer anderen Grafik: die Objekte selbst einfügen (keine zusätzliche Gruppe), Lage wie im Original
+      const kids = [...g.children];
+      g.replaceWith(...kids);
+      if (this.target !== this.root) for (const k of kids) if (isDrawn(k)) applyTransform(k, new DOMMatrix(), this.root);
+      this.sel = kids.filter(isDrawn);
+      this.commit(t('Eingefügt'));
+      return;
+    }
     this.sel = [g];
     this.commit(t('Importiert'));
   }
@@ -2749,7 +2852,8 @@ export class GraphicEditor {
       });
       if (!r) return null;
       meta = r;
-      if (isMedia && r.title) this.setA11y(r.title, [...this.root.children].find(c => c.localName === 'desc')?.textContent || '');
+      // Titel gehört zur Grafik: als Schritt ins Protokoll, sonst verschwände er mit Rückgängig/Wiederholen
+      if (isMedia && r.title) { this.setA11y(r.title, [...this.root.children].find(c => c.localName === 'desc')?.textContent || ''); this.commit(t('Dokument geändert')); }
     }
     this.webPrefs = prefs;
     try { if (!web) web = await this.webSvg(prefs); } catch (e) { console.error(e); web = null; }
