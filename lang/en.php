@@ -8988,4 +8988,6 @@ return [
     '{prop}, Schlüsselbild bei {s}' => '{prop}, keyframe at {s}',
     '„Pfad folgen“: ein Objekt und zuletzt den Weg (Pfad) auswählen.' => '“Follow path”: select an object and, last, the path.',
     '„Zählen“ gilt für Texte mit einer Zahl.' => '“Count up” applies to texts with a number.',
+    'Auf der Website erscheint in der Ecke der Grafik ein Knopf „Animation anhalten“ (WCAG 2.2.2), außerhalb des Bildes hält die Bewegung an, bei „Bewegung reduzieren“ steht das Endbild.' => 'On the website a “Pause animation” button appears in the corner of the graphic (WCAG 2.2.2); outside the viewport the motion pauses, with “reduce motion” the final frame is shown.',
+    'Bewegung länger als 5 Sekunden' => 'Motion longer than 5 seconds',
 ];

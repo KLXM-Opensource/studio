@@ -421,4 +421,8 @@ return [
 
     // Bewegte Grafiken (Core\Graphics\Motion)
     'Animation abspielen' => 'Play animation',
+    'Animation anhalten' => 'Pause animation',
+    'Animation fortsetzen' => 'Resume animation',
+    'Animation angehalten' => 'Animation paused',
+    'Animation läuft' => 'Animation playing',
 ];

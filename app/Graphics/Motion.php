@@ -36,8 +36,13 @@ use Core\Svg;
  */
 final class Motion
 {
-    /** Fassung der Ausgabe – mit jeder Änderung an Aufbau oder CSS erhöhen (neue Dateinamen) */
-    public const VERSION = 1;
+    /**
+     * Fassung der Ausgabe – fließt mit der Prüfsumme dieser Datei (generator()) in die Dateinamen: jede Änderung am Aufbau oder CSS
+     * ergibt neue Adressen, auch wenn niemand die Zahl erhöht (vorher konnte nach einem Update alte CSS aus dem Zwischenspeicher kommen).
+     */
+    public const VERSION = 2;
+    /** Automatisch gestartete Bewegung, die länger läuft (s), bekommt einen Knopf „Animation anhalten“ (WCAG 2.2.2) */
+    public const PAUSE_AFTER = 5.0;
     public const TRIGGERS = ['load', 'view', 'hover', 'click'];
     public const DIRS = ['normal', 'reverse', 'alternate', 'alternate-reverse'];
     /** Verläufe (Editor-Namen → CSS) */
@@ -55,6 +60,7 @@ final class Motion
 
     /** @var array<string, ?array> */
     private static array $memo = [];
+    private static ?string $gen = null;
     /** @var array<string, int> Einbindungen je Grafik in dieser Anfrage */
     private static array $seen = [];
 
@@ -221,7 +227,23 @@ final class Motion
         }
         $svg = str_replace('__GMALT__', e(trim($alt) !== '' ? $alt : (string) ($m['title'] ?? '')), $svg);
         $svg = str_replace('__GMPLAY__', e(lt('Animation abspielen')), $svg);
+        if (!empty($b['pause'])) $svg = self::pauseBox($svg, $key);
         return '<link rel="stylesheet" href="' . e($b['css']) . '" data-gm-css>' . $svg;
+    }
+
+    /**
+     * Hülle mit Knopf „Animation anhalten“ (WCAG 2.2.2): ein echter <button> in der Ecke der Grafik, erst sichtbar, wenn das
+     * Skript läuft (ohne Skript, bei „Bewegung reduzieren“ und „Dezente Animationen“ aus steht ohnehin das Endbild). Der Zustand
+     * wird über die Beschriftung und eine Statusmeldung angesagt.
+     */
+    private static function pauseBox(string $svg, string $key): string
+    {
+        $icon = '<svg class="cms-gm-pause__i" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">'
+            . '<path class="cms-gm-pause__p" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/><path class="cms-gm-pause__r" d="M8 5.5v13l11-6.5z"/></svg>';
+        return '<span class="cms-gm-box ' . e($key) . '-box">' . $svg
+            . '<button type="button" class="cms-gm-pause" hidden data-gm-pause="' . e(lt('Animation anhalten')) . '" data-gm-resume="'
+            . e(lt('Animation fortsetzen')) . '" data-gm-paused="' . e(lt('Animation angehalten')) . '" data-gm-running="' . e(lt('Animation läuft'))
+            . '" aria-label="' . e(lt('Animation anhalten')) . '">' . $icon . '</button><span class="cms-gm-sr" role="status"></span></span>';
     }
 
     /** Skript nur auf Seiten, die es brauchen (Auslöser „sobald sichtbar“, Klick, Hotspots, Zählen, Schleifen) */
@@ -250,7 +272,7 @@ final class Motion
         if (!$model) return self::$memo[$mk] = null;
         $pal = Themed::isThemed($web) ? Themed::palette() : [];
         $darkOn = Themed::darkActive();
-        $hash = substr(sha1(self::VERSION . "\n" . $web . "\n" . json_encode($model) . "\n" . json_encode($pal) . ($darkOn ? 'd' : '')), 0, 10);
+        $hash = substr(sha1(self::generator() . "\n" . $web . "\n" . json_encode($model) . "\n" . json_encode($pal) . ($darkOn ? 'd' : '')), 0, 10);
         $id = (string) (int) $m['id'];
         $base = 'gm-' . $id . '-' . $hash;
         $cache = site()->storage('cache/grafik-motion');
@@ -272,7 +294,7 @@ final class Motion
             foreach (glob($cache . '/gm-' . $id . '-*.json') ?: [] as $old) if (filemtime($old) < time() - 86400) @unlink($old);
             $title = str_replace('*/', '', (string) ($m['title'] ?? $m['original_name'] ?? ''));
             if (@file_put_contents("$dir/$base.css", "/* KLXM Studio – Grafik „" . $title . "“, automatisch erzeugt */\n" . $out['css'], LOCK_EX) === false) return self::$memo[$mk] = null;
-            $meta = ['key' => $out['key'], 'svg' => $out['svg'], 'links' => $out['links'], 'interactive' => $out['interactive'], 'dark' => $out['dark'], 'js' => $out['js']];
+            $meta = ['key' => $out['key'], 'svg' => $out['svg'], 'links' => $out['links'], 'interactive' => $out['interactive'], 'dark' => $out['dark'], 'js' => $out['js'], 'pause' => $out['pause']];
             @file_put_contents("$cache/$base.json", json_encode($meta), LOCK_EX);
         }
         $meta['css'] = Graphics::url('m/' . $base . '.css');
@@ -284,6 +306,27 @@ final class Motion
     {
         self::$memo = [];
         self::$seen = [];
+    }
+
+    /**
+     * Kennung des Erzeugers: Fassung + Prüfsumme dieser Datei und des Website-Skripts. Gehört zu jedem Dateinamen der Ausgabe –
+     * nach einem Update entstehen neue Dateien, alte (gecachte) CSS kann nicht mehr ausgeliefert werden.
+     */
+    public static function generator(): string
+    {
+        if (self::$gen !== null) return self::$gen;
+        $parts = [(string) self::VERSION, (string) @sha1_file(__FILE__)];
+        $js = dirname(__DIR__, 2) . '/resources/js/graphic-motion.js';
+        if (is_file($js)) $parts[] = (string) @sha1_file($js);
+        return self::$gen = substr(sha1(implode(':', $parts)), 0, 12);
+    }
+
+    /** Braucht die Szene einen Knopf zum Anhalten? Automatisch (Laden, Sichtbar) oder per Klick gestartet und länger als 5 s bzw. endlos */
+    public static function needsPause(array $scene): bool
+    {
+        if (!in_array($scene['tr'] ?? 'view', ['load', 'view', 'click'], true)) return false;
+        $it = (int) ($scene['it'] ?? 1);
+        return $it === 0 || (float) ($scene['dl'] ?? 0) + (float) ($scene['d'] ?? 0) * $it > self::PAUSE_AFTER;
     }
 
     /**
@@ -314,7 +357,7 @@ final class Motion
 
     /**
      * @param array{w: int, h: int} $size
-     * @return array{key: string, svg: string, css: string, links: list<string>, interactive: bool, dark: bool, js: bool}
+     * @return array{key: string, svg: string, css: string, links: list<string>, interactive: bool, dark: bool, js: bool, pause: bool}
      */
     public static function build(string $web, ?string $dark, array $model, string $key, array $size, bool $standalone = false): array
     {
@@ -400,6 +443,11 @@ final class Motion
         $links = [];
         $interactive = false;
         $js = in_array($sc['tr'], ['view', 'click'], true) || $sc['it'] !== 1;
+        // Knopf „Animation anhalten“: braucht das Skript; beim Auslöser „beim Laden“ spielt die Bewegung dann erst mit dem Skript
+        // (ohne Skript bleibt das Endbild stehen – eine endlose Bewegung ohne Halt-Möglichkeit gäbe es sonst)
+        $pause = !$standalone && self::needsPause($sc);
+        if ($pause) $js = true;
+        $cssScene = $pause && $sc['tr'] === 'load' ? ['tr' => 'armed'] + $sc : $sc;
         $tips = [];
         $hotIdx = [];
         $n = 0;
@@ -434,7 +482,7 @@ final class Motion
                     $js = true;
                 }
                 if (isset($a['on'], $hotIdx[$a['on']])) $js = true;
-                $css[] = self::itemCss($S, $n, $a, $sc, $hotIdx, $dark !== null || $standalone);
+                $css[] = self::itemCss($S, $n, $a, $cssScene, $hotIdx, $dark !== null || $standalone);
             }
             if ($it['link'] !== '') {
                 $aEl = $doc->createElementNS(self::NS, 'a');
@@ -543,7 +591,24 @@ final class Motion
         if ($interactive) $base[] = $S . ' .gm-l,' . $S . ' .gm-hot{cursor:pointer;text-decoration:none}' . $S . ' .gm-l:focus-visible,' . $S . ' .gm-hot:focus-visible{outline:2px solid currentColor;outline-offset:2px}';
         if ($sc['tr'] === 'click') $base[] = $S . '[role=button]{cursor:pointer}';
         $anim = $S . ' .gm-a,' . $S . ' .gm-c,' . $S . ' .gm-c *';
-        $base[] = $S . '.is-off :is(.gm-a,.gm-c,.gm-c *){animation-play-state:paused!important}';
+        $base[] = $S . ':is(.is-off,.is-paused) :is(.gm-a,.gm-c,.gm-c *){animation-play-state:paused!important}';
+        if ($pause) {
+            // Knopf in der Ecke der Grafik, Farben aus dem Kit (wie Suche und Hinweise), Rückfall neutral; mindestens 24 px (WCAG 2.5.8)
+            $B = $S . '-box';
+            $base[] = $B . '{position:relative;display:block;width:fit-content;max-width:100%}'
+                . $B . ' .cms-gm-pause{position:absolute;right:8px;bottom:8px;z-index:1;display:inline-grid;place-items:center;box-sizing:border-box;width:36px;height:36px;margin:0;padding:0;'
+                . 'border:2px solid currentColor;border-radius:999px;background:var(--kit-bg,#fff);color:var(--kit-ink,#1F2430);cursor:pointer;'
+                . 'box-shadow:0 1px 4px rgb(0 0 0 / .25);opacity:.92;transition:opacity .15s}'
+                . $B . ' .cms-gm-pause:hover{opacity:1}'
+                . $B . ' .cms-gm-pause:focus-visible{opacity:1;outline:3px solid var(--kit-accent,#1d4ed8);outline-offset:2px}'
+                . $B . ' .cms-gm-pause[hidden]{display:none}'
+                . $B . ' .cms-gm-pause__i{display:block;width:16px;height:16px;fill:currentColor}'
+                . $B . ' .cms-gm-pause__r,' . $B . ' .cms-gm-pause.is-paused .cms-gm-pause__p{display:none}'
+                . $B . ' .cms-gm-pause.is-paused .cms-gm-pause__r{display:inline}'
+                . $B . ' .cms-gm-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}'
+                . '@media (prefers-reduced-motion:reduce){' . $B . ' .cms-gm-pause{display:none}}'
+                . '@media (forced-colors:active){' . $B . ' .cms-gm-pause{border-color:ButtonText;background:ButtonFace;color:ButtonText}}';
+        }
         $end = self::endCss($S, $model);
         $base[] = '@media (prefers-reduced-motion:reduce){' . $anim . '{animation:none!important}' . $end . '}';
         $base[] = $S . '.gm-still :is(.gm-a,.gm-c,.gm-c *){animation:none!important}' . str_replace($S . ' ', $S . '.gm-still ', $end);
@@ -551,7 +616,7 @@ final class Motion
         // Grundregeln vorn, Endzustand (reduzierte Bewegung, Design-Schalter) zuletzt – er gewinnt gegen Ruhe/Anfang
         $tail = array_splice($base, -2);
         return ['key' => $K, 'svg' => (string) $svg, 'css' => implode("\n", array_merge($base, array_filter($css), $tail)) . "\n", 'links' => $links,
-            'interactive' => $interactive, 'dark' => $dark !== null, 'js' => $js];
+            'interactive' => $interactive, 'dark' => $dark !== null, 'js' => $js, 'pause' => $pause];
     }
 
     /** Regeln je Element: Ruhe/Anfang/Abspielen und @keyframes je Eigenschaft */

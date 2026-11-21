@@ -164,6 +164,18 @@ final class SelfTest
         self::t(str_contains($svg, 'pathLength="1"') && str_contains($svg, 'data-gm-count="0 1250 0 . , 0 1 ease-out"'), 'Linie zeichnen (pathLength) und Zählen');
         self::t(str_contains($o['css'], '@media (prefers-reduced-motion:reduce)') && str_contains($o['css'], 'infinite alternate both') && str_contains($o['css'], 'animation-play-state:paused'), 'reduzierte Bewegung, Schleife, Anhalten');
         self::t($o['js'] && $o['interactive'], 'Skript nötig (sichtbar, Schleife, Hotspot, Zählen)');
+        // WCAG 2.2.2: automatisch gestartet und länger als 5 s bzw. endlos → Knopf „Animation anhalten“
+        self::t(Motion::needsPause(['tr' => 'view', 'it' => 0, 'd' => 2, 'dl' => 0]) && Motion::needsPause(['tr' => 'load', 'it' => 3, 'd' => 2, 'dl' => 0])
+            && !Motion::needsPause(['tr' => 'load', 'it' => 2, 'd' => 2, 'dl' => 0.5]) && !Motion::needsPause(['tr' => 'hover', 'it' => 0, 'd' => 2, 'dl' => 0]), 'Knopf „Animation anhalten“ ab 5 s oder endlos (nicht beim Zeigen)');
+        self::t($o['pause'] && str_contains($o['css'], '.gmtest-box .cms-gm-pause{') && str_contains($o['css'], ':is(.is-off,.is-paused)'), 'Knopf: Regeln in der CSS-Datei, Anhalten über .is-paused');
+        $lm = $model;
+        $lm['scene'] = ['tr' => 'load'] + $lm['scene'];
+        $lo = Motion::build($web, null, (array) $lm, 'gmload', ['w' => 400, 'h' => 200]);
+        self::t($lo['pause'] && $lo['js'] && str_contains($lo['css'], '.gmload.is-play .gm-a1{animation:') && !str_contains($lo['css'], "\n.gmload .gm-a1{animation:"), 'endlos beim Laden: spielt erst mit dem Skript (ohne Skript Endbild)');
+        $sm = $model;
+        $sm['scene'] = ['it' => 1, 'd' => 2, 'dl' => 0, 'tr' => 'load'] + $sm['scene'];
+        self::t(!Motion::build($web, null, (array) $sm, 'gmshort', ['w' => 400, 'h' => 200])['pause'], 'kurze Bewegung ohne Knopf');
+        self::t(strlen(Motion::generator()) === 12 && Motion::generator() === Motion::generator(), 'Dateinamen hängen am Erzeuger (Prüfsumme statt Handzahl)');
         $alone = Motion::standalone($web, $w);
         self::t(str_contains($alone, '<style><![CDATA[') && str_contains($alone, 'href="https://example.org/a"') && !str_contains($alone, '__GM'), 'eigenständiges animiertes SVG mit CSS');
         // Mediathek: inline statt <img>
@@ -177,6 +189,7 @@ final class SelfTest
         foreach (glob(site()->storage('cache/grafik-motion') . '/gm-' . (int) $m['id'] . '-*.json') ?: [] as $f) $files[] = $f;
         self::t(str_contains($html, '<svg') && !str_contains($html, '<img') && str_contains($html, 'data-gm-css') && str_contains($html, 'aria-label="Selbsttest Bewegung"'), 'Mediathek: bewegte Grafik inline mit CSS-Datei');
         self::t(str_contains($html, 'href="https://example.org/a"') && !str_contains($html, '__GM'), 'Platzhalter ersetzt (Links, ids)');
+        self::t(str_contains($html, '<span class="cms-gm-box ') && str_contains($html, '<button type="button" class="cms-gm-pause" hidden') && str_contains($html, 'aria-label="' . e(lt('Animation anhalten')) . '"') && str_contains($html, 'role="status"'), 'Website: Knopf „Animation anhalten“ in der Hülle (erst mit Skript sichtbar)');
         self::t(str_contains(Motion::inject('<body>' . $html . '</body>'), 'graphic-motion.js') && Motion::inject('<body></body>') === '<body></body>', 'Skript nur auf Seiten mit bewegten Grafiken');
         self::t(str_contains(Media::pictureOf($m, '100vw', ['static' => true]), '<img'), '„static“ erzwingt das Bild');
         [$m2] = Graphics::saveMedia(self::SAMPLE, ['name' => 'selbsttest-still', 'alt' => 'Still']);

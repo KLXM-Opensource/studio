@@ -4,6 +4,8 @@
  *   .is-armed  Anfangszustand (ohne Skript bleibt der Endzustand stehen)
  *   .is-play   abspielen – sobald zu einem Viertel sichtbar (data-gm="view") bzw. bei Klick/Enter/Leertaste (click)
  *   .is-off    außerhalb des Bildes: Schleifen halten an
+ *   .is-paused angehalten über den Knopf „Animation anhalten“ (Hülle .cms-gm-box, WCAG 2.2.2 – bei automatisch gestarteter
+ *              Bewegung über 5 s bzw. Schleifen; der Knopf erscheint erst mit diesem Skript)
  *   .is-hN / .was-hN  Hotspot N an bzw. war an (rückwärts)
  * Zählen: Text mit data-gm-count zählt zum geschriebenen Wert hoch. „Bewegung reduzieren“ und Design-Schalter
  * „Dezente Animationen“ aus (.gm-still): nichts – es bleibt der Endzustand. MIT
@@ -81,9 +83,37 @@ function init(svg) {
     svg.classList.remove('is-play');
     void svg.getBoundingClientRect();
     svg.classList.add('is-play');
-    if (counts.length) { const was = !!clock; clock = { start: performance.now(), paused: false, at: 0 }; counts.forEach(c => c.set(local(0))); if (!was) requestAnimationFrame(tick); }
+    if (btn) { btn.hidden = false; }
+    if (counts.length) { const was = !!clock; clock = { start: performance.now(), paused: false, at: 0 }; counts.forEach(c => c.set(local(0))); if (!was) requestAnimationFrame(tick); hold(); }
   };
   if (counts.length) counts.forEach(c => c.set(local(0)));
+  // Knopf „Animation anhalten/fortsetzen“ (Core\Graphics\Motion::pauseBox): angehalten bleibt angehalten, auch wenn die Grafik
+  // aus dem Bild und wieder hinein scrollt; Zustand über Beschriftung und Statusmeldung
+  const box = svg.parentElement?.classList.contains('cms-gm-box') ? svg.parentElement : null;
+  const btn = box?.querySelector('.cms-gm-pause'), status = box?.querySelector('.cms-gm-sr');
+  let paused = false, visible = true;
+  const hold = () => {
+    if (!clock) return;
+    const off = paused || !visible;
+    if (off && !clock.paused) { clock.at = (performance.now() - clock.start) / 1000; clock.paused = true; }
+    else if (!off && clock.paused) { clock.start = performance.now() - clock.at * 1000; clock.paused = false; requestAnimationFrame(tick); }
+  };
+  if (btn) {
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      paused = !paused;
+      svg.classList.toggle('is-paused', paused);
+      btn.classList.toggle('is-paused', paused);
+      btn.setAttribute('aria-label', paused ? btn.dataset.gmResume : btn.dataset.gmPause);
+      if (status) status.textContent = paused ? btn.dataset.gmPaused : btn.dataset.gmRunning;
+      hold();
+    });
+    // endliche Bewegung ist durch: Knopf ausblenden (nur, wenn er nicht gerade den Fokus hat)
+    svg.addEventListener('animationend', () => {
+      if (svg.getAnimations({ subtree: true }).some(a => a.playState !== 'finished') || clock) return;
+      if (document.activeElement !== btn && !paused) btn.hidden = true;
+    });
+  }
   if (tr === 'load') play();
   if (tr === 'hover') {
     const go = () => { if (counts.length) { clock = { start: performance.now(), paused: false, at: 0 }; requestAnimationFrame(tick); } };
@@ -110,10 +140,8 @@ function init(svg) {
   svg._gm = {
     vis(on) {
       svg.classList.toggle('is-off', !on);
-      if (clock) {
-        if (!on && !clock.paused) { clock.at = (performance.now() - clock.start) / 1000; clock.paused = true; }
-        else if (on && clock.paused) { clock.start = performance.now() - clock.at * 1000; clock.paused = false; requestAnimationFrame(tick); }
-      }
+      visible = on;
+      hold();
       if (on && tr === 'view' && !svg.classList.contains('is-play')) play();
     },
   };
