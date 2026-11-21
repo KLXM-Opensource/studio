@@ -8,6 +8,7 @@ $__cmds = [
         ['account:selftest', 'Selbsttest der Anmeldedaten und von „Passwort vergessen“: Tokens, Ablauf, einmalig, Abbrechen, vergebene/unbekannte Adresse (keine Rückschlüsse), auth_ver, 2FA bleibt Pflicht – in einer Transaktion, zurückgerollt (Exit-Code 1 bei Fehlern)'],
         ['user:invite <email> [rolle] [--name="…"] [--lang=de|en]', 'Person einladen: E-Mail mit Link (einmalig, invite_days Tage gültig); ohne zugestellte E-Mail wird der Link ausgegeben. Rolle nie „network“'],
         ['invites:selftest', 'Selbsttest der Einladungen (Token, Hash, Rollenprüfung; Netzwerk-Admins einladen: nur Netzwerk-Website und Netzwerk-Konten, Liste, Annehmen, Ablauf – zurückgerollt; Exit-Code 1 bei Fehlern)'],
+        ['install', 'Erstinstallation ohne Rückfragen (läuft nach composer create-project): Ordner, Datenbank, config.local.php; zeigt Setup-Token und nächste Schritte – wiederholbar'],
         ['setup:token', 'Setup-Token für /admin/setup anzeigen'],
         ['keys:generate [--force]', 'Schlüsselpaar für verschlüsselte Eingänge erzeugen (geheimer Schlüssel wird einmal angezeigt)'],
     ],

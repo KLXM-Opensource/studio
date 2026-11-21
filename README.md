@@ -41,12 +41,28 @@ Aktuelle Version: siehe `CMS_VERSION` in `app/bootstrap.php` (derzeit 1.0.0) · 
   optional `curl`, `exif`, `pdo_mysql`. `proc_open` für Hintergrundprozesse (Sicherungen aus der Netzwerk-Übersicht, KI-Aufträge).
 - Apache oder nginx mit Front-Controller, HTTPS.
 - Datenbank: SQLite (Standard) oder MySQL/MariaDB je Website.
-- Installation aus dem Git-Repository: **Composer 2** (`vendor/` ist nicht eingecheckt). Das Installations-ZIP enthält `vendor/` bereits.
+- Installation per `composer create-project` oder aus dem Git-Repository: **Composer 2** (`vendor/` ist nicht eingecheckt). Das Installations-ZIP enthält `vendor/` bereits.
 - Nur zum Ändern von CSS/JS-Quellen: **Node 22 + pnpm 10** – die gebauten Dateien liegen versioniert in `public/`.
 - Optional: **Ollama** (lokale KI, z. B. `gemma3` für Text/Bilder, `bge-m3` als mehrsprachiges Embedding-Modell) oder
-  ein EU-/OpenAI-kompatibler Anbieter; **ffmpeg** und **whisper.cpp** (`whisper-cli`) für lokale Transkription; Cron.
+  ein EU-/OpenAI-kompatibler Anbieter; **ffmpeg** (Video-Vorschaubilder) und **whisper.cpp** (`whisper-cli`) für lokale Transkription;
+  **poppler-utils** (`pdftoppm`) für PDF-Vorschaubilder; Cron.
 
 ## Schnellstart (lokal)
+
+Mit Composer (Paket [`klxm/studio`](https://packagist.org/packages/klxm/studio)):
+
+```bash
+composer create-project klxm/studio meine-website
+cd meine-website
+php -S localhost:8000 -t public public/index.php
+```
+
+`create-project` lädt die aktuelle Version mit allen Abhängigkeiten und führt danach `php bin/console install` aus:
+Datenbank und `config/config.local.php` entstehen, der Setup-Token und die nächsten Schritte erscheinen im Terminal.
+Dann `http://localhost:8000/admin/setup` öffnen, mit dem Token das erste Konto anlegen und nach dem Anmelden Kit und
+Startinhalte wählen.
+
+Aus dem Git-Repository (zum Mitentwickeln):
 
 ```bash
 git clone https://github.com/KLXM-Opensource/studio.git klxm-studio && cd klxm-studio
@@ -118,6 +134,24 @@ claude mcp add --transport http klxm-studio https://ihre-domain.de/mcp --header 
 
 Inhaltsänderungen entstehen als Entwurf mit Revision; Zugänge „Zur Freigabe“ reichen Änderungen zur Prüfung ein
 (Verwaltung → KLXM AI → Eingereicht). Anfragen aus Eingängen sind über API/MCP nur als Metadaten sichtbar.
+
+## English
+
+KLXM Studio is a lean multi-site CMS without a framework (PHP ≥ 8.4.1, SQLite or MySQL/MariaDB): on-page block editor,
+kits (designs with starter content), custom data tables, encrypted inboxes, media library, search, optional AI features
+(Ollama, EU or OpenAI-compatible providers), REST API and MCP server. Visitor pages are cookie-free by default. The admin
+interface is available in German and English.
+
+```bash
+composer create-project klxm/studio my-website
+cd my-website
+php -S localhost:8000 -t public public/index.php   # then open /admin/setup with the setup token shown by the installer
+```
+
+Requirements: PHP ≥ 8.4.1 with `pdo_sqlite` (SQLite ≥ 3.35), `sodium`, `gd`, `mbstring`, `dom`, `fileinfo`, `intl`, `phar`,
+`zlib`; Composer 2; a web server with the document root set to `public/` (production). Optional: ffmpeg, poppler-utils,
+whisper.cpp, Ollama. A ready-made ZIP including `vendor/` is attached to each [release](https://github.com/KLXM-Opensource/studio/releases).
+Developer documentation ships with the product (`/admin/hilfe/technik`). License: MIT.
 
 ## Lizenz
 

@@ -54,7 +54,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: |
             tools/pnpm-lock.yaml
-            themes/*/pnpm-lock.yaml
+            kits/*/pnpm-lock.yaml
 
       - name: Build
         run: cd tools && pnpm install --frozen-lockfile && pnpm run build
@@ -102,6 +102,13 @@ jobs:
           if [ ! -s dist/notes.md ]; then
             echo "::warning::Kein Abschnitt „## ${{ steps.v.outputs.version }}“ in CHANGELOG.md gefunden."
             echo "Änderungen: siehe [CHANGELOG.md](CHANGELOG.md)." > dist/notes.md
+          fi
+          # GitHub begrenzt den Release-Text auf 125 000 Zeichen: zu lange Abschnitte → Einleitung (bis zum ersten „###“) + Verweis
+          if [ "$(wc -m < dist/notes.md)" -gt 100000 ]; then
+            echo "::notice::Abschnitt zu lang für den Release-Text – nur Einleitung und Verweis auf CHANGELOG.md."
+            awk '/^### / { exit } { print }' dist/notes.md > dist/notes-short.md
+            printf '\nAlle Änderungen: [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md)\n' "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" >> dist/notes-short.md
+            mv dist/notes-short.md dist/notes.md
           fi
           printf '\n---\nInstallation: ZIP entpacken, Dokumentstamm auf `public/` setzen, `/admin/setup` öffnen – Einzelheiten im README. Prüfsumme: `%s.zip.sha256`.\n' \
             "${{ steps.v.outputs.name }}" >> dist/notes.md

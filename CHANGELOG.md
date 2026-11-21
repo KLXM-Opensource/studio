@@ -6,6 +6,20 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer create-project klxm/studio meine-website`
+oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
+die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
+
+### Installation per Composer (Packagist)
+- Paket `klxm/studio` (Typ `project`): `composer create-project klxm/studio meine-website` lädt die Version mit allen Abhängigkeiten
+  und führt danach `php bin/console install` aus – Ordner, Datenbank und `config/config.local.php` entstehen, Setup-Token und
+  nächste Schritte erscheinen im Terminal (ohne Rückfragen, wiederholbar). Paketangaben für Packagist (englische Beschreibung,
+  Schlagworte, Support-Adressen), `minimum-stability: stable`, `prefer-stable`.
+- `.gitattributes`: Archive (GitHub-ZIP, Packagist) ohne die CI des Kern-Repositorys und ohne die Release-Prüfung des Kerns;
+  Shell-Skripte und `bin/console` immer mit LF.
+- Release-Workflow: Ist der Abschnitt im CHANGELOG zu lang für einen GitHub-Release (Grenze 125 000 Zeichen), stehen in den
+  Release-Notizen die Einleitung und ein Verweis auf `CHANGELOG.md`.
+
 ### Kit fluid: Dachzeilen und Links in „Akzent hell“ immer lesbar
 - Im Abschnitt „Akzent hell“ mischt fluid die Fläche selbst (14 % Farbton im Hintergrund) und setzte den Akzent als Schrift darauf – ohne Prüfung. Bei manchen eigenen Farben fiel das unter 4,5:1 (z. B. Dachzeile im Einstieg 4,29:1), obwohl Akzent und Hintergrund für sich bestanden. Jetzt rechnet der Kern eine lesbare Variante: nur wenn das Paar durchfällt, wird die Linkfarbe dort minimal Richtung Überschriftenfarbe gemischt; wo es besteht, bleibt alles pixelgleich (alle Voreinstellungen unverändert). Gewählte Farbwerte ändern sich nie. Bei „Farbenfroh“ je Farbton des Abschnitts.
 - Neu im Design eines Kits: `'derive'` – abgeleitete Farben mit Kontrastschutz (`Core\Design::derived()`, `readable()`), siehe Entwicklerhandbuch → Kits → Design.
