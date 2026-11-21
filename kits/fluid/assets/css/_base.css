@@ -50,6 +50,10 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .sec{container-type:inline-size;padding-block:var(--f-sec);background:var(--f-sec-bg,transparent);color:var(--f-text)}
 .bg-muted{--f-sec-bg:var(--f-surface);--f-card:var(--f-bg)}
 .bg-tint{--f-sec-bg:var(--f-a-soft);--f-card:var(--f-bg);--f-ico-bg:var(--f-bg);--f-ico:var(--f-a);--f-surface:color-mix(in srgb,var(--f-bg) 60%,transparent)}
+/* Linkfarbe auf „Akzent hell“: --f-link-t1 = Akzent; nur wenn er auf der gemischten Fläche unter 4,5:1 fällt, etwas Richtung
+   Überschriftenfarbe (design.php → derive, Core\Design::derived). Nicht in farbigen Flächen (dort gilt deren Schriftfarbe).
+   Gilt für alles mit --f-link im Abschnitt (Dachzeile, Links, Betonung .hl, Häkchen …). */
+.bg-tint:not(:is(.bg-accent,.bg-secondary,.bg-dark,.on-media,.sec--ov-dark) *){--f-link:var(--f-link-t1,var(--f-a))}
 /* Nebentext auf Akzent = volle Schrift auf Akzent: gemischt (86 %) fiel er auf Karten/Flächen im Abschnitt unter 4,5:1 */
 .bg-accent{--f-sec-bg:var(--f-a);--f-fg:var(--f-a-on);--f-muted:var(--f-a-on);--f-btn-ink:var(--f-a)}
 .bg-dark,.on-media{--f-sec-bg:var(--f-dark);--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 80%,var(--f-dark));--f-btn-ink:var(--f-dark)}

@@ -17,6 +17,9 @@ html.pal-colorful{--f-p1:var(--f-a);--f-p2:var(--f-b);--f-p3:var(--f-c3);--f-p4:
 /* Zarte Tönung: ersetzt „Akzent hell“ im jeweiligen Element (Abschnitt „Akzent hell“, Symbolflächen, Etiketten …) */
 .pal-colorful :is(main>.sec,.feat,.card,.tile,.stat,.step,.dl-item,.dl-chip,.dl-fchip,.snav__item){--f-tone-soft:color-mix(in srgb,var(--f-tone) 14%,var(--f-bg));--f-a-soft:var(--f-tone-soft)}
 .pal-colorful main>.sec.bg-tint{--f-sec-bg:var(--f-tone-soft)}
+/* Linkfarbe passend zur Tönung des Abschnitts (design.php → derive: --f-link-t1 … t5; unverändert der Akzent, wo er besteht) */
+.pal-colorful main>.sec.bg-tint:nth-of-type(5n+2){--f-link:var(--f-link-t2,var(--f-a))}.pal-colorful main>.sec.bg-tint:nth-of-type(5n+3){--f-link:var(--f-link-t3,var(--f-a))}
+.pal-colorful main>.sec.bg-tint:nth-of-type(5n+4){--f-link:var(--f-link-t4,var(--f-a))}.pal-colorful main>.sec.bg-tint:nth-of-type(5n+5){--f-link:var(--f-link-t5,var(--f-a))}
 
 /* Dachzeilen: Strich, Punkt bzw. Etikett im Farbton des Abschnitts */
 .pal-colorful .eyebrow::before{background:var(--f-tone)}

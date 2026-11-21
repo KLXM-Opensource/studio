@@ -6,6 +6,10 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Kit fluid: Dachzeilen und Links in „Akzent hell“ immer lesbar
+- Im Abschnitt „Akzent hell“ mischt fluid die Fläche selbst (14 % Farbton im Hintergrund) und setzte den Akzent als Schrift darauf – ohne Prüfung. Bei manchen eigenen Farben fiel das unter 4,5:1 (z. B. Dachzeile im Einstieg 4,29:1), obwohl Akzent und Hintergrund für sich bestanden. Jetzt rechnet der Kern eine lesbare Variante: nur wenn das Paar durchfällt, wird die Linkfarbe dort minimal Richtung Überschriftenfarbe gemischt; wo es besteht, bleibt alles pixelgleich (alle Voreinstellungen unverändert). Gewählte Farbwerte ändern sich nie. Bei „Farbenfroh“ je Farbton des Abschnitts.
+- Neu im Design eines Kits: `'derive'` – abgeleitete Farben mit Kontrastschutz (`Core\Design::derived()`, `readable()`), siehe Entwicklerhandbuch → Kits → Design.
+
 ### Sortierbare Tabellen: eine Umsetzung, die von NativeCSS
 - Datenliste „Spalten sortierbar“ nutzt die Komponente „Sortierbare Tabelle“ von NativeCSS 1.4.0 (MIT) statt eines eigenen Skripts – unverändert übernommen als Kern-Asset (`resources/js/table-sort.js`, `resources/css/table-sort.css`, Lizenzkopf; der Kern hängt nicht am Kit native), weiter nur über das Merkmal `@tablesort`. Gleiches Verhalten (Schaltflächen im Kopf, `aria-sort`, Ansage, Zahl/Datum/Text, stabil, leere Zellen ans Ende), dazu: Datum mit Uhrzeit und Zeitzone, Uhrzeiten, `colspan`, Event `ncss-table-sort-change`, Klasse `is-sortable`.
 - Markup: `<table data-ncss-sort>` statt `data-table-sort`, Zahlenspalten mit `data-sort-align="end"`; Klassen `.ncss-table-sort-button`, `.ncss-table-sort-icon`, `.ncss-table-sort-status` statt `.tsort-btn`, `.tsort-ico`, `.tsort-status` (kein mitgeliefertes Kit nutzte die alten Klassen). Stile im Layer `components` mit neutralen Rückfallwerten – jede Regel des Kits gewinnt; eine eigene `css/table-sort.css` des Kits ersetzt die Datei weiterhin. Schatten an der Kante unverändert.
