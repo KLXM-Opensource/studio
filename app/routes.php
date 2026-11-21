@@ -368,6 +368,7 @@ return function (Router $r): void {
     $r->post('/admin/api/grafik/clean', [$gr, 'clean']);
     $r->post('/admin/api/grafik/motion-svg', [$gr, 'motionSvg']);
     $r->post('/admin/api/grafik/data-values', [$gr, 'dataValues']);
+    $r->post('/admin/api/grafik/app-icon', [$gr, 'appIcon']);
     $r->post('/admin/api/grafik/assign', [$gr, 'assign']);
     $r->post('/admin/api/grafik/{id}/delete', [$gr, 'delete']);
 

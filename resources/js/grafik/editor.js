@@ -44,6 +44,7 @@ import { duplicateAgain, repeatDialog } from './repeat.js';
 import { Warp } from './warp.js';
 import { MotionPersona, isCountText, hasMotion } from './motion.js';
 import { DataPersona } from './data.js';
+import { ExportPersona } from './slices.js';
 import { isBoundText } from './bind.js';
 
 /** Größe lesbar (Byte → KB) */
@@ -134,6 +135,9 @@ export class GraphicEditor {
     // Persona Daten (Bindung an Datentabellen und Zustände der Website, data.js)
     this.dataP = new DataPersona(this);
     this.registerPersona(this.dataP.persona);
+    // Persona Export (Bereiche/Slices, Formate je Bereich, Favicon/App-Symbole/Social-Vorschau, ZIP – slices.js)
+    this.exportP = new ExportPersona(this);
+    this.registerPersona(this.exportP.persona);
     this.load(this.doc.svg || '', t('Geöffnet'));
   }
 
@@ -542,6 +546,9 @@ export class GraphicEditor {
     }
     if (this.pen) out.push(this.drawPen());
     if (this.textEd) out.push(this.textEd.draw());
+    // Überlagerung der aktiven Persona (z. B. Bereiche in Export)
+    const per = this.personas.find(p => p.id === this.persona);
+    if (per?.overlay) out.push(per.overlay());
     // Textrahmen: Breite gestrichelt, Griff rechts zum Ändern der Breite
     const tf = this.textEl || (this.sel.length === 1 && this.sel[0].localName === 'text' && this.tool === 'select' ? this.sel[0] : null);
     if (tf && tf.hasAttribute('data-ge-frame')) out.push(this.drawTextFrame(tf));

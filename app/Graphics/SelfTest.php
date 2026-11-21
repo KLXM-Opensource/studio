@@ -227,6 +227,11 @@ final class SelfTest
         $work = str_replace('<text id="zahl"', '<text id="zahl" data-ge-bind="' . $b([['p' => 'text', 'v' => 'plaetze', 'tpl' => '{v} Plätze frei', 'fmt' => 'num', 'd' => 0]]) . '"', $work);
         $w = Svg::clean($work, ['editor' => true])['svg'];
         self::t(str_contains($w, 'data-ge-data="') && str_contains($w, 'data-ge-bind="') && !str_contains($w, '!!kein-base64'), 'Daten: Bindungen bleiben in der Arbeitsfassung, nur Base64');
+        // Export-Bereiche (Persona Export): nur Base64, nur in der Arbeitsfassung
+        $sl = base64_encode('[{"id":"s1","n":"Favicon","x":0,"y":0,"w":24,"h":24,"f":["ico"]}]');
+        $sx = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-ge-slices="' . $sl . '"><rect width="10" height="10" data-ge-slices="&lt;script&gt;"/></svg>';
+        self::t(str_contains(Svg::clean($sx, ['editor' => true])['svg'], 'data-ge-slices="' . $sl . '"') && substr_count(Svg::clean($sx, ['editor' => true])['svg'], 'data-ge-slices') === 1
+            && !str_contains(Svg::clean($sx, ['keep_ids' => true])['svg'], 'data-ge-slices'), 'Export: Bereiche nur als Base64 in der Arbeitsfassung, nie in der Web-Fassung');
         $model = Bind::model($w);
         self::t($model !== null && isset($model['values']['plaetze']) && !isset($model['values']['Böse']) && count($model['items']['balken'] ?? []) === 2, 'Daten: Modell bereinigt (Namen, unbekannte Eigenschaft entfällt)');
         if (!$model) return;
@@ -482,6 +487,8 @@ final class SelfTest
             if ($m->class !== GraphicsController::class) continue;
             $body = implode("\n", array_slice(explode("\n", $src), $m->getStartLine() - 1, $m->getEndLine() - $m->getStartLine() + 1));
             self::t((bool) preg_match('~\$this->auth\(\$r, \'media\.(upload|delete)\'\)~', $body), 'Aktion ' . $m->name . ' prüft „media.upload“ bzw. „media.delete“');
+            // Favicon/App-Symbol der Website übernehmen: zusätzlich das Recht der Grundeinstellungen
+            if ($m->name === 'appIcon') self::t(str_contains($body, "can('system.manage')"), 'App-Symbol übernehmen verlangt „system.manage“');
         }
         // Rolle ohne Medienrechte darf nicht
         foreach (\Core\Permissions::roles() as $key => $role) {

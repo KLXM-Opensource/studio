@@ -617,3 +617,48 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .gd-list code { font: 11px var(--adm-mono, ui-monospace, monospace); color: var(--adm-t2) }
 .gd-list__acts { display: inline-flex; gap: 2px; flex: none }
 .gd-list--states li { align-items: center }
+
+/* ---------------------------------------------------------------- Persona Export (slices.js): Bereiche, Formate, Größen-Vorschau */
+.ge[data-persona=export] .ge-side > .ge-pg:not(.ge-pg--export) { display: none }
+.ge-pg--export { flex: 1 0 auto }
+.ge-pg--export[hidden] { display: none }
+.ge[data-persona=export] .ge-stage { cursor: crosshair }
+.gx-slice { fill: color-mix(in srgb, #12A150 10%, transparent); stroke: #12A150; stroke-width: 1.5; stroke-dasharray: 6 3 }
+.gx-slice.is-sel { fill: color-mix(in srgb, #12A150 16%, transparent); stroke-dasharray: none; stroke-width: 2 }
+.gx-safe { fill: none; stroke: #12A150; stroke-width: 1; stroke-dasharray: 3 3 }
+.gx-label { fill: #0B6B35; font: 700 11px var(--adm-font) }
+.gx-label.is-sel { fill: #085A2C }
+.gx-h { fill: var(--adm-card); stroke: #12A150; stroke-width: 1.5 }
+html.adm-ui[data-theme=dark] .gx-label { fill: #7DDBA6 }
+@media (prefers-color-scheme: dark) { html.adm-ui:not([data-theme=light]) .gx-label { fill: #7DDBA6 } }
+.gx-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px }
+.gx-list li { padding: 6px 8px; border: 1px solid var(--adm-line); border-radius: 8px; font-size: 12px; cursor: pointer }
+.gx-list li .ge-note { display: block; margin: 0 }
+.gx-list li[aria-selected=true] { border-color: var(--adm-a); box-shadow: 0 0 0 1px var(--adm-a) }
+.gx-list li:hover { background: var(--adm-hover) }
+.gx-presets, .gx-acts { display: flex; flex-wrap: wrap; gap: 6px }
+.gx-acts { justify-content: space-between; align-items: center }
+.gx-formats { display: grid; gap: 4px; margin: 0; padding: 0; border: 0 }
+.gx-formats legend { margin: 6px 0 4px; padding: 0 }
+.ge-pg--export, .gx-panel, .gx-panel .ge-form { min-width: 0 }
+.gx-bg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12px; color: var(--adm-t2) }
+.gx-bg__l { flex: 1 0 100% }
+.gx-list li { overflow-wrap: anywhere }
+.gx-area { max-height: 34vh; overflow: auto }
+.gx-sizes { padding: 10px 12px }
+.gx-sizes__row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px }
+.gx-size { display: grid; justify-items: center; gap: 4px; margin: 0; font-size: 11px; color: var(--adm-t2) }
+.gx-size__img { position: relative; display: flex; align-items: flex-end; gap: 8px; padding: 6px; border-radius: 8px;
+  background: repeating-conic-gradient(var(--adm-fill) 0 25%, var(--adm-card) 0 50%) 50% / 12px 12px; border: 1px solid var(--adm-line) }
+.gx-size__ph { display: block; width: 48px; height: 48px }
+.gx-px1 { display: block }
+.gx-pxz { display: block; image-rendering: pixelated }
+.gx-app { display: block; width: 90px; height: 90px; border-radius: 20px }
+.gx-social { display: block; width: 240px; height: 126px }
+.gx-mask { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border: 1.5px dashed #12A150; border-radius: 50% }
+.gx-snap { font-size: 11px }
+.gx-panel .ge-row4 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+.gx-panel .ge-lbl > .ge-in:not(.ge-in--s) { flex: 1 1 0; width: 0; min-width: 0 }
+.gx-panel .ge-row4 .ge-in--s { width: 0; flex: 1 1 0; min-width: 0; max-width: 90px }
+.gx-panel .ge-form { grid-template-columns: minmax(0, 1fr) }
+.gd-panel .ge-form { grid-template-columns: minmax(0, 1fr) }
