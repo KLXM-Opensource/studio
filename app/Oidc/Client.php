@@ -167,7 +167,12 @@ final class Client
         // höchstens 5 offene Anmeldungen je Sitzung (älteste fallen weg)
         uasort($pending, fn($a, $b) => $b['at'] <=> $a['at']);
         self::setPending(array_slice($pending, 0, 5, true));
-        $q = ['response_type' => 'code', 'client_id' => $p['client_id'], 'redirect_uri' => Providers::redirectUri(), 'scope' => $p['scopes'] ?: 'openid',
+        // Rollen-Claim anfordern, wenn der Anbieter den gleichnamigen Scope anbietet (Hub: „roles“) – nur dann, sonst lehnen
+        // strenge Anbieter unbekannte Scopes ab. Fehlt der Claim trotzdem, gilt die Rolle des Anbieters (Accounts::roleFor).
+        $scope = $p['scopes'] ?: 'openid';
+        $rc = (string) ($p['role_claim'] ?? '');
+        if ($rc !== '' && in_array($rc, (array) ($d['scopes_supported'] ?? []), true) && !in_array($rc, explode(' ', $scope), true)) $scope .= ' ' . $rc;
+        $q = ['response_type' => 'code', 'client_id' => $p['client_id'], 'redirect_uri' => Providers::redirectUri(), 'scope' => $scope,
             'state' => $state, 'nonce' => $nonce, 'code_challenge' => self::challenge($verifier), 'code_challenge_method' => 'S256'];
         if (!empty($ctx['login_hint'])) $q['login_hint'] = mb_substr((string) $ctx['login_hint'], 0, 191);
         $ep = (string) $d['authorization_endpoint'];

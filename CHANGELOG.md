@@ -68,6 +68,11 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Sitzungen (`auth_ver`). Vorher bekam eine Freigabe „redaktion“ im Agentur-Hub die volle Administration.
 - **Vorab freigegebene Konten** verknüpfen sich per E-Mail nur noch mit ausdrücklichem `email_verified: true`.
 - **RFC 9207:** Kündigt der Anbieter `authorization_response_iss_parameter_supported` an, ist `iss` in der Rückkehr Pflicht.
+- **Scope für den Rollen-Claim:** Bietet der Anbieter den Scope des Rollen-Claims an (`scopes_supported`, Hub: `roles`), wird er
+  mit angefordert.
+- **Überwachung (status-v1):** Nonces werden 660 s gemerkt (länger als das ganze Fenster von ±300 s – vorher ließ sich eine Anfrage genau
+  an der Grenze wiederholen); der Host-Header wird wie beim Dienst normalisiert (klein, ohne Standard-Port und Schlusspunkt) und muss zur
+  Installation gehören (`InstanceInfo::known`) – keine Wiederholung einer für eine andere Installation signierten Anfrage.
 - **JWK:** RSA-Länge auf das Bit genau (≥ 2048), Exponent ungerade und ≥ 3; verschachtelte Werte in `aud`, `amr`, `name` werden
   ignoriert statt Warnungen auszulösen.
 - **Selbstauskunft** `/.well-known/klxm-studio`: Zwischenspeicher je Host und nur für bekannte Hosts (`InstanceInfo::known`) –

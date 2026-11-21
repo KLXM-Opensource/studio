@@ -95,7 +95,8 @@ final class SelfTest
             if ($method === 'GET' && $url === self::ISS . '/.well-known/openid-configuration') {
                 return $j(['issuer' => $idp['issuer'], 'authorization_endpoint' => self::ISS . '/authorize', 'token_endpoint' => self::ISS . '/token',
                     'jwks_uri' => self::ISS . '/jwks', 'end_session_endpoint' => self::ISS . '/logout', 'code_challenge_methods_supported' => ['S256'],
-                    'id_token_signing_alg_values_supported' => ['RS256', 'EdDSA']]);
+                    'id_token_signing_alg_values_supported' => ['RS256', 'EdDSA'], 'scopes_supported' => ['openid', 'email', 'profile', 'roles'],
+                    'authorization_response_iss_parameter_supported' => true]);
             }
             if ($method === 'GET' && $url === self::ISS . '/jwks') return $j(['keys' => $idp['keys']]);
             if ($method === 'POST' && $url === self::ISS . '/token') {
@@ -133,6 +134,8 @@ final class SelfTest
             [$q, $code] = $authorize();
             $eq('Anfrage: Code-Flow mit PKCE S256', [$q['response_type'], $q['code_challenge_method'], strlen($q['state']) >= 43, strlen($q['nonce']) >= 43],
                 ['code', 'S256', true, true]);
+            $eq('Anfrage: Scope „roles“, wenn angeboten', in_array('roles', explode(' ', (string) $q['scope']), true), true);
+            $eq('RFC 9207: iss Pflicht, wenn angekündigt', Client::issRequired($prov), true);
             $pend = Client::takeState($q['state']);
             $res = Client::finish($prov, (array) $pend, $code);
             $eq('Ablauf: Anmeldung gültig', [$res['claims']['sub'], $res['alg']], ['staff-1', 'RS256']);
