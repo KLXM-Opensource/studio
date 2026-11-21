@@ -319,6 +319,14 @@
           <code>Bind::forEditor()</code> (Tabellen mit Feldern, Öffnungszeiten, Sonnenzeiten heute, Zustände jetzt). Vorschau: Kopie mit eingesetzten Werten
           über dem Dokument (<code>applyAll</code>, gleiche Rechnung wie <code>Bind::apply</code>), Dokument bleibt die gezeichnete Fassung.</li>
       </ul></li>
+    <li id="grafik-collab-technik"><b>Zusammenarbeit</b> (<code>collab.js</code>): Fassungen aus <code>graphic_versions</code>
+      (<code>Graphics::versions()</code> mit <code>user</code> = wer durch Speichern ersetzt hat), Vergleich nebeneinander bzw. überblendet (zwei
+      <code>&lt;img&gt;</code>, <code>clip-path</code> über <code>--x</code>, Regler und Ziehen), „Wiederherstellen“ = <code>load()</code> + <code>commit()</code>.
+      <code>GET /admin/api/grafik/usage?ref=…</code> → <code>Graphics::usages()</code> (Mediathek: <code>Media::usages()</code>; eigene Ablage: Zuordnung in der
+      Blockauswahl), Vorschau als verkleinertes <code>&lt;iframe&gt;</code> (gleicher Ursprung, erst auf Wunsch). Präsenz: <code>Core\Presence</code> mit Typ
+      <code>graphic</code> und id = ref (<code>PresenceController::allowed()</code>: Recht <code>media.upload</code>, Grafik vorhanden; „zuletzt gespeichert“ aus
+      <code>graphic_versions</code>), Herzschlag alle 15 s, <code>leave</code> beim Schließen; <code>save()</code> fragt über <code>Collab::confirmSave()</code> nach,
+      wenn jemand anderes seit dem Öffnen gespeichert hat.</li>
     <li id="grafik-export-technik"><b>Persona Export</b> (<code>slices.js</code>, <code>raster.js</code>): Bereiche an der Wurzel als
       <code>data-ge-slices</code> = Base64 <code>[{id, n, x, y, w, h, f: [svg|svgd|pdf|ico|app|social|socialjpg], bg, snap: {16: 1, …}}]</code> (nur
       Arbeitsfassung). Überlagerung über den Persona-Haken <code>overlay()</code> in <code>draw()</code>. Vektor-Ausgaben mit <code>viewBox</code> = Bereich

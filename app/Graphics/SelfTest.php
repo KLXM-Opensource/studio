@@ -291,6 +291,13 @@ final class SelfTest
         self::t(is_file($f1) && str_contains((string) file_get_contents($f1), 'id="offen"') && !str_contains((string) file_get_contents($f1), 'id="zu"'), 'Daten: um 10 Uhr „geöffnet“ in der Datei');
         self::t($until !== null && $until <= $wed10 + 300, 'Daten: Seiten-Cache gilt nur bis zum nächsten Wechsel');
         self::t(str_contains($h1, 'alt="Kurse: ') && !str_contains($h1, '{anzahl}'), 'Daten: Alt-Text mit Wert');
+        // Zusammenarbeit: Verwendet auf (noch nirgends), Fassungen mit Person, Präsenz für Grafiken
+        self::t(Graphics::usages('media:' . (int) $m['id']) === [] && Graphics::usages('fremd:1') === [], 'Verwendet auf: neue Grafik nirgends eingebunden, fremde Angaben leer');
+        [$m3] = Graphics::saveMedia($web, ['name' => 'selbsttest-daten'], (int) $m['id'], $w);
+        $vs = Graphics::versions('media:' . (int) $m['id']);
+        self::t($m3 !== null && count($vs) === 1 && (app()->auth->user() !== null || $vs[0]['user'] === ''), 'Fassungen: Ersetzen legt eine frühere Fassung an (mit Person)');
+        $rp = new \ReflectionMethod(\Core\Http\Controllers\Admin\PresenceController::class, 'allowed');
+        self::t($rp->invoke(null, 'graphic', 'media:' . (int) $m['id']) === can('media.upload') && $rp->invoke(null, 'graphic', 'media:999999999') === false && $rp->invoke(null, 'graphic', 'x:1') === false, 'Präsenz: Grafiken der Mediathek, nur vorhandene');
         Bind::$now = null;
         \Core\PageCache::resetUntil();
         // Seiten-Cache: abgelaufene Frist → neu erzeugen

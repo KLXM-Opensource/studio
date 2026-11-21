@@ -272,6 +272,16 @@
     lädt die Dateien herunter (mehrere als ZIP), <b>Alle Bereiche als ZIP</b> alles in Ordnern. Pixel-Formate entstehen nur hier beim Herunterladen –
     die Grafik selbst bleibt Vektor. Mit dem Recht für die Grundeinstellungen übernimmt <b>Als Favicon/App-Symbol der Website übernehmen</b> den Bereich
     für die ganze Website (Grundeinstellungen → App-Icon &amp; PWA zeigt danach dieses Bild).</p>
+  <h4 id="grafik-fassungen">Fassungen, Verwendet auf, wer arbeitet gerade</h4>
+  <p>Neben dem Namen der Grafik stehen zwei Knöpfe: <b>Fassungen vergleichen</b> (Uhr) zeigt die früheren Fassungen – jedes Speichern legt eine an,
+    mit Datum und Person. Wählen Sie eine Fassung (auch mit <kbd>↑</kbd>/<kbd>↓</kbd>) und vergleichen Sie <b>nebeneinander</b> oder
+    <b>überblendet</b>: Der Regler (oder ein Klick ins Bild) schiebt die Trennlinie zwischen früherer Fassung und aktuellem Stand. <b>Diese Fassung
+    wiederherstellen</b> holt sie in den Editor – als Schritt im Protokoll, gespeichert wird erst mit <b>Speichern</b>; Rückgängig bringt den Stand davor
+    zurück. <b>Verwendet auf</b> (Kette) listet die Seiten, Blöcke und Einträge, auf denen die Grafik eingebunden ist, mit Link und einer verkleinerten
+    <b>Vorschau</b> der Seite – so sehen Sie vor dem Speichern, wo sich etwas ändert.</p>
+  <p>Bearbeitet jemand anderes dieselbe Grafik, erscheint oben „… bearbeitet gerade“. Hat diese Person inzwischen gespeichert, fragt
+    <b>Speichern</b> nach, bevor es ihren Stand ersetzt (er bleibt als frühere Fassung erhalten). Wie bei Seiten lässt sich die Anzeige in den
+    Grundeinstellungen abschalten.</p>
   <h4 id="grafik-dunkel">Design-Farben, Hell und Dunkel</h4>
   <p>Wählen Sie eine Farbe unter <b>Farbfelder → Design der Website</b> (z. B. „Akzent“), merkt sich die Grafik die <b>Design-Farbe</b>, nicht nur
     den Farbwert: Ändern Sie später unter <b>Design</b> den Akzent, zeigt die Website die Grafik in der neuen Farbe – ohne sie neu zu speichern.

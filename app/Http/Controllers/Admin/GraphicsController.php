@@ -134,7 +134,8 @@ final class GraphicsController extends AdminController
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
-                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'), 'dataValues' => url('/admin/api/grafik/data-values'), 'appIcon' => url('/admin/api/grafik/app-icon'),
+                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'), 'dataValues' => url('/admin/api/grafik/data-values'), 'appIcon' => url('/admin/api/grafik/app-icon'), 'usage' => url('/admin/api/grafik/usage'),
+                'presence' => \Core\Http\Controllers\Admin\PresenceController::on() ? url('/admin/api/presence') : '',
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
                 'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'), 'partUpdate' => url('/admin/api/grafik/part/update'), 'partsImport' => url('/admin/api/grafik/parts/import'),
             ],
@@ -364,6 +365,16 @@ final class GraphicsController extends AdminController
         }
         if (!$r->wantsJson()) return $this->back('/admin/grafik', 'success', $id ? __('Blockvorschau gilt jetzt in der Blockauswahl.') : __('Blockvorschau aufgehoben.'));
         return Response::json(['ok' => true]);
+    }
+
+    /** Verwendet auf: GET ?ref=media:{id}|graphic:{id} → {items: [{label, url, preview}]} (Seiten, Blöcke, Einträge; Blockauswahl) */
+    public function usage(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $ref = $r->str('ref');
+        if (!preg_match('~^(media|graphic):\d+$~', $ref)) return Response::fail(__('Unbekannte Grafik.'), 404);
+        if (str_starts_with($ref, 'graphic:') && ($g = Graphics::find((int) substr($ref, 8))) && ($deny = $this->needKind($r, (string) $g['kind']))) return $deny;
+        return Response::json(['ok' => true, 'items' => Graphics::usages($ref)]);
     }
 
     /** Frühere Fassung laden: GET ?ref=media:{id}|graphic:{id}&id={version} */

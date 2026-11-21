@@ -284,11 +284,43 @@ final class Graphics
         }
     }
 
-    /** @return list<array{id: int, created_at: string}> frühere Fassungen, neueste zuerst */
+    /** @return list<array{id: int, created_at: string, user: string}> frühere Fassungen, neueste zuerst (user = wer sie durch Speichern ersetzt hat) */
     public static function versions(string $ref): array
     {
-        return array_map(fn($v) => ['id' => (int) $v['id'], 'created_at' => (string) $v['created_at']],
-            app()->db->fetchAll('SELECT id, created_at FROM graphic_versions WHERE ref = ? ORDER BY id DESC', [$ref]));
+        $db = app()->db;
+        $names = [];
+        $rows = $db->fetchAll('SELECT id, created_at, user_id FROM graphic_versions WHERE ref = ? ORDER BY id DESC', [$ref]);
+        foreach (array_unique(array_filter(array_map(fn($v) => (int) $v['user_id'], $rows))) as $uid) {
+            $u = $db->fetch('SELECT name, email FROM users WHERE id = ?', [$uid]);
+            $names[$uid] = $u ? (string) ($u['name'] ?: $u['email']) : '';
+        }
+        return array_map(fn($v) => ['id' => (int) $v['id'], 'created_at' => (string) $v['created_at'], 'user' => $names[(int) $v['user_id']] ?? ''], $rows);
+    }
+
+    /**
+     * Wo wird die Grafik verwendet? media:{id} → Seiten, Blöcke, Einträge (Media::usages), graphic:{id} → Blockauswahl (Vorschau eines Blocks).
+     * @return list<array{label: string, url: ?string, preview: ?string}> preview = öffentliche Adresse für die Vorschau der Seite
+     */
+    public static function usages(string $ref): array
+    {
+        if (preg_match('~^media:(\d+)$~', $ref, $m)) {
+            $out = [];
+            foreach (Media::usages((int) $m[1]) as $u) {
+                $url = isset($u['url']) && is_string($u['url']) ? $u['url'] : null;
+                $preview = $url !== null && !str_starts_with($url, url('/admin')) ? $url : null;
+                $out[] = ['label' => (string) $u['label'], 'url' => $url, 'preview' => $preview];
+            }
+            return $out;
+        }
+        if (preg_match('~^graphic:(\d+)$~', $ref, $m)) {
+            $out = [];
+            $blocks = self::blockTypes();
+            foreach (self::previewMap() as $block => $id) {
+                if ((int) $id === (int) $m[1]) $out[] = ['label' => __('Blockauswahl: {name}', ['name' => (string) ($blocks[$block] ?? $block)]), 'url' => url('/admin/grafik'), 'preview' => null];
+            }
+            return $out;
+        }
+        return [];
     }
 
     public static function version(string $ref, int $id): ?string

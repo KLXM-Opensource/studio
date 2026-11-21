@@ -45,6 +45,7 @@ import { Warp } from './warp.js';
 import { MotionPersona, isCountText, hasMotion } from './motion.js';
 import { DataPersona } from './data.js';
 import { ExportPersona } from './slices.js';
+import { Collab } from './collab.js';
 import { isBoundText } from './bind.js';
 
 /** Größe lesbar (Byte → KB) */
@@ -138,6 +139,8 @@ export class GraphicEditor {
     // Persona Export (Bereiche/Slices, Formate je Bereich, Favicon/App-Symbole/Social-Vorschau, ZIP – slices.js)
     this.exportP = new ExportPersona(this);
     this.registerPersona(this.exportP.persona);
+    // Fassungen vergleichen, „Verwendet auf“, wer bearbeitet gerade (collab.js)
+    this.collab = new Collab(this);
     this.load(this.doc.svg || '', t('Geöffnet'));
   }
 
@@ -2965,6 +2968,8 @@ export class GraphicEditor {
 
   async save(asNew = false) {
     this.finishPen(); this.endText();
+    // Hat jemand anderes die Grafik inzwischen gespeichert? (Präsenz, wie bei Seiten)
+    if (!asNew && this.collab && !(await this.collab.confirmSave())) return null;
     if (this.compoundEdit) { this.scope = this.root; await this.endCompound(); }
     const d = this.doc;
     if (d.target === 'none') {
@@ -3068,6 +3073,7 @@ export class GraphicEditor {
   }
 
   destroy() {
+    this.collab?.destroy();
     document.removeEventListener('keydown', this.keyHandler);
     document.removeEventListener('paste', this.pasteHandler);
     document.removeEventListener('keyup', this.keyUp);

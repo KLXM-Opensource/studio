@@ -28,7 +28,11 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Desktop-Programme, PDF (Vektor) und – als einzige Pixel-Ausgaben – Favicon (ICO 16/32/48 + PNG), App-Symbole (180/192/512, maskable mit Schutzzone) und
   Social-Vorschau 1200 × 630 (PNG/JPEG). Symbolgrößen 16/24/32/48 mit Ausrichtung am Pixelraster je Größe, alle Bereiche als ZIP. „Als Favicon/App-Symbol
   der Website übernehmen“ nutzt `Core\AppIcons` (Bild aus der Mediathek, Recht „system.manage“).
-- Neue Routen `POST /admin/api/grafik/data-values`, `POST /admin/api/grafik/app-icon`; `Core\Svg::clean` (Arbeitsfassung) lässt `data-ge-bind`,
+- **Fassungen vergleichen** (nebeneinander oder überblendet mit Regler, Tastatur) und **wiederherstellen** als Schritt im Protokoll; **Verwendet auf** mit
+  Links und verkleinerter Vorschau der Seiten; **Präsenz**: wer die Grafik gerade bearbeitet, steht oben, Speichern fragt nach, wenn jemand anderes
+  inzwischen gespeichert hat (`Core\Presence`, Typ `graphic`). Unter 1600 px zeigen die Personas nur Symbole (Name bleibt für Screenreader), Hell |
+  Dunkel | Nebeneinander behält unter 1280 px seinen Namen für Screenreader (vorher fehlte er).
+- Neue Routen `POST /admin/api/grafik/data-values`, `POST /admin/api/grafik/app-icon`, `GET /admin/api/grafik/usage`; `Core\Svg::clean` (Arbeitsfassung) lässt `data-ge-bind`,
   `data-ge-data`, `data-ge-slices` nur als Base64 zu. `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Daten und Zustände; Export),
   Entwicklerhandbuch → Medien → Grafik-Editor.
 

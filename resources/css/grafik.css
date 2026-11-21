@@ -441,7 +441,7 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-scheme svg.ico { width: 15px; height: 15px }
 .ge-bgbtn { font-family: var(--adm-font) }
 .ge-bgbtn__sw { width: 14px; height: 14px; border-radius: 4px; background: linear-gradient(135deg, var(--c, #fff) 50%, var(--c2, #111) 50%); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25) }
-@media (max-width: 1280px) { .ge-scheme span, .ge-bgbtn [data-bglbl] { display: none } }
+@media (max-width: 1280px) { .ge-bgbtn [data-bglbl] { display: none } .ge-scheme span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
 /* Nebeneinander: links bearbeiten, rechts die Dunkel-Fassung (nicht bearbeitbar) */
 .ge[data-scheme=side] .ge-stage { grid-column: 2; grid-row: 3; width: 50%; justify-self: start }
 .ge-twin { grid-column: 2; grid-row: 3; justify-self: end; width: 50%; height: 100%; position: relative; display: grid; place-items: center; padding: 60px 40px;
@@ -662,3 +662,44 @@ html.adm-ui[data-theme=dark] .gx-label { fill: #7DDBA6 }
 .gx-panel .ge-row4 .ge-in--s { width: 0; flex: 1 1 0; min-width: 0; max-width: 90px }
 .gx-panel .ge-form { grid-template-columns: minmax(0, 1fr) }
 .gd-panel .ge-form { grid-template-columns: minmax(0, 1fr) }
+
+/* ---------------------------------------------------------------- Zusammenarbeit (collab.js): Fassungen vergleichen, Verwendet auf, Präsenz */
+.ge-collab { display: inline-flex; align-items: center; gap: 2px; flex: none }
+.ge-collab[hidden] { display: none }
+.ge-collab .ge-zoombtn { display: inline-flex; align-items: center; gap: 5px }
+.ge-collab__who:empty { display: none }
+.ge-collab__pill { display: inline-flex; align-items: center; gap: 6px; max-width: 220px; padding: 2px 10px 2px 3px; border-radius: 999px; background: var(--adm-fill); border: 1px solid var(--adm-line); font: 600 12px var(--adm-font); color: var(--adm-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.ge-collab__av { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: -4px; border-radius: 50%; border: 2px solid var(--adm-card); background: var(--adm-a); color: #fff; font: 700 10px var(--adm-font); object-fit: cover }
+.ge-vc { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; min-height: 360px }
+.ge-vc__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; align-content: start; max-height: 60vh; overflow-y: auto }
+.ge-vc__list li { display: grid; gap: 2px; padding: 6px 8px; border: 1px solid var(--adm-line); border-radius: 8px; font-size: 12px; color: var(--adm-t2); cursor: pointer }
+.ge-vc__list li strong { color: var(--adm-ink) }
+.ge-vc__list li[aria-selected=true] { border-color: var(--adm-a); box-shadow: 0 0 0 1px var(--adm-a) }
+.ge-vc__main { display: grid; gap: 10px; align-content: start; min-width: 0 }
+.ge-vc__modes { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--adm-fill); justify-self: start }
+.ge-vc__modes button { min-height: 28px; padding: 0 12px; border: 0; border-radius: 6px; background: none; color: var(--adm-t2); font: 700 12px var(--adm-font); cursor: pointer }
+.ge-vc__modes button[aria-checked=true] { background: var(--adm-card); color: var(--adm-ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12) }
+.ge-vc__side { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.ge-vc__side[hidden], .ge-vc__over[hidden] { display: none }
+.ge-vc__side figure { margin: 0; display: grid; gap: 4px; font-size: 12px; color: var(--adm-t2) }
+.ge-vc__img, .ge-vc__stack { display: grid; place-items: center; min-height: 220px; padding: 8px; border: 1px solid var(--adm-line); border-radius: 8px;
+  background: repeating-conic-gradient(var(--adm-fill) 0 25%, var(--adm-card) 0 50%) 50% / 16px 16px }
+.ge-vc__img img { max-width: 100%; max-height: 320px }
+.ge-vc__stack { position: relative; --x: 50%; touch-action: none; cursor: ew-resize }
+.ge-vc__stack img { grid-area: 1 / 1; max-width: 100%; max-height: 360px; user-select: none; -webkit-user-drag: none }
+.ge-vc__top { clip-path: inset(0 calc(100% - var(--x)) 0 0) }
+.ge-vc__line { position: absolute; top: 0; bottom: 0; left: var(--x); width: 2px; margin-left: -1px; background: var(--adm-a); pointer-events: none }
+.ge-vc__slider { justify-content: flex-start }
+.ge-vc__slider .ge-range { flex: 1 }
+.ge-use { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px }
+.ge-use li { padding: 8px 10px; border: 1px solid var(--adm-line); border-radius: 8px }
+.ge-use__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
+.ge-use__row > span { flex: 1; min-width: 200px; font-size: 13px }
+.ge-use__prev { margin-top: 8px }
+.ge-use__frame { position: relative; width: 100%; height: 240px; overflow: hidden; border: 1px solid var(--adm-line); border-radius: 6px; background: #fff }
+.ge-use__frame iframe { position: absolute; left: 0; top: 0; width: 400%; height: 400%; border: 0; transform: scale(.25); transform-origin: 0 0; pointer-events: none }
+@media (max-width: 760px) { .ge-vc { grid-template-columns: 1fr } .ge-vc__side { grid-template-columns: 1fr } }
+/* vier Personas: unter 1600 px nur Symbole (Name bleibt für Screenreader und als Tooltip), der Titel des Dokuments behält Platz */
+@media (max-width: 1600px) { .ge-personas button { padding: 0 9px } .ge-personas button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
+.ge-doctitle { flex: 0 1 auto; min-width: 72px }
+@media (max-width: 1180px) { .ge-top [data-act=export], .ge-top [data-shellbtns] .adm-btn { font-size: 0; gap: 0; padding-inline: 8px } .ge-top [data-act=export] svg.ico, .ge-top [data-shellbtns] .adm-btn svg.ico { width: 16px; height: 16px } .ge-doctitle .ge-fmt { display: none } }
