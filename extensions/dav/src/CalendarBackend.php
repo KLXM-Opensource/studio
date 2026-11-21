@@ -310,6 +310,8 @@ final class CalendarBackend extends \Sabre\CalDAV\Backend\AbstractBackend
             }
             $in[$c['category']] = $cf['type'] === 'multiselect' ? $keys : ($keys[0] ?? '');
         }
+        // „Nur Website“-Felder (Core\Data\Exposure): gehen nie an Apps – und Apps schreiben sie nie
+        foreach ($t['fields'] as $f) if (\Core\Data\Exposure::isWebsiteOnly($f)) unset($in[$f['name']]);
         return [$in, trim((string) ($ev->UID ?? '')) ?: bin2hex(random_bytes(16))];
     }
 }

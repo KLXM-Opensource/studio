@@ -160,6 +160,8 @@ final class Dav
     {
         $raw = self::storedSettings((string) $table['handle']);
         if (isset($raw['status'])) return $raw['status'] === 'draft' ? 'draft' : 'published';
+        // Kontakte-Tabellen (Core\Data\Kinds): neue Kontakte sind über „Auf der Website zeigen“ (aus) ohnehin nicht öffentlich
+        if (\Core\Data\Kinds::isContacts($table)) return 'published';
         $detail = ($table['settings']['route'] ?? '') !== '' && !empty($table['settings']['detail_page_id']);
         return !Calendar::enabled($table) && $detail ? 'draft' : 'published';
     }
