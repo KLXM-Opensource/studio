@@ -828,6 +828,8 @@ final class Theme
         // Personen (Kern-Block people) – Kit kann css/people.css mitbringen
         // … auch in Inhaltsblöcken von Einträgen (entry_blocks, z. B. Ansprechpersonen je Gruppe)
         if ($types === null || array_intersect(['people', 'entry_blocks'], $types)) $out[] = $this->coreCss('people.css');
+        // Unterseiten (Kern-Block subpages) – Variablen --sp-* aus dem Kit, oder eigene css/subpages.css
+        if (($types === null || in_array('subpages', $types, true)) && isset($this->blocks['subpages'])) $out[] = $this->coreCss('subpages.css');
         // Partner & Logos – Variablen --partners-* aus dem Kit, oder eigene css/partners.css
         if (($types === null || in_array('partners', $types, true)) && !empty($this->blocks['partners']['core'])) {
             $out[] = $this->coreCss('partners.css');

@@ -10,6 +10,28 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Personen nach Filter, Block „Unterseiten“, fluid: Menü „Groß“ und Video-Knopf
+- **Block „Personen“ – Quelle „Alle aus der Tabelle, gefiltert“** (`source = filter`, Standard bleibt „Von Hand“): alle veröffentlichten
+  Einträge der Personen-Tabelle, optional nur mit bestimmten Werten in einem Feld (mehrere Werte je Zeile oder mit Komma; Auswahl per
+  Beschriftung oder Kurzname, Verknüpfung per ID/Slug/Titel, Text „enthält“), sortiert wie in der Tabelle (auch Reihenfolge von Hand)
+  oder nach Feld, mit Höchstzahl. vCard und Kontakt wie bisher; der Seiten-Cache leert sich beim Speichern eines Eintrags. So wird z. B.
+  der Vorstand nur noch in der Tabelle gepflegt (`Core\Blocks\PeopleSource`).
+- **Neuer Kern-Block „Unterseiten“** (`subpages`): die Kinder einer Seite (Standard: aufgerufene Seite, sonst per Linkauswahl `page:ID`)
+  automatisch als Karten mit Bild, Liste mit Links oder Kacheln mit Pfeil – Titel, Beschreibung (Meta-Beschreibung, sonst Text des
+  Seitenkopfs), Bild (Seitenkopf, sonst Vorschaubild, responsive Größen); nur veröffentlichte, für Gäste keine geschützten, optional nur
+  „im Menü“; Reihenfolge wie im Menü, A–Z oder neueste; Höchstzahl, Spalten, Bildformat, Überschriftenebene wählbar. Kern-CSS
+  `resources/css/subpages.css` (Variablen `--sp-*`, vom Kit ersetzbar), fluid/foto/galerie nutzen ihre Karten-Tokens; hell/dunkel und
+  farbige Abschnitte lesbar; Vorschaugrafik der Blockauswahl (`Core\Blocks\SubpageList`).
+- **Personen auf farbigen Abschnitten lesbar:** Auf „Akzent“, „Zweite Markenfarbe“ und „Dunkel“ blieben Name, E-Mail und Telefon in den
+  weißen Karten unsichtbar (helle Schrift der Fläche auf weißem Grund, kit:test 1:1). `people.css` leitet die Farben je Karte ab,
+  fluid, foto und galerie geben den Karten die Schrift der Seite (`--f0-*`, wie andere Karten in Seitenfarbe).
+- **fluid: Größe der Menüpunkte „Groß“** (`nav_size = large`, Klasse `nz-large`): 17 px, mehr Innenabstand, 48 px Zielhöhe – für wenige
+  Hauptpunkte und große Grundschrift. Standard bleibt „Normal“; `fluid_nav_fit()` rechnet die Breite mit, die Leiste schaltet bei Enge
+  weiter auf die Menü-Schaltfläche um.
+- **fluid, foto, galerie: Knopf „Hintergrundvideo anhalten“ überdeckt nichts mehr** – unter dem Text wird Platz für ihn reserviert
+  (auf großen Flächen ohnehin vorhanden), auf schmalen Flächen nur das Symbol (zugänglicher Name bleibt, 44 px).
+- Selbsttest `blocks:selftest` erweitert (Filter, Sortierung, Höchstzahl, Ausgabe; Unterseiten: Auswahl, Reihenfolge, Bild/Text, Ausgabe).
+
 ### Anmeldung per OpenID Connect und signierte Überwachung (Standard aus)
 - **OpenID Connect** (`Core\Oidc`): Anmeldung über einen Identitätsanbieter (z. B. den Hub einer Agentur) – Authorization Code Flow
   mit PKCE S256, `state`, `nonce`, Discovery, JWKS mit Schlüsselwechsel, ID-Token RS256/EdDSA ohne neue Abhängigkeit (openssl,

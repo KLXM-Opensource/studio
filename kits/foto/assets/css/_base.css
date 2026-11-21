@@ -62,7 +62,7 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 }
 /* Karten/Etiketten in Seitenfarbe (--f-bg) innerhalb farbiger Abschnitte: Schrift und Knöpfe der Seite (--f0-*, am :root berechnet)
    statt der Fläche – sonst hell auf hell (bg-dark im Hellmodus) bzw. dunkel auf dunkel (bg-accent im Dunkelmodus). */
-:is(.mt-over__card,.cms-slide--ov-box .cms-slide__box,.hx-cmp__tag,.df-act,.dl-search__row){
+:is(.mt-over__card,.cms-person,.cms-slide--ov-box .cms-slide__box,.hx-cmp__tag,.df-act,.dl-search__row){
   --f-ink:var(--f0-ink);--f-text:var(--f0-text);--f-muted:var(--f0-muted);--f-link:var(--f0-link);--f-fg:var(--f0-ink);--f-btn-bg:var(--f-a);--f-btn-ink:var(--f-a-on);--f-btn-hover:var(--f-a-strong)}
 .sec--ov-dark{--f-fg:var(--f-on-dark);--f-muted:color-mix(in srgb,var(--f-on-dark) 88%,transparent);--f-btn-ink:var(--f-dark)}
 /* Gleiche Hintergründe hintereinander: ein Abstand statt zwei */
@@ -120,6 +120,8 @@ img[class*=fx],img[class*=fy]{object-position:var(--fx,50%) var(--fy,50%)}
 .cover-link:focus-visible{outline:0}
 :is(.feat,.tcard,.tile):has(.cover-link:focus-visible){outline:2px solid var(--f-focus);outline-offset:3px}
 .card{background:var(--f-card);border:1px solid var(--f-card-bd);border-radius:var(--f-r-l);box-shadow:var(--f-card-sh);backdrop-filter:var(--f-card-blur)}
+/* Kern-Block „Unterseiten“ (resources/css/subpages.css): Karten wie .card – Design „Karten“, farbige Abschnitte inklusive */
+:root .cms-subpages{--sp-card:var(--f-card);--sp-card-bd:var(--f-card-bd);--sp-card-sh:var(--f-card-sh);--sp-r:var(--f-r-l)}
 :is(.feat--link,.tcard--link.card,.tile):hover{border-color:var(--f-line-strong)}
 
 /* ---------------------------------------------------------------- Hinweisbalken */
