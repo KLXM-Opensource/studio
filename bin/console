@@ -90,6 +90,7 @@
  *                                                     übergeben (Administration → Funktionen & Erweiterungen); Sicherung .bak + Diff
  *   extensions:publish                                Öffentliche Dateien der Erweiterungen nach public/assets/ext kopieren
  *   reseed --force                                    ALLE Inhalte löschen und Startinhalte neu einspielen
+ *   pdfjs:cmaps [--remove]                            PDF-Anzeige: Zeichentabellen für chinesische/japanische/koreanische PDFs nachladen (1,6 MB, nicht im Download)
  *   fonts:search <name> [--category=serif]            Google-Fonts-Katalog durchsuchen (Fontsource, nur freie Lizenzen)
  *   fonts:install <familie> [--weights=400,700] [--subsets=latin,latin-ext] [--variable] [--italic] [--preload]
  *                                                     Schrift laden und selbst ausliefern (public/assets/fonts/installed, alle Websites)
@@ -1512,6 +1513,10 @@ switch ($cmd) {
         // Kit-Schriften (design.php → fonts → 'fontsource') installieren – je Website; --all: alle Websites der Installation
         if (Core\Cli::flag($args, 'all')) exit(Core\Cli::eachSite('fonts:sync', $args, false));
         exit(Core\Fonts::console($cmd, $args));
+
+    case 'pdfjs:cmaps':
+        // Zeichentabellen der PDF-Anzeige (pdf.js) nachladen bzw. entfernen – nur für CJK-PDFs ohne eingebettete Schrift nötig
+        exit(Core\PdfCmaps::console($args));
 
     case 'fonts:search':
     case 'fonts:install':

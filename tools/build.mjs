@@ -126,7 +126,10 @@ async function vendors() {
   // nicht aus (resources/js/pdfviewer.mjs nutzt pdf.min.mjs ohne Skripte), daher weg: 475 KB weniger
   const skip = f => /quickjs/i.test(path.basename(f));
   fs.rmSync(path.join(pdf, 'wasm'), { recursive: true, force: true });
-  for (const dir of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
+  // cmaps (1,6 MB, nur für chinesische/japanische/koreanische PDFs ohne eingebettete Schrift) liefern wir nicht aus –
+  // bei Bedarf: php bin/console pdfjs:cmaps (lädt sie einmal passend zur Version nach public/assets/vendor/pdfjs/cmaps)
+  fs.writeFileSync(path.join(pdf, 'VERSION'), JSON.parse(fs.readFileSync(nm('pdfjs-dist/package.json'), 'utf8')).version + '\n');
+  for (const dir of ['standard_fonts', 'wasm', 'iccs']) {
     if (fs.existsSync(nm('pdfjs-dist', dir))) {
       fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true, filter: f => !skip(f) });
       console.log('  vendor  ' + path.relative(ROOT, path.join(pdf, dir)) + '/');

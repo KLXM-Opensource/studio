@@ -71,3 +71,4 @@ deploy/targets/*.env
 !/storage/sessions/
 # PHPStan (tools/phpstan, nur Entwicklung)
 /tools/phpstan/vendor/
+/public/assets/vendor/pdfjs/cmaps/

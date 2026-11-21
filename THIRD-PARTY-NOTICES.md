@@ -108,7 +108,7 @@ Installed from `kits/frameworks/package.json` and copied/built by `kits/framewor
 
 | Component | License | License text |
 |---|---|---|
-| CMaps (`cmaps/*.bcmap`), © 1990-2009 Adobe Systems Incorporated | BSD-3-Clause-style (Adobe) | `cmaps/LICENSE` |
+| CMaps (`cmaps/*.bcmap`, not bundled – only after `php bin/console pdfjs:cmaps`), © 1990-2009 Adobe Systems Incorporated | BSD-3-Clause-style (Adobe) | `cmaps/LICENSE` |
 | Foxit standard fonts (`standard_fonts/Foxit*.pfb`), © 2014 PDFium Authors | BSD-3-Clause | `standard_fonts/LICENSE_FOXIT` |
 | Liberation Sans (`standard_fonts/LiberationSans-*.ttf`), © 2007-2011 Red Hat, Inc. | GNU GPL v2 with font embedding exception (Red Hat Liberation font license) | `standard_fonts/LICENSE_LIBERATION` |
 | JBIG2 decoder (`wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `wasm/LICENSE_JBIG2`, `wasm/LICENSE_PDFJS_JBIG2` |

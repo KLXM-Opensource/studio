@@ -22,6 +22,8 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 - Download (`git archive`/Packagist) ohne reine Repository-Quellen: NativeCSS-Schriften liegen gebaut in `public/assets/kits/native/fonts`,
   `docs/php-api.md` erzeugt die Verwaltung live. Installations-ZIP 17,4 → 15,6 MB.
 ### Kleinerer Download: Testdaten der Abhängigkeiten, App-Icon-Schrift
+- PDF-Anzeige: Zeichentabellen (CMaps, 1,6 MB) für chinesische/japanische/koreanische PDFs nicht mehr im Download – bei Bedarf
+  `php bin/console pdfjs:cmaps` (Core\PdfCmaps, Version aus `public/assets/vendor/pdfjs/VERSION`); andere PDFs unverändert.
 - `bin/vendor-clean.php` (Composer `post-install-cmd`/`post-update-cmd`) entfernt Testordner aus `vendor/` – u. a. 17 MB Testdaten von
   `wamania/php-stemmer` (über loupe); `vendor/` schrumpft von rund 41 auf 22 MB.
 - App-Icon-Schrift: `theme.php` → `'fonts' => ['icon' => 'fontsource:inter:700']` lädt die TTF beim ersten Bedarf (Fontsource, OFL) nach
