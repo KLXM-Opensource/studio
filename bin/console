@@ -173,9 +173,11 @@
  *   data:selftest [--roundtrip]                       Selbsttest Tabellen-Definition: Rundlauf aller Tabellen, „Felder bearbeiten“ im Editor,
  *                                                     Zweck (Ableitung) und Assistent „Neue Tabelle“ je Zweck (vorübergehende Tabellen);
  *                                                     --roundtrip: nur Rundlauf und Zweck, ändert nichts
+ *   data:convert <tabelle> --kind=contacts [--map=quelle:ziel[beschriftung+|-],…] [--apply] | --revert | --drop-legacy
+ *                                                     Tabelle an Ort und Stelle in ein Adressbuch umwandeln (Standard: Probelauf mit Bericht)
  *   data:template <vorlage> [--handle=…] [--name="…"] [--slug=adresse] [--form=bewerbungen|new|none] [--with-detail-page]
  *                 [--with-list-page] [--dry-run]     Tabelle aus Vorlage anlegen bzw. ergänzen (wie „Neue Tabelle aus Vorlage“; wiederholbar):
- *                                                     blog, team, products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
+ *                                                     blog, team, contacts (Adressbuch), products, events, jobs (Stellenangebote, Google for Jobs) + Eingang
  *                                                     „Bewerbungen“, faq, inbox, applications
  *   jobs:from-page <seite-id|pfad> [--table=…] [--title="…"] [--slug=…] [--employment=vollzeit,teilzeit] [--posted=JJJJ-MM-TT]
  *                 [--no-redirect] [--no-links] [--dry-run]

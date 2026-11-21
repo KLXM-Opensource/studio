@@ -10,6 +10,37 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Adressbuch (Tabellenart „contacts“) und Freigabe je Feld und Ziel
+- **Tabellenart Adressbuch** (`settings.kind = contacts`, `Core\Data\Kinds`): eine normale Inhaltstabelle (Route, Detailseiten,
+  Revisionen, Workflow, geteilte Tabellen, Suche, API, Blöcke) mit festem, versioniertem Grundschema (`settings.kind_version`, nur
+  additiv): „Auf der Website zeigen“, Anzeigename, Titel, Vor-/Nachname, Funktion, Organisation, Abteilung, Foto, Telefon, E-Mail,
+  Adresse, Web, Geburtstag, Listen, Notiz. Grundfelder sind im Designer gesperrt (Typ fest, nicht löschbar, Beschriftung änderbar),
+  Zusatzfelder frei. Vorlage „Adressbuch“ im Assistenten bzw. `data:template contacts`; Detailseite als Porträt.
+- **Beschriftete Mehrfachfelder** (`Core\Combo`: `phones`, `emails`, `addresses`, `urls`, auch in normalen Tabellen): je Angabe
+  Beschriftung (Mobil, Geschäftsstelle, Arbeit, Privat … oder eigene) und Freigabe „Öffentlich“ (Adressen auch „nur Ort“),
+  Standard intern; Eingabe als kompakte Zeilen. Beschriftungen und vCard-Typen nach KLXM/contacts (MIT).
+- **Freigabe je Feld und Ziel** (`Core\Data\Exposure`): im Designer „Sichtbarkeit“ – *immer*, *Redaktion entscheidet je Eintrag*
+  (Standard je Ziel, Schalter mit Weltkugel direkt am Feld, Stand in der Spalte `_exposure`) oder *nie* – getrennt für die Ziele
+  Website (Blöcke, Detailseite, JSON-LD, Suche/KI, RSS), öffentliche Visitenkarte (vCard) und öffentliche Kalender-Datei (ICS, Abo,
+  Export). Ältere Angaben bleiben gültig: ohne Angabe = immer für alle Ziele, „Nie öffentlich“ = nie, „Bewusst öffentlich“ quittiert
+  den Hinweis. „Nur Website“ (z. B. Vita) geht nie an vCard, ICS, CardDAV oder CalDAV. Kontakte erscheinen nur mit „Auf der Website
+  zeigen“ – auf der Website filtert schon die Abfrage, damit auch Kits mit eigenen Abfragen (Galerie, Editorial) nichts anderes
+  sehen. Verwaltung, API mit Token, MCP und die Apps der Redaktion sehen weiter alles.
+- **Bestehende Blöcke lesen Adressbücher ohne Zuordnung:** Personen (Name, Funktion, Foto, freigegebene Telefonnummer/E-Mail,
+  Visitenkarte), Datenliste, Datensatz-Felder (Kontakt-Knöpfe aus den Mehrfachfeldern), Visitenkarte mit allen freigegebenen
+  Angaben und Beschriftungen (`item.X-ABLabel`), JSON-LD mit Adresse. Verknüpfungen auf ein Adressbuch sind Kontakt-Felder
+  (Designer: „Adressbücher – Feld Kontakt“); auf der Website erscheinen nur freigegebene Kontakte.
+- **`data:convert <tabelle> --kind=contacts`:** Umwandlung an Ort und Stelle mit Probelauf (Standard) und Bericht (Feldzuordnung,
+  Namensaufteilung, Freigabe-Vorschlag – mobil/privat und „Nie öffentlich“ werden intern, „Redaktion entscheidet“ je Eintrag –,
+  betroffene Blöcke und Einstellungen), `--map=quelle:ziel[beschriftung+|-]`, `--apply` (Sicherung, Revision je Eintrag,
+  Altfelder bleiben ausgeblendet, Verweise in Blöcken und Bedingungen werden umgeschrieben), `--revert`, `--drop-legacy`. Gleiche
+  Tabelle, gleiche IDs – Verknüpfungen bleiben. Wird nie automatisch angewandt.
+- **dav 1.4.0:** Adressbücher ohne Feldzuordnung, Mehrfachfelder mit TYPE/X-ABLabel, Listen als Kategorien; eine in der App neue
+  oder geänderte Angabe wird nie von selbst öffentlich.
+- Tabellen ohne diese Merkmale verhalten sich unverändert (praxis: Pixelvergleich ohne Abweichung). Selbsttests in `data:selftest`
+  (Grundschema, Mehrfachfelder, jeder Ausgabeweg je Ziel, CardDAV/CalDAV, Umwandlung/Zurückdrehen). Handbuch → Daten →
+  „Adressbuch“, „Sichtbarkeit“; Entwicklerhandbuch → Daten → „Tabellenarten“, „Freigabe (Exposure)“.
+
 ### Datenschutz: Felder „Nie öffentlich“
 - **Neue Feld-Option „Nie öffentlich“** (`private`) im Tabellen-Designer für Inhaltstabellen. Ein solches Feld erscheint in
   keiner Website-Ausgabe – zentral über `Core\Data\Exposure::publicEntry()`: Block „Personen“ (früher rückte bei leerem „Telefon“
