@@ -242,7 +242,7 @@ final class WebPush
     private static function curlAll(array $requests, int $parallel, int $timeout): array
     {
         $out = [];
-        $mh = curl_multi_init();
+        $mh = curl_multi_init();  // nosemgrep: klxm-http-only-core-fetch – parallele Zustellung an Push-Dienste; Endpunkte nur aus Push::endpointAllowed (https, bekannte Dienste)
         $queue = $requests;
         $active = [];
         $retry = [];
@@ -250,7 +250,7 @@ final class WebPush
             $id = array_key_first($queue);
             $r = $queue[$id];
             unset($queue[$id]);
-            $ch = curl_init($r['url']);
+            $ch = curl_init($r['url']);  // nosemgrep: klxm-http-only-core-fetch – siehe curlAll()
             $retry[$id] = null;
             curl_setopt_array($ch, [
                 CURLOPT_POST => true, CURLOPT_POSTFIELDS => $r['body'], CURLOPT_HTTPHEADER => $r['headers'], CURLOPT_RETURNTRANSFER => true,
@@ -291,7 +291,7 @@ final class WebPush
     {
         $out = [];
         foreach ($requests as $id => $r) {
-            $ctx = stream_context_create(['http' => ['method' => 'POST', 'header' => implode("\r\n", $r['headers']), 'content' => $r['body'],
+            $ctx = stream_context_create(['http' => ['method' => 'POST', 'header' => implode("\r\n", $r['headers']), 'content' => $r['body'],  // nosemgrep: klxm-http-only-core-fetch – siehe curlAll()
                 'timeout' => $timeout, 'ignore_errors' => true, 'follow_location' => 0], 'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
             $resp = @file_get_contents($r['url'], false, $ctx);
             $code = 0;

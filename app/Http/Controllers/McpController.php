@@ -141,7 +141,7 @@ final class McpController
         $req = (string) ($p['protocolVersion'] ?? '');
         // Client merken (zustandsloser Server): erscheint in der Prüf-Ebene als Herkunft, z. B. „claude-code 2.1“
         $client = trim(mb_substr(strip_tags((string) ($p['clientInfo']['name'] ?? '') . ' ' . (string) ($p['clientInfo']['version'] ?? '')), 0, 120));
-        if ($client !== '' && isset($this->token['id']) && $client !== ($this->token['mcp_client'] ?? '')) {
+        if ($client !== '' && isset($this->token['id']) && $client !== ($this->token['mcp_client'] ?? '')) {  // nosemgrep: klxm-timing-safe-compare – Name des MCP-Clients (nur gemerkt), kein Geheimnis
             try {
                 app()->db->update('api_tokens', ['mcp_client' => $client], 'id = :id', ['id' => (int) $this->token['id']]);
             } catch (\Throwable) {

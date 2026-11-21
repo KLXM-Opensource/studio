@@ -593,7 +593,7 @@ final class EmailChange
             $p = self::pending($a);
             $before = (string) $p['token_hash'];
             self::resend($ua);
-            $eq('Erneut senden: neuer Bestätigungslink', (string) self::pending($a)['token_hash'] !== $before, true);
+            $eq('Erneut senden: neuer Bestätigungslink', (string) self::pending($a)['token_hash'] !== $before, true);  // nosemgrep: klxm-timing-safe-compare – Selbsttest: neuer Hash nach erneutem Senden
             $eq('Erneut senden: Abbrechen-Link bleibt', (string) self::pending($a)['cancel_hash'], (string) $p['cancel_hash']);
             $eq('Im Konto abbrechen', self::cancelOwn($ua), true);
             $eq('Im Konto abbrechen: nichts mehr offen', self::pending($a), null);

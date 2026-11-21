@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.21.1@ecd8c23829dd6527337f0f72790c7f894a1a3d0e">
+  <file src="../../app/AI/Ai.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/AI/HelpIndex.php">
+    <TaintedInclude>
+      <code><![CDATA[$file]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/AI/SelfTest.php">
+    <TaintedHtml>
+      <code><![CDATA[$got]]></code>
+      <code><![CDATA[$want]]></code>
+      <code><![CDATA[$want]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="../../app/AI/Transcriber.php">
+    <TaintedShell>
+      <code><![CDATA[$cmd]]></code>
+    </TaintedShell>
+  </file>
+  <file src="../../app/Admin/views/glossary/index.php">
+    <TaintedHtml>
+      <code><![CDATA[\Core\Fields::renderField(['name' => 'exclude', 'label' => __('Seiten ausnehmen'), 'type' => 'pages', 'store' => 'paths',
+          'help' => __('„mit Unterseiten“ nimmt alle Seiten darunter aus; eigene Pfade (z. B. /blog/*) lassen sich im Dialog ergänzen. Einzelne Abschnitte: Abschnitts-Option „Glossar-Begriffe hier nicht markieren“ im Editor.')],
+          $settings['exclude'], [], 's')]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[\Core\Fields::renderField(['name' => 'exclude', 'label' => __('Seiten ausnehmen'), 'type' => 'pages', 'store' => 'paths',
+          'help' => __('„mit Unterseiten“ nimmt alle Seiten darunter aus; eigene Pfade (z. B. /blog/*) lassen sich im Dialog ergänzen. Einzelne Abschnitte: Abschnitts-Option „Glossar-Begriffe hier nicht markieren“ im Editor.')],
+          $settings['exclude'], [], 's')]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Admin/views/pages/form.php">
+    <TaintedHtml>
+      <code><![CDATA[Fields::renderField(['name' => 'og_image', 'label' => 'Vorschaubild (soziale Netzwerke)', 'type' => 'media'], $old['og_image'] ?? null, [], 'x')]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[Fields::renderField(['name' => 'og_image', 'label' => 'Vorschaubild (soziale Netzwerke)', 'type' => 'media'], $old['og_image'] ?? null, [], 'x')]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/AdminPath.php">
+    <TaintedHtml>
+      <code><![CDATA[$local]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="../../app/AppIcons.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/AssetDocs.php">
+    <TaintedFile>
+      <code><![CDATA[$dir . '/functions.php']]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Avatar.php">
+    <TaintedSSRF>
+      <code><![CDATA[$tmp]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/Blocks/Custom.php">
+    <TaintedHtml>
+      <code><![CDATA[$v]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="../../app/Blocks/data_fields.php">
+    <TaintedHtml>
+      <code><![CDATA[$h]]></code>
+      <code><![CDATA[$h]]></code>
+      <code><![CDATA[$tp === 'richtext' ? '<div class="prose df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</div>' : '<p class="df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</p>']]></code>
+      <code><![CDATA[$tp === 'richtext' ? '<div class="prose df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</div>' : '<p class="df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</p>']]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[$h]]></code>
+      <code><![CDATA[$h]]></code>
+      <code><![CDATA[$tp === 'richtext' ? '<div class="prose df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</div>' : '<p class="df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</p>']]></code>
+      <code><![CDATA[$tp === 'richtext' ? '<div class="prose df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</div>' : '<p class="df-profile__lead"' . entry_edit_attr($t, $e, $f) . '>' . $h . '</p>']]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Branding.php">
+    <TaintedFile>
+      <code><![CDATA[$file['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Chat/Messages.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/ContentSync.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+    <TaintedHtml>
+      <code><![CDATA['  neues Medium: #' . $mid . ' ' . ($m['original_name'] ?: $m['file']) . (!empty($m['pool_ref']) ? " (Verweis auf Pool {$m['_pool']})" : '') . "\n"]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA['  neues Medium: #' . $mid . ' ' . ($m['original_name'] ?: $m['file']) . (!empty($m['pool_ref']) ? " (Verweis auf Pool {$m['_pool']})" : '') . "\n"]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Data/DataForms.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$path]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/Data/Shared.php">
+    <TaintedFile>
+      <code><![CDATA[$from]]></code>
+      <code><![CDATA[MediaPools::dir('_removed')]]></code>
+      <code><![CDATA[MediaPools::dir('_removed') . '/removed.log']]></code>
+      <code><![CDATA[MediaPools::mediaDir($dst) . '/' . $rel]]></code>
+      <code><![CDATA[self::dir($key)]]></code>
+      <code><![CDATA[self::dir($key)]]></code>
+      <code><![CDATA[self::dir($key) . '/left']]></code>
+      <code><![CDATA[self::dir($key) . '/left/' . $site . '-' . date('YmdHis') . '.json']]></code>
+      <code><![CDATA[self::dir($key) . '/share.json']]></code>
+      <code><![CDATA[self::dir('_removed')]]></code>
+      <code><![CDATA[self::dir('_removed') . '/' . $key . '-' . date('YmdHis')]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Data/SharedPoolsTest.php">
+    <TaintedFile>
+      <code><![CDATA[$log]]></code>
+      <code><![CDATA[$log]]></code>
+      <code><![CDATA[$log]]></code>
+      <code><![CDATA[MediaPools::dir('_removed')]]></code>
+      <code><![CDATA[MediaPools::dir('_removed') . '/removed.log']]></code>
+      <code><![CDATA[MediaPools::mediaDir(Shared::poolKey($orphan)) . '/rest.jpg']]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Database.php">
+    <TaintedSql>
+      <code><![CDATA["ALTER TABLE $table ADD COLUMN $name $ddl"]]></code>
+      <code><![CDATA[$sql]]></code>
+    </TaintedSql>
+  </file>
+  <file src="../../app/DependencyCheck.php">
+    <TaintedFile>
+      <code><![CDATA["$dir/composer.json"]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Design.php">
+    <TaintedFile>
+      <code><![CDATA["$dir/$name"]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Extensions.php">
+    <TaintedInclude>
+      <code><![CDATA[$f]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/FeatureRelease.php">
+    <TaintedFile>
+      <code><![CDATA[$bak]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Fonts.php">
+    <TaintedFile>
+      <code><![CDATA["$tmp/$name"]]></code>
+      <code><![CDATA["$tmp/LICENSE.txt"]]></code>
+      <code><![CDATA["$tmp/font.css"]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$old]]></code>
+      <code><![CDATA[$old]]></code>
+      <code><![CDATA[$real]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[self::dir('fonts.json')]]></code>
+      <code><![CDATA[self::dir('fonts.json')]]></code>
+      <code><![CDATA[self::dir()]]></code>
+    </TaintedFile>
+    <TaintedHtml>
+      <code><![CDATA["Keine Kit-Schriften nötig ($label).\n"]]></code>
+      <code><![CDATA[$fail ? "$fail Schrift(en) nicht installiert ($label) – bis dahin gilt die Ersatzschrift.\n"
+                    : ($dry ? "Probelauf ($label) – nichts geändert.\n" : "Schriften aktuell ($label).\n")]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA["Keine Kit-Schriften nötig ($label).\n"]]></code>
+      <code><![CDATA[$fail ? "$fail Schrift(en) nicht installiert ($label) – bis dahin gilt die Ersatzschrift.\n"
+                    : ($dry ? "Probelauf ($label) – nichts geändert.\n" : "Schriften aktuell ($label).\n")]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Glossary/ShareTest.php">
+    <TaintedHtml>
+      <code><![CDATA[json_encode($res, JSON_UNESCAPED_UNICODE) . "\n"]]></code>
+      <code><![CDATA[json_encode($res, JSON_UNESCAPED_UNICODE) . "\n"]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[json_encode($res, JSON_UNESCAPED_UNICODE) . "\n"]]></code>
+      <code><![CDATA[json_encode($res, JSON_UNESCAPED_UNICODE) . "\n"]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Graphics/Bind.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Graphics/Motion.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Graphics/Themed.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Guide.php">
+    <TaintedFile>
+      <code><![CDATA[$dir . '/' . $key . '.md']]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/BlockController.php">
+    <TaintedFile>
+      <code><![CDATA[$f['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/FontsController.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/GlossaryController.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $file['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/MediaController.php">
+    <TaintedFile>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.json"]]></code>
+      <code><![CDATA["$path.part"]]></code>
+      <code><![CDATA["$path.part"]]></code>
+      <code><![CDATA["$path.part"]]></code>
+      <code><![CDATA["$path.part"]]></code>
+      <code><![CDATA["$path.part"]]></code>
+      <code><![CDATA[$file['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/MediaTrackController.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $file['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/RedirectController.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $file['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/Admin/SourceController.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Controllers/ProtectedMediaController.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Http/Fetch.php">
+    <TaintedSSRF>
+      <code><![CDATA[$url]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/I18n.php">
+    <TaintedInclude>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/Icons.php">
+    <TaintedFile>
+      <code><![CDATA[$full]]></code>
+      <code><![CDATA[$stateFile]]></code>
+      <code><![CDATA[$stateFile]]></code>
+      <code><![CDATA[$stateFile]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/ImageFit.php">
+    <TaintedFile>
+      <code><![CDATA[$src]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Kit.php">
+    <TaintedFile>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[(string) self::definitionFile($dir)]]></code>
+    </TaintedFile>
+    <TaintedInclude>
+      <code><![CDATA[$file]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/KitPackages.php">
+    <TaintedFile>
+      <code><![CDATA["$dst/$rel"]]></code>
+      <code><![CDATA["$dst/$rel"]]></code>
+      <code><![CDATA["$root/" . self::MARKER]]></code>
+      <code><![CDATA["$root/composer.json"]]></code>
+      <code><![CDATA[$def]]></code>
+      <code><![CDATA[$dir]]></code>
+      <code><![CDATA[$dir]]></code>
+      <code><![CDATA[$dir]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$old]]></code>
+      <code><![CDATA[$old]]></code>
+      <code><![CDATA[$root]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$target]]></code>
+      <code><![CDATA[$to]]></code>
+      <code><![CDATA[$trash]]></code>
+      <code><![CDATA[$work]]></code>
+      <code><![CDATA[self::uploadDir()]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/KitSelfTest.php">
+    <TaintedInclude>
+      <code><![CDATA[$fluid . '/theme.php']]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/Landing.php">
+    <TaintedFile>
+      <code><![CDATA["$dir/$name"]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Mailer.php">
+    <TaintedFile>
+      <code><![CDATA[$base . '.eml']]></code>
+      <code><![CDATA[$base . '.html']]></code>
+    </TaintedFile>
+    <TaintedHeader>
+      <code><![CDATA[$subject]]></code>
+      <code><![CDATA[$subject]]></code>
+    </TaintedHeader>
+  </file>
+  <file src="../../app/Media.php">
+    <TaintedFile>
+      <code><![CDATA["$dst/$rel"]]></code>
+      <code><![CDATA["$dst/$rel"]]></code>
+      <code><![CDATA["$src/$rel"]]></code>
+      <code><![CDATA["$src/$rel"]]></code>
+      <code><![CDATA[$cache . '/' . $new . $rest]]></code>
+      <code><![CDATA[$cacheDir]]></code>
+      <code><![CDATA[$dir]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$out]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$path]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[self::dir() . "/$rel"]]></code>
+      <code><![CDATA[self::dir() . "/$rel"]]></code>
+      <code><![CDATA[self::dir() . '/' . $cur]]></code>
+      <code><![CDATA[self::dir() . '/' . $data['file']]]></code>
+      <code><![CDATA[self::dir() . '/' . $e['master']]]></code>
+      <code><![CDATA[self::dir() . '/' . $file]]></code>
+      <code><![CDATA[self::dir() . '/' . $m['file']]]></code>
+      <code><![CDATA[self::dir() . '/' . $master]]></code>
+      <code><![CDATA[self::dir() . '/' . $master]]></code>
+      <code><![CDATA[self::dir() . '/' . $new]]></code>
+      <code><![CDATA[self::dir() . '/' . $old['file']]]></code>
+      <code><![CDATA[self::dir() . '/' . $rel]]></code>
+      <code><![CDATA[self::dir() . '/' . $rel]]></code>
+      <code><![CDATA[self::dir() . '/' . $stored['master']]]></code>
+      <code><![CDATA[self::dir() . '/cache']]></code>
+      <code><![CDATA[self::dir() . '/cache/' . $v['base'] . '-' . $s['w'] . '.' . $f]]></code>
+      <code><![CDATA[self::dir() . '/cache/' . $v['base'] . '-' . $s['w'] . '.' . $f]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$path]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/MediaPools.php">
+    <TaintedFile>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$url]]></code>
+      <code><![CDATA[self::dir($key)]]></code>
+      <code><![CDATA[self::dir($key)]]></code>
+      <code><![CDATA[self::dir($key)]]></code>
+      <code><![CDATA[self::dir($key) . '/pool.json']]></code>
+      <code><![CDATA[self::dir('_removed')]]></code>
+      <code><![CDATA[self::dir('_removed') . '/' . $key . '-' . date('YmdHis')]]></code>
+      <code><![CDATA[self::mediaDir($key)]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$url]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/MediaTracks.php">
+    <TaintedFile>
+      <code><![CDATA[$c['dir'] . '/' . $old['file']]]></code>
+      <code><![CDATA[$c['dir'] . '/' . $other['file']]]></code>
+      <code><![CDATA[$c['dir'] . '/' . $rel]]></code>
+      <code><![CDATA[$c['dir'] . '/' . $t['file']]]></code>
+      <code><![CDATA[$c['dir'] . '/' . $t['file']]]></code>
+      <code><![CDATA[$c['dir'] . '/tracks']]></code>
+      <code><![CDATA[MediaPools::mediaDir($from) . '/' . $old]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Network/Move.php">
+    <TaintedHtml>
+      <code><![CDATA[implode("\n", $this->out) . "\n"]]></code>
+    </TaintedHtml>
+    <TaintedTextWithQuotes>
+      <code><![CDATA[implode("\n", $this->out) . "\n"]]></code>
+    </TaintedTextWithQuotes>
+  </file>
+  <file src="../../app/Network/Stats.php">
+    <TaintedFile>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[self::cacheFile($key)]]></code>
+    </TaintedFile>
+    <TaintedShell>
+      <code><![CDATA[$cmd]]></code>
+    </TaintedShell>
+  </file>
+  <file src="../../app/NetworkHost.php">
+    <TaintedHtml>
+      <code><![CDATA[$host]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="../../app/Onboarding.php">
+    <TaintedFile>
+      <code><![CDATA[(string) Kit::definitionFile(Kit::dir($name))]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Proxy.php">
+    <TaintedFile>
+      <code><![CDATA[$url]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$url]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/Seeder.php">
+    <TaintedInclude>
+      <code><![CDATA[$file]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/SiteExtract.php">
+    <TaintedFile>
+      <code><![CDATA[$d]]></code>
+      <code><![CDATA[$dst]]></code>
+      <code><![CDATA[$src]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Sites.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file . '.bak']]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+    </TaintedFile>
+    <TaintedHtml>
+      <code><![CDATA[$value]]></code>
+      <code><![CDATA[$x]]></code>
+    </TaintedHtml>
+  </file>
+  <file src="../../app/Support/Tickets.php">
+    <TaintedFile>
+      <code><![CDATA[$src]]></code>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/Svg.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$file]]></code>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../app/Theme.php">
+    <TaintedExtract>
+      <code><![CDATA[$__vars]]></code>
+      <code><![CDATA[$__vars]]></code>
+      <code><![CDATA[$__vars]]></code>
+    </TaintedExtract>
+    <TaintedFile>
+      <code><![CDATA[$f]]></code>
+    </TaintedFile>
+    <TaintedInclude>
+      <code><![CDATA[$__file]]></code>
+      <code><![CDATA[(string) Kit::definitionFile($dir)]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/Tutorials.php">
+    <TaintedInclude>
+      <code><![CDATA[$themeFile]]></code>
+    </TaintedInclude>
+  </file>
+  <file src="../../app/VCard.php">
+    <TaintedFile>
+      <code><![CDATA[$path]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$path]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/VideoThumbs.php">
+    <TaintedFile>
+      <code><![CDATA["$cache/$base-{$s['w']}.webp"]]></code>
+      <code><![CDATA[$cache]]></code>
+      <code><![CDATA[$cache]]></code>
+      <code><![CDATA[$dir . '/' . $rel]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp . '.jpg']]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$out]]></code>
+      <code><![CDATA[$tmp]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../app/VideoWeb.php">
+    <TaintedFile>
+      <code><![CDATA[$dir . '/' . $old['file']]]></code>
+      <code><![CDATA[$out]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+      <code><![CDATA[$tmp]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[$out]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../bin/console">
+    <TaintedFile>
+      <code><![CDATA["$dir/page.html"]]></code>
+      <code><![CDATA[$def]]></code>
+      <code><![CDATA[$def]]></code>
+      <code><![CDATA[$dir]]></code>
+      <code><![CDATA[$mediaDir]]></code>
+      <code><![CDATA[Core\Data\Shared::dir($sk)]]></code>
+      <code><![CDATA[Core\Data\Shared::dir($sk) . '/share.json']]></code>
+      <code><![CDATA[Core\Data\Shared::dir($sk) . '/share.json']]></code>
+      <code><![CDATA[Core\Data\Shared::dir($sk) . '/share.sqlite']]></code>
+      <code><![CDATA[Core\Data\Shared::dir($sk) . '/share.sqlite' . $x]]></code>
+      <code><![CDATA[Core\MediaPools::dir($pk)]]></code>
+      <code><![CDATA[Core\MediaPools::dir($pk) . '/pool.json']]></code>
+      <code><![CDATA[Core\MediaPools::dir($pk) . '/pool.json']]></code>
+      <code><![CDATA[Core\MediaPools::dir($pk) . '/pool.sqlite']]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../extensions/consent_kit/src/AdminController.php">
+    <TaintedFile>
+      <code><![CDATA[(string) $f['tmp_name']]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../extensions/dav/src/CardBackend.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../extensions/video_tools/src/AdminController.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+    <TaintedSSRF>
+      <code><![CDATA[(string) $file['tmp_name']]]></code>
+    </TaintedSSRF>
+  </file>
+  <file src="../../extensions/video_tools/src/Mp4Info.php">
+    <TaintedFile>
+      <code><![CDATA[$file]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../extensions/video_tools/src/Output.php">
+    <TaintedFile>
+      <code><![CDATA["$dir/$old"]]></code>
+      <code><![CDATA["$dir/$rel"]]></code>
+      <code><![CDATA["$dir/$rel"]]></code>
+      <code><![CDATA["$dir/cache"]]></code>
+    </TaintedFile>
+  </file>
+  <file src="../../extensions/video_tools/src/Repo.php">
+    <TaintedFile>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[$f]]></code>
+      <code><![CDATA[rtrim(Media::dir(), '/') . '/' . $row['preview']]]></code>
+      <code><![CDATA[rtrim(Media::dir(), '/') . '/' . $row['preview']]]></code>
+    </TaintedFile>
+  </file>
+</files>

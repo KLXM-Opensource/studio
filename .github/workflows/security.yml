@@ -1,0 +1,125 @@
+# Sicherheitsprüfungen für KLXM Studio – alles kostenlos, ohne Konten, kein Code an Dritte:
+#   audit     composer audit (composer.lock) und pnpm audit (tools/, kits/*) – bekannte Lücken in Abhängigkeiten
+#   gitleaks  Geheimnisse in der ganzen Git-Historie (.gitleaks.toml: Standardregeln + belegte Ausnahmen)
+#   psalm     Taint-Analyse (tools/psalm): Eingaben → HTML, SQL, Dateipfade, Shell, SSRF …
+#   semgrep   Projektregeln (tools/semgrep): Mailer, Fetch, CSP der Website, eval/extract/unserialize, Token-Vergleiche
+# Lokal ausführbar wie hier beschrieben (Entwicklerhandbuch → Sicherheit, CONTRIBUTING.md).
+name: Sicherheit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 5 * * 1'   # montags: neue Meldungen zu unveränderten Abhängigkeiten
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Abhängigkeiten (composer/pnpm audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: composer audit
+        run: |
+          composer audit --locked
+          composer audit --locked --working-dir=tools/phpstan
+          composer audit --locked --working-dir=tools/psalm
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: tools/package.json
+
+      # Alle Pakete gelten (nicht nur --prod): tools/ hat nur devDependencies, aber Editor.js, PDF.js, MapLibre, ECharts
+      # u. a. werden nach public/ kopiert und ausgeliefert. Schwelle: high. Ein geprüfter, nicht ausnutzbarer Fund wird in
+      # der package.json des Ordners unter pnpm.auditConfig.ignoreGhsas mit Begründung im Commit ausgenommen.
+      - name: pnpm audit (tools/, kits/*)
+        run: |
+          set -u
+          fail=0
+          for d in tools kits/*/; do
+            [ -f "$d/pnpm-lock.yaml" ] || continue
+            echo "::group::$d"
+            (cd "$d" && pnpm audit --audit-level high) || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail
+
+  gitleaks:
+    name: Geheimnisse (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      # SHA-256 von gitleaks_8.30.1_linux_x64.tar.gz (gitleaks_8.30.1_checksums.txt des Releases)
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # ganze Historie
+
+      - name: gitleaks laden (feste Version + Prüfsumme)
+        run: |
+          set -euo pipefail
+          f="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "/tmp/$f" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$f"
+          echo "${GITLEAKS_SHA256}  /tmp/$f" | sha256sum -c -
+          tar -xzf "/tmp/$f" -C /tmp gitleaks
+
+      - name: gitleaks (ganze Historie)
+        run: /tmp/gitleaks git --redact --no-banner -v --exit-code 1 .
+
+  psalm:
+    name: Taint-Analyse (Psalm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, sodium, pdo_sqlite, mbstring, intl, zip, exif
+          tools: composer:v2
+          coverage: none
+
+      - name: Composer install (Projekt + Werkzeug)
+        run: |
+          composer install --no-progress --no-interaction
+          composer install --no-progress --no-interaction --working-dir=tools/psalm
+
+      - name: psalm --taint-analysis
+        run: php -d memory_limit=4G tools/psalm/vendor/bin/psalm -c tools/psalm/psalm.xml --taint-analysis --no-progress --output-format=github --threads=4
+
+  semgrep:
+    name: Projektregeln (Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # Semgrep Community im offiziellen Image mit fester Version und Digest; nur lokale Regeln, keine Metriken, kein Konto.
+      # INFO-Hinweise (Ausgabe ohne e()) zeigt nur der lokale Lauf.
+      - name: semgrep
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src \
+            semgrep/semgrep:1.184.0@sha256:cc1b68266f267878b39739373ea9985b9a78e5d64497dd875c8de100b22695ed \
+            semgrep scan --config tools/semgrep/ --metrics=off --error --severity ERROR --severity WARNING

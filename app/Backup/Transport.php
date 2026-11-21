@@ -176,7 +176,7 @@ final class Transport
     /** Anfrage ausführen → Antwort; Ausnahme mit lesbarer Meldung bei Fehler bzw. unerwartetem HTTP-Status */
     private function curl(string $url, array $opt = [], array $okHttp = []): string
     {
-        $ch = curl_init($url);
+        $ch = curl_init($url);  // nosemgrep: klxm-http-only-core-fetch – Sicherungsziel (WebDAV/SFTP/FTP) vom Admin eingetragen, oft im eigenen Netz (NAS); braucht curl-Protokolle und Streaming, Fetch sperrt private Adressen
         $user = (string) ($this->t['user'] ?? '');
         $base = [CURLOPT_CONNECTTIMEOUT => 20, CURLOPT_TIMEOUT => 0, CURLOPT_LOW_SPEED_LIMIT => 1024,
             CURLOPT_LOW_SPEED_TIME => 120, CURLOPT_FOLLOWLOCATION => false, CURLOPT_USERAGENT => 'KLXM-Studio-Backup/' . CMS_VERSION];

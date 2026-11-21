@@ -462,7 +462,7 @@ final class Template
                         $this->attrsSeen = $seen;
                         $end = $this->scan($body, $s);
                         $allSeen += $this->attrsSeen;
-                        if (self::sig($end) !== $sig) {
+                        if (self::sig($end) !== $sig) {  // nosemgrep: klxm-timing-safe-compare – Strukturvergleich der Vorlage (Attributsignatur), kein Geheimnis
                             throw new TemplateError($n['t'] === 'if'
                                 ? __('Jeder Zweig von {% if %} muss die HTML-Tags schließen, die er öffnet (Anweisung in Zeile {n}).', ['n' => $n['line']])
                                 : __('Der Inhalt von {% for %} muss die HTML-Tags schließen, die er öffnet (Anweisung in Zeile {n}).', ['n' => $n['line']]), $n['line']);

@@ -1,0 +1,9 @@
+# Semgrep (tools/semgrep): nur eigener Code – Abhängigkeiten, gebaute Dateien und Laufzeitdaten nicht prüfen
+vendor/
+node_modules/
+public/
+storage/
+config/sites/
+tools/phpstan/vendor/
+tools/psalm/vendor/
+tools/tutorials/.venv-chatterbox/

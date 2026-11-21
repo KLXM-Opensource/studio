@@ -52,6 +52,9 @@ Entwicklerhandbuch (`/admin/hilfe/technik`).
 - Alle Selbsttests: `php bin/console` listet sie (`*:selftest`, u. a. `extensions:selftest`, `db:selftest`,
   `format:selftest`, `blocks:selftest`, `data:selftest`) – alle grün.
 - `php bin/console i18n:missing en` → 0.
+- Sicherheit (CI „Sicherheit“): `composer audit --locked`, `pnpm audit --audit-level high` (tools/), gitleaks, Psalm-Taint-Analyse
+  (`tools/psalm`) und Semgrep-Projektregeln (`tools/semgrep`) ohne Fund – Befehle im Entwicklerhandbuch → Sicherheit; Fehlalarme nur
+  begründet ausnehmen, echte Funde beheben.
 - CSS/JS-Quellen geändert (`resources/`, `kits/*/assets`, `extensions/*/assets`): `cd tools && pnpm run build`, die
   gebauten Dateien in `public/` mit committen.
 - Jede Funktion mit Doku: Handbuch bzw. Entwicklerhandbuch und `CHANGELOG.md`.

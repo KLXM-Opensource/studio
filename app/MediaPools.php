@@ -154,7 +154,7 @@ final class MediaPools
     private static function getJson(string $url): ?array
     {
         if (function_exists('curl_init')) {
-            $ch = curl_init($url);
+            $ch = curl_init($url);  // nosemgrep: klxm-http-only-core-fetch – Anfrage an eine eigene Netzwerk-Website (eingetragene Domain, signiert, 60 s gültig)
             curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_FOLLOWLOCATION => false,
                 CURLOPT_HTTPHEADER => ['Accept: application/json'], CURLOPT_USERAGENT => 'KLXM-Studio-Network']);
             $body = curl_exec($ch);
@@ -162,7 +162,7 @@ final class MediaPools
             curl_close($ch);
             return $code === 200 && is_string($body) ? (json_decode($body, true) ?: null) : null;
         }
-        $body = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 8, 'header' => "Accept: application/json\r\n", 'ignore_errors' => true]]));
+        $body = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 8, 'header' => "Accept: application/json\r\n", 'ignore_errors' => true]]));  // nosemgrep: klxm-http-only-core-fetch – wie oben, Rückfall ohne curl
         return is_string($body) ? (json_decode($body, true) ?: null) : null;
     }
 

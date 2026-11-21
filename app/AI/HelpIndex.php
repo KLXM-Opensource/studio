@@ -81,7 +81,7 @@ final class HelpIndex
     public static function ensure(): void
     {
         try {
-            if (self::meta('signature') !== self::signature()) self::rebuild(false);
+            if (self::meta('signature') !== self::signature()) self::rebuild(false);  // nosemgrep: klxm-timing-safe-compare – Prüfsumme des Hilfe-Index (Aktualität), kein Geheimnis
         } catch (\Throwable $e) {
             error_log('[ai] help index: ' . $e->getMessage());
         }
@@ -161,7 +161,7 @@ final class HelpIndex
     public static function status(): array
     {
         return ['sections' => (int) self::db()->fetchValue('SELECT COUNT(*) FROM sections'), 'vectors' => (int) self::db()->fetchValue('SELECT COUNT(*) FROM vectors'),
-            'built_at' => self::meta('built_at'), 'current' => self::meta('signature') === self::signature()];
+            'built_at' => self::meta('built_at'), 'current' => self::meta('signature') === self::signature()];  // nosemgrep: klxm-timing-safe-compare – Prüfsumme des Hilfe-Index (Aktualität), kein Geheimnis
     }
 
     // ================================================================== Quellen
