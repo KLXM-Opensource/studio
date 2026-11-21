@@ -105,6 +105,11 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   prüft zusätzlich npm in `tools/`. Alles lokal ausführbar, ohne Konten; die Werkzeuge selbst (Pakete, Binaries, Images) sind nur Entwicklung und nicht im Installations-ZIP.
   Befehle: Entwicklerhandbuch → Sicherheit & Datenschutz → Sicherheitswerkzeuge, `CONTRIBUTING.md`.
 
+### Daten: „Bewusst öffentlich“ quittiert den Datenschutz-Hinweis
+- Neue Feld-Option **„Bewusst öffentlich“** (`public_ok`, nur bei Feldern, die nach Mobil/Privat/Geburtstag aussehen): bestätigt, dass die
+  Angabe absichtlich auf der Website erscheint – der Hinweis in Tabellen-Designer und Health entfällt, die Ausgabe bleibt unverändert.
+  Schließt „Nie öffentlich“ aus.
+
 ### Seitentitel: Website-Zusatz nur, wenn Platz ist
 - Der Zusatz „ | Name der Website“ hinter dem Seitentitel (`Core\Seo::withSuffix`) entfällt, wenn Titel und Zusatz zusammen mehr als
   60 Zeichen hätten – der eigentliche Titel (bei Terminen samt Datum) hat Vorrang, Suchmaschinen kürzen ohnehin hinten. Gilt für

@@ -33,9 +33,12 @@ $type = $f['type'] ?? 'text';
       <label class="f-check"><input type="checkbox" name="<?= $n ?>[width]" value="half"<?= ($f['width'] ?? '') === 'half' ? ' checked' : '' ?>> <span>Halbe Breite</span></label>
       <?php if (!$inbox): // Core\Data\Exposure: nie in einer Website-Ausgabe (Blöcke, Detailseite, Visitenkarte, JSON-LD, Suche, Feeds) ?>
       <label class="f-check" title="<?= e(__('Erscheint nirgends auf der Website – nicht in Blöcken, auf der Detailseite, in der Visitenkarte, den strukturierten Daten, der Suche oder Feeds. Verwaltung, API und Adressbuch-Apps sehen es weiter.')) ?>"><input type="checkbox" name="<?= $n ?>[private]" value="1"<?= !empty($f['private']) ? ' checked' : '' ?>> <span><?= icon('lock') ?> <?= e(__('Nie öffentlich')) ?></span></label>
+      <?php if (!empty($f['public_ok']) || \Core\Data\Exposure::looksPrivate($f)): ?>
+      <label class="f-check" title="<?= e(__('Geprüft: Die Angabe soll auf der Website erscheinen (z. B. mit Einverständnis der Personen). Der Datenschutz-Hinweis entfällt.')) ?>"><input type="checkbox" name="<?= $n ?>[public_ok]" value="1"<?= !empty($f['public_ok']) ? ' checked' : '' ?>> <span><?= icon('check') ?> <?= e(__('Bewusst öffentlich')) ?></span></label>
+      <?php endif; ?>
       <?php endif; ?>
     </div>
-    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint.')) ?></p><?php endif; ?>
+    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint; „Bewusst öffentlich“ bestätigt, dass sie erscheinen soll.')) ?></p><?php endif; ?>
     <?php
     // Gestaltung des Formulars (keine Spalte): Abschnitt – Darstellung; Freitext – formatierter Text (Formatierungsleiste wie im Rich-Text-Feld)
     $sid = 'dts-' . preg_replace('~[^a-z0-9_]~i', '', (string) $i);

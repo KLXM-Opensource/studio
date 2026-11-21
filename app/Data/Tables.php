@@ -395,6 +395,8 @@ final class Tables
             ];
             // Nie öffentlich (Core\Data\Exposure): erscheint in keiner Website-Ausgabe, nur in Verwaltung, API und CardDAV
             if (!$inbox && !empty($f['private'])) $def['private'] = true;
+            // Bewusst öffentlich (geprüft): Hinweis „sieht privat aus“ in Designer und Health entfällt; schließt „Nie öffentlich“ aus
+            elseif (!$inbox && !empty($f['public_ok'])) $def['public_ok'] = true;
             if (in_array($type, ['select', 'multiselect'], true)) {
                 $opts = [];
                 foreach (preg_split('~\R~', (string) ($f['options'] ?? '')) as $line) {
