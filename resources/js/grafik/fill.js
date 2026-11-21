@@ -113,7 +113,7 @@ export async function fill(opts = {}) {
       shadow = stage.attachShadow({ mode: 'open' });
       // Vorschau genau im Seitenverhältnis des Formats (sonst zeigte „meet“ die Nachbar-Formate am Rand)
       shadow.innerHTML = '<style>:host{all:initial;display:flex;align-items:center;justify-content:center;width:100%;height:100%;overflow:hidden}svg{display:block;flex:0 0 auto;box-shadow:0 1px 4px rgba(0,0,0,.25)}</style>';
-      new ResizeObserver(() => root && show()).observe(stage);
+      new ResizeObserver(() => requestAnimationFrame(() => root && show())).observe(stage);
       bindForm();
       rebuild(true);
       dlg.querySelector('.ge-fill__form input, .ge-fill__form textarea, .ge-fill__form button')?.focus();
