@@ -31,6 +31,7 @@ final class FormatSelfTest
             // ICU: Reihenfolge, Trenner und Monatsnamen kommen aus der Sprache (weitere Website-Sprachen ohne eigenen Code)
             $eq('ICU weitere Sprachen', [Format::for('fr')->date($ts, 'long'), Format::for('sl')->date($ts), Format::for('it')->date($ts, 'day_month')],
                 ['24 septembre 2026', '24. 09. 2026', '24 settembre']);
+            $eq('date medium en (Monatskürzel)', $en->date('2027-03-14', 'medium'), '14 Mar 2027');
         }
 
         // Relative Angaben (fester Zeitpunkt)
