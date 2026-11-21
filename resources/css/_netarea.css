@@ -24,7 +24,7 @@ html.adm-ui[data-theme=dark]{--net-ink:#0B0C0F}
 
 /* Umschalter Netzwerk ↔ Website: zwei gleich große Felder, das aktive hell hervorgehoben */
 .adm-areaswitch{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px;margin:0 2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.28)}
-.adm-areaswitch form{margin:0;display:flex}
+.adm-areaswitch > form{margin:0;display:flex}
 .adm-areaswitch__net{display:flex;align-items:center;gap:7px;padding:8px 11px;border:0;border-radius:7px;background:none;color:var(--adm-ink);font:700 13px var(--adm-font);text-decoration:none;cursor:pointer;white-space:nowrap}
 .adm-areaswitch__net .ico{width:16px;height:16px}
 .adm-areaswitch__net:hover,.adm-areaswitch__net:focus-visible{background:var(--adm-hover)}
@@ -44,3 +44,6 @@ html.adm-ui[data-theme=dark]{--net-ink:#0B0C0F}
 
 /* Seiten mit zwei Hüllen (Grundeinstellungen ↔ Netzwerk): ohne eigene Bereichsleiste volle Breite */
 .adm--netarea .adm-tabs-form--side.us-shell{display:block}
+.adm-areaswitch .adm-netswitch__menu :is(button,a){min-width:0}
+.adm-areaswitch .adm-netswitch__site{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.adm-areaswitch .adm-netswitch__menu small{flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
