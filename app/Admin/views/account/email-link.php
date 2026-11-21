@@ -64,6 +64,5 @@ $action = url(($mode === 'cancel' ? '/admin/konto/email-abbrechen/' : '/admin/ko
     </form>
     <?php endif; ?>
   </section>
-  <p class="adm-muted"><a href="<?= e(url('/')) ?>">← <?= e(__('Zur Website')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php include __DIR__ . '/../invite/_foot.php'; ?>
 </div>

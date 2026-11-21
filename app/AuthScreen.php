@@ -5,15 +5,16 @@ namespace Core;
 
 /**
  * Bildschirme vor der Anmeldung (Anmelden, Passkey, Zwei-Faktor, Einladung, Links aus E-Mails, Einrichtung):
- * bewegter Farbhimmel hinter einer Karte aus Milchglas, der sich mit der Tageszeit ändert (resources/css/auth.css).
+ * ruhige Fläche in einem Hauch der Markenfarbe mit feinem Punktraster und weichem Licht von oben, davor eine deckende Karte
+ * (resources/css/auth.css) – reines CSS, ohne Bilder und ohne Bewegung.
  *
  *  - Tageszeit serverseitig in der Zeitzone der Website (config 'timezone'): morning 5–10 Uhr, day 11–16, evening 17–21,
- *    night 22–4 → Klasse am <body> (auth--morning|day|evening|night, dazu is-weekend Sa/So). Kein JavaScript, kein Flackern.
- *    Nachts immer dunkel (data-theme="dark" am <html>), sonst folgt der Himmel prefers-color-scheme.
+ *    night 22–4 → Klasse am <body> (auth--morning|day|evening|night, dazu is-weekend Sa/So) und Gruß. Kein JavaScript.
+ *    Nachts immer dunkel (data-theme="dark" am <html>), sonst folgt die Seite prefers-color-scheme.
  *  - Markenfarbe: Designfarbe der App (Grundeinstellungen → App, sys.pwa_theme; sonst Standard des Kits). Farbton und
- *    Sättigung fließen als CSS-Variablen (--auth-h, --auth-h2, --auth-s, --auth-brand) in die Farbflächen – über eine kleine
+ *    Sättigung fließen als CSS-Variablen (--auth-h, --auth-h2, --auth-s, --auth-brand) sehr verhalten in Fläche, Raster und Licht – über eine kleine
  *    erzeugte CSS-Datei (media/auth/auth-<hash>.css, strenge CSP ohne style-Attribute; Muster wie Core\ImageFit).
- *    Graue, fast schwarze oder fast weiße Farben → KLXM-Studio-Palette (Navy 222° + Mint 158°, Standard in auth.css).
+ *    Graue, fast schwarze oder fast weiße Farben → KLXM-Studio-Palette (Navy 222°, Standard in auth.css).
  *  - Tageszeit zum Testen erzwingen: ?tod=morning|day|evening|night (&weekend=1) – nur mit config 'debug',
  *    environment ≠ production oder auf localhost / *.localhost.
  */
@@ -119,10 +120,10 @@ final class AuthScreen
         return $out;
     }
 
-    /** Hintergrund (dekorativ) direkt nach <body> */
+    /** Hintergrund (dekorativ, nur CSS) direkt nach <body> */
     public static function sky(): string
     {
-        return '<div class="auth-sky" aria-hidden="true"><span class="auth-blob auth-blob--1"></span><span class="auth-blob auth-blob--2"></span><span class="auth-blob auth-blob--3"></span></div>';
+        return '<div class="auth-sky" aria-hidden="true"></div>';
     }
 
     private static function debugAllowed(): bool

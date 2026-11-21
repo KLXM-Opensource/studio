@@ -14,6 +14,5 @@ $title = __('Einladung'); ?>
     <p class="adm-muted"><?= e(__('Sie haben Ihr Konto schon eingerichtet?')) ?> <a href="<?= e(url('/admin/login')) ?>"><?= e(__('Zur Anmeldung')) ?></a></p>
     <?php endif; ?>
   </section>
-  <p class="adm-muted"><a href="<?= e(url('/')) ?>">← <?= e(__('Zur Website')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php include __DIR__ . '/_foot.php'; ?>
 </div>

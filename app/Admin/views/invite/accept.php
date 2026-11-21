@@ -85,6 +85,5 @@ $pwRequired = !$passwordless || !$passkey;
     <?php endif; ?>
   </section>
   <?php if (!$me): // Passkey, Passwort anzeigen, Stärke-Hinweis (resources/js/invite.js) ?><script src="<?= e(asset('js/invite.js')) ?>" defer></script><?php endif; ?>
-  <p class="adm-muted"><a href="<?= e(url('/')) ?>">← <?= e(__('Zur Website')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php include __DIR__ . '/_foot.php'; ?>
 </div>

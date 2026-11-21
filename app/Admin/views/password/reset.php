@@ -48,6 +48,5 @@ $err = fn($k) => isset($errors[$k]) ? '<p class="f-error" id="pw-err-' . e($k) .
     <?php endif; ?>
   </section>
   <?php if ($state === 'ask'): ?><script src="<?= e(asset('js/invite.js')) ?>" defer></script><?php endif; ?>
-  <p class="adm-muted"><a href="<?= e(url('/admin/login')) ?>">← <?= e(__('Zurück zur Anmeldung')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php $footHref = url('/admin/login'); $footLabel = __('Zurück zur Anmeldung'); include __DIR__ . '/../invite/_foot.php'; ?>
 </div>
