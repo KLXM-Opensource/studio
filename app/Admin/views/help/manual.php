@@ -46,6 +46,7 @@ $core = [
     'live' => 'Live-Galerie & Live-Ticker',
     'funktionen' => 'Funktionen & Erweiterungen (Haupt-Admin)',
     'grundeinstellungen' => 'Grundeinstellungen: Domain, Testumgebung, Verschlüsselung (Administration)',
+    'netzwerk' => 'Netzwerk-Verwaltung: mehrere Websites (Netzwerk-Administration)',
     'aufgaben' => 'Häufige Aufgaben',
     'assistent' => \Core\AI\Assist::brand() . ': schreiben, übersetzen, prüfen',
     'ki-chat' => 'KI-Chats: Assistent & Besucher-Chat',

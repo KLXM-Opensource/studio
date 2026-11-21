@@ -10,6 +10,32 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Netzwerk-Verwaltung: eigener Bereich, Website-Verwaltung nur Website-Eigenes
+- **Netzwerk-Bereich** (`Core\Network\Area`, nur mit mehreren Websites): `/admin/network` mit dunklem Kopf „NETZWERK“, eigener
+  Seitenleiste (Websites, Administratoren, Anmeldung & Domain, E-Mail, Kits, Schriften, Branding, Geteilte Medien & Daten,
+  KI-Verbindungen, Geplante Aufgaben, Sicherung außer Haus, Integrität der Dateien, Speicher, Protokoll) und einem deutlichen
+  **Umschalter Netzwerk ↔ Website** oben in jeder Seitenleiste. Die Verwaltung einer Website zeigt nur noch Website-Eigenes.
+- **Umgezogen** (alt → neu, alte Adressen leiten weiter – 301, von anderen Websites 302 zur Netzwerk-Website; Favoriten und
+  Befehlspalette angepasst): `/admin/system/aufgaben` → `/admin/network/aufgaben`, `/admin/system/sicherung` → `/admin/network/sicherung`,
+  `/admin/system/kits` → `/admin/network/kits`, `/admin/system/fonts` → `/admin/network/schriften`, `/admin/system/branding` →
+  `/admin/network/branding`, Integrität der Dateien → `/admin/network/integritaet` (die Datenbank bleibt bei der Website),
+  `/admin/system#pools` → `/admin/network/geteilt`, `/admin/system#ki` (Verbindungen) → `/admin/network/ki`, `/admin/system#adminpath`
+  und Netzwerk-Domain, Anmelde-Richtlinie, Agentur-Zugang (`/admin/users/sicherheit#oidc` der Netzwerk-Website) → `/admin/network/anmeldung`.
+  Einzelinstallationen bleiben unverändert.
+- **Rechte:** Installationsseiten mit mehreren Websites nur für Rolle `network` (`Permissions::installationAdmin()`); die
+  Administration einer Website – auch der Netzwerk-Website – verwaltet nur ihre Website. Netzwerk-Konten behalten überall die
+  vollen Website-Rechte; in der Benutzerliste einer Website erscheinen sie schreibgeschützt („wird im Netzwerk verwaltet“).
+- **Systemmeldungen an** (`Core\Network\SystemMail`, Netzwerk → E-Mail): Empfänger für Integrität der Dateien, fehlgeschlagene
+  Sicherung außer Haus und Fehler in Geplanten Aufgaben (je Fehlerserie einmal); leer = aktive Netzwerk-Konten. Integritäts-Hinweise
+  zur Datenbank einer Website gehen an deren Administration, nicht an Schatten-Konten der Netzwerk-Administration.
+  `health` meldet einen Fehler, wenn mehrere Websites kein Netzwerk-Konto für E-Mail haben.
+- **E-Mail-Einstellungen in Gruppen:** Grundeinstellungen → E-Mail-Versand mit 1 Versandweg und Konten, 2 Absender je Zweck (verständliche
+  Namen, wirksamer Absender darunter), 3 Empfänger, 4 Test und Umleitung (Testnachricht an der Gruppe), 5 Impressum – jede Gruppe
+  mit Geltung und Rückfall; Netzwerk → E-Mail ebenso (Netzwerk-Konto, Systemmeldungen an, alle Websites).
+- `Data\Delivery::transport()` prüft die TLS-Eignung am Konto, über das die Zustellung wirklich geht (Zweck „Redaktion“), statt am
+  Konto „Standard“. Selbsttest `network:selftest`. Handbuch → „Netzwerk-Verwaltung“, Entwicklerhandbuch → Netzwerk-Administration →
+  „Netzwerk-Bereich“ und „Systemmeldungen“.
+
 ### E-Mail: welche Adresse gilt wofür
 - **Neue Übersicht** Grundeinstellungen → E-Mail-Versand → „Übersicht: welche Adresse gilt wofür“ (`/admin/system/mail/uebersicht`,
   `Core\Mail\Overview`): je Mailart (Einladung/Passwort, Mails an Netzwerk-Konten, neue Anfrage, Zustellung per E-Mail,
