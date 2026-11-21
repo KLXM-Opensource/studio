@@ -19,6 +19,27 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
 
+### Grafik-Editor: Prüfung mit echten SVGs und Bedienung wie in Grafikprogrammen
+- **Zeichenfläche erbt nichts mehr von der Verwaltung:** Text ohne eigene Schrift erscheint wie in der Mediathek und auf der Website
+  (vorher Lato 13 px), `currentColor` bleibt im dunklen Modus Tinte (vorher fast unsichtbar hellgrau auf Weiß).
+- **Import und Zwischenablage:** Strich-Symbole (Lucide, Tabler …) behalten `fill="none"`/`stroke` der Wurzel (vorher schwarze Flächen);
+  Klassen aus Illustrator-Dateien (`.cls-1`) färben vorhandene Formen nicht mehr um; gezogene SVG-Dateien landen an der Stelle des
+  Loslassens. ⌘C/⌘V zwischen zwei Grafiken: gleiche Objekte an derselben Stelle, mit Verläufen, Pfeilspitzen, Schatten und der Farbe aus
+  ihrer Gruppe (vorher Gruppe in der Mitte, Verlauf fehlte).
+- **Gruppierung aufheben** übernimmt Farben aus Klassenregeln, Deckkraft immer multipliziert (auch 0 und bei eigener Deckkraft der Teile),
+  weitere vererbte Eigenschaften (Strichmuster, Deckkraft von Füllung/Kontur, Füllregel, Textanker, Sichtbarkeit); Gruppen mit
+  Beschneidung, Maske, Filter oder `switch` bleiben mit Hinweis erhalten. Verschachtelte Gruppen in der Auswahl brachen vorher ab.
+- **Rückgängig:** ⌘Z direkt nach Pfeiltasten nimmt die Verschiebung zurück (vorher den Schritt davor, das Protokoll ging verloren);
+  nach Rückgängig ist wieder gewählt, was vorher gewählt war, eine betretene Gruppe bleibt betreten; ⌘Z/⇧⌘Z während der
+  Textbearbeitung nimmt Getipptes und Formatierung (⌘B, Farbe, Schreibweise) zurück statt einzelner Buchstaben; der Titel aus dem
+  Speichern-Dialog ist ein Schritt im Protokoll.
+- **Bedienung:** Klick ohne Ziehen auf ein Objekt einer Mehrfachauswahl wählt nur dieses, ⇧+Ziehen verschiebt waagerecht/senkrecht
+  (vorher nahm ⇧ das Objekt aus der Auswahl); Doppelklick auf einen Knoten (Ecke/glatt) und auf den Namen einer noch nicht gewählten
+  Ebene wirkt jetzt auch beim ersten Mal; Fokus bleibt nach ⌘]/⌘[ auf der verschobenen Ebene; Pipette übernimmt die Deckkraft von
+  Füllung und Kontur; Menü „Objekt“ in der Schrift der Verwaltung.
+- `Core\Svg`: Elemente mit `requiredExtensions` entfallen (Browser zeigen sie nie; in `<switch>` griff vorher die falsche Alternative).
+  `svg:selftest` um den Fall erweitert. Entwicklerhandbuch → Medien → Grafik-Editor (Import, Zwischenablage, Protokoll).
+
 ### Grafik-Editor: Schrift, Typografie, Farbmodelle, Diagramme und Bibliothek (Ausbaustufe 3a)
 
 - **Schriftauswahl mit Vorschau** im Bereich Zeichen und in der Kontextleiste: jede Schrift im eigenen Schriftbild, Filtern beim Tippen,

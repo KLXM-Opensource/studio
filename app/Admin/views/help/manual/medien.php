@@ -134,14 +134,14 @@
   </ol>
   <table class="doc-table">
     <tr><th>Werkzeug</th><th>Taste</th><th>So geht es</th></tr>
-    <tr><td>Verschieben</td><td><kbd>V</kbd></td><td>Klick wählt, Ziehen verschiebt, Rahmen ziehen wählt mehrere; Griffe ändern die Größe (<kbd>⇧</kbd> = Seitenverhältnis, <kbd>⌥</kbd> = von der Mitte), der runde Griff dreht (<kbd>⇧</kbd> = 15°-Schritte). <kbd>⌥</kbd>+Ziehen zieht eine Kopie. Doppelklick betritt eine Gruppe bzw. bearbeitet Text.</td></tr>
+    <tr><td>Verschieben</td><td><kbd>V</kbd></td><td>Klick wählt, Ziehen verschiebt, Rahmen ziehen wählt mehrere; Griffe ändern die Größe (<kbd>⇧</kbd> = Seitenverhältnis, <kbd>⌥</kbd> = von der Mitte), der runde Griff dreht (<kbd>⇧</kbd> = 15°-Schritte). <kbd>⌥</kbd>+Ziehen zieht eine Kopie, <kbd>⇧</kbd>+Ziehen verschiebt nur waagerecht bzw. senkrecht. Ein Klick (ohne Ziehen) auf ein Objekt einer Mehrfachauswahl wählt nur dieses. Doppelklick betritt eine Gruppe bzw. bearbeitet Text.</td></tr>
     <tr><td>Knoten</td><td><kbd>A</kbd></td><td>Zeigt die Punkte einer Kurve; Punkte und Griffe ziehen, <b>Klick auf die Kurve fügt einen Punkt ein</b> (die Form bleibt gleich), Doppelklick auf einen Punkt = Ecke/glatt, <kbd>⌥</kbd> beim Ziehen eines Griffs trennt die Griffe, <kbd>⌫</kbd> löscht Punkte. In der Kontextleiste: Knotenart Ecke/glatt/symmetrisch, an Knoten auftrennen, Endpunkte verbinden, Pfad schließen, Richtung umkehren, Teilpfade trennen, Vereinfachen. Rechtecke, Kreise und Linien werden dabei zu Kurven.</td></tr>
     <tr><td>Zeichenstift</td><td><kbd>P</kbd></td><td>Klick = Eckpunkt, Ziehen = glatter Punkt; Klick auf den ersten Punkt schließt die Form, <kbd>↵</kbd>/<kbd>Esc</kbd> beendet.</td></tr>
     <tr><td>Bleistift</td><td><kbd>N</kbd></td><td>Freihand zeichnen – die Linie wird geglättet (Stärke in der Kontextleiste).</td></tr>
     <tr><td>Rechteck, Ellipse, Vieleck/Stern</td><td><kbd>R</kbd> <kbd>E</kbd> <kbd>G</kbd></td><td>Ziehen; <kbd>⇧</kbd> = gleichmäßig, <kbd>⌥</kbd> = von der Mitte. Eckenradius, Zahl der Ecken und Stern in der Kontextleiste.</td></tr>
     <tr><td>Linie und Pfeil</td><td><kbd>L</kbd></td><td>Ziehen, <kbd>⇧</kbd> = 45°-Schritte; Pfeilspitzen am Anfang/Ende in der Kontextleiste.</td></tr>
     <tr><td>Verbinder</td><td><kbd>C</kbd></td><td>Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten und folgen, wenn Formen sich bewegen (siehe <a href="#grafik-diagramme">Diagramme</a>).</td></tr>
-    <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet.</td></tr>
+    <tr><td>Text</td><td><kbd>T</kbd></td><td>Klicken = Punkttext, <b>Rahmen ziehen = Textrahmen</b> (Zeilen brechen automatisch um). Tippen direkt auf der Fläche mit Schreibmarke; Ziehen wählt aus, Doppelklick ein Wort, <kbd>⌘</kbd><kbd>B</kbd>/<kbd>I</kbd>/<kbd>U</kbd> fett/kursiv/unterstrichen, eine Farbe wirkt auf die markierten Zeichen. <kbd>↵</kbd> = neuer Absatz, <kbd>Esc</kbd> beendet. <kbd>⌘</kbd><kbd>Z</kbd> nimmt beim Tippen Schritt für Schritt zurück – auch Formatierung wie Fett oder Farbe.</td></tr>
     <tr><td>Verlauf</td><td><kbd>F</kbd></td><td>Auf einem Objekt ziehen = linearen Verlauf anlegen bzw. neu ausrichten. Anfang/Ende (radial: Mitte/Radius) und Farbstopps auf der Fläche ziehen, Doppelklick auf die Linie = neuer Stopp, <kbd>⌫</kbd> löscht den gewählten.</td></tr>
     <tr><td>Pipette, Hand, Zoom</td><td><kbd>I</kbd> <kbd>H</kbd> <kbd>Z</kbd></td><td>Farbe eines Objekts übernehmen; Ansicht verschieben (auch Leertaste + Ziehen); vergrößern (<kbd>⌥</kbd> = verkleinern).</td></tr>
   </table>
@@ -166,13 +166,22 @@
       (jede Grafik wird dabei geprüft und bereinigt). Bausteine mit Design-Farben (<code>var(--accent)</code>) bekommen beim Einfügen die
       Farbe der Website; „Farben der Website“ setzt bei den mitgelieferten Bausteinen die Akzentfarbe ein.
       <b>Symbole</b> fügt Symbole aus dem Symbolsatz von KLXM Studio als bearbeitbare Pfade ein.</li>
+    <li><b>Kopieren zwischen Grafiken:</b> <kbd>⌘</kbd><kbd>C</kbd> / <kbd>⌘</kbd><kbd>V</kbd> überträgt Objekte samt Verläufen, Pfeilspitzen,
+      Schatten und der Farbe aus ihrer Gruppe in eine andere Grafik (auch in einem anderen Fenster) – an dieselbe Stelle und ohne zusätzliche
+      Gruppe. SVG-Text aus anderen Programmen wird bereinigt und als Gruppe in die Mitte gesetzt; eine SVG-Datei, die Sie auf die Fläche
+      ziehen, landet dort, wo Sie loslassen. Strich-Symbole (z. B. aus Lucide oder Tabler) behalten dabei ihre Kontur, Klassen aus
+      Illustrator-Dateien (<code>.cls-1</code> …) färben vorhandene Formen nicht um.</li>
+    <li><b>Gruppierung aufheben</b> gibt Füllung, Kontur, Schrift und Deckkraft der Gruppe an die Teile weiter – auch, wenn sie aus einer
+      Klasse der importierten Datei stammen. Gruppen mit Beschneidung, Maske, Effekt oder Alternativen (<code>switch</code>) bleiben
+      erhalten, weil sich das Bild sonst ändern würde; Beschneidung und Maske lösen Sie unter <b>Objekt → Maske freigeben</b>.</li>
     <li><b>Ausrichten und Verteilen</b> in der Kontextleiste: bei mehreren Objekten aneinander, bei einem an der Zeichenfläche.
       Beim Verschieben rasten Objekte an Kanten und Mitten ein (rote Hilfslinien); <kbd>⌘</kbd> beim Ziehen schaltet das ab.</li>
     <li><b>Transformieren:</b> Position, Breite, Höhe und Drehung als Zahl, Bezugspunkt im Raster, Kette = Seitenverhältnis sperren.
       <b>Protokoll</b> zeigt alle Schritte – ein Klick springt zurück.</li>
     <li>Alle Tastaturkürzel zeigt <kbd>?</kbd>. Wichtig: <kbd>⌘</kbd><kbd>Z</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd> Rückgängig/Wiederholen,
       <kbd>⌘</kbd><kbd>D</kbd> duplizieren, <kbd>⌘</kbd><kbd>G</kbd> / <kbd>⇧</kbd><kbd>⌘</kbd><kbd>G</kbd> gruppieren/aufheben, <kbd>⌘</kbd><kbd>[</kbd> / <kbd>]</kbd> nach hinten/vorn,
-      Pfeiltasten verschieben (<kbd>⇧</kbd> = 10), <kbd>Tab</kbd> wählt das nächste Objekt, <kbd>⌘</kbd><kbd>0</kbd> einpassen.</li>
+      Pfeiltasten verschieben (<kbd>⇧</kbd> = 10), <kbd>Tab</kbd> wählt das nächste Objekt, <kbd>⌘</kbd><kbd>0</kbd> einpassen. Rückgängig wählt wieder, was vor dem Schritt gewählt war,
+      und bleibt in einer betretenen Gruppe.</li>
     <li><b>Barrierefreiheit:</b> Unter <b>Dokument …</b> erhalten Infografiken einen <b>Titel</b> und eine ausführliche <b>Beschreibung</b>;
       der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
       Gerät vorhanden sind – deshalb wandelt das Speichern Texte in Schriften der Website auf Wunsch in Kurven um (siehe unten); im Editor bleiben sie Text.</li>
