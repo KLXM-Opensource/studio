@@ -49,7 +49,7 @@ foreach ($dataList['fields'] as $i => $f) {
     if (($f['name'] ?? '') === 'ratio') $dataList['fields'][$i]['options'] += ['3:2' => '3:2', '4:5' => '4:5'];
 }
 array_splice($dataList['fields'], (int) array_search('link_detail', array_column($dataList['fields'], 'name'), true) - 1, 0, [
-    ['type' => 'heading', 'label' => 'Redaktion'],
+    ['type' => 'heading', 'label' => 'Redaktion', 'collapse' => true, 'summary' => 'Rubrik-Leiste, Herkunft, Überspringen'],
     ['name' => 'filter_nav', 'label' => 'Besucher filtern nach …', 'type' => 'datafield', 'width' => 'half', 'empty_label' => '– keine Rubrik-Leiste –',
         'help' => 'Auswahlfeld der Tabelle (z. B. Rubrik): zeigt Links je Rubrik über der Liste – funktioniert ohne JavaScript.'],
     ['name' => 'show_origin', 'label' => 'Herkunft zeigen (geteilte Tabellen: „von Verein …“)', 'type' => 'bool', 'default' => true, 'width' => 'half'],

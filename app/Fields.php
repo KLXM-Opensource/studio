@@ -13,7 +13,8 @@ namespace Core;
  * Typen: text textarea richtext inline email tel url link number bool select date time
  *        page pages (mehrere Seiten, Core\PagePicker) media file repeater secret heading icon (Symbolauswahl, Wert = Symbolname, Ausgabe: icon($wert))
  * Überschrift mit 'collapse' => true|'open': aufklappbarer Abschnitt bis zur nächsten Überschrift (geöffnet bei Fehlern darin
- * und bei leeren Pflichtfeldern); 'summary' = Kurztext im Kopf, 'count' => true = „3 von 7 ausgefüllt“ im Kopf.
+ * und bei leeren Pflichtfeldern); 'summary' = Kurztext im Kopf, 'count' => true = „3 von 7 ausgefüllt“ im Kopf,
+ * 'variants' => [...] = ganzer Abschnitt nur bei diesen Varianten des Blocks.
  */
 final class Fields
 {
@@ -339,12 +340,13 @@ final class Fields
     public static function renderForm(array $fields, array $values, array $errors = [], string $prefix = 'f', string $path = ''): string
     {
         $html = '';
-        $open = null;   // aufklappbarer Abschnitt: [Kopf, Inhalt, offen?, zählen?, Felder, ausgefüllt]
+        $open = null;   // aufklappbarer Abschnitt: [Kopf, Inhalt, offen?, zählen?, Felder, ausgefüllt, Varianten]
         $close = function () use (&$open, &$html): void {
             if ($open === null) return;
             // 'count' => true: „3 von 7 ausgefüllt“ im Kopf (resources/js/_fsec.js aktualisiert beim Tippen, ohne ausgeblendete Felder)
             $count = $open[3] && $open[4] > 0 ? '<span class="f-sec__hint f-sec__count" data-sec-count>' . e(__('{n} von {total} ausgefüllt', ['n' => $open[5], 'total' => $open[4]])) . '</span>' : '';
-            $html .= '<details class="f-sec"' . ($open[2] ? ' open' : '') . ($count !== '' ? ' data-count="' . e(__('{n} von {total} ausgefüllt')) . '"' : '') . '>'
+            $html .= '<details class="f-sec"' . ($open[2] ? ' open' : '') . ($count !== '' ? ' data-count="' . e(__('{n} von {total} ausgefüllt')) . '"' : '')
+                . ($open[6] !== '' ? ' data-variants="' . e($open[6]) . '"' : '') . '>'
                 . str_replace('</summary>', $count . '</summary>', $open[0]) . '<div class="f-sec__body">' . $open[1] . '</div></details>';
             $open = null;
         };
@@ -356,7 +358,8 @@ final class Fields
                     $help = (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '')
                         . (!empty($f['links']) ? '<p class="f-help">' . implode(' · ', array_map(fn($l) => '<a href="' . e(url((string) $l['url'])) . '">' . e((string) $l['label']) . '</a>', (array) $f['links'])) . '</p>' : '');
                     $open = ['<summary class="f-sec__sum"><span class="f-sec__title">' . e($f['label']) . '</span>'
-                        . (!empty($f['summary']) ? '<span class="f-sec__hint">' . e((string) $f['summary']) . '</span>' : '') . '</summary>', $help, $f['collapse'] === 'open', !empty($f['count']), 0, 0];
+                        . (!empty($f['summary']) ? '<span class="f-sec__hint">' . e((string) $f['summary']) . '</span>' : '') . '</summary>', $help, $f['collapse'] === 'open', !empty($f['count']), 0, 0,
+                        implode(' ', array_map('strval', (array) ($f['variants'] ?? [])))];   // 'variants': ganzer Abschnitt nur bei diesen Varianten
                     continue;
                 }
             }
