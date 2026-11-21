@@ -72,7 +72,13 @@ $ocDis = $ocLocked ? ' disabled' : ''; ?>
         <?php if ($ocNet): ?><option value="network"<?= $ocRole === 'network' ? ' selected' : '' ?>><?= e(__('Netzwerk-Administration (alle Websites)')) ?></option><?php endif; ?>
         <?php foreach ($roles as $k => $ro): if ($k === 'network') continue; ?><option value="<?= e($k) ?>"<?= $ocRole === $k ? ' selected' : '' ?>><?= e($ro['name']) ?></option><?php endforeach; ?>
       </select>
-      <p class="f-help" id="oc-role-h"><?= e($ocNet ? __('Netzwerk-Administration: Die Anmeldung hier gilt per Einmal-Anmeldung für alle Websites des Netzwerks; die anderen Websites zeigen den Knopf ebenfalls.') : __('Gilt für neu angelegte Konten; danach können Sie die Rolle hier ändern.')) ?></p></div>
+      <p class="f-help" id="oc-role-h"><?= e($ocNet ? __('Netzwerk-Administration: Die Anmeldung hier gilt per Einmal-Anmeldung für alle Websites des Netzwerks; die anderen Websites zeigen den Knopf ebenfalls.') : __('Gilt für neu angelegte Konten; danach können Sie die Rolle hier ändern – außer der Anbieter liefert den Rollen-Claim (dann folgt die Rolle ihm).')) ?></p></div>
+    <div class="f"><label for="oc-rc"><?= e(__('Rolle aus dem Claim')) ?></label><input id="oc-rc" name="oidc[role_claim]" maxlength="60" value="<?= e((string) ($oc['role_claim'] ?? 'roles')) ?>" placeholder="roles" aria-describedby="oc-rc-h"<?= $ocDis ?>>
+      <p class="f-help" id="oc-rc-h"><?= e(__('Steht der Claim im Token, entscheidet er bei jeder Anmeldung: „admin“ → Rolle oben, „redaktion“ → Redaktionsrolle, andere Werte werden abgewiesen. Leer = nicht auswerten.')) ?></p></div>
+    <div class="f f--inline"><label for="oc-er"><?= e(__('Redaktionsrolle')) ?></label>
+      <select id="oc-er" name="oidc[editor_role]"<?= $ocDis ?>>
+        <?php foreach ($roles as $k => $ro): if ($k === 'network') continue; ?><option value="<?= e($k) ?>"<?= ($oc['editor_role'] ?? 'editor') === $k ? ' selected' : '' ?>><?= e($ro['name']) ?></option><?php endforeach; ?>
+      </select></div>
     <div class="f"><label for="oc-acc"><?= e(__('Kennzeichnung der Konten')) ?></label><input id="oc-acc" name="oidc[account_label]" maxlength="40" value="<?= e((string) $oc['account_label']) ?>" placeholder="<?= e(__('Agentur-Konto')) ?>"<?= $ocDis ?>></div>
     <div class="f f--bool"><label class="f-check"><input type="checkbox" role="switch" name="oidc[jit]" value="1" aria-describedby="oc-jit-h"<?= !empty($oc['jit']) ? ' checked' : '' ?><?= $ocDis ?>> <span><?= e(__('Konto bei der ersten Anmeldung anlegen')) ?></span></label>
       <p class="f-help" id="oc-jit-h"><?= e(__('Aus: Nur vorab freigegebene Konten (php bin/console oidc:allow <email>) können sich anmelden. Bestehende Konten mit eigenem Passwort werden nie übernommen.')) ?></p></div>

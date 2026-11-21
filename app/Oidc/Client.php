@@ -246,9 +246,9 @@ final class Client
         $now = self::now();
         $fail = fn(string $why) => new OidcException(__('Das ID-Token ist ungültig ({reason}).', ['reason' => $why]));
         if (!is_string($c['iss'] ?? null) || !hash_equals($p['issuer'], rtrim($c['iss'], '/'))) throw $fail('iss');
-        $aud = is_array($c['aud'] ?? null) ? array_map('strval', $c['aud']) : [(string) ($c['aud'] ?? '')];
+        $aud = is_array($c['aud'] ?? null) ? array_values(array_filter($c['aud'], 'is_string')) : [is_string($c['aud'] ?? null) ? $c['aud'] : ''];
         if (!in_array($p['client_id'], $aud, true)) throw $fail('aud');
-        if ((count($aud) > 1 || isset($c['azp'])) && (string) ($c['azp'] ?? '') !== $p['client_id']) throw $fail('azp');
+        if ((count($aud) > 1 || isset($c['azp'])) && ($c['azp'] ?? null) !== $p['client_id']) throw $fail('azp');
         if (!is_numeric($c['exp'] ?? null) || (int) $c['exp'] < $now - self::LEEWAY) throw $fail('exp');
         if (!is_numeric($c['iat'] ?? null) || (int) $c['iat'] > $now + self::LEEWAY || (int) $c['iat'] < $now - self::MAX_AGE) throw $fail('iat');
         if (isset($c['nbf']) && (int) $c['nbf'] > $now + self::LEEWAY) throw $fail('nbf');
@@ -279,10 +279,20 @@ final class Client
         return $ep . (str_contains($ep, '?') ? '&' : '?') . http_build_query($q, '', '&', PHP_QUERY_RFC3986);
     }
 
+    /** RFC 9207: Kündigt der Anbieter iss in der Antwort an, muss es dabei sein (fehlt es, könnte die Antwort von einem anderen stammen) */
+    public static function issRequired(array $p): bool
+    {
+        try {
+            return !empty(self::discovery($p['issuer'])['authorization_response_iss_parameter_supported']);
+        } catch (\Throwable) {
+            return false;   // Discovery nicht erreichbar: das Einlösen des Codes scheitert ohnehin
+        }
+    }
+
     /** Belegt das Token einen zweiten Faktor? (amr nach RFC 8176) */
     public static function strongAmr(array $claims): bool
     {
-        $amr = array_map('strval', (array) ($claims['amr'] ?? []));
+        $amr = array_values(array_filter((array) ($claims['amr'] ?? []), 'is_string'));
         return (bool) array_intersect($amr, ['mfa', 'otp', 'hwk', 'swk', 'sc', 'fpt', 'face', 'iris', 'retina', 'vbm']);
     }
 }

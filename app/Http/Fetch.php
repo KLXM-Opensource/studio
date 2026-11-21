@@ -33,7 +33,8 @@ final class Fetch
     /**
      * GET mit Schutzmaßnahmen.
      * $o: headers (list<string>), timeout (s, 2–60), max (Bytes), kind (Schlüssel aus TYPES oder null = alles), ua (User-Agent),
-     *     basic ([user, pass]) – Zugangsdaten nur für den ersten Host (bei Weiterleitung auf andere Hosts nicht mitsenden)
+     *     basic ([user, pass]) – Zugangsdaten nur für den ersten Host (bei Weiterleitung auf andere Hosts nicht mitsenden),
+     *     hosts (list<string>: nur diese Hosts, auch bei Weiterleitungen – geprüft vor dem Abruf), redirects (0–3, Standard 3)
      * @return array{status: int, body: string, type: string, url: string, bytes: int, ms: int}
      * @throws FetchException
      */
@@ -62,7 +63,15 @@ final class Fetch
         $ua = trim((string) ($o['ua'] ?? '')) ?: self::userAgent();
         $started = microtime(true);
         $firstHost = strtolower((string) parse_url($url, PHP_URL_HOST));
-        for ($hop = 0; $hop <= 3; $hop++) {
+        // 'hosts' => [...]: nur diese Hosts abrufen – auch Weiterleitungsziele werden VOR dem Abruf geprüft;
+        // 'redirects' => n: höchstens n Weiterleitungen (Standard 3, 0 = keine)
+        $onlyHosts = isset($o['hosts']) ? array_map(fn($h) => strtolower(trim((string) $h)), (array) $o['hosts']) : null;
+        $maxHops = max(0, min(3, (int) ($o['redirects'] ?? 3)));
+        for ($hop = 0; $hop <= $maxHops; $hop++) {
+            $h0 = strtolower(trim((string) parse_url(trim($url), PHP_URL_HOST), '[]'));
+            if ($onlyHosts !== null && !in_array($h0, $onlyHosts, true)) {
+                throw new FetchException(__('Fremder Host – nicht abgerufen: {host}', ['host' => $h0]));
+            }
             [$scheme, $host, $port, $ip] = self::check($url);
             $headers = array_values(array_filter(array_map('strval', (array) ($o['headers'] ?? []))));
             // Kopfzeilen mit Zugangsdaten nur an den eingestellten Host – nicht an Weiterleitungsziele

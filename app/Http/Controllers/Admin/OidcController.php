@@ -86,7 +86,9 @@ final class OidcController extends AdminController
         $p = Providers::get((string) $pend['p']);
         if (!$p) return $this->fail(__('Die Anmeldung über diesen Anbieter ist ausgeschaltet.'), 400);
         // RFC 9207: nennt der Anbieter seinen Issuer, muss er passen (Schutz vor Verwechslung mehrerer Anbieter)
+        // – kündigt er das an (authorization_response_iss_parameter_supported), ist iss Pflicht
         if ($r->str('iss') !== '' && !hash_equals($p['issuer'], rtrim($r->str('iss'), '/'))) return $this->fail(__('Die Antwort stammt von einem anderen Anbieter.'), 400);
+        if ($r->str('iss') === '' && Client::issRequired($p)) return $this->fail(__('Die Antwort stammt von einem anderen Anbieter.'), 400);
         if (($err = $r->str('error')) !== '') {
             $code = preg_replace('~[^\w.-]~', '', $err);
             return $this->fail($code === 'access_denied' ? __('Die Anmeldung wurde beim Anbieter abgebrochen oder ist für diese Website nicht freigegeben.')
@@ -101,9 +103,11 @@ final class OidcController extends AdminController
             error_log('[oidc] ' . $e->getMessage());
             return $this->fail(__('Die Anmeldung über den Anbieter ist fehlgeschlagen.'), 502);
         }
-        $amr = array_values(array_unique(array_merge(['fed'], array_filter(array_map('strval', (array) ($res['claims']['amr'] ?? [])), fn($v) => preg_match('~^[a-z]{2,10}$~', $v)),
+        $amr = array_values(array_unique(array_merge(['fed'], array_filter((array) ($res['claims']['amr'] ?? []), fn($v) => is_string($v) && preg_match('~^[a-z]{2,10}$~', $v)),
             $p['mfa'] === 'trust' || Client::strongAmr($res['claims']) ? ['mfa'] : [])));
         $next = self::safeNext((string) $pend['next']);
+        // Rolle dieser Anmeldung (Accounts::roleFor – z. B. „redaktion“ im Hub = keine Netzwerk-Administration)
+        $p['role'] = (string) $row['role'];
         if ($p['role'] === 'network') {
             if ($e2 = Network::loginShadow($row, 'oidc.login', $amr)) return $this->fail($e2);
         } else {

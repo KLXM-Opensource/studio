@@ -29,21 +29,41 @@ final class InstanceInfo
     /** Auskunft oder null (nichts eingerichtet → 404). Zwischengespeichert für 60 s (öffnet sonst die Datenbanken aller Websites). */
     public static function get(bool $fresh = false): ?array
     {
-        $file = ROOT . '/storage/cache/klxm-instance.json';
-        if (!$fresh && is_file($file) && filemtime($file) > time() - self::CACHE_TTL) {
+        // Adressen können vom Host der Anfrage abhängen (Website ohne eigene Domain) → Zwischenspeicher je Host, und nur für
+        // bekannte Hosts. Sonst könnte eine Anfrage mit fremdem Host-Header die Auskunft für alle vergiften (redirect_uri, status_url).
+        $host = strtolower(trim((string) (app()->request?->host() ?? '')));
+        $file = self::known($host) ? ROOT . '/storage/cache/klxm-instance-' . substr(hash('sha256', $host), 0, 16) . '.json' : null;
+        if ($file === null && app()->request) {
+            $l = new RateLimiter(app()->db);
+            $k = 'instance-info:' . hash_hmac('sha256', app()->request->ip(), app()->key());
+            if ($l->tooMany($k, 30, 600)) throw new Http\HttpException(429);
+            $l->hit($k);
+        }
+        if (!$fresh && $file !== null && is_file($file) && filemtime($file) > time() - self::CACHE_TTL) {
             $d = json_decode((string) @file_get_contents($file), true);
             if (is_array($d)) return $d['info'] ?? null;
         }
         $info = self::build();
-        @mkdir(dirname($file), 0770, true);
-        @file_put_contents($file, json_encode(['info' => $info], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        if ($file !== null) {
+            @mkdir(dirname($file), 0770, true);
+            @file_put_contents($file, json_encode(['info' => $info], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        }
         return $info;
+    }
+
+    /** Host gehört sicher zur Installation: Domain einer Website, Netzwerk-Domain oder eingestellte Adresse der Website */
+    public static function known(string $host): bool
+    {
+        if ($host === '') return false;
+        if (Sites::resolve($host, null) !== null || NetworkHost::is($host)) return true;
+        $u = trusted_site_url();
+        return $u !== null && strtolower((string) parse_url($u, PHP_URL_HOST) . (($p = parse_url($u, PHP_URL_PORT)) ? ':' . $p : '')) === $host;
     }
 
     /** Zwischenspeicher verwerfen (nach Änderungen an OIDC, Überwachung, Netzwerk-Domain) */
     public static function flush(): void
     {
-        @unlink(ROOT . '/storage/cache/klxm-instance.json');
+        foreach (glob(ROOT . '/storage/cache/klxm-instance*.json') ?: [] as $f) @unlink($f);
     }
 
     public static function build(): ?array

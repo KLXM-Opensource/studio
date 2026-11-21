@@ -33,7 +33,10 @@ final class Jwk
         $e = self::unb64u((string) ($jwk['e'] ?? ''));
         if ($n === false || $e === false) return null;
         $n = ltrim($n, "\0");
-        if (strlen($n) * 8 < self::RSA_MIN_BITS || strlen($e) > 8 || $e === '') return null;
+        $e = ltrim($e, "\0");
+        // Länge auf das Bit genau (führende Null-Bits des ersten Bytes abziehen), Exponent ungerade und ≥ 3
+        $bits = $n === '' ? 0 : strlen($n) * 8 - (8 - strlen(decbin(ord($n[0]))));
+        if ($bits < self::RSA_MIN_BITS || strlen($e) > 8 || $e === '' || (ord($e[strlen($e) - 1]) & 1) === 0 || (strlen($e) === 1 && ord($e) < 3)) return null;
         $rsa = self::seq(self::int($n) . self::int(ltrim($e, "\0")));
         $algo = self::seq("\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01" . "\x05\x00");   // rsaEncryption, NULL
         $spki = self::seq($algo . "\x03" . self::len(strlen($rsa) + 1) . "\0" . $rsa);

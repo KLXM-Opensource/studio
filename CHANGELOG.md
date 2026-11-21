@@ -61,6 +61,22 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 - **Fußzeile** aller Seiten vor der Anmeldung (`views/invite/_foot.php`): links der Rückweg, rechts das Zeichen der Agentur klein
   neben „Technik: KLXM Studio“, darunter die Support-Zeile (Anmeldung, Zwei-Faktor, Passwort vergessen); am Telefon untereinander.
 
+### Sicherheit: Anmeldung per OpenID Connect, Selbstauskunft, Abrufe
+- **Rolle aus dem Claim** (`Accounts::roleFor`, Einstellung „Rolle aus dem Claim“ `role_claim`, Standard `roles`, und
+  „Redaktionsrolle“ `editor_role`): Liefert der Anbieter den Claim, entscheidet er bei jeder Anmeldung – `admin` → Rolle des
+  Anbieters, `redaktion` → Redaktionsrolle (nie Netzwerk-Administration), andere Werte abgewiesen; Rollenwechsel beenden die
+  Sitzungen (`auth_ver`). Vorher bekam eine Freigabe „redaktion“ im Agentur-Hub die volle Administration.
+- **Vorab freigegebene Konten** verknüpfen sich per E-Mail nur noch mit ausdrücklichem `email_verified: true`.
+- **RFC 9207:** Kündigt der Anbieter `authorization_response_iss_parameter_supported` an, ist `iss` in der Rückkehr Pflicht.
+- **JWK:** RSA-Länge auf das Bit genau (≥ 2048), Exponent ungerade und ≥ 3; verschachtelte Werte in `aud`, `amr`, `name` werden
+  ignoriert statt Warnungen auszulösen.
+- **Selbstauskunft** `/.well-known/klxm-studio`: Zwischenspeicher je Host und nur für bekannte Hosts (`InstanceInfo::known`) –
+  ein fremder Host-Header kann die Auskunft (redirect_uri, status_url) nicht mehr für andere vergiften; unbekannte Hosts 30 Abrufe
+  je IP in 10 Minuten.
+- **`Core\Http\Fetch`:** Optionen `hosts` (nur diese Hosts – auch Weiterleitungsziele werden vor dem Abruf geprüft) und `redirects`
+  (0–3).
+- **SVG:** CSS-Bildfunktionen ohne `url(…)` (`image-set()`, `src()`, `cross-fade()` …) gelten als unsicher (kein Nachladen).
+
 ### Überwachung: technische Meldungen getrennt von Einrichtung und Redaktion
 - **Kategorien der Prüfungen** (`Core\Health::rows()`): `technical` (alarmiert eine Überwachung), `setup` (Einrichtung) und
   `editorial` (Redaktion) – beide nur zur Anzeige. Technisch u. a. Datenbank, Ordner, PHP-Version und neu das **Lebensende der
