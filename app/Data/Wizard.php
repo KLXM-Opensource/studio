@@ -223,8 +223,16 @@ final class Wizard
             $fields[] = $row;
         }
         if ($fields && $kind === 'content' && !array_filter($fields, fn($f) => !empty($f['in_list']))) foreach (array_slice(array_keys($fields), 0, 3) as $k) $fields[$k]['in_list'] = 1;
-        $d['fields'] = $fields;
         $names = array_column($fields, 'name');
+        // Bedingungen der Vorlage (z. B. „Ende nach Beginn“) nur, solange das Bezugsfeld übernommen wurde
+        foreach ($fields as &$row) {
+            if (!empty($row['compare'])) $row['compare'] = array_values(array_filter((array) $row['compare'], fn($c) => in_array($c['field'] ?? '', $names, true)));
+            foreach (['visible_if', 'required_if'] as $k) {
+                if (!empty($row[$k]['rules'])) $row[$k]['rules'] = array_values(array_filter((array) $row[$k]['rules'], fn($r) => in_array($r['field'] ?? '', $names, true)));
+            }
+        }
+        unset($row);
+        $d['fields'] = $fields;
         $s = $d['settings'];
         $s['kind'] = $kind;
         $s['purpose'] = $purpose;
@@ -385,6 +393,24 @@ final class Wizard
             $eq('Erraten: Kursanmeldung', self::guess('Anmeldung zum Yogakurs mit Teilnehmerliste'), Purpose::unavailable('registration') === null ? 'registration' : 'content');
             $eq('Erraten: Inventar → intern', self::guess('Inventar der Geräte, nur intern'), 'internal');
             $eq('Erraten: Blog → Inhalte', self::guess('Neuigkeiten mit Bild und Text'), 'content');
+            // Vorlage „Termine“: Ende ≥ Beginn als Bedingung; ohne Beginn fällt die Bedingung weg (kein Fehler)
+            if (Purpose::unavailable('content') === null && isset(DataController::presets()['events'])) {
+                $r = self::create(self::apply(self::start('content', 'events'), ['name' => 'Selbsttest Termine ' . $sfx]));
+                $eq('Termine: ohne Fehler', $r['errors'], []);
+                if ($r['table']) {
+                    $made[] = $r['table']['handle'];
+                    $eq('Termine: Ende nach Beginn', array_column((array) (Tables::field($r['table'], 'ende')['compare'] ?? []), 'field'), ['beginn']);
+                    if (\Core\Data\Calendar::enabled($r['table'])) {
+                        $eq('Termine: ganztägig = nur Datum', array_column(array_filter(Entries::schema($r['table']), fn($f) => isset($f['date_only_if'])), 'date_only_if', 'name'),
+                            ['beginn' => 'ganztaegig', 'ende' => 'ganztaegig']);
+                    }
+                }
+                $st = self::start('content', 'events');
+                $st = self::apply($st, ['name' => 'Selbsttest Termine ohne Beginn ' . $sfx, 'f' => [1 => ['label' => $st['fields'][1]['label'], 'type' => $st['fields'][1]['type']]]]);
+                $r = self::create($st);
+                $eq('Termine ohne Beginn: ohne Fehler, ohne Bedingung', [$r['errors'], isset($r['table']) ? (Tables::field($r['table'], 'ende')['compare'] ?? null) : 'x'], [[], null]);
+                if ($r['table']) $made[] = $r['table']['handle'];
+            }
         } catch (\Throwable $e) {
             $fails[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {

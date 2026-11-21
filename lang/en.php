@@ -7191,6 +7191,9 @@ return [
     'Gruppe mit Rahmen' => 'Group with frame',
     'Text im Formular' => 'Text in the form',
     'Zwischenüberschrift' => 'Subheading',
+    'Eingeklappt (zeigt die Anzahl ausgefüllter Felder)' => 'Collapsed (shows the number of filled-in fields)',
+    '{n} von {total} ausgefüllt' => '{n} of {total} filled in',
+    '„Eingeklappt“ gilt für die Eingabe der Redaktion: Der Abschnitt öffnet sich per Klick, bei Fehlern und bei leeren Pflichtfeldern von selbst; im öffentlichen Formular erscheint er als Zwischenüberschrift.' => '“Collapsed” applies to editors’ input: the section opens on click, and by itself when there are errors or empty required fields; in the public form it appears as a subheading.',
     'Adressen' => 'Addresses',
     'Adressen der Seiten als eigene Spalte zeigen' => 'Show page addresses as a column',
     '1 Jahr' => '1 year',
@@ -8265,8 +8268,10 @@ return [
     'Logo des Anbieters ist lokal gespeichert.' => 'The provider logo is stored locally.',
     'Logo des Anbieters nicht übernommen: {msg}' => 'Provider logo not applied: {msg}',
     // Datenschutz: Feld-Option „Nie öffentlich“ (Core\Data\Exposure)
+    'Bewusst öffentlich' => 'Deliberately public',
+    'Geprüft: Die Angabe soll auf der Website erscheinen (z. B. mit Einverständnis der Personen). Der Datenschutz-Hinweis entfällt.' => 'Checked: this information is meant to appear on the website (e.g. with the consent of the people concerned). The privacy notice no longer appears.',
     'Nie öffentlich' => 'Never public',
     'Erscheint nirgends auf der Website – nicht in Blöcken, auf der Detailseite, in der Visitenkarte, den strukturierten Daten, der Suche oder Feeds. Verwaltung, API und Adressbuch-Apps sehen es weiter.' => 'Never appears on the website – not in blocks, on the detail page, in the contact card, the structured data, the search or feeds. The admin, the API and address book apps still see it.',
-    'Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint.' => 'Looks like private information (e.g. a mobile number) – “Never public” keeps it off the website.',
+    'Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint; „Bewusst öffentlich“ bestätigt, dass sie erscheinen soll.' => 'Looks like private information (e.g. a mobile number) – “Never public” keeps it off the website; “Deliberately public” confirms that it should appear.',
     'Datenschutz: „{table}“ zeigt {fields} öffentlich – im Tabellen-Designer „Nie öffentlich“ prüfen' => 'Privacy: “{table}” shows {fields} publicly – check “Never public” in the table designer',
 ];

@@ -208,16 +208,16 @@ final class NotFound
     public static function blockFields(): array
     {
         return [
-            ['type' => 'heading', 'label' => 'Vorschläge'],
+            ['type' => 'heading', 'label' => 'Vorschläge', 'collapse' => true, 'summary' => 'Ähnliche Seiten zur Adresse'],
             ['name' => 'suggest', 'label' => '„Vielleicht meinten Sie …“ – ähnliche Seiten zur aufgerufenen Adresse', 'type' => 'bool', 'default' => true],
             ['name' => 'suggest_title', 'label' => 'Überschrift der Vorschläge', 'type' => 'text', 'max' => 60, 'width' => 'half', 'default' => 'Vielleicht meinten Sie:'],
             ['name' => 'suggest_max', 'label' => 'Höchstens', 'type' => 'select', 'required' => true, 'default' => '3', 'width' => 'half',
                 'options' => ['1' => '1', '3' => '3', '5' => '5']],
-            ['type' => 'heading', 'label' => 'Suche'],
+            ['type' => 'heading', 'label' => 'Suche', 'collapse' => true, 'summary' => 'Suchfeld und Beschriftung'],
             ['name' => 'search', 'label' => 'Suchfeld zeigen (wenn die Suche eingeschaltet ist)', 'type' => 'bool', 'default' => true],
             ['name' => 'search_title', 'label' => 'Überschrift der Suche', 'type' => 'text', 'max' => 60, 'width' => 'half', 'default' => 'Oder suchen Sie danach:'],
             ['name' => 'search_placeholder', 'label' => 'Platzhalter im Suchfeld (optional)', 'type' => 'text', 'max' => 60, 'width' => 'half'],
-            ['type' => 'heading', 'label' => 'Button'],
+            ['type' => 'heading', 'label' => 'Button', 'collapse' => true, 'summary' => 'Startseite, zweiter Button'],
             ['name' => 'home_label', 'label' => 'Button zur Startseite (leer = kein Button)', 'type' => 'text', 'max' => 40, 'width' => 'half', 'default' => 'Zur Startseite'],
             ['name' => 'link_label', 'label' => 'Zweiter Button (optional)', 'type' => 'text', 'max' => 40, 'width' => 'half'],
             ['name' => 'link', 'label' => 'Ziel des zweiten Buttons', 'type' => 'link'],

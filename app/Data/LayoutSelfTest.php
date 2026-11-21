@@ -95,6 +95,35 @@ final class LayoutSelfTest
             $eq('Redaktion: Gliederung', array_map(fn($f) => $f['type'] === 'heading' ? 'h:' . $f['label'] : $f['name'], $fs), ['name', 'h:Kontakt', 'e_mail', 'h:', 'h:Ihre Nachricht', 'nachricht']);
             $form = \Core\Fields::renderForm($fs, [], [], 'f');
             $eq('Redaktion: Überschrift und Hinweis', [str_contains($form, '<h3 class="f-heading">Kontakt</h3>'), str_contains($form, 'f-richnote"><p>Bitte <b>vollständig</b>')], [true, true]);
+
+            // Darstellung „Eingeklappt“: aufklappbarer Abschnitt mit Zählung, offen bei Fehlern/leeren Pflichtfeldern;
+            // im öffentlichen Formular eine Zwischenüberschrift; Freitext bleibt im Abschnitt
+            $in = Tables::toInput($t);
+            foreach ($in['fields'] as &$f) if (($f['type'] ?? '') === 'section') $f['style'] = 'collapsed';
+            unset($f);
+            [$def5, $err5] = Tables::validate($in, $t);
+            $eq('Eingeklappt: gespeichert', [$err5, Tables::allFields(['fields_all' => $def5['fields']] + $t)[1]['style']], [[], 'collapsed']);
+            $t5 = ['fields_all' => $def5['fields']] + $t;
+            $fs5 = Entries::formSchema($t5);
+            $eq('Eingeklappt: Redaktion mit collapse + count', [$fs5[1]['collapse'] ?? null, $fs5[1]['count'] ?? null], [true, true]);
+            $form5 = \Core\Fields::renderForm($fs5, ['e_mail' => 'erika@example.org'], [], 'f');
+            $eq('Eingeklappt: zu, Zählung, Freitext im Abschnitt', [
+                preg_match('~<details class="f-sec" data-count="[^"]+"><summary class="f-sec__sum"><span class="f-sec__title">Kontakt</span>.*?data-sec-count>1 von 1 ausgefüllt</span></summary>.*?f-richnote.*?</details>~s', $form5),
+            ], [1]);
+            $req = \Core\Fields::renderForm([['type' => 'heading', 'label' => 'A', 'collapse' => true, 'count' => true], ['name' => 'x', 'label' => 'X', 'type' => 'text', 'required' => true]], [], [], 'f');
+            $eq('Eingeklappt: leeres Pflichtfeld öffnet', str_contains($req, '<details class="f-sec" open'), true);
+            $err = \Core\Fields::renderForm([['type' => 'heading', 'label' => 'A', 'collapse' => true], ['name' => 'x', 'label' => 'X', 'type' => 'text']], [], ['x' => 'Fehler'], 'f');
+            $eq('Eingeklappt: Fehler öffnet', str_contains($err, '<details class="f-sec" open'), true);
+            $eq('Eingeklappt: öffentliches Formular = Zwischenüberschrift', str_contains(DataForms::render($t5, ['uid' => 'st5']), 'dff-sec dff-sec--heading" id="st5-kontakt"'), true);
+
+            // Datum und Uhrzeit: nur Datum (ganztägig) = 00:00 Uhr; Eingabe bei 'date_only_if' als Datum
+            $dt = ['name' => 'beginn', 'label' => 'Beginn', 'type' => 'datetime', 'date_only_if' => 'ganz'];
+            $eq('Datum/Uhrzeit: nur Datum = 00:00', \Core\Fields::sanitize([$dt], ['beginn' => '2026-12-12'])[0]['beginn'], '2026-12-12 00:00');
+            $eq('Datum/Uhrzeit: ungültiges Datum abgelehnt', isset(\Core\Fields::sanitize([$dt], ['beginn' => '2026-02-30'])[1]['beginn']), true);
+            $on = \Core\Fields::renderForm([$dt], ['beginn' => '2026-12-12 10:30', 'ganz' => true], [], 'f');
+            $off = \Core\Fields::renderForm([$dt], ['beginn' => '2026-12-12 10:30', 'ganz' => false], [], 'f');
+            $eq('Datum/Uhrzeit: ganztägig als Datum, Uhrzeit gemerkt', [str_contains($on, 'type="date"'), str_contains($on, 'value="2026-12-12"'), str_contains($on, 'data-time="10:30"'), str_contains($on, 'data-date-only="f[ganz]"')], [true, true, true, true]);
+            $eq('Datum/Uhrzeit: sonst mit Uhrzeit', [str_contains($off, 'type="datetime-local"'), str_contains($off, 'value="2026-12-12T10:30"')], [true, true]);
         } catch (\Throwable $e) {
             $fails[] = 'Gestaltung – Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {

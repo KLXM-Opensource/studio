@@ -147,6 +147,7 @@ final class ExposureSelfTest
             $eq('Health: Hinweis nennt nur das unmarkierte Feld', [str_contains($hint, 'Selbsttest Personen'), str_contains($hint, '„Handy (alt)“'), str_contains($hint, '„Mobil“')], [true, true, false]);
             $eq('looksPrivate', [Exposure::looksPrivate(['name' => 'mobil', 'type' => 'tel']), Exposure::looksPrivate(['name' => 'mobil', 'type' => 'tel', 'private' => true]),
                 Exposure::looksPrivate(['name' => 'telefon', 'type' => 'tel']), Exposure::looksPrivate(['name' => 'x', 'label' => 'Geburtstag', 'type' => 'date'])], [true, false, false, true]);
+            $eq('looksPrivate: „Bewusst öffentlich“ quittiert den Hinweis', Exposure::looksPrivate(['name' => 'mobil', 'type' => 'tel', 'public_ok' => true]), false);
         } catch (\Throwable $e) {
             $fails[] = 'Nie öffentlich – Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {

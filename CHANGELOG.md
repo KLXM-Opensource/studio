@@ -56,6 +56,27 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Verhalten (alle Optionen, Filter immer). Handbuch → Daten, Entwicklerhandbuch → Daten → „Besucher-Filter: gemeinsame Regel“;
   Selbsttest `blocks:selftest`.
 
+### Redaktion entlasten: eingeklappte Abschnitte, ganztägige Termine, passende Blockauswahl, Rollen aufräumen
+- **Datentabellen: Abschnitt „Eingeklappt“** (Darstellung des Elements „Abschnitt“, `Tables::SECTION_STYLES` = `heading|fieldset|collapsed`):
+  in der Verwaltung und in der Seitenleiste „Eintrag bearbeiten“ ein aufklappbarer Abschnitt mit „3 von 7 ausgefüllt“ im Kopf
+  (`Core\Fields` Überschrift mit `'count' => true`, aktualisiert beim Tippen ohne ausgeblendete Felder – `resources/js/_fsec.js`).
+  Offen bei Fehlern **und bei leeren Pflichtfeldern** (gilt jetzt für alle aufklappbaren Abschnitte); Freitext bleibt im Abschnitt.
+  Öffentliche Formulare zeigen ihn als Zwischenüberschrift. Bestehende Tabellen bleiben unverändert.
+- **Ganztägige Termine ohne Uhrzeit:** In Kalender-Tabellen zeigen Beginn und Ende nur das Datum, sobald „Ganztägig“ gesetzt ist
+  (Feldoption `date_only_if` in `Core\Fields`, gesetzt aus der Kalender-Zuordnung in `Entries::schema()`; `resources/js/_dateonly.js`
+  merkt sich die Uhrzeit beim Umschalten). Datum und Uhrzeit akzeptiert ein Datum allein als 00:00 Uhr (auch API/MCP).
+  Vorlage „Termine“: Bedingung „Ende nicht vor dem Beginn“ (fällt weg, wenn „Beginn“ nicht übernommen wird).
+- **Blockformulare: Grundfelder zuerst.** Datenliste, Nächste Termine, Kalender, Personen, Unterseiten, Partner & Logos, Galerien,
+  Slider, Live-Text, Diagramm, Formular, Kennzahlen und 404-Vorschläge zeigen oben nur Überschrift und das Nötige (Tabelle, Anzahl,
+  Quelle); Darstellung, Filter und Links stehen eingeklappt mit Kurzhinweis. Gespeicherte Daten ändern sich nicht. Aufklappbare
+  Abschnitte können mit `'variants'` nur bei bestimmten Varianten erscheinen (Kit fluid: Downloads → „Suche & Filter“ nur bei „Liste“).
+- **Blockauswahl nach Kontext** (`'context' => 'detail'|'404'`, `Core\Blocks\Picker::context/fits`, `Theme::editorConfig($page)`):
+  Vor/Zurück, Datensatz-Felder, Inhaltsblöcke des Eintrags und die Stellen-Blöcke nur in Detailseiten-Vorlagen, 404-Vorschläge nur
+  auf der 404-Seite. Vorhandene Blöcke bleiben bearbeitbar; überschreibt ein Kit den Kern-Block, gilt der Kontext weiter.
+- **Rollen:** Speichern einer Rolle verwirft keine Rechte abgeschalteter Erweiterungen mehr (`Permissions::keepHidden`). Neuer Befehl
+  `roles:clean [--dry-run] [--all]` entfernt Rechte, die weder der Kern noch der Code einer installierten Erweiterung kennt
+  (`Core\RoleCleanup`); `migrate` entfernt nichts, Health zeigt einen Hinweis (Einrichtung). Selbsttest `roles:selftest`.
+
 ### CalDAV/CardDAV (Erweiterung dav 1.3.0): nur veröffentlichte Einträge, Namen, Organisation, Text statt HTML
 - Neue Option je Tabelle **`published_only`** („Nur veröffentlichte Einträge“, `ext.dav.tables.<tabelle>.published_only`): Entwürfe
   und geplante Einträge bleiben aus Kalender- und Adressbuch-Apps heraus (Abruf/Ändern 404). Standard aus, damit bestehende
@@ -83,6 +104,11 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   der Website, `eval`/`extract`/`unserialize`, schwache Passwort-Hashes, Token-Vergleiche ohne `hash_equals`). Dependabot
   prüft zusätzlich npm in `tools/`. Alles lokal ausführbar, ohne Konten; die Werkzeuge selbst (Pakete, Binaries, Images) sind nur Entwicklung und nicht im Installations-ZIP.
   Befehle: Entwicklerhandbuch → Sicherheit & Datenschutz → Sicherheitswerkzeuge, `CONTRIBUTING.md`.
+
+### Daten: „Bewusst öffentlich“ quittiert den Datenschutz-Hinweis
+- Neue Feld-Option **„Bewusst öffentlich“** (`public_ok`, nur bei Feldern, die nach Mobil/Privat/Geburtstag aussehen): bestätigt, dass die
+  Angabe absichtlich auf der Website erscheint – der Hinweis in Tabellen-Designer und Health entfällt, die Ausgabe bleibt unverändert.
+  Schließt „Nie öffentlich“ aus.
 
 ### Seitentitel: Website-Zusatz nur, wenn Platz ist
 - Der Zusatz „ | Name der Website“ hinter dem Seitentitel (`Core\Seo::withSuffix`) entfällt, wenn Titel und Zusatz zusammen mehr als

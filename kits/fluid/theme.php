@@ -657,6 +657,7 @@ return [
                 ]],
                 ['name' => 'tags', 'label' => 'Nur Dateien mit Schlagworten (optional)', 'type' => 'text', 'max' => 200, 'placeholder' => 'z. B. satzung, protokoll',
                     'help' => 'Schlagworte der Mediathek, mit Komma getrennt – gezeigt werden Dateien mit mindestens einem davon. Leer = alle.'],
+                ['type' => 'heading', 'label' => 'Suche & Filter', 'collapse' => true, 'variants' => ['list'], 'summary' => 'Kacheln, Suche, Schlagwort-Filter'],
                 ['name' => 'view', 'label' => 'Darstellung zu Beginn', 'type' => 'select', 'default' => 'list', 'width' => 'half', 'variants' => ['list'],
                     'options' => ['list' => 'Liste mit Vorschaubildern', 'tiles' => 'Kacheln mit großer Vorschau']],
                 ['name' => 'tools', 'label' => 'Suche und Umschalter Liste/Kacheln', 'type' => 'bool', 'default' => true, 'width' => 'half', 'variants' => ['list'],

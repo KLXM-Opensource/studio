@@ -33,7 +33,7 @@ final class RoleController extends AdminController
         if ($name === '') {
             return $this->back($key ? "/admin/roles/$key" : '/admin/roles/new', 'error', __('Bitte einen Namen angeben.'));
         }
-        $perms = array_values(array_intersect((array) ($r->post['perms'] ?? []), Permissions::all()));
+        $perms = array_values(array_intersect((array) ($r->post['perms'] ?? []), Permissions::all()));   // angehakt (Prüfung unten)
         // Ohne alle Rechte (*): nur Rechte vergeben, die die eigene Rolle hat – und keine Rolle ändern, die mehr darf
         $mine = app()->auth->role();
         if ($mine !== null && !in_array('*', $mine['permissions'], true)) {
@@ -49,8 +49,9 @@ final class RoleController extends AdminController
             && !\Core\Invites::assignable(['key' => $role['key'] ?? 'neu', 'permissions' => $perms, 'tables' => $tables === null ? null : json_decode($tables, true)], $mine)) {
             return $this->back('/admin/users/rollen', 'error', __('Sie können nur Rechte und Tabellen vergeben, die Ihre eigene Rolle hat.'));
         }
+        // Rechte, die die Oberfläche nicht zeigt (abgeschaltete Erweiterung), bleiben erhalten – entfernen nur mit roles:clean
         $data = ['name' => $name, 'description' => mb_substr(trim(strip_tags($r->str('description'))), 0, 200),
-            'permissions_json' => json_encode($perms), 'tables_json' => $tables];
+            'permissions_json' => json_encode(Permissions::keepHidden($perms, $role['permissions'] ?? [])), 'tables_json' => $tables];
         if ($role) {
             app()->db->update('roles', $data, 'rkey = :k', ['k' => $role['key']]);
         } else {

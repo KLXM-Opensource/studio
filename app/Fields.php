@@ -12,7 +12,9 @@ namespace Core;
  * Feld: ['name','label','type','required','help','default','options','fields','width','max','placeholder']
  * Typen: text textarea richtext inline email tel url link number bool select date time
  *        page pages (mehrere Seiten, Core\PagePicker) media file repeater secret heading icon (Symbolauswahl, Wert = Symbolname, Ausgabe: icon($wert))
- * Überschrift mit 'collapse' => true|'open': aufklappbarer Abschnitt bis zur nächsten Überschrift (geöffnet bei Fehlern darin).
+ * Überschrift mit 'collapse' => true|'open': aufklappbarer Abschnitt bis zur nächsten Überschrift (geöffnet bei Fehlern darin
+ * und bei leeren Pflichtfeldern); 'summary' = Kurztext im Kopf, 'count' => true = „3 von 7 ausgefüllt“ im Kopf,
+ * 'variants' => [...] = ganzer Abschnitt nur bei diesen Varianten des Blocks.
  */
 final class Fields
 {
@@ -259,8 +261,10 @@ final class Fields
                 if ($s === '') return ['', null];
                 return [$s, preg_match('~^\d{2}:\d{2}$~', $s) ? null : self::msg('„{label}“: Uhrzeit im Format HH:MM.', ['label' => $label])];
             case 'datetime':
-                // Gespeichert „JJJJ-MM-TT HH:MM“ (Ortszeit der Website); akzeptiert auch „T“ und Sekunden (datetime-local, ISO)
+                // Gespeichert „JJJJ-MM-TT HH:MM“ (Ortszeit der Website); akzeptiert auch „T“ und Sekunden (datetime-local, ISO).
+                // Nur ein Datum (Eingabe ohne Uhrzeit bei 'date_only_if', z. B. ganztägiger Termin) = 00:00 Uhr
                 if ($s === '') return ['', null];
+                if (preg_match('~^\d{4}-\d{2}-\d{2}$~', $s) && checkdate((int) substr($s, 5, 2), (int) substr($s, 8, 2), (int) substr($s, 0, 4))) return ["$s 00:00", null];
                 if (preg_match('~^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$~', $s, $m) && checkdate((int) substr($m[1], 5, 2), (int) substr($m[1], 8, 2), (int) substr($m[1], 0, 4))
                     && (int) $m[2] < 24 && (int) $m[3] < 60) {
                     return ["$m[1] $m[2]:$m[3]", null];
@@ -336,28 +340,42 @@ final class Fields
     public static function renderForm(array $fields, array $values, array $errors = [], string $prefix = 'f', string $path = ''): string
     {
         $html = '';
-        $open = null;   // aufklappbarer Abschnitt: [Kopf, Inhalt, offen?]
+        $open = null;   // aufklappbarer Abschnitt: [Kopf, Inhalt, offen?, zählen?, Felder, ausgefüllt, Varianten]
         $close = function () use (&$open, &$html): void {
             if ($open === null) return;
-            $html .= '<details class="f-sec"' . ($open[2] ? ' open' : '') . '>' . $open[0] . '<div class="f-sec__body">' . $open[1] . '</div></details>';
+            // 'count' => true: „3 von 7 ausgefüllt“ im Kopf (resources/js/_fsec.js aktualisiert beim Tippen, ohne ausgeblendete Felder)
+            $count = $open[3] && $open[4] > 0 ? '<span class="f-sec__hint f-sec__count" data-sec-count>' . e(__('{n} von {total} ausgefüllt', ['n' => $open[5], 'total' => $open[4]])) . '</span>' : '';
+            $html .= '<details class="f-sec"' . ($open[2] ? ' open' : '') . ($count !== '' ? ' data-count="' . e(__('{n} von {total} ausgefüllt')) . '"' : '')
+                . ($open[6] !== '' ? ' data-variants="' . e($open[6]) . '"' : '') . '>'
+                . str_replace('</summary>', $count . '</summary>', $open[0]) . '<div class="f-sec__body">' . $open[1] . '</div></details>';
             $open = null;
         };
         foreach ($fields as $f) {
-            if (($f['type'] ?? '') === 'heading') {
+            // Hinweis ohne Überschrift (z. B. Freitext einer Datentabelle) bleibt im laufenden Abschnitt
+            if (($f['type'] ?? '') === 'heading' && (trim((string) ($f['label'] ?? '')) !== '' || !empty($f['collapse']) || $open === null)) {
                 $close();
                 if (!empty($f['collapse']) && $path === '') {
                     $help = (!empty($f['help']) ? '<p class="f-help">' . e($f['help']) . '</p>' : '')
                         . (!empty($f['links']) ? '<p class="f-help">' . implode(' · ', array_map(fn($l) => '<a href="' . e(url((string) $l['url'])) . '">' . e((string) $l['label']) . '</a>', (array) $f['links'])) . '</p>' : '');
                     $open = ['<summary class="f-sec__sum"><span class="f-sec__title">' . e($f['label']) . '</span>'
-                        . (!empty($f['summary']) ? '<span class="f-sec__hint">' . e((string) $f['summary']) . '</span>' : '') . '</summary>', $help, $f['collapse'] === 'open'];
+                        . (!empty($f['summary']) ? '<span class="f-sec__hint">' . e((string) $f['summary']) . '</span>' : '') . '</summary>', $help, $f['collapse'] === 'open', !empty($f['count']), 0, 0,
+                        implode(' ', array_map('strval', (array) ($f['variants'] ?? [])))];   // 'variants': ganzer Abschnitt nur bei diesen Varianten
                     continue;
                 }
             }
-            $one = self::renderField($f, $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f)), $errors, $prefix, $path);
+            $v = $values[$f['name'] ?? ''] ?? ($f['default'] ?? self::emptyValue($f));
+            if (!empty($f['date_only_if'])) $f['_date_only'] = !empty($values[$f['date_only_if']]);   // Datum/Uhrzeit: „ganztägig“ gesetzt
+            $one = self::renderField($f, $v, $errors, $prefix, $path);
             if ($open !== null) {
                 $open[1] .= $one;
                 $n = $f['name'] ?? null;
                 if ($n !== null && array_filter(array_keys($errors), fn($k) => $k === $n || str_starts_with((string) $k, $n . '.'))) $open[2] = true;
+                if ($n !== null && ($f['type'] ?? '') !== 'heading') {
+                    $empty = $v === null || $v === '' || $v === [] || $v === false;
+                    $open[4]++;
+                    if (!$empty) $open[5]++;
+                    if ($empty && !empty($f['required'])) $open[2] = true;   // Pflichtfeld leer (z. B. neuer Eintrag): Abschnitt offen
+                }
             } else {
                 $html .= $one;
             }
@@ -406,6 +424,21 @@ final class Fields
         }
         $flush();
         return $html;
+    }
+
+    /**
+     * Eingabe „Datum und Uhrzeit“. 'date_only_if' => 'feld' (Ja/Nein-Feld desselben Formulars, z. B. „Ganztägig“): ist es
+     * gesetzt, zeigt das Feld nur das Datum (gespeichert als 00:00 Uhr); resources/js/_dateonly.js schaltet beim Umschalten um
+     * und merkt sich die Uhrzeit. renderForm setzt '_date_only' aus den Werten.
+     */
+    private static function datetimeInput(array $f, string $id, string $inputName, string $v, string $aria, string $prefix): string
+    {
+        $v = str_replace(' ', 'T', $v);
+        if (empty($f['date_only_if'])) return '<input type="datetime-local" id="' . $id . '" name="' . $inputName . '" value="' . e($v) . '" step="60"' . $aria . '>';
+        $only = !empty($f['_date_only']);
+        $time = strlen($v) >= 16 ? substr($v, 11, 5) : '';
+        return '<input type="' . ($only ? 'date' : 'datetime-local') . '" id="' . $id . '" name="' . $inputName . '" value="' . e($only ? substr($v, 0, 10) : $v) . '"'
+            . ($only ? '' : ' step="60"') . ' data-date-only="' . e($prefix . '[' . $f['date_only_if'] . ']') . '"' . ($time !== '' && $time !== '00:00' ? ' data-time="' . e($time) . '"' : '') . $aria . '>';
     }
 
     /** Bindungs-Kontext im Editor für Detailseiten-Vorlagen: ['table' => array, 'bound' => [feld => quelle]] */
@@ -564,7 +597,7 @@ final class Fields
             'icon' => Icons::picker($id, $inputName, $v, ['optional' => !$req, 'attrs' => $aria]),
             'geo' => self::renderGeo($id, $inputName, $v, $aria, $f),
             'iban' => '<input type="text" id="' . $id . '" name="' . $inputName . '" value="' . e($v !== '' ? Iban::format($v) : '') . '" maxlength="42" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="DE00 0000 0000 0000 0000 00" data-iban' . $aria . '>',
-            'datetime' => '<input type="datetime-local" id="' . $id . '" name="' . $inputName . '" value="' . e(str_replace(' ', 'T', $v)) . '" step="60"' . $aria . '>',
+            'datetime' => self::datetimeInput($f, $id, $inputName, $v, $aria, $prefix),
             'page' => self::renderSelect($id, $inputName, self::pageOptions(), $v, $aria, true),
             // Sammlung: Auswahl + Mediathek öffnen (anlegen, füllen, übernehmen – CMSMedia.pickCollection, resources/js/admin.js)
             'collection' => '<div class="col-field">' . self::renderSelect($id, $inputName, array_column(Media::collections(), 'name', 'id'), $v, $aria, true)

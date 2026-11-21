@@ -83,6 +83,8 @@ final class Theme
         // Kern-Blöcke (Datenliste, Datensatz-Felder) – Theme kann sie abschalten oder die Ausgabe überschreiben
         if ($this->def['core_blocks'] ?? true) {
             foreach (require ROOT . '/app/Blocks/blocks.php' as $type => $b) {
+                // Kit überschreibt einen Kern-Block: Kontext der Blockauswahl (Picker::fits) gilt weiter, außer das Kit setzt einen eigenen
+                if (isset($this->blocks[$type], $b['context']) && !array_key_exists('context', $this->blocks[$type])) $this->blocks[$type]['context'] = $b['context'];
                 $this->blocks[$type] ??= $b + ['type' => $type, 'fields' => [], 'label' => $type, 'core' => true];
             }
         }
@@ -991,9 +993,11 @@ final class Theme
         return $count;
     }
 
-    public function editorConfig(): array
+    /** Konfiguration des Editors; $page = bearbeitete Seite (Blockauswahl nach Kontext, Core\Blocks\Picker::fits) */
+    public function editorConfig(?array $page = null): array
     {
         $blocks = [];
+        $context = $page !== null ? Blocks\Picker::context($page) : null;
         $previews = Blocks\Picker::previews($this, $this->blocks);   // Blockauswahl: Vorschaugrafiken (optional, Core\Blocks\Picker)
         foreach ($this->blocks as $type => $b) {
             // Formular einer Datentabelle im Block (Knopf „Felder bearbeiten“, resources/js/_form_fields.js): 'formfields' => Feldname,
@@ -1010,7 +1014,8 @@ final class Theme
                 'central' => $b['central'] ?? null, 'background' => $b['background'] ?? 'white',
                 'help' => $b['help'] ?? null,
                 'description' => Blocks\Picker::description($b), 'preview' => $previews[$type] ?? null,   // Blockauswahl (beides optional)
-                'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true),   // zurückgezogene eigene Blöcke: nicht einfügbar
+                'insertable' => Features::allowsBlock($type) && ($b['insertable'] ?? true)   // zurückgezogene eigene Blöcke: nicht einfügbar
+                    && ($context === null || Blocks\Picker::fits($b, $context)),             // z. B. „Datensatz-Felder“ nur in Detailseiten-Vorlagen
                 'listed' => ($b['listed'] ?? true) !== false,   // false: nicht in der Blockauswahl, nur über Vorlagen (Extension::blockPresets)
                 'formfields' => $ff ?: null,
                 'raw' => !empty($b['raw']),   // eigene Abschnitts-Hülle → nicht „neben den vorigen Block“

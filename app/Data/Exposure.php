@@ -153,7 +153,7 @@ final class Exposure
     /** Sieht das Feld nach einer privaten Angabe aus (Mobil, Handy, privat, Geburtstag …), ohne als „Nie öffentlich“ markiert zu sein? */
     public static function looksPrivate(array $f): bool
     {
-        if (self::isPrivate($f) || !in_array($f['type'] ?? '', self::HINT_TYPES, true)) return false;
+        if (self::isPrivate($f) || !empty($f['public_ok']) || !in_array($f['type'] ?? '', self::HINT_TYPES, true)) return false;
         return (bool) preg_match(self::PRIVATE_HINT, (string) ($f['name'] ?? '') . ' ' . (string) ($f['label'] ?? ''));
     }
 

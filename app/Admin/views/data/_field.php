@@ -40,9 +40,12 @@ $type = $f['type'] ?? 'text';
       <?php if (!$inbox): // Core\Data\Exposure: nie in einer Website-Ausgabe (Blöcke, Detailseite, Visitenkarte, JSON-LD, Suche, Feeds) ?>
       <label class="f-check" title="<?= e(__('Erscheint nirgends auf der Website – nicht in Blöcken, auf der Detailseite, in der Visitenkarte, den strukturierten Daten, der Suche oder Feeds. Verwaltung, API und Adressbuch-Apps sehen es weiter.')) ?>"><input type="checkbox" name="<?= $n ?>[private]" value="1"<?= !empty($f['private']) ? ' checked' : '' ?>> <span><?= icon('lock') ?> <?= e(__('Nie öffentlich')) ?></span></label>
       <label class="f-check" title="<?= e(__('Erscheint auf der Website (Detailseite, Blöcke), geht aber nie an Adressbuch- und Kalender-Apps (CardDAV/CalDAV), Visitenkarten oder ICS-Kalender – z. B. für „Vita“ oder „Über mich“.')) ?>"><input type="checkbox" name="<?= $n ?>[website_only]" value="1"<?= !empty($f['website_only']) ? ' checked' : '' ?>> <span><?= icon('globe') ?> <?= e(__('Nur Website')) ?></span></label>
+      <?php if (!empty($f['public_ok']) || \Core\Data\Exposure::looksPrivate($f)): ?>
+      <label class="f-check" title="<?= e(__('Geprüft: Die Angabe soll auf der Website erscheinen (z. B. mit Einverständnis der Personen). Der Datenschutz-Hinweis entfällt.')) ?>"><input type="checkbox" name="<?= $n ?>[public_ok]" value="1"<?= !empty($f['public_ok']) ? ' checked' : '' ?>> <span><?= icon('check') ?> <?= e(__('Bewusst öffentlich')) ?></span></label>
+      <?php endif; ?>
       <?php endif; ?>
     </div>
-    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint.')) ?></p><?php endif; ?>
+    <?php if (!$inbox && \Core\Data\Exposure::looksPrivate($f)): ?><p class="f-help dt-field__private-hint"><?= icon('warning') ?> <?= e(__('Sieht nach einer privaten Angabe aus (z. B. Mobilnummer) – „Nie öffentlich“ verhindert, dass sie auf der Website erscheint; „Bewusst öffentlich“ bestätigt, dass sie erscheinen soll.')) ?></p><?php endif; ?>
     <?php
     // Gestaltung des Formulars (keine Spalte): Abschnitt – Darstellung; Freitext – formatierter Text (Formatierungsleiste wie im Rich-Text-Feld)
     $sid = 'dts-' . preg_replace('~[^a-z0-9_]~i', '', (string) $i);
@@ -50,10 +53,11 @@ $type = $f['type'] ?? 'text';
     ?>
     <div class="dt-field__extra" data-show-for="section"<?= $type === 'section' ? '' : ' hidden' ?>>
       <label class="dt-in"><span><?= e(__('Darstellung')) ?></span><select name="<?= $n ?>[style]">
-        <option value="heading"<?= ($f['style'] ?? 'heading') !== 'fieldset' ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
+        <option value="heading"<?= !in_array($f['style'] ?? 'heading', ['fieldset', 'collapsed'], true) ? ' selected' : '' ?>><?= e(__('Zwischenüberschrift')) ?></option>
         <option value="fieldset"<?= ($f['style'] ?? '') === 'fieldset' ? ' selected' : '' ?>><?= e(__('Gruppe mit Rahmen')) ?></option>
+        <option value="collapsed"<?= ($f['style'] ?? '') === 'collapsed' ? ' selected' : '' ?>><?= e(__('Eingeklappt (zeigt die Anzahl ausgefüllter Felder)')) ?></option>
       </select></label>
-      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?></p>
+      <p class="f-help"><?= e(__('Die folgenden Felder gehören zu diesem Abschnitt – bis zum nächsten Abschnitt. Die Bezeichnung ist die Überschrift im Formular, der Hilfetext steht darunter. Speichert keine Daten.')) ?> <?= e(__('„Eingeklappt“ gilt für die Eingabe der Redaktion: Der Abschnitt öffnet sich per Klick, bei Fehlern und bei leeren Pflichtfeldern von selbst; im öffentlichen Formular erscheint er als Zwischenüberschrift.')) ?></p>
     </div>
     <div class="dt-field__extra" data-show-for="content"<?= $type === 'content' ? '' : ' hidden' ?>>
       <div class="dt-in dt-in--rich"><span id="<?= $sid ?>-l"><?= e(__('Text im Formular')) ?></span>
