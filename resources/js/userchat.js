@@ -10,7 +10,6 @@
  * - Zähler in der Seitenleiste und im Fenstertitel; Hinweise im Browser nur nach ausdrücklicher Zustimmung (Glocke)
  */
 import { t } from './_i18n.js';
-import ICON_MAP from '../../public/assets/icons/icons-map.json';
 import { esc, csrf } from './_html.js';
 
 const d = document;
@@ -21,10 +20,10 @@ const store = {
   set(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* privat/gesperrt */ } },
 };
 
-// Symbole aus dem Sprite (wie _icons.js, ohne dessen Abhängigkeiten)
-// Je Symbol das kleine Sprite seines Themas (Index icons-map.json, Core\Icons) – sonst das vollständige icons.svg
+// Symbole aus dem Sprite: je Symbol das kleine Sprite seines Themas – den Index (icons-map.json) bringt admin.js mit
+// (_icons.js über window.CMSAdminModules, Skript-Reihenfolge in views/layout.php); ohne ihn das vollständige icons.svg
 const sprite = d.documentElement.dataset.icons || '/assets/icons/icons.svg';
-const spriteOf = name => (ICON_MAP[name] ? sprite.replace(/icons\.svg(?=\?|$)/, ICON_MAP[name] + '.svg') : sprite);
+const spriteOf = name => window.CMSAdminModules?.['_icons.js']?.spriteUrl?.(name) || sprite;
 const ico = (name, cls = '') => `<svg class="ico${cls ? ' ' + esc(cls) : ''}" aria-hidden="true" focusable="false" width="1em" height="1em" fill="currentColor"><use href="${esc(spriteOf(name))}#i-${esc(name)}"/></svg>`;
 
 let cfg;

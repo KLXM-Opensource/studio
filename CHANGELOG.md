@@ -10,6 +10,17 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Weniger Bytes: Teile der Verwaltung bei Bedarf, kleinere Demo-Medien und Downloads
+- `admin.js` lädt selten gebrauchte Teile erst bei Bedarf (`resources/js/admin-*.mjs`, `_lazy.js`): KI-Oberfläche nur mit
+  KI-Konfiguration, Block-Designer, Externe Quellen, Grundeinstellungen → KI, Feldtyp „Wiederholung“. `admin.js` schrumpft von
+  587 auf 474 KB (gzip 186 → 156 KB). Gemeinsame Module (Ebene, Rückfragen, Symbole) teilen die Teile über
+  `window.CMSAdminModules` (`_shared.js`, Build-Plugin) – keine zweite Kopie, ein Zustand. `userchat.js` nimmt den Symbol-Index
+  aus `admin.js` statt einer eigenen Kopie (48 → 35 KB).
+- PDF.js ohne QuickJS (`wasm/quickjs-eval.*`, 475 KB): nur für Skripte in PDF-Formularen im Viewer von pdf.js, den Studio nicht nutzt.
+- Demo-Medien des Kits „NativeCSS“ neu kodiert (Kurzfilm 1,26 MB → 395 KB, 960 × 540, gleiche Länge, Untertitel und Kapitel;
+  Schleifen 276 → 192 KB), Beispielbild der Tutorials 432 → 202 KB. Startinhalte und Kits bleiben vollständig.
+- Download (`git archive`/Packagist) ohne reine Repository-Quellen: NativeCSS-Schriften liegen gebaut in `public/assets/kits/native/fonts`,
+  `docs/php-api.md` erzeugt die Verwaltung live. Installations-ZIP 17,4 → 15,6 MB.
 ### Kleinerer Download: Testdaten der Abhängigkeiten, App-Icon-Schrift
 - `bin/vendor-clean.php` (Composer `post-install-cmd`/`post-update-cmd`) entfernt Testordner aus `vendor/` – u. a. 17 MB Testdaten von
   `wamania/php-stemmer` (über loupe); `vendor/` schrumpft von rund 41 auf 22 MB.

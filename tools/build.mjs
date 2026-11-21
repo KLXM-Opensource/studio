@@ -5,6 +5,8 @@
  *   pnpm watch         Assets bei Änderungen neu bauen
  *
  * Quellen:  resources/{css,js}          → public/assets/{css,js}          (Core: Admin + Editor)
+ *           resources/js/admin-*.mjs    → Teile von admin.js, die erst bei Bedarf laden (_lazy.js); gemeinsame Module
+ *                                         kommen aus admin.js (Plugin adminShared, Liste in resources/js/_shared.js)
  *           kits/{name}/assets/…        → public/assets/kits/{name}/…     (je Kit)
  *           extensions/{name}/assets/…  → public/assets/ext/{name}/…      (je Erweiterung)
  *           Alles liegt unter public/assets/ – ganz oben in public/ würde jeder Ordner die gleichnamige Seitenadresse
@@ -120,14 +122,16 @@ async function vendors() {
   copy(nm('pdfjs-dist/build/pdf.min.mjs'), path.join(pdf, 'pdf.min.mjs'));
   copy(nm('pdfjs-dist/build/pdf.worker.min.mjs'), path.join(pdf, 'pdf.worker.min.mjs'));
   copy(nm('pdfjs-dist/LICENSE'), path.join(pdf, 'LICENSE.txt'));
+  // QuickJS (wasm/quickjs-eval.*) braucht nur pdf.sandbox.mjs (Skripte in PDF-Formularen, Viewer von pdf.js) – den liefern wir
+  // nicht aus (resources/js/pdfviewer.mjs nutzt pdf.min.mjs ohne Skripte), daher weg: 475 KB weniger
+  const skip = f => /quickjs/i.test(path.basename(f));
+  fs.rmSync(path.join(pdf, 'wasm'), { recursive: true, force: true });
   for (const dir of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
     if (fs.existsSync(nm('pdfjs-dist', dir))) {
-      fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true });
+      fs.cpSync(nm('pdfjs-dist', dir), path.join(pdf, dir), { recursive: true, filter: f => !skip(f) });
       console.log('  vendor  ' + path.relative(ROOT, path.join(pdf, dir)) + '/');
     }
   }
-  // QuickJS (wasm/quickjs-eval.*): pdfjs-dist liefert keine Lizenzdatei mit – MIT-Texte aus resources/licenses/
-  if (fs.existsSync(path.join(pdf, 'wasm/quickjs-eval.wasm'))) copy(path.join(ROOT, 'resources/licenses/LICENSE_QUICKJS.txt'), path.join(pdf, 'wasm/LICENSE_QUICKJS'));
 }
 
 
@@ -251,6 +255,35 @@ function entries() {
   return list;
 }
 
+/**
+ * Nachgeladene Teile von admin.js (resources/js/admin-*.mjs, geladen mit _lazy.js): Importe der gemeinsamen Kern-Module aus
+ * resources/js/_shared.js (Zeilen „from './_x.js'“) zeigen auf window.CMSAdminModules['_x.js'] – dieselbe Instanz wie in
+ * admin.js (eine Ebene, ein Zustand) statt einer Kopie im Bündel. Exportnamen liest esbuild aus der Quelle.
+ */
+const JS_SRC = path.join(ROOT, 'resources/js');
+const isAdminPart = src => path.dirname(src) === JS_SRC && /^admin-[\w-]+\.mjs$/.test(path.basename(src));
+const adminShared = {
+  name: 'admin-shared',
+  setup(b) {
+    const names = new Set([...fs.readFileSync(path.join(JS_SRC, '_shared.js'), 'utf8').matchAll(/from '\.\/(_[\w-]+\.js)'/g)].map(m => m[1]));
+    b.onResolve({ filter: /^\.\/_[\w-]+\.js$/ }, args => {
+      const file = path.join(args.resolveDir, args.path);
+      if (path.dirname(file) !== JS_SRC || !names.has(path.basename(file))) return undefined;
+      return { path: path.basename(file), namespace: 'cms-shared' };
+    });
+    b.onLoad({ filter: /.*/, namespace: 'cms-shared' }, async args => {
+      const r = await build({ entryPoints: [path.join(JS_SRC, args.path)], bundle: false, format: 'esm', write: false, metafile: true, outdir: TOOLS, logLevel: 'silent' });
+      const exp = Object.values(r.metafile.outputs)[0].exports;
+      const ref = `globalThis.CMSAdminModules?.[${JSON.stringify(args.path)}]`;
+      return {
+        contents: `const M = ${ref};\nif (!M) throw new Error('admin.js fehlt: ${args.path} nicht geteilt');\n`
+          + exp.map(e => (e === 'default' ? 'export default M.default;' : `export const ${e} = M.${e};`)).join('\n'),
+        loader: 'js',
+      };
+    });
+  },
+};
+
 const options = ([src, outdir]) => {
   const ext = extOf(src);
   const extra = ext ? (extHooks.get(ext.name).mod.esbuild?.(src) ?? {}) : {};
@@ -270,6 +303,8 @@ const options = ([src, outdir]) => {
   loader: { '.woff2': 'file' },
   // Kern-Helfer für Erweiterungen: import … from 'klxm-studio/_i18n.js' → resources/js/_i18n.js (mitgebündelt)
   alias: { 'klxm-studio': path.join(ROOT, 'resources/js'), ...(extra.alias ?? {}) },
+  // Teile von admin.js: gemeinsame Module aus admin.js statt Kopie (adminShared)
+  plugins: isAdminPart(src) ? [adminShared] : [],
   legalComments: 'none',
   logLevel: 'warning',
   };

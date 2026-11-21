@@ -4,6 +4,10 @@
 /.github                      export-ignore
 /.gitattributes               export-ignore
 /.claude/skills/release-check export-ignore
+# Nur Quellen fürs Repository: die NativeCSS-Schriften liegen gebaut unter public/assets/kits/native/fonts (kits/native/build.mjs
+# kopiert sie nur, wenn die Quelle da ist), die PHP-API-Referenz erzeugt die Verwaltung live (/admin/hilfe/php-api, docs:api)
+/kits/native/vendor/ncss/fonts export-ignore
+/docs/php-api.md              export-ignore
 
 # Zeilenenden: Shell-Skripte und die Konsole immer LF (auch bei Checkout unter Windows)
 *.sh        text eol=lf

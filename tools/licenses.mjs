@@ -70,7 +70,6 @@ const REQUIRED_FILES = [
   'public/assets/vendor/pdfjs/wasm/LICENSE_JBIG2',
   'public/assets/vendor/pdfjs/wasm/LICENSE_OPENJPEG',
   'public/assets/vendor/pdfjs/wasm/LICENSE_QCMS',
-  'public/assets/vendor/pdfjs/wasm/LICENSE_QUICKJS',
   'public/assets/fonts/OFL-Lato.txt',
   'public/assets/icons/LICENSE.txt',
 ];

@@ -4,13 +4,14 @@
  * Wird auch vom Inline-Editor genutzt (window.CMSAdmin).
  */
 import { initBar, layer, layerBox, listen, pathTarget, ui, uiAll, openDialog, deepActive, shadowFor, addRoot, setUiCss, pathClosest, inPath, IN_ADMIN, topInset } from './_shadow.js';
+import './_shared.js';   // gemeinsame Module für die nachgeladenen Teile admin-*.mjs (window.CMSAdminModules)
+import { lazy } from './_lazy.js';   // Teile, die erst bei Bedarf laden: KI, Block-Designer, Externe Quellen, KI-Einstellungen, Wiederholungen
 import './_media.js';
 import './_notes.js';   // Redaktionsnotizen im Bearbeiten-Modus: als Text übernehmen oder löschen
 import { toast, toastNext, flushToast } from './_toast.js';   // Meldungen (Verwaltung + Website)
 import { openSpotlight } from './_spotlight.js';
 import { t } from './_i18n.js';
 import { initGeo } from './_geo.js';
-import { initRRule } from './_rrule.js';
 import { conditions } from './_conditions.js';
 import { initIban } from './_iban.js';
 import { initRuleBuilder } from './_schema_rules.js';
@@ -25,7 +26,6 @@ import { initNetwork } from './_network.js';
 import { initOnline } from './_online.js';   // „online“-Herzschlag (Core\Presence::ONLINE)
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
-import { initSources } from './_sources.js';   // Daten → Externe Quellen: Zuordnung mit Auswahl, Beispiel und Probeabruf (Core\Sources)
 import { initPagePreview } from './_ptpreview.js';   // Seitenbaum → Vorschau als Seitenleiste (Mobil/Desktop, hoch/quer)
 import { initEntryEdit } from './_entry_edit.js';
 import { initTargetEdit } from './_target_edit.js';   // „Bearbeiten“ an Karten/Kacheln → Seite bzw. Eintrag (Core\TargetEdit)
@@ -39,12 +39,10 @@ import { ico } from './_icons.js';   // Symbolauswahl (Feldtyp „icon“, Tabel
 import { initAccent } from './_accent.js';   // Konto → Akzentfarbe: Live-Vorschau (Core\Accent)
 import { initFeatures } from './_features.js';   // Funktionen & Erweiterungen: Sicherheitsbestätigung (Core\Features)
 import { initFonts } from './_fonts.js';   // Grundeinstellungen → Schriften: Proben von der eigenen Domain (Core\Fonts)
-import { initBlockBuilder } from './_blockbuilder.js';   // Verwaltung → Blöcke: Block-Designer (Core\Blocks\Custom)
 import { Rich } from './_rte.js';   // Formatierungsleiste: Stile, Farben, Marker, Link, Menüs, Tastatur
 import * as Markdown from './_markdown.js';   // Markdown einfügen/importieren (Rich-Text-Felder, Seiten-Editor)
 import { pickLink, openLinkPicker, initLinkFields } from './_links.js';   // Linkauswahl (Rich-Text und Feldtyp „link“)
 import { initPagesFields, openPagesPicker } from './_pages.js';   // Seitenauswahl (Feldtyp „pages“, Core\PagePicker)
-import { initAiSettings } from './_aiset.js';   // Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles)
 import { initAssistant } from './_assistant.js';
 import { esc, csrf } from './_html.js';
 import { initPush } from './_push.js';   // Push-Benachrichtigungen: Konto → Benachrichtigungen, Abo auffrischen (Core\Push)
@@ -97,9 +95,11 @@ initOnline();
 // Eingereicht: Sammelauswahl (_review.js)
 initReview();
 initRedirects();
-initSources();
+// Daten → Externe Quellen: Zuordnung mit Auswahl, Beispiel und Probeabruf (Core\Sources) – admin-sources.mjs
+if (d.querySelector('[data-src-form]')) lazy('admin-sources').then(m => m.initSources?.());
 initPagePreview();
-initAiSettings();   // Grundeinstellungen → KI (nur mit #aip-data)
+// Grundeinstellungen → KI: Verbindungen prüfen, Modelle übernehmen (Core\AI\Profiles) – admin-aiset.mjs, nur mit #aip-data
+if (d.getElementById('aip-data')) lazy('admin-aiset').then(m => m.initAiSettings?.());
 // Konto → Akzentfarbe (_accent.js)
 initAccent();
 // Grundeinstellungen → Schriften (_fonts.js)
@@ -1231,6 +1231,10 @@ function initBlockFields(scope = d) {
   });
 }
 
+/** Wiederholung (Feldtyp „rrule“, _rrule.js) – admin-rrule.mjs, nur wenn scope ein solches Feld enthält */
+function initRRule(scope) {
+  if (scope.querySelector?.('[data-rrule]:not([data-rrule-ready])')) lazy('admin-rrule').then(m => m.initRRule?.(scope));
+}
 function init(scope = d) { initBlockFields(scope); initIban(scope); initGeo(scope); initRRule(scope); initBinding(scope); initRelations(scope); initRepeaters(scope); initRepeaterCollapse(scope); initRte(scope); initLinkFields(scope); initPagesFields(scope); initMedia(scope); initMediaText(scope); initCollectionFields(scope); initShowIf(scope); initCounters(scope); initDataFields(scope); initIconPickers(scope); initIconGallery(scope); initTiles(scope); initAi(scope); /* KI-Assistent */ }
 init();
 flushToast();   // Meldung von der vorherigen Seite (toastNext), z. B. nach dem Wiederherstellen
@@ -1277,7 +1281,8 @@ d.addEventListener('click', e => {
 });
 initSettingsPreview();
 initDesign();
-initBlockBuilder();
+// Verwaltung → Blöcke: Block-Designer (Core\Blocks\Custom) – admin-blockbuilder.mjs
+if (d.querySelector('[data-cb]')) lazy('admin-blockbuilder').then(m => m.initBlockBuilder?.());
 /** Angaben einer Erweiterung (Extension::adminData), einmal gelesen; {} ohne Angaben */
 const extCache = {};
 function extData(name) {
