@@ -8245,4 +8245,15 @@ return [
     'Manifest (extension.php) ließ sich nicht laden' => 'manifest (extension.php) could not be loaded',
     'Manifest laden' => 'Loading the manifest',
     'Start (boot) fehlgeschlagen' => 'start (boot) failed',
+    // Anmeldung: Logo des Anbieters (Core\Oidc\Logo)
+    'Das Logo des Anbieters ist zu groß (höchstens {kb} KB).' => 'The provider logo is too large (at most {kb} KB).',
+    'Das Logo des Anbieters muss eine SVG- oder PNG-Datei sein.' => 'The provider logo must be an SVG or PNG file.',
+    'Das Logo konnte nicht gespeichert werden.' => 'The logo could not be saved.',
+    'Das PNG-Logo ist beschädigt oder größer als {px} Pixel.' => 'The PNG logo is damaged or larger than {px} pixels.',
+    'Das SVG-Logo enthält keine Grafik.' => 'The SVG logo contains no graphics.',
+    'Die Logo-Adresse des Anbieters muss mit https:// beginnen.' => 'The provider logo address must start with https://.',
+    'Erscheint klein neben dem Anmelde-Link (SVG mit currentColor passt sich hell und dunkel an). Leer = Logo aus dem Discovery-Dokument (logo_uri), sonst ein neutrales Symbol.' => 'Shown small next to the sign-in link (an SVG drawn with currentColor adapts to light and dark). Empty = logo from the discovery document (logo_uri), otherwise a neutral icon.',
+    'Logo des Anbieters (optional)' => 'Provider logo (optional)',
+    'Logo des Anbieters ist lokal gespeichert.' => 'The provider logo is stored locally.',
+    'Logo des Anbieters nicht übernommen: {msg}' => 'Provider logo not applied: {msg}',
 ];

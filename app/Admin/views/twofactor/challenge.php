@@ -36,7 +36,6 @@ $codeHelp = $hasTotp ? __('Geben Sie den 6-stelligen Code aus Ihrer Authenticato
   <?php if ($pkFirst): ?></details><?php endif; ?>
   <?php endif; ?>
   <?php if ($hasPk && !$pkFirst) echo $pkHtml; ?>
-  <p class="adm-muted"><a href="<?= e(url('/admin/login')) ?>">← <?= e(__('Abbrechen')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php $footHref = url('/admin/login'); $footLabel = __('Abbrechen'); $footSupport = true; include __DIR__ . '/../invite/_foot.php'; ?>
 </div>
 <?php if ($hasPk): ?><script src="<?= e(asset('js/passkey.js')) ?>" defer></script><?php endif; ?>

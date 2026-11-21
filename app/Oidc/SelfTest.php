@@ -38,6 +38,10 @@ final class SelfTest
             }
         };
 
+        // Logos des Anbieters (Core\Oidc\Logo) in einem eigenen Ordner – die echte Ablage bleibt unberührt
+        $logoDir = sys_get_temp_dir() . '/klxm-oidc-logo-' . bin2hex(random_bytes(4));
+        Logo::$dir = $logoDir;
+
         // ------------------------------------------------------------ Schlüssel
         $rsa = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
         $rsaJwk = Jwk::fromRsa(openssl_pkey_get_details($rsa)['key'], 'r1');
@@ -217,6 +221,87 @@ final class SelfTest
             Client::$now = null;
             Client::resetForTest();
         }
+
+        // ------------------------------------------------------------ Logo des Anbieters (logo_uri)
+        try {
+            self::logoTests($eq, $logoDir);
+        } finally {
+            Logo::$transport = null;
+            Logo::$dir = null;
+            foreach (glob($logoDir . '/*') ?: [] as $f) @unlink($f);
+            @rmdir($logoDir);
+        }
         return ['ok' => $ok, 'fails' => $fails];
+    }
+
+    /** Logo: Bereinigung, Größenlimit, nur einmal laden, nur lokal ausgeben (kein Hotlink), Ersatzsymbol */
+    private static function logoTests(\Closure $eq, string $dir): void
+    {
+        $iss = 'https://hub.example.org';
+        $src = 'https://hub.example.org/static/logo.svg';
+        $calls = 0;
+        $body = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hub" onload="alert(1)">'
+            . '<title>Hub</title><style>body{display:none}</style><script>alert(2)</script>'
+            . '<defs><linearGradient id="g"><stop offset="0" stop-color="#2F6FED"/></linearGradient></defs>'
+            . '<circle cx="32" cy="32" r="20" fill="currentColor"/><rect width="10" height="10" fill="url(#g)"/>'
+            . '<image href="https://tracker.example.net/p.png" width="1" height="1"/></svg>';
+        Logo::$transport = function (string $url) use (&$calls, &$body): array {
+            $calls++;
+            return ['status' => 200, 'body' => $body];
+        };
+        $eq('Logo: geladen', Logo::sync($iss, ['logo_uri' => $src]), null);
+        $svg = (string) (Logo::stored($iss)['data'] ?? '');
+        $eq('Logo: Skript, on…-Attribut, <style>, <image> und title entfernt', [str_contains($svg, 'script'), str_contains($svg, 'onload'), str_contains($svg, '<style'), str_contains($svg, '<image'), str_contains($svg, '<title')], [false, false, false, false, false]);
+        $eq('Logo: dekorativ (aria-hidden), currentColor bleibt', [str_contains($svg, 'aria-hidden="true"'), str_contains($svg, 'role='), str_contains($svg, 'currentColor')], [true, false, true]);
+        $eq('Logo: ids mit Präfix samt Verweis', [str_contains($svg, 'id="oidc-logo-g"'), str_contains($svg, 'url(#oidc-logo-g)')], [true, true]);
+        $html = Logo::html(['issuer' => $iss, 'site' => site()->key, 'logo_media' => 0]);
+        $eq('Logo: Ausgabe lokal eingebettet, kein Verweis auf den Anbieter', [str_starts_with($html, '<svg'), str_contains($html, 'hub.example.org'), str_contains($html, 'tracker.example.net'), (bool) preg_match('~(href|src)="https?:~', $html)], [true, false, false, false]);
+        Logo::sync($iss, ['logo_uri' => $src]);
+        $eq('Logo: gleiche Adresse → nur einmal geladen', $calls, 1);
+        Logo::sync($iss, ['logo_uri' => $src], true);
+        $eq('Logo: Speichern lädt neu', $calls, 2);
+
+        // Größenlimit: zu groß → kein Logo, Ersatzsymbol
+        $body = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h10v10z"/>' . str_repeat('<!-- x -->', 7000) . '</svg>';
+        $eq('Logo: über 64 KB abgewiesen', Logo::sync($iss, ['logo_uri' => $src . '?v=2']) !== null, true);
+        $eq('Logo: nach Fehler keins gespeichert', Logo::stored($iss), null);
+        $eq('Logo: ohne Logo neutrales Symbol', str_contains(Logo::html(['issuer' => $iss]), 'auth-alt__logo--icon'), true);
+        $n = $calls;
+        Logo::sync($iss, ['logo_uri' => $src . '?v=2']);
+        $eq('Logo: fehlerhafte Adresse nicht bei jedem Abruf erneut geladen', $calls, $n);
+
+        // Nur https, nur SVG/PNG
+        $eq('Logo: http/ftp-Adresse abgewiesen', Logo::download($iss, 'ftp://hub.example.org/logo.svg') !== null, true);
+        $body = '<html><body>kein Bild</body></html>';
+        $eq('Logo: weder SVG noch PNG abgewiesen', Logo::sync($iss, ['logo_uri' => $src . '?v=3']) !== null, true);
+        $body = 'GIF89a' . str_repeat("\0", 20);
+        $eq('Logo: GIF abgewiesen', Logo::sync($iss, ['logo_uri' => $src . '?v=4']) !== null, true);
+
+        // PNG: geprüft und als data:-Adresse ausgegeben
+        if (function_exists('imagecreatetruecolor')) {
+            $png = function (int $w, int $h): string {
+                $im = imagecreatetruecolor($w, $h);
+                ob_start();
+                imagepng($im);
+                return (string) ob_get_clean();
+            };
+            $body = $png(32, 32);
+            $eq('Logo: PNG übernommen', [Logo::sync($iss, ['logo_uri' => 'https://hub.example.org/logo.png']), Logo::stored($iss)['type'] ?? null], [null, 'png']);
+            $html = Logo::html(['issuer' => $iss]);
+            $eq('Logo: PNG als data:-Adresse, ohne Verweis auf den Anbieter', [str_contains($html, 'src="data:image/png;base64,'), str_contains($html, 'hub.example.org'), str_contains($html, 'alt=""')], [true, false, true]);
+            $body = $png(600, 20);
+            $eq('Logo: PNG über 512 px abgewiesen', Logo::sync($iss, ['logo_uri' => 'https://hub.example.org/gross.png']) !== null, true);
+            $body = "\x89PNG\r\n\x1a\n" . 'kaputt';
+            $eq('Logo: beschädigtes PNG abgewiesen', Logo::sync($iss, ['logo_uri' => 'https://hub.example.org/kaputt.png']) !== null, true);
+        }
+
+        // Abruf scheitert → Anmeldung unberührt, kein Logo
+        Logo::$transport = function (): array { throw new \RuntimeException('nicht erreichbar'); };
+        $eq('Logo: Abruf scheitert → Fehlertext', Logo::sync($iss, ['logo_uri' => $src . '?v=5']), 'nicht erreichbar');
+        // logo_uri entfällt → gespeichertes Logo und Vermerk weg
+        Logo::sync($iss, ['logo_uri' => $src . '?v=5']);
+        Logo::sync($iss, []);
+        $eq('Logo: ohne logo_uri entfernt', [Logo::stored($iss), Logo::status($iss)], [null, null]);
+        $eq('Logo: Ablage nur im Test-Ordner', Logo::dir(), $dir);
     }
 }

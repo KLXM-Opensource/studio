@@ -28,6 +28,5 @@ $title = __('Passwort vergessen');
     <p class="inv-note"><?= e(__('Zwei-Faktor-Anmeldung und Passkeys bleiben unverändert – nach dem neuen Passwort fragt die Anmeldung wie gewohnt nach dem zweiten Faktor.')) ?></p>
     <?php endif; ?>
   </section>
-  <p class="adm-muted"><a href="<?= e(url('/admin/login')) ?>">← <?= e(__('Zurück zur Anmeldung')) ?></a></p>
-  <p class="adm-product"><?= cms_mark() ?></p>
+  <?php $footHref = url('/admin/login'); $footLabel = __('Zurück zur Anmeldung'); $footSupport = true; include __DIR__ . '/../invite/_foot.php'; ?>
 </div>

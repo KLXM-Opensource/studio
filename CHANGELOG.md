@@ -25,6 +25,23 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Redaktion sieht die Meldung auf der Fehlerseite. Der letzte Fehler je Erweiterung (14 Tage) steht unter Funktionen & Erweiterungen
   und in `extensions:list`. `extensions:selftest` prüft beides.
 
+### Anmeldeseite überarbeitet: Passkey zuerst, Agentur-Zugang leise, ruhiger Hintergrund
+- **Reihenfolge:** „Mit Passkey anmelden“ ist der einzige Hauptknopf (nur mit Passkey-fähigem Browser); darunter E-Mail und
+  Passwort – „Anmelden“ tritt dann als Umriss zurück, ohne Passkey ist er der Hauptknopf. Die Anmeldung über einen
+  OpenID-Connect-Anbieter (z. B. Agentur Hub) steht nicht mehr als großer Knopf oben, sondern als leise Zeile ganz unten in der
+  Karte: kleiner Link (44 px hoch, per Tastatur erreichbar) mit **Logo des Anbieters**.
+- **Logo des Anbieters** (`Core\Oidc\Logo`, `Providers::logoHtml()`): wählbar aus der Mediathek (Benutzer & Rollen → Anmeldung &
+  Sicherheit, `logo_media`) oder automatisch aus dem optionalen Feld `logo_uri` des Discovery-Dokuments (https, SVG oder PNG bis
+  64 KB) – einmal geladen (`Core\Http\Fetch`), SVG über `Core\Svg::clean` bereinigt, PNG geprüft, abgelegt in
+  `storage/oidc-logos/`. Ausgabe immer lokal (SVG eingebettet mit `currentColor`, PNG als `data:`), nie ein Verweis auf den Anbieter;
+  ohne Logo ein neutrales Symbol. Selbsttest in `oidc:selftest` (Bereinigung, Größenlimit, einmaliges Laden, kein Hotlink).
+- **Hintergrund:** statt bewegter Pastell-Farbflächen eine ruhige Fläche in einem Hauch der Markenfarbe mit feinem Punktraster und
+  weichem Licht von oben – reines CSS, ohne Bewegung, hell und dunkel; Karte deckend statt Milchglas. Neue Variablen `--auth-dot`,
+  `--auth-dot-gap`, `--auth-glow`, `--auth-mark`, `--auth-foot-line`; entfallen sind `--auth-c1…3`, `--auth-o`, `--auth-speed`,
+  `--auth-glass`.
+- **Fußzeile** aller Seiten vor der Anmeldung (`views/invite/_foot.php`): links der Rückweg, rechts das Zeichen der Agentur klein
+  neben „Technik: KLXM Studio“, darunter die Support-Zeile (Anmeldung, Zwei-Faktor, Passwort vergessen); am Telefon untereinander.
+
 ### Überwachung: technische Meldungen getrennt von Einrichtung und Redaktion
 - **Kategorien der Prüfungen** (`Core\Health::rows()`): `technical` (alarmiert eine Überwachung), `setup` (Einrichtung) und
   `editorial` (Redaktion) – beide nur zur Anzeige. Technisch u. a. Datenbank, Ordner, PHP-Version und neu das **Lebensende der

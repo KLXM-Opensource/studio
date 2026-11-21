@@ -14,6 +14,7 @@ use Core\Http\Fetch;
  *  - JWKS: 1 Stunde zwischengespeichert; unbekannte kid → einmal neu laden (Schlüsselwechsel), höchstens alle 60 Sekunden.
  *  - ID-Token: Signatur RS256/EdDSA (Core\Oidc\Jwt), iss, aud (+ azp bei mehreren), exp/iat mit 60 s Toleranz, iat nicht älter
  *    als 10 Minuten, nonce, at_hash falls vorhanden, sub vorhanden.
+ *  - Optionales Feld logo_uri: Logo::sync legt das Logo des Anbieters einmal lokal ab (Anmeldeseite, nie Hotlink).
  *  - Abrufe über Core\Http\Fetch (SSRF-Schutz); für den Selbsttest ersetzt Client::$transport die Abrufe.
  *  - Offene Anmeldungen in der Sitzung (_oidc): je state Anbieter, nonce, code_verifier, Ziel – 10 Minuten, höchstens 5, einmal verwendbar.
  */
@@ -105,7 +106,7 @@ final class Client
     /** Discovery-Dokument (geprüft) */
     public static function discovery(string $issuer, bool $force = false): array
     {
-        return self::cached('disc', $issuer, $force, function () use ($issuer): array {
+        return self::cached('disc', $issuer, $force, function () use ($issuer, $force): array {
             $d = self::json($issuer . '/.well-known/openid-configuration');
             if (!hash_equals($issuer, rtrim((string) ($d['issuer'] ?? ''), '/')) || (string) ($d['issuer'] ?? '') === '') {
                 throw new OidcException(__('Das Discovery-Dokument nennt einen anderen Issuer – Anmeldung abgebrochen.'));
@@ -115,6 +116,12 @@ final class Client
             }
             if (isset($d['code_challenge_methods_supported']) && !in_array('S256', (array) $d['code_challenge_methods_supported'], true)) {
                 throw new OidcException(__('Der Anbieter unterstützt PKCE (S256) nicht.'));
+            }
+            // Optionales Logo (logo_uri) einmal lokal ablegen – Fehler dabei stören die Anmeldung nie (Core\Oidc\Logo)
+            try {
+                Logo::sync($issuer, $d, $force);
+            } catch (\Throwable $e) {
+                error_log('[oidc] Logo: ' . $e->getMessage());
             }
             return $d;
         });

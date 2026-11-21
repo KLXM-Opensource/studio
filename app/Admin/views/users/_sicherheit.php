@@ -52,6 +52,13 @@ $ocDis = $ocLocked ? ' disabled' : ''; ?>
     <div class="f"><label for="oc-name"><?= e(__('Name des Anbieters')) ?></label><input id="oc-name" name="oidc[name]" maxlength="60" value="<?= e((string) $oc['name']) ?>" placeholder="Agentur-Login"<?= $ocDis ?>></div>
     <div class="f"><label for="oc-label"><?= e(__('Beschriftung des Knopfs')) ?></label><input id="oc-label" name="oidc[label]" maxlength="60" value="<?= e((string) $oc['label']) ?>" placeholder="<?= e(__('Mit {name} anmelden', ['name' => $oc['name'] ?: 'Agentur-Login'])) ?>" aria-describedby="oc-label-h"<?= $ocDis ?>>
       <p class="f-help" id="oc-label-h"><?= e(__('Leer = „Mit {name} anmelden“.', ['name' => __('Name des Anbieters')])) ?></p></div>
+    <?php $ocLogo = \Core\Oidc\Logo::status((string) $oc['issuer']); $ocMid = (int) ($oc['logo_media'] ?? 0); // Logo neben dem Anmelde-Link ?>
+    <div class="f" role="group" aria-labelledby="oc-logo-l" aria-describedby="oc-logo-h"><span class="f-label" id="oc-logo-l"><?= e(__('Logo des Anbieters (optional)')) ?></span>
+      <div class="media-field" data-accept="image"><input type="hidden" name="oidc[logo_media]" value="<?= $ocMid > 0 ? $ocMid : '' ?>"<?= $ocDis ?>>
+        <div class="media-field-preview"><?= \Core\Fields::mediaPreview($ocMid > 0 ? $ocMid : null) ?></div>
+        <?php if (!$ocLocked): ?><button type="button" class="btn btn--small" data-media-pick><?= e(__('Auswählen …')) ?></button> <button type="button" class="btn btn--small btn--ghost" data-media-clear><?= e(__('Entfernen')) ?></button><?php endif; ?></div>
+      <p class="f-help" id="oc-logo-h"><?= e(__('Erscheint klein neben dem Anmelde-Link (SVG mit currentColor passt sich hell und dunkel an). Leer = Logo aus dem Discovery-Dokument (logo_uri), sonst ein neutrales Symbol.')) ?>
+        <?php if ($ocLogo && empty($ocLogo['error'])): ?> <?= e(__('Logo des Anbieters ist lokal gespeichert.')) ?><?php elseif ($ocLogo): ?> <?= e(__('Logo des Anbieters nicht übernommen: {msg}', ['msg' => mb_strimwidth((string) $ocLogo['error'], 0, 120, '…')])) ?><?php endif; ?></p></div>
     <div class="f"><label for="oc-iss"><?= e(__('Issuer-Adresse')) ?></label><input id="oc-iss" name="oidc[issuer]" type="url" value="<?= e((string) $oc['issuer']) ?>" placeholder="https://anbieter.example.org/oidc" aria-describedby="oc-iss-h"<?= $ocDis ?>>
       <p class="f-help" id="oc-iss-h"><?= e(__('Die Einstellungen holt die Website von {path} (Discovery).', ['path' => '/.well-known/openid-configuration'])) ?></p></div>
     <div class="f"><label for="oc-cid"><?= e(__('Client-ID')) ?></label><input id="oc-cid" name="oidc[client_id]" maxlength="191" value="<?= e((string) $oc['client_id']) ?>"<?= $ocDis ?>></div>
