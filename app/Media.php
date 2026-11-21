@@ -2108,9 +2108,12 @@ final class Media
         // PDF: 1. Seite als Vorschaubild (mit pdftoppm), ebenso lazy erzeugt
         $poster = $isImg ? null : (VideoThumbs::isVideo($m) ? self::posterFor($m) : (VideoThumbs::isPdf($m) ? self::autoPoster($m) : null));
         $pic = $isImg ? $m : $poster;
+        // Vorschau mit Prüfsumme der Datei: SVGs (keine Bildgrößen) behalten beim Ersetzen ihren Namen – ohne ?v= zeigte der
+        // Browser nach dem Bearbeiten (Grafik-Editor, Ersetzen) weiter die alte Fassung aus dem Zwischenspeicher
+        $ver = fn(string $u): string => !empty($pic['hash']) && $pic['hash'] !== '-' ? $u . (str_contains($u, '?') ? '&' : '?') . 'v=' . substr((string) $pic['hash'], 0, 10) : $u;
         return [
-            'id' => (int) $m['id'], 'url' => self::url($m), 'thumb' => $pic ? self::url($pic, 480) : null,
-            'large' => $pic ? self::url($pic, 1200) : null,
+            'id' => (int) $m['id'], 'url' => self::url($m), 'thumb' => $pic ? $ver(self::url($pic, 480)) : null,
+            'large' => $pic ? $ver(self::url($pic, 1200)) : null,
             'poster' => $poster ? (!empty($poster['_auto_poster']) ? 'auto' : 'chosen') : null,
             'thumb_gen' => !$poster && VideoThumbs::pending($m)
                 ? url('/admin/api/media/' . (int) $m['id'] . '/thumb') . (self::$pool !== null ? '?pool=' . rawurlencode(self::$pool) : '') : null,

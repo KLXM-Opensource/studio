@@ -12,6 +12,8 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
 
 
 ### Grafik-Editor: Personas Daten und Export, Anhalten von Bewegung (Ausbaustufe 5)
+- **Mediathek-Vorschau nach dem Bearbeiten:** Vorschaubilder tragen die Prüfsumme der Datei (`?v=`) – SVGs behalten beim Ersetzen ihren Namen, die Mediathek
+  zeigte deshalb nach dem Bearbeiten im Grafik-Editor weiter die alte Fassung aus dem Browser-Zwischenspeicher.
 - **Mediathek: Filter „Grafiken (SVG)“ und „Animationen“** (Seitenleiste, `Media::all(['kind' => 'svg'|'anim'])`, MCP `media_list`): bewegte Grafiken
   erkennt `Media::ensureSvgAnim()` an der Web-Fassung (`Motion::isAnimated`), gemerkt in `media.svg_anim` mit der Prüfsumme – neue Fassungen werden neu geprüft.
 - **Kontextmenü auf der Zeichenfläche:** Rechtsklick (oder Menü-Taste, Umschalt+F10) mit den üblichen Befehlen – Zwischenablage, Gruppieren/aufheben,
