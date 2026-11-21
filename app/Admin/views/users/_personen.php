@@ -11,7 +11,8 @@
       <div class="set-row__main"><span class="set-row__label"><?= e($u['name'] ?: $u['email']) ?> <span class="adm-badge us-net" title="<?= e(__('Zentral verwaltetes Konto der Netzwerk-Administration')) ?>"><?= e(__('Netzwerk')) ?></span><?php if (!empty($u['idp'])): ?> <span class="adm-badge us-idp" title="<?= e(__('Meldet sich über einen Identitätsanbieter an (OpenID Connect)')) ?>"><?= e(\Core\Oidc\Providers::labelFor((string) $u['idp'])) ?></span><?php endif; ?></span>
         <span class="set-row__sub"><?= e($u['email']) ?> · <?= e($lastLogin($u)) ?></span></div>
       <div class="set-row__ctl"><span class="adm-badge adm-badge--muted"><?= e($roles['network']['name'] ?? __('Netzwerk-Administration')) ?></span>
-        <?= $self ? '<span class="adm-badge">' . e(__('Sie')) . '</span>' : '<span class="adm-muted us-readonly">' . e(__('zentral verwaltet')) . '</span>' ?></div>
+        <?= $self ? '<span class="adm-badge">' . e(__('Sie')) . '</span>' : '<span class="adm-muted us-readonly">' . e(__('wird im Netzwerk verwaltet')) . '</span>' ?>
+        <?php if (\Core\Network\Area::active() && \Core\Network\Network::isNetworkUser()): // Netzwerk-Konten: Link in den Netzwerk-Bereich ?><a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(\Core\Network\Network::isNetworkSite() ? url('/admin/network/administratoren') : \Core\Network\Network::siteLink(\Core\Network\Network::siteKey(), '/admin/network/administratoren')) ?>"><?= e(__('Im Netzwerk öffnen')) ?></a><?php endif; ?></div>
     </div>
     <?php continue; endif; ?>
     <?php $uPk = (int) ($u['passkeys'] ?? 0); $uMfa = (int) ($u['totp_enabled'] ?? 0) || $uPk > 0; ?>

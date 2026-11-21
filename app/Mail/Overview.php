@@ -33,6 +33,7 @@ final class Overview
         'review' => ['Änderungen warten auf Freigabe', 'notify', false, false, 'reviewers', 'Über API, MCP oder KI eingereichte Änderungen – höchstens alle 15 Minuten.'],
         'support' => ['Support-Meldungen', 'notify', false, false, 'support', 'Neue Meldungen und Antworten im Support.'],
         'chat' => ['Erwähnungen im Chat', 'notify', false, false, 'mention', 'Ungelesene Erwähnungen im Chat der Verwaltung.'],
+        'tasks' => ['Aufgaben: Zuweisung und Erinnerung', 'notify', false, false, 'assignee', 'Neue Aufgabe für eine Person oder Rolle, Erinnerung an fällige Aufgaben – je Konto abschaltbar.'],
         'newsletter' => ['Newsletter und Massenversand', 'newsletter', false, false, 'list', 'Für Erweiterungen wie einen Newsletter – ohne Impressum gesperrt.'],
     ];
 
@@ -171,10 +172,12 @@ final class Overview
             'delivery' => self::deliveryRecipients(),
             'visitor' => [__('Adresse aus dem Formular'), __('Einstellung der Tabelle (Eingangsbestätigung)'), '/admin/data'],
             'admins' => [implode(', ', self::admins()) ?: $none, app()->settings->get('sys.integrity_mail', true)
-                ? __('alle Konten mit allen Rechten dieser Website') : __('ausgeschaltet (Grundeinstellungen → Integrität)'), '/admin/system/integritaet'],
+                ? (\Core\Sites::multi() ? __('Administration dieser Website (Datenbank)') : __('alle Konten mit allen Rechten dieser Website'))
+                : __('ausgeschaltet (Grundeinstellungen → Integrität)'), '/admin/system/integritaet'],
             'reviewers' => self::reviewRecipients($none),
             'support' => [__('Support-Team bzw. die meldende Person'), __('Support'), null],
             'mention' => [__('die erwähnte Person'), __('Chat'), null],
+            'assignee' => [__('die zuständige Person bzw. die Personen der Rolle'), __('Aufgaben (Konto → Mitteilungen)'), '/admin/aufgaben'],
             default => [__('Verteiler der Erweiterung'), __('Erweiterung'), null],
         };
     }
@@ -225,9 +228,10 @@ final class Overview
         }
     }
 
-    /** @return list<string> Adressen der Konten mit allen Rechten (wie Integrity::notify) */
+    /** @return list<string> Empfänger der Integritäts-Hinweise dieser Website (wie Integrity::notify) */
     private static function admins(): array
     {
+        if (\Core\Sites::multi()) return \Core\Integrity::recipients('db');
         $roles = array_keys(array_filter(\Core\Permissions::roles(), fn($r) => in_array('*', (array) $r['permissions'], true)));
         if (!$roles) return [];
         $in = implode(',', array_fill(0, count($roles), '?'));

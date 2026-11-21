@@ -36,37 +36,42 @@ use Core\Fields;
   <div class="adm-tabs" role="tablist" aria-label="Bereiche">
     <?php foreach ($groups as $i => $g): ?><?= $tab($g['id'], $g['label'], $i === 0) ?><?php endforeach; ?>
     <?= $tab('keys', 'Verschlüsselung') ?>
-    <?= $tab('pools', __('Geteilte Medien')) ?>
+    <?php // Netzwerk (Core\Network\Area): Geteilte Medien, Adresse der Verwaltung, KI-Verbindungen und die installationsweiten Unterseiten
+    // stehen nur im Netzwerk-Bereich – hier nur, was diese Website betrifft
+    $netMoved = \Core\Network\Area::active(); ?>
+    <?php if (!$netMoved): ?><?= $tab('pools', __('Geteilte Medien')) ?><?php endif; ?>
     <?php $sharedTab = \Core\Data\Shared::canManage() || \Core\Data\Shared::forSite(); if ($sharedTab): ?><?= $tab('shared', __('Geteilte Daten')) ?><?php endif; ?>
     <?= $tab('push', __('Push-Benachrichtigungen')) ?>
     <?= $tab('umgebung', __('Umgebung')) ?>
-    <?= $tab('adminpath', __('Adresse der Verwaltung')) ?>
+    <?php if (!$netMoved): ?><?= $tab('adminpath', __('Adresse der Verwaltung')) ?><?php endif; ?>
     <?= $tab('info', 'Systeminfo') ?>
     <?php // Unterseiten mit eigener Adresse (Domain, Branding, Schriften, Geplante Aufgaben, Integrität, Sicherung außer Haus, Kits): Links unten in derselben Leiste (dort: system/_sidenav.php)
-    $subLinks = array_filter(['domain' => \Core\Domains::available() ? [url('/admin/system/domain'), __('Domain'), 'globe'] : null,
+    $subLinks = $netMoved ? [] : array_filter(['domain' => \Core\Domains::available() ? [url('/admin/system/domain'), __('Domain'), 'globe'] : null,
         'branding' => \Core\Branding::canEdit() ? [url('/admin/system/branding'), __('Branding & Support'), 'paint-brush'] : null,
         'fonts' => \Core\Fonts::canManage() ? [url('/admin/system/fonts'), __('Schriften'), 'text-t'] : null,
         'aufgaben' => \Core\Cron::canManage() ? [url('/admin/system/aufgaben'), __('Geplante Aufgaben'), 'clock-countdown'] : null,
         'integritaet' => can('system.manage') ? [url('/admin/system/integritaet'), __('Integrität'), 'shield-check'] : null,
         'sicherung' => can('system.manage') && \Core\Permissions::installationAdmin() ? [url('/admin/system/sicherung'), __('Sicherung außer Haus'), 'cloud-arrow-up'] : null,
         'kits' => \Core\KitPackages::canManage() ? [url('/admin/system/kits'), __('Kits'), 'package'] : null]);
-    if ($subLinks): ?><span class="adm-tabs__sep" role="separator"></span><?php endif;
-    foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>
+    if ($subLinks): ?><span class="adm-tabs__sep" aria-hidden="true"></span><?php endif;
+    foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" role="tab" aria-selected="false" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>
   </div>
   <?php foreach ($groups as $i => $g): ?>
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-<?= e($g['id']) ?>" aria-labelledby="tab-<?= e($g['id']) ?>"<?= $i === 0 ? '' : ' hidden' ?>>
     <h2><?= e($g['label']) ?></h2>
-    <?php if ($g['id'] === 'ki'): /* KI: Übersicht, Verbindungen und Verwendung der Installation vor den Schaltern der Website */ ?>
+    <?php if ($g['id'] === 'ki' && !$netMoved): /* KI: Übersicht, Verbindungen und Verwendung der Installation vor den Schaltern der Website (Netzwerk: im Netzwerk-Bereich) */ ?>
       <?= \Core\Theme::capture(ROOT . '/app/Admin/views/system/_ai.php', ['part' => 'top']) ?>
     <?php endif; ?>
     <?php $gFields = $g['fields'];
     if ($g['id'] === 'mail'): // E-Mail-Versand: Konten-Liste (bzw. erstes Konto) und Verwendung vor den übrigen Feldern (system/_mail.php)
       // Impressum für E-Mails (Core\Mail\Imprint): weder Text noch Impressum-Seite → deutlicher Hinweis oben im Reiter
-      if (\Core\Mail\Imprint::missing()): ?><p class="adm-flash adm-flash--error" id="mail-imprint-missing" role="status"><?= e(__('E-Mails dieser Website enthalten derzeit kein Impressum: Bitte unten „Impressum für E-Mails“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen. Bis dahin ist der Newsletter-Versand gesperrt.')) ?> <a href="#f-f-sys-mail-imprint"><?= e(__('Zum Feld')) ?></a></p><?php endif;
+      if (\Core\Mail\Imprint::missing()): ?><p class="adm-flash adm-flash--error" id="mail-imprint-missing" role="status"><?= e(__('E-Mails dieser Website enthalten derzeit kein Impressum: Bitte unten „Impressum in jeder E-Mail“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen. Bis dahin ist der Newsletter-Versand gesperrt.')) ?> <a href="#f-f-sys-mail-imprint"><?= e(__('Zum Feld')) ?></a></p><?php endif;
       $std = array_values(\Core\Mail\Accounts::STANDARD_KEYS);
       $stdFields = array_values(array_filter($gFields, fn($f) => in_array($f['name'] ?? '', $std, true) || (($f['type'] ?? '') === 'heading' && ($f['label'] ?? '') === 'Konto „Standard“')));
       $gFields = array_values(array_filter($gFields, fn($f) => !in_array($f, $stdFields, true)));
-      echo \Core\Theme::capture(ROOT . '/app/Admin/views/system/_mail.php', ['stdFields' => $stdFields, 'values' => $values, 'errors' => $errors]);
+      // Gruppen 1–5 mit allen übrigen Feldern (Empfänger, Test und Umleitung, Impressum) rendert system/_mail.php selbst
+      echo \Core\Theme::capture(ROOT . '/app/Admin/views/system/_mail.php', ['stdFields' => $stdFields, 'values' => $values, 'errors' => $errors, 'fields' => $gFields, 'user' => $user]);
+      $gFields = [];
     endif; ?>
     <div class="set-groups"><?= Fields::renderGroups($gFields, $values, $errors, 'f') ?></div>
     <?php if ($g['id'] === 'app'): ?>
@@ -97,13 +102,6 @@ use Core\Fields;
           </tbody>
         </table>
         <button class="adm-btn" form="proxy-clear" type="submit">Zwischenspeicher leeren</button>
-      </div>
-    <?php endif; ?>
-    <?php if ($g['id'] === 'mail'): ?>
-      <div class="adm-inline-box">
-        <strong>Testnachricht senden</strong>
-        <p class="adm-muted">Erst speichern, dann testen.</p>
-        <div class="adm-row"><input type="email" form="testmail" name="to" placeholder="<?= e($user['email']) ?>" aria-label="Empfänger der Testnachricht"><button class="adm-btn" form="testmail" type="submit">Test senden</button></div>
       </div>
     <?php endif; ?>
     <?php if ($g['id'] === 'suche' || $g['id'] === 'ki'): /* Website-Suche bzw. KI: Status, Tests, Anbieter (Core\Search, Core\AI) */ ?>
@@ -160,119 +158,10 @@ use Core\Fields;
     </section>
   </section>
 
-  <?php
-  $pools = \Core\MediaPools::all();
-  $manage = \Core\MediaPools::canManage();
-  $network = \Core\Network\Network::siteKey();
-  $allSites = \Core\Sites::all();
-  // Websites, die einen Pool über ihre Konfigurationsdatei nutzen (in der Oberfläche nicht abwählbar)
-  $viaConfig = function (string $pool) use ($allSites): array {
-      $out = [];
-      foreach ($allSites as $k => $c) {
-          $list = $k === site()->key ? (array) app()->config->get('media_pools', []) : (array) ($c['media_pools'] ?? []);
-          if (in_array($pool, $list, true)) $out[] = $k;
-      }
-      return $out;
-  };
-  ?>
-  <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-pools" aria-labelledby="tab-pools" hidden>
-    <h2><?= e(__('Geteilte Medien')) ?></h2>
-    <p class="adm-muted"><?= e(__('Zentrale Mediatheken für mehrere Websites dieser Installation, z. B. Logos und Markenbilder. In der Mediathek erscheint dafür eine Umschaltung. Pflegen dürfen Rollen mit „Geteilte Medien pflegen“ auf der Hauptwebsite und auf Websites, die unter „Pflegen dürfen“ freigegeben sind; alle anderen verwenden die Dateien nur. Änderungen wirken sofort auf allen Websites.')) ?></p>
-    <?php if ($manage): ?>
-      <?php
-      // Pools geteilter Datentabellen („data-{key}“) verwaltet die Tabelle: eigene Darstellung, leere zusammengeklappt
-      $autoPools = $emptyAuto = [];
-      foreach ($pools as $pk => $pl) {
-          if (($tk = \Core\Data\Shared::poolTable($pk)) === null) continue;
-          $autoPools[$pk] = $tk;
-          unset($pools[$pk]);
-      }
-      $siteLabel = fn(string $sk) => $sk === 'default' ? __('Hauptwebsite') : (isset($allSites[$sk]) ? (new \Core\Site($sk, $allSites[$sk]))->label() : $sk);
-      ?>
-      <?php foreach ($autoPools as $pk => $tk): $meta = \Core\MediaPools::meta($pk); $n = \Core\MediaPools::count($pk); $sm = \Core\Data\Shared::meta($tk);
-        if ($n === 0) { $emptyAuto[$pk] = $tk; continue; } ?>
-      <div class="pl-card pl-card--auto">
-        <div class="pl-head">
-          <strong><?= e(__('Bilder der geteilten Tabelle „{name}“', ['name' => $sm['label'] ?? $tk])) ?></strong>
-          <code><?= e($pk) ?></code><?php if (!empty($meta['protected'])): ?> <span class="adm-badge"><?= icon('lock') ?> <?= e(__('Geschützt')) ?></span><?php endif; ?><span class="adm-muted"><?= e($n === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => $n])) ?></span>
-          <a class="adm-btn adm-btn--small adm-btn--ghost" href="<?= e(url('/admin/system?table=' . rawurlencode($tk) . '#shared')) ?>"><?= e(__('Zur Tabelle')) ?></a>
-        </div>
-        <p class="adm-muted"><?= e(__('Genutzt von: {sites} – automatisch alle beteiligten Websites der Tabelle.', ['sites' => implode(', ', array_map($siteLabel, (array) $meta['sites']))])) ?></p>
-        <fieldset class="pl-sites"><legend><?= e(__('Pflegen dürfen')) ?> <small class="adm-muted"><?= e(__('Alt-Texte, Zuschnitte und Sammlungen in der Mediathek – Bilder der Einträge setzt jede beteiligte Website selbst')) ?></small></legend>
-          <?php foreach ($allSites as $sk => $sc): $main = $sk === $network; ?>
-          <label class="f-check"><input type="checkbox" form="pool-<?= e($pk) ?>" name="editors[]" value="<?= e($sk) ?>"<?= $main || in_array($sk, (array) $meta['editors'], true) ? ' checked' : '' ?><?= $main ? ' disabled' : '' ?>>
-            <span><?= e($siteLabel($sk)) ?><?= $main ? ' <small class="adm-muted">' . e(__('immer')) . '</small>' : '' ?></span></label>
-          <?php endforeach; ?>
-        </fieldset>
-        <div class="adm-row">
-          <button class="adm-btn adm-btn--small" type="submit" form="pool-<?= e($pk) ?>"><?= e(__('Speichern')) ?></button>
-          <span class="adm-muted pl-hint"><?= e(__('Wird mit der Tabelle verwaltet.')) ?></span>
-        </div>
-      </div>
-      <?php endforeach; ?>
-      <?php if ($emptyAuto): ?>
-      <details class="pl-card pl-card--auto">
-        <summary><?= e(__('Leere Pools geteilter Tabellen ({n})', ['n' => count($emptyAuto)])) ?></summary>
-        <p class="adm-muted"><?= e(__('Diese Pools gehören zu geteilten Datentabellen und enthalten noch keine Dateien. Sie werden mit der Tabelle verwaltet; Pools von Tabellen ohne Bild- oder Dateifelder entfernt „migrate“ automatisch.')) ?></p>
-        <ul>
-          <?php foreach ($emptyAuto as $pk => $tk): $sm = \Core\Data\Shared::meta($tk); ?>
-          <li><?= e(__('Bilder der geteilten Tabelle „{name}“', ['name' => $sm['label'] ?? $tk])) ?> <code><?= e($pk) ?></code>
-            <?= \Core\Data\Shared::hasMediaFields($tk) ? '' : '<small class="adm-muted">' . e(__('ohne Bild-/Dateifelder – wird beim nächsten „migrate“ entfernt')) . '</small>' ?></li>
-          <?php endforeach; ?>
-        </ul>
-      </details>
-      <?php endif; ?>
-      <?php foreach ($pools as $pk => $pl): $meta = \Core\MediaPools::meta($pk); $cfgSites = $viaConfig($pk); $n = \Core\MediaPools::count($pk); ?>
-      <div class="pl-card">
-        <div class="pl-head">
-          <label class="pl-name"><span class="adm-sr"><?= e(__('Name')) ?></span><input form="pool-<?= e($pk) ?>" name="label" value="<?= e($pl) ?>" maxlength="80"></label>
-          <code><?= e($pk) ?></code><span class="adm-muted"><?= e($n === 1 ? __('1 Datei') : __('{n} Dateien', ['n' => $n])) ?></span>
-        </div>
-        <fieldset class="pl-sites"><legend><?= e(__('Genutzt von')) ?></legend>
-          <?php foreach ($allSites as $sk => $sc): $st = new \Core\Site($sk, $sc); $fixed = in_array($sk, $cfgSites, true); ?>
-          <label class="f-check"><input type="checkbox" form="pool-<?= e($pk) ?>" name="sites[]" value="<?= e($sk) ?>"<?= $fixed || in_array($sk, (array) $meta['sites'], true) ? ' checked' : '' ?><?= $fixed ? ' disabled' : '' ?>>
-            <span><?= e($sk === 'default' ? __('Hauptwebsite') : $st->label()) ?><?= $sk === site()->key ? ' ' . e(__('(diese)')) : '' ?><?= $fixed ? ' <small class="adm-muted">' . e(__('per Konfiguration')) . '</small>' : '' ?></span></label>
-          <?php endforeach; ?>
-        </fieldset>
-        <fieldset class="pl-sites"><legend><?= e(__('Pflegen dürfen')) ?> <small class="adm-muted"><?= e(__('Personen mit „Geteilte Medien pflegen“ auf diesen Websites – alle anderen verwenden die Dateien nur')) ?></small></legend>
-          <?php foreach ($allSites as $sk => $sc): $st = new \Core\Site($sk, $sc); $main = $sk === $network; ?>
-          <label class="f-check"><input type="checkbox" form="pool-<?= e($pk) ?>" name="editors[]" value="<?= e($sk) ?>"<?= $main || in_array($sk, (array) $meta['editors'], true) ? ' checked' : '' ?><?= $main ? ' disabled' : '' ?>>
-            <span><?= e($sk === 'default' ? __('Hauptwebsite') : $st->label()) ?><?= $main ? ' <small class="adm-muted">' . e(__('immer')) . '</small>' : '' ?></span></label>
-          <?php endforeach; ?>
-        </fieldset>
-        <div class="adm-row">
-          <button class="adm-btn adm-btn--small" type="submit" form="pool-<?= e($pk) ?>"><?= e(__('Speichern')) ?></button>
-          <?php if ($n === 0): ?><button class="adm-btn adm-btn--small adm-btn--ghost" type="submit" form="pool-del-<?= e($pk) ?>" data-confirm="<?= e(__('Pool „{name}“ löschen?', ['name' => $pl])) ?>"><?= e(__('Löschen')) ?></button>
-          <?php else: ?><span class="adm-muted pl-hint"><?= e(__('Löschen erst, wenn der Pool leer ist.')) ?></span><?php endif; ?>
-        </div>
-      </div>
-      <?php endforeach; ?>
-      <div class="adm-inline-box pl-new">
-        <strong><?= e(__('Neuen Pool anlegen')) ?></strong>
-        <div class="adm-row">
-          <label class="pl-field"><span><?= e(__('Name')) ?></span><input form="pool-new" name="label" required maxlength="80" placeholder="<?= e(__('z. B. Markenbilder')) ?>"></label>
-          <label class="pl-field"><span><?= e(__('Kurzname')) ?></span><input form="pool-new" name="key" required pattern="[a-z][a-z0-9\-]{1,31}" maxlength="32" placeholder="marke"></label>
-        </div>
-        <fieldset class="pl-sites"><legend><?= e(__('Nutzen dürfen')) ?></legend>
-          <?php foreach ($allSites as $sk => $sc): $st = new \Core\Site($sk, $sc); ?>
-          <label class="f-check"><input type="checkbox" form="pool-new" name="sites[]" value="<?= e($sk) ?>"<?= $sk === site()->key ? ' checked' : '' ?>> <span><?= e($sk === 'default' ? __('Hauptwebsite') : $st->label()) ?></span></label>
-          <?php endforeach; ?>
-        </fieldset>
-        <label class="f-check"><input type="checkbox" form="pool-new" name="protected" value="1"> <span><?= e(__('Geschützt: Dateien nur für angemeldete Personen (z. B. Mitgliederbereich) – nicht öffentlich erreichbar, nicht in der Suche')) ?></span></label>
-        <button class="adm-btn adm-btn--primary adm-btn--small" type="submit" form="pool-new"><?= e(__('Anlegen')) ?></button>
-      </div>
-    <?php else: ?>
-      <?php $mine = \Core\MediaPools::forSite(); ?>
-      <p><?= $mine ? e(__('Diese Website nutzt:')) . ' <strong>' . e(implode(', ', $mine)) . '</strong>' : e(__('Diese Website nutzt keine geteilten Medien.')) ?></p>
-      <p class="adm-muted"><?= e(__('Pools anlegen und zuordnen kann die Hauptwebsite bzw. die Agentur.')) ?></p>
-    <?php endif; ?>
-  </section>
+  <?php if (!$netMoved) { $poolsPanel = true; include __DIR__ . '/system/_pools.php'; } ?>
 
   <?php if ($sharedTab): ?><?= \Core\Theme::capture(ROOT . '/app/Admin/views/data/_shared_system.php', ['part' => 'panel', 'user' => $user]) ?><?php endif; ?>
 
-  <?php // Adresse der Verwaltung (Core\AdminPath): eigenes Formular #adminpath unten, Felder per form-Attribut
-    $apCustom = \Core\AdminPath::custom(); $apCan = \Core\AdminPath::canManage() && !\Core\AdminPath::fromEnv();
-    $apHasPw = (string) (\Core\Mfa::row(app()->auth->user() ?? [])['password_hash'] ?? '') !== ''; ?>
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-push" aria-labelledby="tab-push" data-nosave hidden>
 <?php include __DIR__ . '/system/_push.php'; // Push-Benachrichtigungen (Core\Push): Status, Abos, Versand, Test ?>
   </section>
@@ -281,39 +170,12 @@ use Core\Fields;
 <?php $env = environment(); include __DIR__ . '/system/_environment.php'; ?>
   </section>
 
+  <?php if (!$netMoved): ?>
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-adminpath" aria-labelledby="tab-adminpath" data-nosave hidden>
-    <h2><?= e(__('Adresse der Verwaltung')) ?></h2>
-    <p class="set-page__lead"><?= e(__('Unter dieser Adresse melden Sie sich an. Standard ist /admin. Optional eine eigene Adresse: Sie hält automatische Login-Scanner fern – ersetzt aber keine starken Passwörter und keinen zweiten Faktor.')) ?></p>
-    <section class="set-group">
-      <div class="set-list">
-        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Aktuell')) ?></span><code class="set-row__sub" id="ap-current"><?= e(admin_url_abs('/admin')) ?></code></div>
-          <div class="set-row__ctl"><?= $apCustom ? '<span class="adm-badge">' . e(__('eigene Adresse')) . '</span>' : '<span class="adm-badge adm-badge--muted">' . e(__('Standard')) . '</span>' ?>
-            <button type="button" class="adm-btn adm-btn--small" data-copy="#ap-current"><?= e(__('Kopieren')) ?></button></div></div>
-        <?php if (\Core\Sites::multi()): ?><div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e(__('Gilt für')) ?></span></div><div class="set-row__ctl"><?= e(__('alle Websites dieser Installation')) ?></div></div><?php endif; ?>
-      </div>
-    </section>
-    <?php if (\Core\AdminPath::fromEnv()): ?>
-    <p class="adm-flash adm-flash--info"><?= e(__('Festgelegt über die Umgebungsvariable KLXM_ADMIN_PATH beim Hosting – dort ändern.')) ?></p>
-    <?php elseif (!$apCan): ?>
-    <p class="adm-flash adm-flash--info"><?= e(__('Die Adresse gilt für alle Websites dieser Installation – ändern kann sie nur die Netzwerk-Administration.')) ?></p>
-    <?php else: $apSuggest = \Core\AdminPath::random(); ?>
-    <section class="set-group">
-      <h3 class="set-group__title"><?= e(__('Adresse ändern')) ?></h3>
-      <div class="set-list">
-        <div class="f"><label for="ap-path"><?= e(__('Neue Adresse')) ?></label>
-          <div class="adm-prefix ap-input"><span aria-hidden="true"><?= e(preg_replace('~^https?://~', '', rtrim(admin_url_abs('/'), '/')) . '/') ?></span><input id="ap-path" name="admin_path" form="adminpath" autocomplete="off" spellcheck="false" maxlength="40" pattern="[a-z0-9][a-z0-9\-]{4,39}" value="<?= e($apCustom ? ltrim(\Core\AdminPath::prefix(), '/') : '') ?>" placeholder="<?= e($apSuggest) ?>" aria-describedby="ap-help"></div>
-          <p class="f-help ap-hint" id="ap-help"><?= e(__('5–40 Zeichen: Kleinbuchstaben, Ziffern, Bindestriche. Nicht erlaubt sind übliche Adressen wie admin, login, wp-admin, backend oder verwaltung.')) ?> <?= e(__('Vorschlag:')) ?> <code><?= e($apSuggest) ?></code></p></div>
-        <?php if ($apHasPw && !\Core\Mfa::recentAuth()): // kürzlich angemeldet/bestätigt: kein Passwort nötig ?><div class="f f--inline"><label for="ap-pw"><?= e(__('Ihr Passwort zur Bestätigung')) ?></label><input id="ap-pw" name="password" type="password" form="adminpath" autocomplete="current-password" required></div><?php endif; ?>
-      </div>
-      <p class="set-group__note"><?= e(__('Nach dem Ändern geht es sofort unter der neuen Adresse weiter. Lesezeichen und die App auf dem Homescreen bitte neu anlegen. /admin zeigt ohne Anmeldung nur noch „Seite nicht gefunden“.')) ?></p>
-      <div class="set-actions">
-        <button class="adm-btn adm-btn--primary" type="submit" form="adminpath"><?= e(__('Adresse ändern')) ?></button>
-        <?php if ($apCustom): ?><button class="adm-btn" type="submit" form="adminpath" name="reset" value="1" formnovalidate><?= e(__('Zurück zu /admin')) ?></button><?php endif; ?>
-      </div>
-    </section>
-    <?php endif; ?>
+<?php include __DIR__ . '/system/_adminpath.php'; ?>
     <?php $nhForm = 'networkhost'; $nhBack = 'system'; include __DIR__ . '/system/_network_host.php'; // Netzwerk- bzw. Verwaltungs-Domain (Core\NetworkHost) ?>
   </section>
+  <?php endif; ?>
 
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-info" aria-labelledby="tab-info" data-nosave hidden>
     <h2>Systeminfo</h2>
@@ -341,19 +203,6 @@ use Core\Fields;
       <?php foreach ($exts as $en => $em): ?><div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e($em['label']) ?></span><span class="set-row__sub"><code><?= e($en) ?></code> · <?= e($em['version'] ?: '–') ?> · <?= e($em['source']) ?></span></div>
         <div class="set-row__ctl"><?= \Core\Extensions::isActive($en) ? '<span class="adm-badge">aktiv</span>' : '<span class="adm-badge adm-badge--muted">inaktiv</span>' ?></div></div><?php endforeach; ?>
       </div>
-    </section>
-    <?php endif; ?>
-    <?php if (\Core\Sites::multi() && \Core\Network\Network::isNetworkSite()): ?>
-    <section class="set-group">
-      <h3 class="set-group__title">Websites dieser Installation</h3>
-      <div class="set-list">
-      <?php foreach (\Core\Sites::all() as $k => $c): $s = new \Core\Site($k, $c); $h = $s->hosts()[0] ?? null; ?>
-        <div class="set-row"><div class="set-row__main"><span class="set-row__label"><?= e($s->label()) ?><?= $k === site()->key ? ' <span class="adm-badge">diese</span>' : '' ?></span>
-          <span class="set-row__sub"><code><?= e($k) ?></code> · <?= e(implode(', ', $s->hosts()) ?: 'alle übrigen Domains') ?> · Kit: <?= e($k === site()->key ? app()->theme->name : ((string) ($c['theme'] ?? '') ?: '–')) ?></span></div>
-          <div class="set-row__ctl"><?php if ($h && $k !== site()->key): ?><a href="<?= e(\Core\Network\Network::siteLink($k, '/admin')) ?>" target="_blank" rel="noopener">Verwaltung ↗</a><?php endif; ?></div></div>
-      <?php endforeach; ?>
-      </div>
-      <p class="set-group__note">Jede Website hat eigene Datenbank, Medien, Benutzer und Schlüssel. Neue Website: <code>php bin/console site:create &lt;key&gt; &lt;domain&gt; [kit]</code></p>
     </section>
     <?php endif; ?>
   </section>

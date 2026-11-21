@@ -40,7 +40,7 @@ $fmtTrend = function (?array $t): string {
 </header>
 
 <div class="dash-bar">
-  <a class="dash-bar__btn" href="<?= e(url('/admin' . ($customize ? '' : '?anpassen=1'))) ?>" data-dash-customize aria-pressed="<?= $customize ? 'true' : 'false' ?>"><?= icon('sliders-horizontal') ?><span data-dash-customize-label><?= e($customize ? __('Fertig') : __('Übersicht anpassen')) ?></span></a>
+  <a class="dash-bar__btn" role="button" href="<?= e(url('/admin' . ($customize ? '' : '?anpassen=1'))) ?>" data-dash-customize aria-pressed="<?= $customize ? 'true' : 'false' ?>"><?= icon('sliders-horizontal') ?><span data-dash-customize-label><?= e($customize ? __('Fertig') : __('Übersicht anpassen')) ?></span></a>
   <form method="post" action="<?= e(url('/admin/api/dashboard/prefs')) ?>" class="dash-bar__reset" data-dash-form<?= $customize ? '' : ' hidden' ?>><?= csrf_field() ?><input type="hidden" name="do" value="reset"><button type="submit" class="dash-bar__btn"><?= icon('arrow-counter-clockwise') ?><span><?= e(__('Standard wiederherstellen')) ?></span></button></form>
   <p class="dash-bar__hint adm-muted" data-dash-hint<?= $customize ? '' : ' hidden' ?>><?= e(__('Karten mit den Pfeilen oder per Ziehen am Griff verschieben, mit dem Auge aus- und einblenden.')) ?></p>
 </div>
@@ -113,6 +113,7 @@ if ($onl): ?>
         <p class="adm-muted"><?= e(__('Für Ihre Rolle gibt es hier keine Kennzahlen.')) ?></p>
         <?php endif; ?>
       <?php elseif ($key === 'todo'): ?>
+        <?= /* Aufgaben (Core\Tasks): „Aufgabe anlegen“ (Dialog) und „Alle Aufgaben“ */ \Core\Theme::capture(ROOT . '/app/Admin/views/tasks/_bar.php', ['user' => $user, 'back' => '/admin']) ?>
         <?php if ($todos): ?>
         <ol class="dash-todo" role="list">
           <?php foreach ($todos as $n => $t): if ($n === 6): ?>
@@ -122,10 +123,11 @@ if ($onl): ?>
           <li class="dash-todo__item is-<?= e($t['tone']) ?>">
             <span class="dash-todo__ico"><?= icon($t['icon']) ?></span>
             <div class="dash-todo__main">
-              <p class="dash-todo__title"><span class="dash-todo__count"><?= (int) $t['count'] ?></span> <?= e($t['title']) ?><?php if ($t['tone'] === 'err'): ?> <span class="dash-todo__tag"><?= e(__('dringend')) ?></span><?php endif; ?></p>
+              <p class="dash-todo__title"><?php if (empty($t['task'])): ?><span class="dash-todo__count"><?= (int) $t['count'] ?></span> <?php else: ?><span class="sr-only"><?= e(__('Aufgabe')) ?>: </span><?php endif; ?><?= e($t['title']) ?><?php if ($t['tone'] === 'err' || ($t['task']['priority'] ?? '') === 'high'): ?> <span class="dash-todo__tag"><?= e(__('dringend')) ?></span><?php endif; ?></p>
               <p class="dash-todo__text"><?= e($t['text']) ?></p>
             </div>
             <a class="adm-btn adm-btn--small<?= $n === 0 ? ' adm-btn--primary' : '' ?>" href="<?= e(!empty($t['hits']) ? $t['href'] : url($t['href'])) ?>"><?= e($t['action']) ?><span class="sr-only">: <?= e($t['title']) ?></span></a>
+            <?php if (!empty($t['done'])): // Aufgabe (Core\Tasks): direkt abhaken – Kommentar auf der Seite der Aufgabe ?><form method="post" action="<?= e(url($t['done']['url'])) ?>" class="dash-todo__alt"><?= csrf_field() ?><input type="hidden" name="back" value="/admin"><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost"><?= icon('check') ?> <?= e(__('Erledigt')) ?><span class="sr-only">: <?= e($t['title']) ?></span></button></form><?php endif; ?>
             <?php if (!empty($t['dismiss'])): ?><form method="post" action="<?= e(url($t['dismiss']['url'])) ?>" class="dash-todo__alt"><?= csrf_field() ?><input type="hidden" name="text" value="<?= e($t['dismiss']['value']) ?>"><button type="submit" class="adm-btn adm-btn--small adm-btn--ghost" title="<?= e(__('{text} ist kein Platzhalter, sondern Absicht – nicht mehr melden', ['text' => $t['dismiss']['value']])) ?>"><?= e($t['dismiss']['label']) ?></button></form><?php endif; ?>
             <?php if (!empty($t['hits'])): // Platzhalter: alle Fundstellen je Seite und Block – eigene Zeile unter Text und Knöpfen, volle Breite ?>
             <details class="dash-ph" id="platzhalter"<?= ($_GET['ph'] ?? '') === '1' ? ' open' : '' ?>>

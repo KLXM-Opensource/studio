@@ -120,7 +120,8 @@ abstract class AdminController
         if ($msg !== '') {
             app()->session->flash($type, $msg);
         }
-        return Response::redirect(url($to));
+        // Seiten im Netzwerk-Bereich (Core\Network\Area): Rücksprung auf die neue Adresse
+        return Response::redirect(url(\Core\Network\Area::path($to)));
     }
 
     protected function changed(): void

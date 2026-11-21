@@ -30,7 +30,7 @@ final class DashboardController extends AdminController
         $checks = Metrics::setupChecks();
         $ext = Dashboard::extensions($user);
         return $this->view('dashboard', [
-            'css' => ['css/dashboard.css', 'css/placeholders.css'],
+            'css' => ['css/dashboard.css', 'css/placeholders.css', 'css/tasks.css'],
             'cards' => $cards,
             'figures' => [...Metrics::figures($user), ...$ext['tiles']],
             'todos' => Metrics::todos($user, $checks),

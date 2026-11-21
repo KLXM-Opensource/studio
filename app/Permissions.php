@@ -68,6 +68,11 @@ final class Permissions
                 'chat.use' => __('Chat nutzen (Direktnachrichten, Kanäle der Website)'),
                 'chat.manage' => __('Kanäle anlegen, Mitglieder festlegen, Nachrichten in Kanälen entfernen'),
             ],
+            // Aufgaben der Redaktion (Core\Tasks): abhaken darf jede zuständige Person auch ohne diese Rechte
+            __('Aufgaben') => [
+                'tasks.use' => __('Aufgaben für sich selbst anlegen'),
+                'tasks.manage' => __('Aufgaben für andere anlegen, zuweisen, bearbeiten und löschen; alle Aufgaben sehen'),
+            ],
             // Push-Benachrichtigungen (Core\Push) – zusätzlich Funktion „push“ der Website
             __('Mitteilungen') => [
                 'push.view' => __('Mitteilungen: Verlauf, Kanäle und Statistik ansehen'),
@@ -102,7 +107,7 @@ final class Permissions
             'network' => ['name' => 'Netzwerk-Administration', 'description' => 'Alle Websites und alle Daten (zentral verwaltet)', 'permissions' => ['*'], 'builtin' => 1],
             'editor' => ['name' => 'Redaktion', 'description' => 'Inhalte pflegen und veröffentlichen',
                 'permissions' => ['pages.edit', 'pages.publish', 'pages.manage', 'settings.edit', 'media.upload', 'media.delete',
-                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use', 'push.view'], 'builtin' => 1],
+                    'data.edit', 'data.publish', 'data.delete', 'requests.read', 'requests.manage', 'support.report', 'support.answer', 'ai.use', 'chat.use', 'push.view', 'tasks.use'], 'builtin' => 1],
             'author' => ['name' => 'Autorin / Autor', 'description' => 'Entwürfe schreiben, nichts veröffentlichen',
                 'permissions' => ['pages.edit', 'media.upload', 'data.edit', 'support.report'], 'builtin' => 1],
             'requests' => ['name' => 'Anfragen bearbeiten', 'description' => 'Nur Online-Anfragen',
@@ -153,10 +158,13 @@ final class Permissions
     /** Darf die Rolle das? Optional für eine bestimmte Datentabelle. */
     /**
      * Darf die angemeldete Person Einstellungen ändern, die für die ganze Installation gelten (Kits, Schriften, geteilte Medien,
-     * geplante Aufgaben)? Integratoren bzw. Netzwerk-Konten sowie die Administration (system.manage) der Netzwerk-Website.
+     * geplante Aufgaben, Sicherung, Dateien-Integrität)? Mit mehreren Websites nur Netzwerk-Konten (Rolle network) – die Seiten
+     * liegen dann im Netzwerk-Bereich (Core\Network\Area); die Administration einer Website (auch der Netzwerk-Website) verwaltet
+     * nur ihre Website. Einzelinstallation: Integratoren und die Administration (system.manage) wie bisher.
      */
     public static function installationAdmin(): bool
     {
+        if (Sites::multi()) return Network\Network::isNetworkUser();
         return Features::integrator() || (can('system.manage') && Network\Network::isNetworkSite());
     }
 

@@ -13,6 +13,7 @@
     <li>Seiten per ID, Slug oder <code>home</code>. Inhaltsänderungen werden als <b>Entwurf</b> mit Revision gespeichert; <code>"publish": true</code> bzw. <code>POST /pages/{page}/publish</code> veröffentlicht.</li>
     <li>Blöcke: <code>{id, type, data, section}</code> – Felder laut <code>GET /block-types</code>. Fehlende Pflichtfelder blockieren Entwürfe nicht, werden aber als <code>warnings</code> gemeldet.</li>
     <li>Einstellungs-Updates sind Teil-Updates (<code>PATCH</code>) und gelten sofort; Validierung wie im Admin.</li>
+    <li>Aufgaben der Redaktion (<code>/tasks</code>): im Namen des Token-Benutzers, Rechte <code>tasks.use</code>/<code>tasks.manage</code>, nie über die Prüf-Ebene (sie ändern keine Inhalte) – siehe <a href="#aufgaben">Aufgaben</a>.</li>
   </ul>
   <h3>Sprachen, Karten, Multi-Site</h3>
   <ul>

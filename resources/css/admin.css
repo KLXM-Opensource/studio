@@ -24,7 +24,9 @@
 @import "./_cron.css";   /* Grundeinstellungen → Geplante Aufgaben (Core\Cron) */
 @import "./_features.css";   /* Funktionen & Erweiterungen (Core\Features, app/Admin/views/features.php, resources/js/_features.js) */   /* Externe Quellen (Core\Sources): Zuordnung, Vorschau, Protokoll, Badge „aus Quelle“ */
 @import "./_subscribe.css";   /* Daten → Abonnieren (Core\Data\Subscriptions) */
-@import "./_toast.css";  /* Meldungen (Toast), gemeinsam mit editor.shadow.css */
+@import "./_netarea.css";   /* Netzwerk-Bereich: Kopf „NETZWERK“, Seitenleiste, Umschalter (Core\Network\Area) */
+@import "./_mailsettings.css";   /* E-Mail-Versand: nummerierte Gruppen, wirksamer Absender (system/_mail.php, network/_email.php) */
+@import "./_toast.css";   /* Meldungen (Toast), gemeinsam mit editor.shadow.css */
 /* ==========================================================================
    Admin-Oberfläche (Core). Nutzt dieselbe Schrift und Farbwelt wie das Theme.
    ========================================================================== */
@@ -3654,7 +3656,7 @@ html.adm-ui[data-theme=dark] .brand-dark{display:block!important}html.adm-ui[dat
 .net-presence form{margin:0}
 .net-presence__b{display:flex;align-items:center;gap:8px;width:100%;padding:4px 6px;border:0;border-radius:8px;background:color-mix(in srgb,#3DD9A0 14%,transparent);color:inherit;font:inherit;font-size:13px;text-align:left;cursor:pointer}
 .net-presence__b:hover,.net-presence__b:focus-visible{background:color-mix(in srgb,#3DD9A0 26%,transparent)}
-.net-presence__ava{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:#14917F;color:#fff;font:700 9.5px/1 var(--adm-font)}
+.net-presence__ava{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:#0F7566;color:#fff;font:700 9.5px/1 var(--adm-font)}
 .net-presence small{color:var(--adm-t3)}
 
 /* Grundeinstellungen → E-Mail-Konten (system/mail-accounts.php) */
@@ -3827,6 +3829,11 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rep-row{display:flex;align-items:flex-start;gap:8px;border:0;padding:0;margin:0 0 6px;background:none}
 .rep-item.rep-row.is-collapsed>.rep-fields{display:grid}   /* Zeilen klappen nie ein */
 .rep-row .rep-row__fields{flex:1;display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,2fr) auto;gap:0 8px;align-items:start}
+/* Wert bekommt den Platz (Telefonnummer, E-Mail): Beschriftung fest, Schalter so breit wie nötig */
+.rep-row .rep-row__fields:not(:has([name$="[street]"])){display:flex;flex-wrap:wrap;align-items:flex-start}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>*{flex:0 0 auto}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f-vis,.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:first-child{flex:0 1 150px;min-width:110px}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:not(.f--bool):not(:first-child){flex:1 1 220px;min-width:0}
 .rep-row .rep-row__fields>.f,.rep-row .rep-row__fields>.f-vis>.f{grid-column:auto;margin:0}
 .rep-row .rep-row__fields>.f-vis{grid-column:1/2}
 .rep-row .rep-row__fields .f>label:not(.f-check),.rep-row .rep-row__fields .f>.f-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}

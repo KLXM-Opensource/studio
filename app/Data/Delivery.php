@@ -236,6 +236,19 @@ final class Delivery
         if ($s === null && (Mailer::$testDump !== null || app()->config->get('mail_dump'))) {
             return ['level' => 'ok', 'text' => __('Lokale Testablage (mail_dump) – es wird nichts versendet.')];
         }
+        // Geprüft wird das Konto, über das die Zustellung wirklich geht: Zweck „Redaktion“ (notify) mit derselben Rangfolge wie
+        // beim Versand (Core\Mail\Accounts::route – weiteres Konto bzw. Rückfall aufs Netzwerk-Konto), nicht pauschal „Standard“
+        if ($s === null) {
+            $a = \Core\Mail\Accounts::route('notify');
+            if ($a['transport'] === 'dsn' && filter_var($a['from'], FILTER_VALIDATE_EMAIL)) {
+                return ['level' => 'ok', 'text' => __('Versand über einen Dienst (Konto „{name}“) – Übertragung per HTTPS.', ['name' => $a['label']])];
+            }
+            if (str_starts_with($a['transport'], 'ext:') && filter_var($a['from'], FILTER_VALIDATE_EMAIL)) {
+                return ['level' => 'warn', 'text' => __('Versandweg einer Erweiterung (Konto „{name}“) – ob verschlüsselt übertragen wird, hängt vom Dienst ab.', ['name' => $a['label']])];
+            }
+            $s = ['sys.mail_from' => $a['from'], 'sys.mail_transport' => $a['transport'], 'sys.mail_host' => $a['host'],
+                'sys.mail_encryption' => $a['encryption'], 'sys.mail_verify_peer' => $a['verify_peer']];
+        }
         if (!filter_var((string) $get('sys.mail_from', ''), FILTER_VALIDATE_EMAIL)) {
             return ['level' => 'error', 'text' => __('Keine gültige Absender-Adresse (Grundeinstellungen → E-Mail-Versand).')];
         }

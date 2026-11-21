@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Netzwerk-Bereich (Core\Network\Area, app/Admin/views/layout.php): dunkler Kopf „NETZWERK“, eigene Seitenleiste in Graphit
+   (statt Navy der Website) mit Bernstein-Markierung, Umschalter Netzwerk ↔ Website. Farben unabhängig vom Branding der Website.
+   ========================================================================== */
+html.adm-ui{--net-ink:#121418;--net-amber:#F0B54A;--net-amber-ink:#1B1406}
+@media (prefers-color-scheme: dark){html.adm-ui:not([data-theme=light]){--net-ink:#0B0C0F}}
+html.adm-ui[data-theme=dark]{--net-ink:#0B0C0F}
+
+/* Seitenleiste und Kopfleiste (schmal) im Netzwerk-Bereich */
+.adm--netarea{--adm-nav:var(--net-ink)}
+.adm--netarea .adm-side nav a[aria-current],.adm--netarea .adm-side nav a[aria-current=page]{box-shadow:inset 3px 0 0 var(--net-amber)}
+.adm--netarea .adm-top{background:var(--net-ink)}
+
+/* Kennzeichen „NETZWERK“ */
+.adm-netbadge{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:999px;background:var(--net-amber);color:var(--net-amber-ink);font:800 11.5px/1.3 var(--adm-font);letter-spacing:.1em}
+.adm-netbadge .ico{width:14px;height:14px}
+.adm-brand--netarea .adm-netbadge{width:max-content;max-width:100%}
+.adm-brand--netarea{display:grid;gap:6px;justify-items:start;padding:4px 8px;text-decoration:none;color:var(--adm-ink)}
+.adm-brand--netarea small{font-size:12px;color:var(--adm-t3);letter-spacing:0;text-transform:none}
+
+/* Kopf über dem Inhalt */
+.adm-netbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 20px;padding:10px 14px;border-radius:10px;background:var(--net-ink);color:#F4F6FA;font-size:13.5px;color-scheme:dark}
+.adm-netbar__t{opacity:.92}
+
+/* Umschalter Netzwerk ↔ Website: zwei gleich große Felder, das aktive hell hervorgehoben */
+.adm-areaswitch{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px;margin:0 2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.28)}
+.adm-areaswitch > form{margin:0;display:flex}
+.adm-areaswitch__net{display:flex;align-items:center;gap:7px;padding:8px 11px;border:0;border-radius:7px;background:none;color:var(--adm-ink);font:700 13px var(--adm-font);text-decoration:none;cursor:pointer;white-space:nowrap}
+.adm-areaswitch__net .ico{width:16px;height:16px}
+.adm-areaswitch__net:hover,.adm-areaswitch__net:focus-visible{background:var(--adm-hover)}
+.adm-areaswitch__net[aria-current=page]{background:var(--net-amber);color:var(--net-amber-ink)}
+.adm-areaswitch .adm-netswitch{margin:0;min-width:0}
+.adm-areaswitch .adm-netswitch summary{background:none;padding:5px 8px;border-radius:7px}
+.adm-areaswitch .adm-netswitch.is-current summary{background:rgba(255,255,255,.16)}
+.adm-areaswitch .adm-netswitch[open]{grid-column:1/-1}
+.adm-areaswitch .adm-netswitch__menu a[aria-current=page]{font-weight:700}
+.is-drill:not(.is-drill-peek):not(.is-drill-nav) .adm-side > .adm-areaswitch{display:none}
+
+/* Seitenleiste des Netzwerks: Gruppenüberschriften wie „Einrichtung“ */
+.adm-netnav ul{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:1px}
+.adm-netnav .adm-side__label{margin-top:12px}
+.adm-netnav a{display:flex;align-items:center;gap:10px}
+.adm-netnav .adm-navwarn{margin-left:auto}
+
+/* Seiten mit zwei Hüllen (Grundeinstellungen ↔ Netzwerk): ohne eigene Bereichsleiste volle Breite */
+.adm--netarea .adm-tabs-form--side.us-shell{display:block}
+.adm-areaswitch .adm-netswitch__menu :is(button,a){min-width:0}
+.adm-areaswitch .adm-netswitch__site{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.adm-areaswitch .adm-netswitch__menu small{flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

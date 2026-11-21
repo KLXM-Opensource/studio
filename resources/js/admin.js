@@ -28,6 +28,7 @@ import { initNetwork } from './_network.js';
 import { initOnline } from './_online.js';   // „online“-Herzschlag (Core\Presence::ONLINE)
 import { initReview } from './_review.js';   // Prüf-Ebene „Eingereicht“ (Core\Review)
 import { initRedirects } from './_redirects.js';   // Administration → Weiterleitungen (Core\Redirects)
+import { initTasks } from './_tasks.js';   // Aufgaben (Core\Tasks): „Aufgabe anlegen“ als Dialog
 import { initPagePreview } from './_ptpreview.js';   // Seitenbaum → Vorschau als Seitenleiste (Mobil/Desktop, hoch/quer)
 import { initEntryEdit } from './_entry_edit.js';
 import { initTargetEdit } from './_target_edit.js';   // „Bearbeiten“ an Karten/Kacheln → Seite bzw. Eintrag (Core\TargetEdit)
@@ -97,6 +98,7 @@ initOnline();
 // Eingereicht: Sammelauswahl (_review.js)
 initReview();
 initRedirects();
+initTasks();
 // Daten → Externe Quellen: Zuordnung mit Auswahl, Beispiel und Probeabruf (Core\Sources) – admin-sources.mjs
 if (d.querySelector('[data-src-form]')) lazy('admin-sources').then(m => m.initSources?.());
 initPagePreview();

@@ -96,6 +96,9 @@ final class AdminPages
             self::normalize(['id' => 'chat-settings', 'href' => '/admin/chat/einstellungen', 'label' => __('Chat'), 'icon' => 'chatcfg', 'kind' => 'settings',
                 'description' => __('Chat ein- oder ausschalten, Kanäle anlegen und verwalten'),
                 'visible' => fn() => \Core\Chat\Chat::settingsVisible()], 'core', __('Funktionen')),
+            // Aufgaben der Redaktion (Core\Tasks): jede angemeldete Person sieht ihre Aufgaben – im Hauptmenü nach den Inhalten
+            self::normalize(['id' => 'tasks', 'href' => '/admin/aufgaben', 'label' => __('Aufgaben'), 'icon' => 'list-checks', 'kind' => 'content', 'place' => 'main',
+                'description' => __('Offene Fragen und To-dos der Redaktion mit Zuständigkeit, Fälligkeit und Verlauf')], 'core', __('Funktionen')),
             // Schnittstellen: Tokens für REST-API und MCP
             self::normalize(['id' => 'api', 'href' => '/admin/api-tokens', 'label' => __('API & MCP'), 'icon' => 'api', 'kind' => 'settings', 'perm' => 'api.manage',
                 'description' => __('Zugänge (Tokens) für Automatisierungen und KI-Assistenten')], 'core', __('Funktionen')),
@@ -184,7 +187,11 @@ final class AdminPages
                 [self::HUB, __('Einstellungen der Funktionen'), 'prefs', self::hasSettings()],
                 ['/admin/users', __('Benutzer & Rollen'), 'users', can('users.manage')],
                 // Branding der Agentur (Core\Branding): Einzel-Installation Administration, Netzwerk nur Netzwerk-Administration
-                ['/admin/system/branding', __('Branding & Support'), 'branding', \Core\Branding::canEdit()],
+                // – mit mehreren Websites im Netzwerk-Bereich (Core\Network\Area), nicht in der Website-Verwaltung
+                ['/admin/system/branding', __('Branding & Support'), 'branding', \Core\Branding::canEdit() && !\Core\Network\Area::active()],
+                // Mehrere Websites: Integrität der Datenbank dieser Website als eigener Punkt (die Unterseiten-Leiste der Grundeinstellungen
+                // entfällt dort, die Dateien prüft der Netzwerk-Bereich)
+                ['/admin/system/integritaet', __('Integrität'), 'integrity', can('system.manage') && \Core\Network\Area::active()],
                 // Aktionslog (Core\Activity): wer hat wann Seiten, Datensätze, Medien angelegt, geändert, veröffentlicht, gelöscht
                 ['/admin/aktionslog', __('Aktionslog'), 'activity', \Core\Activity::canView()],
                 // Werkzeuge/Infoseiten von Funktionen und Erweiterungen (nav('admin'), v. a. kind tool – z. B. Video-Werkzeuge)

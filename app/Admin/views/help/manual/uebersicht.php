@@ -20,6 +20,8 @@
   <h3>Was ist zu tun?</h3>
   <p>Eine Liste nach Dringlichkeit – jeder Punkt mit Anzahl, kurzer Erklärung und einem Knopf, der direkt an die richtige Stelle führt: neue Anfragen, eingereichte Änderungen, Support-Antworten, ungelesene Chat-Nachrichten, offene Punkte der Einrichtung (z. B. „Impressum zugeordnet“), Entwürfe, die seit über 14 Tagen liegen, Bilder ohne Alt-Text (auch je Sprache), Videos ohne Untertitel, Seiten ohne SEO-Beschreibung, offene <a href="#platzhalter">[Platzhalter] und Redaktionsnotizen <code>[# … #]</code></a> und externe Quellen mit Fehler. Ist alles erledigt, sagt die Karte das auch: <b>Alles erledigt</b>.</p>
 
+  <p><b>Aufgaben</b> stehen ebenfalls hier – je Aufgabe ein Punkt mit Fälligkeit und Zuständigkeit, bis jemand sie abhakt („Erledigt“ direkt in der Liste). Über <b>Aufgabe anlegen</b> oben in der Karte hinterlegen Sie eine neue, <b>Alle Aufgaben</b> führt zur vollständigen Liste. Mehr im Kapitel <a href="#<?= e($anchor('aufgabenliste')) ?>">Aufgaben für die Redaktion</a>.</p>
+
   <h3 id="platzhalter">Platzhalter und Notizen finden</h3>
   <p>Texte in eckigen Klammern wie <code>[Telefonnummer ergänzen]</code> oder <code>[bitte ergänzen: Öffnungszeiten]</code> sind <b>Platzhalter</b> – aus der Vorlage eines Kits oder als Lücke in einem Vorschlag von <?= e(\Core\AI\Assist::brand()) ?>. Solange welche auf veröffentlichten Seiten stehen, meldet „Was ist zu tun?“ sie mit Anzahl und betroffenen Seiten – auch für die Redaktion, nicht nur für die Administration.</p>
   <ol class="doc-steps">

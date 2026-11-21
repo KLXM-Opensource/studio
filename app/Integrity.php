@@ -537,17 +537,50 @@ final class Integrity
         $keys = array_map(fn($x) => $x['kind'] . '|' . $x['path'], $errors);
         $new = array_values(array_filter($errors, fn($x) => !in_array($x['kind'] . '|' . $x['path'], $old, true)));
         self::write($file, $keys);
-        if (!$new || !app()->settings->get('sys.integrity_mail', true)) return 0;
-        $to = array_values(self::scanDb()['admins']);
+        $multi = Sites::multi();
+        // Dateien der Installation (mehrere Websites): immer an „Systemmeldungen an“ des Netzwerks (Core\Network\SystemMail) –
+        // der Schalter der Website gilt dort nur für ihre Datenbank
+        if (!$new || (!($multi && $scope === 'files') && !app()->settings->get('sys.integrity_mail', true))) return 0;
+        $to = self::recipients($scope);
         if (!$to) return 0;
         $host = (string) (parse_url((string) (app()->settings->get('sys.site_url') ?: (app()->config->get('url') ?? '')), PHP_URL_HOST) ?: site()->key);
         $lines = array_map(fn($x) => '- ' . $x['text'], array_slice($new, 0, 30));
-        $text = __('Die Integritätsprüfung von {host} hat Unerwartetes gefunden:', ['host' => $host]) . "\n\n" . implode("\n", $lines)
+        $net = $multi && $scope === 'files';
+        $where = $net ? __('Bitte prüfen: Verwaltung → Netzwerk → Integrität der Dateien.') : __('Bitte prüfen: Verwaltung → Grundeinstellungen → Integrität.');
+        $text = ($net ? __('Die Integritätsprüfung der Installation hat Unerwartetes in den Dateien gefunden:') : __('Die Integritätsprüfung von {host} hat Unerwartetes gefunden:', ['host' => $host])) . "\n\n" . implode("\n", $lines)
             . (count($new) > 30 ? "\n" . __('… und {n} weitere.', ['n' => count($new) - 30]) : '')
-            . "\n\n" . __('Bitte prüfen: Verwaltung → Grundeinstellungen → Integrität. War es eine gewollte Änderung (Update, neue Erweiterung, neues Konto), dort „Als bekannt übernehmen“.')
-            . "\n\n" . admin_url_abs('/admin/system/integritaet');
-        Mailer::send(__('Sicherheitshinweis: unerwartete Änderungen auf {host}', ['host' => $host]), $text, $to);
+            . "\n\n" . $where . ' ' . __('War es eine gewollte Änderung (Update, neue Erweiterung, neues Konto), dort „Als bekannt übernehmen“.')
+            . "\n\n" . ($net ? Network\Network::siteLink(Network\Network::siteKey(), '/admin/network/integritaet') : admin_url_abs('/admin/system/integritaet'));
+        $subject = $net ? __('Sicherheitshinweis: unerwartete Änderungen an den Dateien der Installation') : __('Sicherheitshinweis: unerwartete Änderungen auf {host}', ['host' => $host]);
+        if ($net) return Network\SystemMail::send($subject, $text, $to) ? count($new) : 0;
+        Mailer::send($subject, $text, $to);
         return count($new);
+    }
+
+    /**
+     * Empfänger der Hinweise. Einzelinstallation: alle Konten mit allen Rechten (wie bisher). Mehrere Websites: Dateien an
+     * „Systemmeldungen an“ (Core\Network\SystemMail); Datenbank an die Administration der Website ohne Netzwerk-Konten
+     * (Schatten-Konten der Netzwerk-Administration bekommen keine Kunden-Mails) – hat die Website keine eigene, an „Systemmeldungen an“.
+     * @return list<string>
+     */
+    public static function recipients(string $scope): array
+    {
+        if (!Sites::multi()) return array_values(self::scanDb()['admins']);
+        if ($scope === 'files') return Network\SystemMail::recipients(array_values(self::scanDb()['admins']));
+        $own = array_values(array_map(fn($u) => (string) $u['email'], array_filter(self::adminRows(), fn($u) => ($u['role'] ?? '') !== 'network' && empty($u['network_uid']))));
+        return $own ?: Network\SystemMail::recipients();
+    }
+
+    /** Aktive Konten mit allen Rechten dieser Website (mit Rolle und Netzwerk-Kennung) @return list<array> */
+    private static function adminRows(): array
+    {
+        $adminRoles = array_keys(array_filter(Permissions::roles(), fn($r) => in_array('*', (array) $r['permissions'], true)));
+        $adminRoles[] = 'network';
+        try {
+            return app()->db->fetchAll('SELECT id, email, role, network_uid FROM users WHERE disabled = 0 AND role IN (' . implode(',', array_fill(0, count($adminRoles), '?')) . ')', $adminRoles);
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /** Selbsttest: Vergleich, Sperrzonen, Signatur – in einem Spielordner, ohne die echte Installation zu berühren */

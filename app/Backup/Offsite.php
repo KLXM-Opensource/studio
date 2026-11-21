@@ -144,10 +144,12 @@ final class Offsite
                     $state[$id] = ['ok' => time(), 'at' => time(), 'error' => null, 'uploaded' => $up, 'bytes' => $bytes,
                         'remote' => count(array_filter($remote, fn($f) => str_ends_with($f, Vault::EXT))) - count($deleted)];
                     $report[$id] = ['ok' => true, 'uploaded' => $up, 'error' => null];
+                    self::notice($id, null, (string) $t['label']);
                 } catch (\Throwable $e) {
                     $state[$id] = ['at' => time(), 'error' => $e->getMessage()] + ($state[$id] ?? []);
                     $report[$id] = ['ok' => false, 'uploaded' => $up, 'error' => $e->getMessage()];
                     $log("  {$t['label']}: FEHLER – " . $e->getMessage());
+                    self::notice($id, $e->getMessage(), (string) $t['label']);
                 }
             }
         } finally {
@@ -235,5 +237,22 @@ final class Offsite
         $plain = strlen($raw) > SODIUM_CRYPTO_SECRETBOX_NONCEBYTES
             ? sodium_crypto_secretbox_open(substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES), substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES), self::boxKey()) : false;
         return $plain === false ? '' : $plain;
+    }
+
+    /**
+     * Systemmeldung (Core\Network\SystemMail, „Systemmeldungen an“): einmal je Fehlerserie eines Ziels, nach dem nächsten
+     * erfolgreichen Lauf wieder scharf. Fehler beim Melden halten die Sicherung nicht auf.
+     */
+    private static function notice(string $id, ?string $error, string $label): void
+    {
+        try {
+            if ($error === null) { \Core\Network\SystemMail::clear('backup:' . $id); return; }
+            \Core\Network\SystemMail::once('backup:' . $id, __('Sicherung außer Haus fehlgeschlagen: {label}', ['label' => $label]),
+                __('Die Sicherung außer Haus an „{label}“ ist fehlgeschlagen:', ['label' => $label]) . "\n\n" . mb_strimwidth($error, 0, 500, '…')
+                . "\n\n" . __('Bitte prüfen: Verwaltung → {where} → Sicherung außer Haus. Nach der nächsten erfolgreichen Sicherung kommt bei einem neuen Fehler wieder eine Meldung.', ['where' => \Core\Sites::multi() ? __('Netzwerk') : __('Grundeinstellungen')]),
+                \Core\Integrity::recipients('files'));
+        } catch (\Throwable $e) {
+            error_log('[offsite] Systemmeldung: ' . $e->getMessage());
+        }
     }
 }

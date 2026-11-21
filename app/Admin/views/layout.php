@@ -5,8 +5,12 @@ $dataOk = $user && (can('data.schema') || array_filter(\Core\Data\Tables::conten
 $inboxes = $user && can('requests.read') ? \Core\Data\Inbox::readable() : [];
 // Netzwerk-Administration (Core\Network): „Netzwerk“ auf der Netzwerk-Website, „Website wechseln“ auf allen anderen
 $netUser = $user && \Core\Network\Network::isNetworkUser($user);
+// Netzwerk-Bereich (Core\Network\Area, mehrere Websites): eigener Kopf „NETZWERK“, eigene Seitenleiste; der Weg dorthin ist der
+// Umschalter Netzwerk ↔ Website oben in der Seitenleiste. Einzelinstallation: „Netzwerk“ bleibt Menüpunkt wie bisher.
+$netMulti = $netUser && \Core\Network\Area::active();
+$netArea = $user && \Core\Network\Area::here();
 $nav = array_values(array_filter([
-    ['/admin/network', __('Netzwerk'), 'network', $netUser && \Core\Network\Network::isNetworkSite()],
+    ['/admin/network', __('Netzwerk'), 'network', $netUser && !$netMulti && \Core\Network\Network::isNetworkSite()],
     ['/admin', __('Übersicht'), 'dashboard', true],
     ['/admin/pages', __('Seiten'), 'pages', $user && can('pages.edit')],
     // Entwürfe (Core\Review\Drafts): offene Seiten- und Eintrags-Entwürfe prüfen, veröffentlichen, verwerfen
@@ -40,6 +44,7 @@ if ($user && \Core\Extensions::filters('admin.nav')) {
         $adminGroups = array_values((array) ($nf['groups'] ?? $adminGroups));
     }
 }
+if ($netArea) { $nav = []; $adminGroups = []; }   // Netzwerk-Bereich: nur die Seitenleiste des Netzwerks (unten)
 $adminNav = array_merge([], ...array_column($adminGroups, 'items'));
 $section = explode('/', $view)[0];
 // Seite einer Sammelseite (Einstellungen/Statistiken, Core\AdminPages)? Dann ist deren Menüpunkt der aktuelle
@@ -118,7 +123,7 @@ if ($user && ($req = app()->request)) {
 <?= $user ? \Core\Extensions::adminHead((string) ($view ?? '')) /* CSS/JS aktiver Erweiterungen für diese Ansicht (Extension::adminAssets) – nach admin.js */ : '' ?>
 </head>
 <?php $drill = $user && !empty($drill) ? $drill : ''; ?>
-<body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $drill ? ' is-drill' : '' ?>" data-max-vars="<?= (int) ini_get('max_input_vars') ?>"<?= $user && \Core\Http\Controllers\Admin\PresenceController::on() ? ' data-online-endpoint="' . e(url('/admin/api/online')) . '"' : '' ?>>
+<body class="adm<?= $user ? '' : ' adm--bare ' . \Core\AuthScreen::bodyClass() ?><?= $netArea ? ' adm--netarea' : '' ?><?= $drill ? ' is-drill' : '' ?>" data-max-vars="<?= (int) ini_get('max_input_vars') ?>"<?= $user && \Core\Http\Controllers\Admin\PresenceController::on() ? ' data-online-endpoint="' . e(url('/admin/api/online')) . '"' : '' ?>>
 <?= $user ? '' : \Core\AuthScreen::sky() ?>
 <?php if (environment() === 'production' && ($mr = \Core\Mailer::testRedirect())): // Test-Umleitung aktiv – nicht vergessen ?><div class="adm-env adm-env--mail" role="note"><?= e(__('E-MAIL-TEST')) ?> · <?= e(__('Alle E-Mails gehen an {to} statt an die eigentlichen Empfänger.', ['to' => implode(', ', $mr)])) ?> <?php if (can('system.manage')): ?><a href="<?= e(url('/admin/system#mail')) ?>"><?= e(__('Ausschalten')) ?></a><?php endif; ?></div><?php endif; ?>
 <?php if (environment() !== 'production'): ?><div class="adm-env adm-env--<?= e(environment()) ?>" role="note"><?= e(strtoupper(environment())) ?> · <?= e(__('Testumgebung – Änderungen hier gehen nicht auf die Live-Website. E-Mails werden umgeleitet, Suchmaschinen ausgesperrt.')) ?></div><?php endif; ?>
@@ -127,19 +132,22 @@ if ($user && ($req = app()->request)) {
   $areaTitle = (string) ($drillTitle ?? '');
   if ($areaTitle === '') foreach ($adminNav as [$h, $l, $k]) if ($isCur($k, $h)) { $areaTitle = (string) $l; break; }
   if ($areaTitle === '') foreach ($nav as [, $l, $k]) if ($isCur($k)) { $areaTitle = (string) $l; break; }
+  if ($areaTitle === '' && $netArea) $areaTitle = (string) ($title ?? __('Netzwerk'));
   if ($areaTitle === '') $areaTitle = match ($section) { 'help' => __('Handbuch & Hilfe'), 'account' => __('Konto'), 'role' => __('Benutzer & Rollen'), default => (string) ($title ?? __('Verwaltung')) };
   // „online“ melden (Core\Presence::ONLINE): Ort = Titel des Bereichs, Pfad der Anfrage
   if ($user) \Core\Http\Controllers\Admin\PresenceController::seen($areaTitle, (string) (app()->request?->path ?? '/admin'));
 ?>
 <header class="adm-top">
   <a class="adm-top__menu" href="#adm-side" aria-label="<?= e(__('Menü öffnen')) ?>" data-drawer-open><?= icon('list') ?></a>
-  <a class="adm-top__title" href="<?= e(url('/admin')) ?>"><small><?= e(admin_brand()[0]) ?></small><span><?= e($areaTitle) ?></span></a>
+  <a class="adm-top__title" href="<?= e(url($netArea ? '/admin/network' : '/admin')) ?>"><small><?= e($netArea ? __('NETZWERK') : admin_brand()[0]) ?></small><span><?= e($areaTitle) ?></span></a>
   <button type="button" class="adm-top__search" data-spotlight aria-label="<?= e(__('Suchen')) ?>"><?= icon('magnifying-glass') ?></button>
 </header>
 <aside class="adm-side" id="adm-side" aria-label="<?= e(__('Menü')) ?>">
   <a class="adm-side__close" href="#main" aria-label="<?= e(__('Menü schließen')) ?>" data-drawer-close><?= icon('x') ?></a>
   <div class="adm-brand-row">
-  <?php if ($netUser): // Netzwerk-Konten: der Website-Name steht im Umschalter darunter – hier kein doppelter Titel ?>
+  <?php if ($netArea): // Netzwerk-Bereich: Kennzeichen statt Marke der Website ?>
+  <a class="adm-brand adm-brand--netarea" href="<?= e(url('/admin/network')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><span class="adm-netbadge"><?= icon('network') ?><?= e(__('NETZWERK')) ?></span><small><?= e(__('{n} Websites · ganze Installation', ['n' => count(\Core\Sites::all())])) ?></small></a>
+  <?php elseif ($netUser): // Netzwerk-Konten: der Website-Name steht im Umschalter darunter – hier kein doppelter Titel ?>
   <a class="adm-brand adm-brand--net" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><small><?= e(__('Verwaltung')) ?></small></a>
   <?php else: ?>
   <a class="adm-brand" href="<?= e(url('/admin')) ?>" data-search-endpoint="<?= e(url('/admin/api/search')) ?>"><?php [$b1, $b2] = admin_brand(); ?><span><?= e($b1) ?><i>.</i></span><small><?= e(trim($b2 . ' · ' . __('Verwaltung'), ' ·')) ?></small></a>
@@ -154,7 +162,30 @@ if ($user && ($req = app()->request)) {
     <?php // Bereiche mit eigenem Menü (Drill-down) blenden Favoriten/Netzwerk aus – dieser Knopf holt sie zurück (_drill.js) ?>
     <button type="button" class="adm-find__ai adm-drill-peek" data-drill-peek hidden aria-expanded="false" aria-controls="adm-fav" title="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>" aria-label="<?= e($netUser ? __('Favoriten & Website wechseln') : __('Favoriten')) ?>"><?= icon('star') ?></button>
   </div>
-  <?php if ($netUser): // Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
+  <?php if ($netMulti): // Umschalter Netzwerk ↔ Website (Core\Network\Area): zwei Felder, das aktive hervorgehoben; Website wechseln per Einmal-Anmeldung ?>
+  <?php $onNetSite = \Core\Network\Network::isNetworkSite(); ?>
+  <div class="adm-areaswitch" role="group" aria-label="<?= e(__('Bereich wechseln')) ?>">
+    <?php if ($onNetSite): ?>
+    <a class="adm-areaswitch__net" href="<?= e(url('/admin/network')) ?>"<?= $netArea ? ' aria-current="page"' : '' ?>><?= icon('network') ?><span><?= e(__('Netzwerk')) ?></span></a>
+    <?php else: ?>
+    <form method="post" action="<?= e(url('/admin/network/open')) ?>"><?= csrf_field() ?><button type="submit" name="site" value="<?= e(\Core\Network\Network::siteKey()) ?>" class="adm-areaswitch__net"><?= icon('network') ?><span><?= e(__('Netzwerk')) ?></span></button></form>
+    <?php endif; ?>
+    <details class="adm-netswitch adm-areaswitch__site<?= $netArea ? '' : ' is-current' ?>">
+      <summary><span class="adm-netswitch__eyebrow"><?= e(__('Website')) ?></span><span class="adm-netswitch__cur"><?= e($netArea ? __('Website wählen') : site()->label()) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('Website wechseln')) ?></span></summary>
+      <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netswitch__menu">
+        <?= csrf_field() ?>
+        <p class="adm-netswitch__h"><?= e(__('Verwaltung einer Website öffnen')) ?></p>
+        <?php foreach (\Core\Sites::all() as $sk => $sc): $st = new \Core\Site($sk, $sc); $sIco = \Core\Network\SiteIcon::for($sk, \Core\Network\Stats::cached($sk)); $sLabel = $sk === 'default' && empty($sc['label']) ? __('Hauptwebsite') : $st->label(); ?>
+        <?php if ($sk === site()->key): // diese Website: einfacher Link (keine Einmal-Anmeldung nötig) ?>
+        <a href="<?= e(url('/admin')) ?>"<?= $netArea ? '' : ' aria-current="page"' ?>><span class="adm-netswitch__site"><img class="adm-netswitch__ico" src="<?= e($sIco['src']) ?>" width="16" height="16" alt="" loading="lazy" decoding="async"><?= e($sLabel) ?></span><small><?= e($netArea ? __('diese') : __('geöffnet')) ?></small></a>
+        <?php else: ?>
+        <button type="submit" name="site" value="<?= e($sk) ?>"><span class="adm-netswitch__site"><img class="adm-netswitch__ico" src="<?= e($sIco['src']) ?>" width="16" height="16" alt="" loading="lazy" decoding="async"><?= e($sLabel) ?></span><small><?= e($sk) ?></small></button>
+        <?php endif; ?>
+        <?php endforeach; ?>
+      </form>
+    </details>
+  </div>
+  <?php elseif ($netUser): // Einzelinstallation: Website wechseln (immer für Netzwerk-Konten, auch auf der Netzwerk-Website): Einmal-Anmeldung per Netzwerk-Token (ohne JavaScript) ?>
   <details class="adm-netswitch">
     <summary><?php // Für Netzwerk-Konten ersetzt der Umschalter den Titel der Marke ?><span class="adm-netswitch__eyebrow"><?= e(__('Netzwerk')) ?></span><span class="adm-netswitch__cur"><?= e(site()->label()) ?></span><span class="adm-netswitch__chev" aria-hidden="true"></span><span class="adm-sr"> – <?= e(__('Website wechseln')) ?></span></summary>
     <form method="post" action="<?= e(url('/admin/network/open')) ?>" class="adm-netswitch__menu">
@@ -203,6 +234,18 @@ if ($user && ($req = app()->request)) {
     <?= $drill ?>
   </div>
   <?php endif; ?>
+  <?php if ($netArea): $netCur = \Core\Network\Area::current($reqPath); // Seitenleiste des Netzwerk-Bereichs (Core\Network\Area::nav) ?>
+  <nav id="adm-mainnav" class="adm-netnav" aria-label="<?= e(__('Netzwerk')) ?>">
+    <?php foreach (\Core\Network\Area::nav() as $gi => $g): if (!$g['items']) continue; ?>
+    <?php if ($g['label'] !== ''): ?><p class="adm-side__label" id="adm-netgrp-<?= (int) $gi ?>"><?= e($g['label']) ?></p><?php endif; ?>
+    <ul<?= $g['label'] !== '' ? ' aria-labelledby="adm-netgrp-' . (int) $gi . '"' : '' ?>>
+      <?php foreach ($g['items'] as [$nk, $nh, $nl, $ni, $nw]): $cur = $reqPath === '/admin/network' ? $nk === '' : $nk === $netCur; ?>
+      <li><a href="<?= e(url($nh)) ?>"<?= $cur ? ' aria-current="page"' : '' ?><?= $nw !== '' ? ' title="' . e($nw) . '"' : '' ?>><?= icon($ni, ['class' => 'adm-nav__ico']) ?><span><?= e($nl) ?></span><?php if ($nw !== ''): ?><span class="adm-navwarn" aria-hidden="true"></span><span class="sr-only"> – <?= e($nw) ?></span><?php endif; ?></a></li>
+      <?php endforeach; ?>
+    </ul>
+    <?php endforeach; ?>
+  </nav>
+  <?php else: ?>
   <nav id="adm-mainnav" aria-label="<?= e(__('Verwaltung')) ?>">
     <ul>
       <?php // Website ansehen: erster Menüpunkt, öffnet einen neuen Tab (Pfeil rechts) ?>
@@ -236,6 +279,7 @@ if ($user && ($req = app()->request)) {
     <noscript><style>.adm-side .adm-navgrp__list[hidden]{display:grid}.adm-navgrp__chev{display:none}</style></noscript>
     <?php endif; ?>
   </nav>
+  <?php endif; ?>
   <div class="adm-side__foot">
     <?php // Hilfe: Handbuch, Assistent, Problem melden – zusammengeklappt; offen auf Hilfeseiten, Zustand merkt sich der Browser (admin.js) ?>
     <details class="adm-helpbox" data-helpbox<?= in_array($section, ['help', 'support'], true) ? ' open' : '' ?>>
@@ -267,6 +311,9 @@ if ($user && ($req = app()->request)) {
 </aside>
 <?php endif; ?>
 <main class="adm-main" id="main">
+  <?php if ($netArea): // Kopf des Netzwerk-Bereichs: unverwechselbar, unabhängig vom Branding der Netzwerk-Website ?>
+  <div class="adm-netbar" role="note"><span class="adm-netbadge"><?= icon('network') ?><?= e(__('NETZWERK')) ?></span><span class="adm-netbar__t"><?= e(__('Einstellungen für die ganze Installation – gelten für alle {n} Websites.', ['n' => count(\Core\Sites::all())])) ?></span></div>
+  <?php endif; ?>
   <?php if (!empty(($impU = app()->auth->user())['_imp'])): $imp = $impU['_imp']; // Ansicht als Rolle/Person (Core\Impersonation) ?>
   <div class="adm-imp" role="status">
     <span class="adm-imp__ico" aria-hidden="true"><?= icon('user-circle') ?></span>
