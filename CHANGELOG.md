@@ -10,6 +10,10 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Mediathek: Hintergrund der Vorschau umschaltbar
+- Knopf in der Werkzeugleiste: Standard, hell, dunkel, kariert (je Browser gemerkt) – helle Logos und transparente PNG/SVG sind auf hellem Grund
+  sonst unsichtbar.
+
 ### Grafik-Editor als eigenes Paket (`klxm/studio-grafik`), neue Andockstellen für Erweiterungen
 - **Der Grafik-Editor wird nicht mehr mit dem Core ausgeliefert.** Er ist jetzt die Erweiterung „grafik“ (Composer `klxm/studio-grafik`, Typ
   `klxm-studio-extension`, MIT, Namensraum `Klxm\Grafik`) mit eigenem Repository, eigenem Handbuch-/Entwicklerhandbuch-Kapitel, eigenen

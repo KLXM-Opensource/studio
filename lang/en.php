@@ -5,6 +5,8 @@
  * Find untranslated texts: php bin/console i18n:missing en
  */
 return [
+    'Hintergrund der Vorschau: {a}' => 'Preview background: {a}',
+    'kariert' => 'checkered',
     '_name' => 'English',
 
     // Netzwerk-Übersicht (app/Admin/views/network/index.php)

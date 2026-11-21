@@ -561,6 +561,8 @@ const vthumbHtml = (m, cls = '') => `<span class="fx-vthumb${m.kind === 'pdf' ? 
 
 // ============================================================ Finder
 // Symbole aus dem Sprite (Phosphor duotone, Core\Icons)
+const THUMB_BGS = ['auto', 'light', 'dark', 'checker'];
+const THUMB_BG_LABEL = () => ({ auto: t('Standard'), light: t('hell'), dark: t('dunkel'), checker: t('kariert') });
 const SVG = {
   grid: ico('squares-four'), masonry: ico('layout'), list: ico('list-bullets'), all: ico('folder'), image: ico('image'), pdf: ico('file-pdf'),
   video: ico('video-camera'), warn: ico('warning'), col: ico('folders'), search: ico('magnifying-glass'),
@@ -583,7 +585,7 @@ class Finder {
     if (pick) this.opts = { ...opts, onPick: async m => pick(this.pool ? (await api.use(m.id)).item : m) };
     this.src = { type: opts.kind === 'image' || opts.kind === 'visual' ? 'kind' : 'all', value: opts.kind === 'image' || opts.kind === 'visual' ? opts.kind : '' };
     this.q = ''; this.items = []; this.sel = new Set(); this.anchor = null; this.active = null; this.meta = null;
-    this.view = store.get('view', 'grid'); if (!['grid', 'masonry', 'list'].includes(this.view)) this.view = 'grid'; this.size = store.get('size', 132); this.sort = store.get('sort', { key: 'created_at', dir: -1 });
+    this.view = store.get('view', 'grid'); if (!['grid', 'masonry', 'list'].includes(this.view)) this.view = 'grid'; this.size = store.get('size', 132); this.thumbBg = store.get('thumbbg', 'auto'); if (!THUMB_BGS.includes(this.thumbBg)) this.thumbBg = 'auto'; this.sort = store.get('sort', { key: 'created_at', dir: -1 });
     // Zuletzt geöffneter Ort (Pool, Sammlung, Tag, Art) – gilt für Mediathek und Auswahl-Dialoge; nicht bei Sprüngen (#m12, #check=…)
     const restored = !/^#(m\d+|c\d+|check=)/.test(location.hash) && this.restoreLast();
     this.build();
@@ -624,6 +626,7 @@ class Finder {
             <button type="button" data-view="masonry" aria-label="Mauerwerk (Bilder im eigenen Seitenverhältnis)" title="Mauerwerk">${SVG.masonry}</button>
             <button type="button" data-view="list" aria-label="Liste" title="Liste">${SVG.list}</button>
           </div>
+          <button type="button" class="fx-tbtn" data-thumbbg>${ico('circle-half')}</button>
           <input type="range" class="fx-size" min="88" max="220" step="4" value="${this.size}" aria-label="Symbolgröße" data-size>
           <label class="fx-sort" data-sortwrap><span class="adm-sr">Sortieren</span><select data-sortsel aria-label="Sortieren">
             <option value="created_at:-1">Neueste zuerst</option><option value="created_at:1">Älteste zuerst</option>
@@ -736,6 +739,8 @@ class Finder {
     }
     $$('[data-view]', r).forEach(b => b.addEventListener('click', () => { this.view = b.dataset.view; store.set('view', this.view); this.applyView(); this.render(); }));
     $('[data-size]', r).addEventListener('input', e => { this.size = +e.target.value; store.set('size', this.size); this.applyView(); });
+    // Hintergrund der Vorschaubilder (helle Logos auf hellem Grund unsichtbar): Standard → hell → dunkel → kariert, je Browser gemerkt
+    $('[data-thumbbg]', r).addEventListener('click', () => { const i = THUMB_BGS.indexOf(this.thumbBg); this.thumbBg = THUMB_BGS[(i + 1) % THUMB_BGS.length]; store.set('thumbbg', this.thumbBg); this.applyView(); });
     // Sortieren in Symbolen und Mauerwerk (Liste: Spaltenköpfe) – dieselbe Sortierung, gemerkt je Browser
     $('[data-sortsel]', r).addEventListener('change', e => {
       const [key, dir] = e.target.value.split(':');
@@ -839,6 +844,9 @@ class Finder {
 
   applyView() {
     this.root.dataset.view = this.view;
+    this.root.dataset.thumbBg = this.thumbBg;
+    const bgb = $('[data-thumbbg]', this.root);
+    if (bgb) { const l = t('Hintergrund der Vorschau: {a}', { a: THUMB_BG_LABEL()[this.thumbBg] }); bgb.setAttribute('aria-label', l); bgb.title = l; bgb.setAttribute('aria-pressed', String(this.thumbBg !== 'auto')); }
     this.root.style.setProperty('--fx-size', this.size + 'px');
     $$('[data-view]', this.root).forEach(b => b.setAttribute('aria-pressed', b.dataset.view === this.view));
     $('[data-size]', this.root).hidden = this.view === 'list';

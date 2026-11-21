@@ -394,6 +394,10 @@ a.adm-stat:hover{box-shadow:0 0 0 2px var(--adm-a);color:inherit}
 .fx-thumb{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:6px;padding:6px}
 .fx-thumb{container-type:inline-size}   /* quadratisch: Höhe = Breite (cqw) – Hochkant-Bilder werden eingepasst, die Kachel wächst nicht */
 .fx-thumb img{max-width:100%;max-height:calc(100cqw - 12px);border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);background:var(--adm-surface)}
+/* Hintergrund der Vorschaubilder umschaltbar (helle Logos, transparente PNG/SVG) – Werkzeugleiste, je Browser gemerkt */
+[data-thumb-bg=light] .fx-thumb img{background:#FFFFFF}
+[data-thumb-bg=dark] .fx-thumb img{background:#1F2430}
+[data-thumb-bg=checker] .fx-thumb img{background:#FFFFFF repeating-conic-gradient(#D5D9E0 0 25%,#FFFFFF 0 50%) 0 0/16px 16px}
 .fx-item[aria-selected=true] .fx-thumb{background:var(--adm-press)}
 .fx-name{max-width:100%;text-align:center;line-height:1.3}
 .fx-name span{display:inline;padding:1px 6px;border-radius:5px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
