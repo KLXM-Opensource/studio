@@ -503,7 +503,7 @@ final class MediaController extends AdminController
 
     /**
      * Vollständig übertragener Upload in Stücken (POST /admin/media/chunk) für andere Abnehmer derselben Mechanik – z. B. die
-     * Bildkompositionen des Grafik-Editors (Core\Graphics\Compose): Pfad der Datei oder null (unvollständig, beschädigt, fremd).
+     * Bildkompositionen eines Grafik-Editors (Erweiterung): Pfad der Datei oder null (unvollständig, beschädigt, fremd).
      * Aufräumen übernimmt der Abnehmer (forgetUpload).
      */
     public static function completedUpload(array $user, string $uploadId): ?string

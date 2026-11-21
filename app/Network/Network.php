@@ -138,7 +138,7 @@ final class Network
         // Protokoll: wer hat welche Website geöffnet, Wartung, Sicherungen, Konten
         $db->pdo->exec("CREATE TABLE IF NOT EXISTS network_log (id $pk, created_at VARCHAR(25) NOT NULL, user_email VARCHAR(191) NULL,
             site VARCHAR(40) NULL, action VARCHAR(40) NOT NULL, detail VARCHAR(191) NULL, ip_hash VARCHAR(32) NULL)$tail");
-        // Grafik-Editor: Bausteine für alle Websites der Installation (Core\Graphics\Shared)
+        // Grafik-Editor (Erweiterung): Bausteine und Vorlagen für alle Websites der Installation – Schema im Core (Core\Graphics\Store)
         $db->pdo->exec("CREATE TABLE IF NOT EXISTS graphic_shared (id $pk, name VARCHAR(191) NOT NULL, folder VARCHAR(191) NULL, svg " . ($my ? 'MEDIUMTEXT' : 'TEXT') . ",
             width INT NULL, height INT NULL, site VARCHAR(40) NULL, user_email VARCHAR(191) NULL, created_at VARCHAR(25), updated_at VARCHAR(25))$tail");
         // Persona Bild: Vorlagen für alle Websites liegen in derselben Tabelle (kind = template; leer = Baustein)

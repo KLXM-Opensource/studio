@@ -716,7 +716,7 @@ final class Media
             return [null, 'Datei ist zu groß (max. ' . (int) ceil($maxBytes / 1048576) . ' MB).'];
         }
         $svg = Svg::detect($path, $mime, $originalName);
-        // Grafiken aus dem Grafik-Editor des Kerns (Core\Graphics, $opt['graphic']) gelten nicht als fremder Upload – bereinigt
+        // Grafiken aus einem Grafik-Editor (Erweiterung, $opt['graphic']) gelten nicht als fremder Upload – bereinigt
         // wird trotzdem; ids bleiben (Ebenen, spätere Animationen)
         if ($svg && empty($opt['graphic']) && !Features::on('media.svg', false)) {
             return [null, __('SVG-Uploads sind auf dieser Website ausgeschaltet (Funktionen & Erweiterungen → „SVG-Grafiken hochladen“).')];
@@ -1881,9 +1881,11 @@ final class Media
                 $out[] = ['label' => $theme->settingsTitle() . ' → ' . $f['label'], 'url' => url('/admin/settings')];
             }
         }
-        // Bilder aus dem Grafik-Editor (Persona Bild), in denen das Foto steckt
-        foreach (Graphics\Compose::usagesOf($id) as $u) $out[] = $u;
-        return $out;
+        // Bilder aus dem Grafik-Editor (Persona Bild), in denen das Foto steckt – auch ohne das Paket (Core\Graphics\Store);
+        // die Adresse zum Bearbeiten ergänzt der Editor über den Filter „media.usages“
+        foreach (Graphics\Store::usagesOf($id) as $u) $out[] = $u;
+        $f = Extensions::filter('media.usages', $out, ['media' => $id]);
+        return is_array($f) ? array_values(array_filter($f, fn($u) => is_array($u) && is_string($u['label'] ?? null))) : $out;
     }
 
     /**
@@ -1940,7 +1942,7 @@ final class Media
             elseif (($f['type'] ?? '') === 'repeater' && is_array($v)) self::fieldsCollect([$f], [$f['name'] => $v], $ids);
         }
         // Fotos in Bildern des Grafik-Editors (Persona Bild)
-        $ids += Graphics\Compose::usedIds();
+        $ids += Graphics\Store::usedIds();
         return $memo = $ids;
     }
 
@@ -2158,9 +2160,6 @@ final class Media
                 ? array_values(array_filter(array_keys(Lang::all()), fn($l) => $l !== Lang::default() && empty(self::translations($m)[$l]['alt']))) : [],
             // SVG (Core\Svg): keine Größen, kein Fokus/Zuschnitt; Ergebnis der Bereinigung für die Upload-Meldung
             'svg' => $m['mime'] === Svg::MIME,
-            // Bild aus dem Grafik-Editor (Persona Bild): „Bearbeiten“ öffnet die Arbeitsfassung (Core\Graphics\Compose)
-            'compose' => $isImg && self::$pool === null ? Graphics\Compose::forMedia((int) $m['id']) : null,
-            'compose_tpl' => $isImg && self::$pool === null && ($cg = Graphics\Compose::forMedia((int) $m['id'])) ? Graphics\Compose::templateOf($cg) : null,
             'note' => $m['mime'] === Svg::MIME && ($st = json_decode((string) $m['variants_json'], true)['svg'] ?? null) ? Svg::note($st) : null,
             'crops' => $isImg ? array_map(fn($c) => [
                 'x' => $c['x'], 'y' => $c['y'], 'w' => $c['w'], 'h' => $c['h'], 'width' => $c['W'], 'height' => $c['H'],
