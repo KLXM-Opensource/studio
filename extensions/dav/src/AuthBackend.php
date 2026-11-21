@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Klxm\Dav;
 
-/** HTTP Basic: Benutzername = E-Mail des Kontos, Passwort = persönliches App-Passwort (nicht das Login-Passwort). */
+/**
+ * HTTP Basic: Benutzername = E-Mail des Kontos, Passwort = persönliches App-Passwort (nicht das Login-Passwort).
+ * Abo-Token des Core (abo-…) als Passwort: Benutzername beliebig, nur lesen, nur die gebundene Kontakte-Tabelle.
+ */
 final class AuthBackend extends \Sabre\DAV\Auth\Backend\AbstractBasic
 {
     public function __construct()

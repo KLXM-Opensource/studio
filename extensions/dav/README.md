@@ -44,6 +44,11 @@ Voraussetzungen: Funktion `data` (und für Kalender `calendar`) an, HTTPS in Pro
 
 Pfade: `/dav/principals/{e-mail}/`, `/dav/calendars/{e-mail}/{tabelle}/`, `/dav/addressbooks/{e-mail}/{tabelle}/`.
 
+**Abo-Token statt App-Passwort (nur lesen):** Mit der Core-Funktion „Kalender und Kontakte per App abonnieren“ (`subscriptions`)
+legt die Redaktion unter Daten → Kontakte-Tabelle → Abonnieren benannte Abo-Tokens an. Als Passwort (Benutzername beliebig, z. B. `abo`)
+öffnen sie genau diese Kontakte-Tabelle als Adressbuch – nur lesen, Umfang „nur öffentlich“ oder „intern“. Prüfung, Ablauf,
+Rate-Limit und Protokoll liegen im Core (`Core\Data\Subscriptions::verify()`); Pfade `/dav/addressbooks/abo-{id}/{tabelle}/`.
+
 ## Abbildung
 
 ### Adressbücher (Tabellenart „contacts“)
@@ -163,6 +168,7 @@ MIT wie KLXM Studio – siehe `LICENSE`. Die verwendeten sabre/*-Pakete stehen u
 |---|---|
 | Slot `account` (Recht `dav.use`) | Abschnitt im Konto: Anzahl eigener App-Passwörter, zuletzt benutzt, Link zur Seite `/admin/dav` |
 | `adminPage` Art `settings` (Recht `data.schema`) | Karte auf Administration → Einstellungen → Einstellungen der Funktionen: Tabellen als Kalender bzw. Adressbuch bereitstellen |
+| Filter `subscriptions.apps` | Seite „Abonnieren“ (Core): CardDAV-Zugang mit Abo-Token für Kontakte-Tabellen |
 | Routen | `GET /admin/dav`, `POST /admin/dav/passwords`, `POST /admin/dav/passwords/{id}/delete` mit `dav.use`; `POST /admin/dav/tables` mit `data.schema` – Anmeldung, Recht und CSRF prüft der Core |
 
 vCard-Felder `X-MYCMS-*` bleiben als historische technische Kennung (in den Apps gespeichert).

@@ -15,7 +15,10 @@ use Core\Permissions;
  */
 final class Dav
 {
-    /** Angemeldeter DAV-Benutzer: users-Zeile + 'scope' (read|write) des App-Passworts */
+    /**
+     * Angemeldeter DAV-Benutzer: users-Zeile + 'scope' (read|write) des App-Passworts. Mit Abo-Token (Core\Data\Subscriptions)
+     * zusätzlich 'abo' => [id, table, scope (public|internal)]: nur lesen, nur diese Tabelle als Adressbuch, Principal „abo-{id}“.
+     */
     public static ?array $user = null;
 
     public const SCOPES = ['write' => 'Lesen und ändern', 'read' => 'Nur lesen'];
@@ -78,9 +81,10 @@ final class Dav
         app()->db->query('DELETE FROM dav_passwords WHERE id = ? AND user_id = ?', [$id, $userId]);
     }
 
-    /** E-Mail + App-Passwort prüfen (mit Sperre nach Fehlversuchen je IP) */
-    public static function login(string $email, string $password): bool
+    /** E-Mail + App-Passwort prüfen (mit Sperre nach Fehlversuchen je IP); Abo-Token als Passwort: aboLogin() */
+    public static function login(string $email, #[\SensitiveParameter] string $password): bool
     {
+        if (class_exists(\Core\Data\Subscriptions::class) && str_starts_with($password, \Core\Data\Subscriptions::PREFIX)) return self::aboLogin($password);
         $limiter = new \Core\RateLimiter(app()->db);
         $key = 'dav:' . hash_hmac('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), app()->key());
         if ($limiter->tooMany($key, 20, 900)) return false;
@@ -104,18 +108,53 @@ final class Dav
         return true;
     }
 
+    /**
+     * Anmeldung mit einem Abo-Token des Core (Benutzername beliebig): Prüfung, Ablauf, Rate-Limit, „zuletzt genutzt“ und Protokoll
+     * übernimmt Subscriptions::verify(). Nur Kontakte-Tabellen, immer nur lesen – keine eigene Token-Verwaltung in dieser Erweiterung.
+     */
+    public static function aboLogin(#[\SensitiveParameter] string $token): bool
+    {
+        $res = \Core\Data\Subscriptions::verify($token, null, 'carddav');
+        if ($res['status'] !== 200 || \Core\Data\Subscriptions::kind($res['table']) !== 'contacts') return false;
+        $tok = $res['token'];
+        self::$user = ['id' => (int) $res['user']['id'], 'email' => 'abo-' . (int) $tok['id'], 'name' => (string) $tok['name'], 'role' => (string) $res['user']['role'],
+            'scope' => 'read', 'roleDef' => $res['role'], 'abo' => ['id' => (int) $tok['id'], 'table' => (string) $tok['table_handle'], 'scope' => (string) $tok['scope']]];
+        return true;
+    }
+
+    /** Ist die Tabelle die eines angemeldeten Abo-Tokens? */
+    public static function aboTable(array $table): bool
+    {
+        return isset(self::$user['abo']) && self::$user['abo']['table'] === $table['handle'];
+    }
+
+    /** Abo-Token mit Umfang „nur öffentlich“: nur veröffentlichte, freigegebene Kontakte (Exposure) */
+    public static function aboAllows(array $table, array $entry): bool
+    {
+        if (!isset(self::$user['abo']) || self::$user['abo']['scope'] === 'internal') return true;
+        return ($entry['status'] ?? '') === 'published' && \Core\Data\Exposure::visible($table, $entry);
+    }
+
+    /** Eintrag für ein Abo-Token „nur öffentlich“: nur freigegebene Angaben (Ziel vcard); sonst unverändert */
+    public static function aboEntry(array $table, array $entry): array
+    {
+        if (!isset(self::$user['abo']) || self::$user['abo']['scope'] === 'internal') return $entry;
+        return \Core\Data\Exposure::publicEntry($table, $entry, 'vcard');
+    }
+
     // ================================================================= Rechte
 
     /** Darf der DAV-Benutzer die Tabelle sehen (Einträge bearbeiten)? */
     public static function canSee(array $table): bool
     {
+        if (isset(self::$user['abo']) && !self::aboTable($table)) return false;   // Abo-Token: nur die gebundene Tabelle
         return self::$user !== null && Permissions::allows(self::$user['roleDef'], 'data.edit', $table['handle']);
     }
 
     /** Schreiben: App-Passwort mit „Lesen und ändern“ + Recht data.edit */
     public static function canWrite(array $table): bool
     {
-        return self::canSee($table) && self::$user['scope'] === 'write';
+        return self::canSee($table) && self::$user['scope'] === 'write' && !isset(self::$user['abo']);
     }
 
     public static function can(string $perm, array $table): bool
@@ -239,7 +278,8 @@ final class Dav
 
     public static function addressBookTables(): array
     {
-        return array_values(array_filter(Tables::content(), fn($t) => self::tableSettings($t)['addressbook'] && !Calendar::enabled($t)));
+        // Abo-Token: seine Kontakte-Tabelle gilt als Adressbuch, auch wenn sie nicht allgemein bereitgestellt ist
+        return array_values(array_filter(Tables::content(), fn($t) => (self::tableSettings($t)['addressbook'] || (self::aboTable($t) && !Tables::isInbox($t))) && !Calendar::enabled($t)));
     }
 
     public static function enabled(): bool
