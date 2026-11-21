@@ -1,0 +1,26 @@
+# gitleaks (Suche nach Geheimnissen in der ganzen Git-Historie) – Standardregeln plus belegte Ausnahmen.
+# Lokal:  gitleaks git --redact -v .        CI: .github/workflows/security.yml
+# Jede Ausnahme nennt die Stelle und warum dort kein Geheimnis steht. Echte Funde nie hier ausnehmen, sondern den
+# Schlüssel widerrufen/ersetzen (er bleibt in der Historie).
+title = "KLXM Studio"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Core\\Push\\WebPush baut aus Rohbytes einen PEM-Rahmen zusammen – Kopfzeile im Code, kein Schlüssel"
+targetRules = ["private-key"]
+regexTarget = "line"
+regexes = ['''"-----BEGIN EC PRIVATE KEY-----\\n" \. chunk_split\(''']
+
+[[allowlists]]
+description = "Oberflächentext „Anmeldung (Token, Benutzer/Passwort …)“ in der Verwaltung und lang/en.php"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''\(Token, Benutzer/Passwort''', '''\(token, user/password''']
+
+[[allowlists]]
+description = "Beispielaufruf in der Doku der DAV-Erweiterung mit Platzhaltern (example.org, APP-PASSWORT)"
+targetRules = ["curl-auth-user"]
+regexTarget = "line"
+regexes = ['''curl -u "mail@example\.org:APP-PASSWORT"''']
