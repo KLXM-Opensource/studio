@@ -10,6 +10,21 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Erweiterungen: optionale Abhängigkeiten prüfen, Startfehler mit Namen
+- **`php bin/console extensions:check`** (`Core\DependencyCheck`) prüft Erweiterungen und Kits statisch, ohne sie zu laden:
+  Klassen, die von Klassen/Interfaces/Traits eines Pakets außerhalb von `require` erben (nur `suggest`, `require-dev` oder gar nicht
+  angegeben), ohne `if (!class_exists(…)) return;` vor der Deklaration, sowie Zugriffe in `extension.php`, `theme.php`/`kit.php`,
+  `console.php` und `functions.php` (`new X`, `X::…`) auf solche Klassen ohne `class_exists()`-Prüfung; dazu Syntaxfehler. Ausgabe mit
+  Datei, Zeile und Abhilfe, Exit 1 bei Fehlern (CI); `--path=ordner` prüft ein einzelnes Paket (z. B. im Repository der Erweiterung),
+  `--only=extensions|kits`. `kit:check` meldet dieselben Funde je Kit. Mitgelieferte Erweiterungen und Kits: ohne Funde.
+- **Kein stilles Überspringen:** Scheitert eine Erweiterung beim Laden des Manifests, im `boot`, in den Datenbank-Schritten oder in
+  `install`, bleibt das ein Fehler – jetzt aber als `Core\ExtensionError` mit Erweiterung, Phase und schuldiger Datei
+  (z. B. `extensions/x/src/Feld.php:4`): eine Zeile im Fehlerprotokoll, auf der Kommandozeile mit Hinweis zum Abschalten, auf der
+  Website eine Fehlerseite „Die Erweiterung „x“ konnte nicht starten“ (Meldung und Datei nur mit `debug` bzw. in der Umgebung
+  `development`). Fehler aus dem Code einer Erweiterung zur Laufzeit (Route, Block) werden ihr ebenfalls zugeordnet; angemeldete
+  Redaktion sieht die Meldung auf der Fehlerseite. Der letzte Fehler je Erweiterung (14 Tage) steht unter Funktionen & Erweiterungen
+  und in `extensions:list`. `extensions:selftest` prüft beides.
+
 ### Überwachung: technische Meldungen getrennt von Einrichtung und Redaktion
 - **Kategorien der Prüfungen** (`Core\Health::rows()`): `technical` (alarmiert eine Überwachung), `setup` (Einrichtung) und
   `editorial` (Redaktion) – beide nur zur Anzeige. Technisch u. a. Datenbank, Ordner, PHP-Version und neu das **Lebensende der
