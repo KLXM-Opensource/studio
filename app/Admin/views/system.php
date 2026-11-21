@@ -53,8 +53,8 @@ use Core\Fields;
         'integritaet' => can('system.manage') ? [url('/admin/system/integritaet'), __('Integrität'), 'shield-check'] : null,
         'sicherung' => can('system.manage') && \Core\Permissions::installationAdmin() ? [url('/admin/system/sicherung'), __('Sicherung außer Haus'), 'cloud-arrow-up'] : null,
         'kits' => \Core\KitPackages::canManage() ? [url('/admin/system/kits'), __('Kits'), 'package'] : null]);
-    if ($subLinks): ?><span class="adm-tabs__sep" role="separator"></span><?php endif;
-    foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>
+    if ($subLinks): ?><span class="adm-tabs__sep" aria-hidden="true"></span><?php endif;
+    foreach ($subLinks as [$href, $label, $i]): ?><a class="adm-tabs__link" href="<?= e($href) ?>" role="tab" aria-selected="false" data-tab-link><span class="adm-tabs__ico" aria-hidden="true"><?= icon($i) ?></span><span class="adm-tabs__label"><?= e($label) ?></span></a><?php endforeach; ?>
   </div>
   <?php foreach ($groups as $i => $g): ?>
   <section class="adm-card adm-panel adm-panel--groups" role="tabpanel" id="panel-<?= e($g['id']) ?>" aria-labelledby="tab-<?= e($g['id']) ?>"<?= $i === 0 ? '' : ' hidden' ?>>
