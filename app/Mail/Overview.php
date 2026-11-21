@@ -33,6 +33,7 @@ final class Overview
         'review' => ['Änderungen warten auf Freigabe', 'notify', false, false, 'reviewers', 'Über API, MCP oder KI eingereichte Änderungen – höchstens alle 15 Minuten.'],
         'support' => ['Support-Meldungen', 'notify', false, false, 'support', 'Neue Meldungen und Antworten im Support.'],
         'chat' => ['Erwähnungen im Chat', 'notify', false, false, 'mention', 'Ungelesene Erwähnungen im Chat der Verwaltung.'],
+        'tasks' => ['Aufgaben: Zuweisung und Erinnerung', 'notify', false, false, 'assignee', 'Neue Aufgabe für eine Person oder Rolle, Erinnerung an fällige Aufgaben – je Konto abschaltbar.'],
         'newsletter' => ['Newsletter und Massenversand', 'newsletter', false, false, 'list', 'Für Erweiterungen wie einen Newsletter – ohne Impressum gesperrt.'],
     ];
 
@@ -175,6 +176,7 @@ final class Overview
             'reviewers' => self::reviewRecipients($none),
             'support' => [__('Support-Team bzw. die meldende Person'), __('Support'), null],
             'mention' => [__('die erwähnte Person'), __('Chat'), null],
+            'assignee' => [__('die zuständige Person bzw. die Personen der Rolle'), __('Aufgaben (Konto → Mitteilungen)'), '/admin/aufgaben'],
             default => [__('Verteiler der Erweiterung'), __('Erweiterung'), null],
         };
     }

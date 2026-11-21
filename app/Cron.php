@@ -95,6 +95,8 @@ final class Cron
         self::register('ai.jobs', __('KI-Aufträge abarbeiten'), 'ai:jobs --all', '*/5 * * * *', ['group' => $g, 'help' => __('Transkription und Übersetzung von Untertiteln.')]);
         self::register('sources.sync', __('Externe Quellen abgleichen'), 'sources:sync --all', '*/15 * * * *', ['group' => $g]);
         self::register('chat.digest', __('Chat: Hinweise auf ungelesene Erwähnungen'), 'chat:digest', '*/15 * * * *', ['group' => $g]);
+        self::register('tasks.remind', __('Aufgaben: Erinnerung an fällige'), 'tasks:remind --all', '0 7 * * *', ['group' => $g,
+            'help' => __('E-Mail an die Zuständigen, wenn eine Aufgabe morgen oder heute fällig ist (überfällige wöchentlich) – nur auf Websites, die die Erinnerung unter Aufgaben eingeschaltet haben (Standard aus).')]);
         self::register('backup.sites', __('Sicherungen der Websites'), 'site:backup --all --keep=14', '0 2 * * *', ['group' => $g, 'timeout' => 3300, 'help' => __('Die neuesten 14 je Website bleiben.')]);
         self::register('backup.pools', __('Sicherungen der geteilten Medien'), 'pool:backup --all --keep=14', '20 2 * * *', ['group' => $g, 'timeout' => 3300]);
         self::register('integrity.check', __('Integrität prüfen'), 'integrity:check --all --quiet', '7 * * * *', ['group' => $g, 'timeout' => 900,

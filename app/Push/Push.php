@@ -313,6 +313,8 @@ final class Push
                 'perm' => 'chat.use', 'feature' => 'chat', 'default' => true, 'owner' => 'core'],
             'push.manual' => ['label' => __('Mitteilungen der Redaktion'), 'help' => __('Nachrichten, die jemand unter „Mitteilungen“ an Personen der Verwaltung schickt.'),
                 'perm' => null, 'feature' => self::FEATURE, 'default' => true, 'owner' => 'core'],
+            'tasks.assigned' => ['label' => __('Aufgaben für Sie'), 'help' => __('Eine Aufgabe wurde Ihnen oder Ihrer Rolle zugewiesen bzw. ist bald fällig.'),
+                'perm' => null, 'feature' => null, 'default' => true, 'owner' => 'core'],
             'review.pending' => ['label' => __('Einreichungen zur Freigabe'), 'help' => __('Änderungen über API, MCP oder KI warten unter „Eingereicht“ auf Ihre Prüfung.'),
                 'perm' => 'review.manage', 'feature' => 'review', 'default' => true, 'owner' => 'core'],
         ] + self::$extra;

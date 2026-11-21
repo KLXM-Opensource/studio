@@ -114,6 +114,12 @@
  *   blocks:demos [--install=name|--all]               Beispiel-Blöcke (app/Blocks/demos) auflisten bzw. als Entwurf übernehmen
  *                                                     (wiederholbar: vorhandene Kopien werden nicht noch einmal angelegt)
  *   guide:list | guide:selftest                       Hinweise zu diesem Projekt (Kit + Website) auflisten | Selbsttest des Einlesens
+ *   tasks:add "Titel" [--text=…] [--link=page:12] [--to=email|role:editor|all] [--due=JJJJ-MM-TT] [--priority=high] [--as=email]
+ *                                                     Aufgabe für die Redaktion anlegen (Core\Tasks, „Was ist zu tun?“)
+ *   tasks:list [--status=open|done|all] [--all] | tasks:done <id> [--comment=…] | tasks:reopen <id>
+ *                                                     Aufgaben auflisten | abhaken (mit Kommentar) | wieder öffnen
+ *   tasks:import-guide [--dry-run]                    Projekt-Hinweise mit „aufgabe: ja“ als Aufgaben für alle übernehmen (je Hinweis einmal)
+ *   tasks:remind [--all] | tasks:selftest             Erinnerung an fällige Aufgaben (Cron, nur wenn eingeschaltet) | Selbsttest
  *   kit:check [--kit=name|--all] [--strict] [-v]     Überschreibungen eines Kits prüfen (+ Kit-Vertrag --kit-*): verwaiste Block-Vorlagen, Kern-Blöcke
  *                                                     mit geändertem Vertrag (unbekannte Angaben), Kern-Fragmente mit neuem Original
  *   fragments:list [--all] [--accept]                 Kern-Fragmente: Herkunft je Fragment (Projekt/Kit/Kern) für das aktive Kit
@@ -1725,6 +1731,16 @@ switch ($cmd) {
         echo ($dry ? 'Probelauf – nichts geändert. ' : '') . 'Website „' . site()->key . '“: ' . $res['pages'] . ' Seite(n) (' . $res['versions'] . ' Fassungen, '
             . $res['texts'] . ' Texte), ' . $res['entries'] . ' Einträge (' . $res['entry_texts'] . ' Felder), ' . $res['notes'] . " Notizen.\n";
         exit(0);
+
+    case 'tasks:add':
+    case 'tasks:list':
+    case 'tasks:done':
+    case 'tasks:reopen':
+    case 'tasks:import-guide':
+    case 'tasks:remind':
+    case 'tasks:selftest':
+        // Aufgaben der Redaktion (Core\Tasks): anlegen, auflisten, abhaken, Projekt-Hinweise übernehmen, Erinnerung, Selbsttest
+        exit(Core\Tasks\Console::run($cmd, $args, __FILE__));
 
     case 'guide:selftest':
         // Hinweise zu diesem Projekt (Core\Guide): Front Matter, Titel, Escaping, Links, Bilder, Bereiche

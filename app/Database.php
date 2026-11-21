@@ -303,6 +303,8 @@ final class Database
         Redirects\Redirects::ensureTable($this);
         // Entwürfe (Core\Review\Drafts): Notiz und zuständige Person je Entwurf, gesicherte verworfene Einträge
         Review\Drafts::ensureTable($this);
+        // Aufgaben der Redaktion (Core\Tasks): Aufgaben mit Zuständigkeit, Fälligkeit, Status und Verlauf
+        Tasks\Tasks::ensureTable($this);
         // Push-Benachrichtigungen (Core\Push): Abos, Schalter je Person, Nachrichten und Warteschlange
         Push\Push::ensureTable($this);
 
