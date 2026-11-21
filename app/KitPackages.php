@@ -393,12 +393,14 @@ final class KitPackages
 
     // ------------------------------------------------------------------ Prüfung
 
-    /** Für health: verdeckte Kits, Pakete ohne veröffentlichte Assets, unpassende Core-Version (nur Hinweise) */
-    public static function health(): array
+    /** Für health: verdeckte Kits, Pakete ohne veröffentlichte Assets, unpassende Core-Version (nur Hinweise)
+     * @param bool $categorized Zeilen mit Kategorie: verdeckte Kits = Einrichtung, Assets/Core-Version = technisch
+     */
+    public static function health(bool $categorized = false): array
     {
         $out = [];
         foreach (Kit::shadowed() as $name => $list) {
-            foreach ($list as $s) $out[__('Kit „{name}“ unter {dir} ({source}) ist verdeckt – es gilt {active}', ['name' => $name, 'dir' => Kit::relative($s['dir']), 'source' => $s['source'], 'active' => Kit::relative(Kit::dir($name))])] = null;
+            foreach ($list as $s) $out[__('Kit „{name}“ unter {dir} ({source}) ist verdeckt – es gilt {active}', ['name' => $name, 'dir' => Kit::relative($s['dir']), 'source' => $s['source'], 'active' => Kit::relative(Kit::dir($name))])] = \Core\Health::cat(null, 'setup', $categorized);
         }
         foreach (Kit::all() as $name => $dir) {
             $src = Kit::source($name);

@@ -71,6 +71,7 @@ final class ExtensionsSelfTest
             self::blockHooks();
             self::filtersAndEvents();
             self::editorHooks();
+            self::healthCategories();
         } catch (\Throwable $e) {
             self::$fail[] = 'Ausnahme: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
         } finally {
@@ -80,6 +81,27 @@ final class ExtensionsSelfTest
             foreach ($saved as $prop => $v) (new \ReflectionProperty($auth, $prop))->setValue($auth, $v);
         }
         return ['ok' => self::$ok, 'fails' => self::$fail];
+    }
+
+    // ================================================================= Prüfungen mit Kategorie (Extension::health)
+
+    private static function healthCategories(): void
+    {
+        $x = new Extension('qa_selftest', __DIR__, ['label' => 'QA']);
+        $x->health(fn() => ['QA: Datenbank erreichbar' => false]);                        // ohne Angabe: technisch
+        $x->health(fn() => ['QA: Schlüssel hinterlegt' => false, 'QA: Hinweis je Zeile' => ['ok' => null, 'category' => 'editorial']], 'einrichtung');
+        $x->health(fn() => throw new \RuntimeException('kaputt'), 'setup');                // Fehler der Prüfung bleibt technisch
+        self::activate($x);
+        try {
+            $rows = [];
+            foreach (Extensions::healthRows() as $r) if (str_starts_with($r['label'], 'QA: ') || str_contains($r['label'], 'qa_selftest')) $rows[$r['label']] = [$r['ok'], $r['category']];
+            self::eq('health: Kategorie je Anmeldung, je Zeile, Standard technisch', $rows, ['QA: Datenbank erreichbar' => [false, 'technical'],
+                'QA: Schlüssel hinterlegt' => [false, 'setup'], 'QA: Hinweis je Zeile' => [null, 'editorial'], 'Erweiterung qa_selftest: Prüfung fehlgeschlagen' => [false, 'technical']]);
+            self::eq('health: alte Form true/false/null bleibt', array_intersect_key(Extensions::health(), ['QA: Hinweis je Zeile' => 1, 'QA: Schlüssel hinterlegt' => 1]),
+                ['QA: Schlüssel hinterlegt' => false, 'QA: Hinweis je Zeile' => null]);
+        } finally {
+            self::activate(null);
+        }
     }
 
     // ================================================================= Block-Haken (blocksResolve, blocksBeforeSave, blockPresets)

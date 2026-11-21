@@ -22,18 +22,20 @@ final class SeoCheck
     public const TITLE_MAX = 60;
     public const DESC_MAX = 160;
 
-    /** Systemprüfung: [Text => true | false (Fehler) | null (Hinweis)] */
-    public static function health(): array
+    /** Systemprüfung: [Text => true | false (Fehler) | null (Hinweis)]
+     * @param bool $categorized Zeilen mit Kategorie: Sperre und Domains = Einrichtung, Seiten-Hinweise = Redaktion
+     */
+    public static function health(bool $categorized = false): array
     {
         $out = [];
         if (environment() === 'production' && (bool) app()->settings->get('sys.noindex')) {
-            $out[__('Suchmaschinen: Die Live-Website ist gesperrt („Suchmaschinen aussperren“ in den Grundeinstellungen)')] = false;
+            $out[__('Suchmaschinen: Die Live-Website ist gesperrt („Suchmaschinen aussperren“ in den Grundeinstellungen)')] = \Core\Health::cat(false, 'setup', $categorized);
             return $out;
         }
         if (noindex_site()) return [];
-        foreach (self::site() as $t) $out[$t] = null;
+        foreach (self::site() as $t) $out[$t] = \Core\Health::cat(null, 'setup', $categorized);
         $n = count(self::pages());
-        if ($n) $out[__('SEO: {n} Hinweise zu Titeln, Beschreibungen und Vorschaubildern – php bin/console seo:check', ['n' => $n])] = null;
+        if ($n) $out[__('SEO: {n} Hinweise zu Titeln, Beschreibungen und Vorschaubildern – php bin/console seo:check', ['n' => $n])] = \Core\Health::cat(null, 'editorial', $categorized);
         return $out;
     }
 

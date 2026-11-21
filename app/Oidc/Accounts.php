@@ -115,6 +115,7 @@ final class Accounts
                 $id = $db->insert('users', ['email' => $email, 'name' => $name, 'password_hash' => self::NO_PASSWORD, 'role' => $p['role'],
                     'idp' => $p['id'], 'created_at' => now()]);
                 $row = $db->fetch('SELECT * FROM users WHERE id = ?', [$id]);
+                \Core\SecurityLog::write('oidc-account');   // Nachvollziehbarkeit; Integritätsprüfung zeigt das Konto als Info (Core\Integrity::oidcAccount)
                 if ($network) Network::log('account.create', null, $email, 'oidc');
                 elseif (\Core\Extensions::listens('user.created')) \Core\Extensions::emit(new \Core\Events\UserCreated($id, $email, (string) $p['role'], 'oidc'));
             }

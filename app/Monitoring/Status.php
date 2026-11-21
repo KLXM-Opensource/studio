@@ -16,8 +16,9 @@ use Core\RateLimiter;
  *
  *   GET /api/monitoring/status   nur mit gültig signierter Anfrage eines eingetragenen Schlüssels
  *
- * Antwort: Version von System, PHP und Kit, Erweiterungen mit Versionen, Ampel der Prüfungen (Core\Health) mit Meldungen,
- * letzte Sicherung, Integrität, Zeitstempel – keine Inhalte, keine Personendaten, keine Geheimnisse.
+ * Antwort: Version von System, PHP und Kit, Erweiterungen mit Versionen, Ampel der Prüfungen (Core\Health) mit Meldungen und
+ * Kategorie (technical | setup | editorial – Ampel und Zähler nur aus technischen), Anzahl der Einträge im Fehlerprotokoll
+ * (ErrorLog, nur Zahlen), letzte Sicherung, Integrität, Zeitstempel – keine Inhalte, keine Personendaten, keine Geheimnisse.
  * Einstellung sys.monitoring (Grundeinstellungen → Überwachung, Recht system.manage) oder Website-Konfiguration
  * 'monitoring' => ['enabled' => true, 'keys' => ['ed25519:…']].
  */
@@ -103,19 +104,25 @@ final class Status
 
     private static function build(): array
     {
+        // Meldungen mit Kategorie (Core\Health): Ampel und Zähler nur aus technischen Meldungen, Einrichtung/Redaktion als notices
         $msgs = [];
-        $err = $warn = 0;
+        $err = $warn = $notices = 0;
         try {
-            foreach (Health::checks() as $label => $ok) {
-                if ($ok === true) continue;
-                $ok === false ? $err++ : $warn++;
-                $msgs[] = ['level' => $ok === false ? 'error' : 'warning', 'text' => mb_strimwidth((string) $label, 0, 200, '…')];
+            foreach (Health::rows() as $r) {
+                if ($r['ok'] === true) continue;
+                $level = $r['ok'] === false ? 'error' : 'warning';
+                if ($r['category'] === Health::TECHNICAL) $level === 'error' ? $err++ : $warn++;
+                else $notices++;
+                $msgs[] = ['level' => $level, 'category' => $r['category'], 'text' => mb_strimwidth($r['label'], 0, 200, '…')];
             }
         } catch (\Throwable $e) {
             error_log('[monitoring] ' . $e->getMessage());
             $err++;
-            $msgs[] = ['level' => 'error', 'text' => 'health check failed'];
+            $msgs[] = ['level' => 'error', 'category' => Health::TECHNICAL, 'text' => 'health check failed'];
         }
+        // Technische Meldungen zuerst (höchstens 50 – Einrichtung und Redaktion fallen zuerst weg), Fehler vor Hinweisen
+        $rank = fn(array $m) => ($m['category'] === Health::TECHNICAL ? 0 : 2) + ($m['level'] === 'error' ? 0 : 1);
+        usort($msgs, fn($a, $b) => $rank($a) <=> $rank($b));
         $components = [];
         foreach (Extensions::active() as $name => $x) {
             $components[] = ['type' => 'extension', 'name' => (string) $name, 'version' => (string) ($x->manifest['version'] ?? ''), 'active' => true];
@@ -146,7 +153,9 @@ final class Status
             'site' => ['key' => site()->key, 'url' => site_url()],
             'theme' => ['name' => app()->theme->name, 'version' => (string) (app()->theme->def['version'] ?? '')],
             'components' => $components,
-            'health' => ['status' => $err ? 'red' : ($warn ? 'yellow' : 'green'), 'errors' => $err, 'warnings' => $warn, 'messages' => array_slice($msgs, 0, 50)],
+            'health' => ['status' => $err ? 'red' : ($warn ? 'yellow' : 'green'), 'errors' => $err, 'warnings' => $warn, 'notices' => $notices,
+                'messages' => array_slice($msgs, 0, 50)],
+            'log' => ErrorLog::summary(),
             'backup' => ['last_at' => self::iso($local ?: null), 'offsite_at' => self::iso($off ?: null)],
             'integrity' => ['status' => $igStatus, 'checked_at' => self::iso($igAt ?: null)],
             'ssl' => ['expires_at' => null],   // ermittelt der Dienst selbst aus der TLS-Verbindung

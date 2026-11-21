@@ -10,6 +10,22 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Überwachung: technische Meldungen getrennt von Einrichtung und Redaktion
+- **Kategorien der Prüfungen** (`Core\Health::rows()`): `technical` (alarmiert eine Überwachung), `setup` (Einrichtung) und
+  `editorial` (Redaktion) – beide nur zur Anzeige. Technisch u. a. Datenbank, Ordner, PHP-Version und neu das **Lebensende der
+  Sicherheitsupdates** (`Health::phpSupport`, Hinweis 180 Tage vorher, danach Fehler), Kit-/Core-Version, Cron, Integrität,
+  Sicherung außer Haus, geänderte Kern-Fragmente; Einrichtung u. a. optionale Werkzeuge, Schriften, E-Mail-Konten und -Impressum,
+  Suchmaschinen gesperrt, Domains; Redaktion die SEO-Hinweise. Ohne Angabe gilt `technical`. Erweiterungen:
+  `Extension::health($fn, 'setup')` bzw. je Zeile `['ok' => …, 'category' => …]`; `Health::checks()` und `bin/console health`
+  bleiben unverändert.
+- **Status `status-v1` kompatibel erweitert:** `health.messages[].category`, `health.status`/`errors`/`warnings` nur aus technischen
+  Meldungen, `health.notices` für Einrichtung/Redaktion, technische Meldungen zuerst; neuer Block `log` mit der Zahl der Einträge im
+  Fehlerprotokoll der letzten 24 Stunden nach Art (`Core\Monitoring\ErrorLog`, nur Zahlen, nie Inhalte).
+- **Integrität:** Ein neues Konto mit allen Rechten aus der Anmeldung über einen eingeschalteten OpenID-Connect-Anbieter (Kennung,
+  Issuer, Rolle des Anbieters, kein lokales Passwort) ist nur noch eine Info („Agentur-Konto über … angelegt“) ohne Mail
+  (`Integrity::oidcAccount`); andere neue Konten mit allen Rechten und später lokal erhöhte Rollen bleiben Fehler.
+  `SecurityLog`-Ereignis `oidc-account` (ohne Sperre, `SecurityLog::INFO`).
+
 ### Anmeldung per OpenID Connect und signierte Überwachung (Standard aus)
 - **OpenID Connect** (`Core\Oidc`): Anmeldung über einen Identitätsanbieter (z. B. den Hub einer Agentur) – Authorization Code Flow
   mit PKCE S256, `state`, `nonce`, Discovery, JWKS mit Schlüsselwechsel, ID-Token RS256/EdDSA ohne neue Abhängigkeit (openssl,

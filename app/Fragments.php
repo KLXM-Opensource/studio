@@ -223,8 +223,10 @@ final class Fragments
     /**
      * Prüfungen für health und die Übersicht (Technik & Betrieb): null = Hinweis (blockiert keinen Deploy).
      * Nur das aktive Kit – so erscheint die Meldung auf der Website, die das Kit nutzt.
+     *
+     * @param bool $categorized Zeilen mit Kategorie: geändertes Kern-Fragment = technisch, ignorierte Kit-Datei = Einrichtung
      */
-    public static function health(): array
+    public static function health(bool $categorized = false): array
     {
         $kit = isset(app()->theme) ? app()->theme->name : '';
         if ($kit === '') return [];
@@ -235,7 +237,7 @@ final class Fragments
             }
         }
         foreach (self::ignored($kit) as $name => $file) {
-            $out[__('Kit „{kit}“: {file} wird ignoriert („{name}“ ist ein Kern-Fragment)', ['kit' => $kit, 'file' => Kit::relative($file), 'name' => $name])] = null;
+            $out[__('Kit „{kit}“: {file} wird ignoriert („{name}“ ist ein Kern-Fragment)', ['kit' => $kit, 'file' => Kit::relative($file), 'name' => $name])] = \Core\Health::cat(null, 'setup', $categorized);
         }
         return $out;
     }

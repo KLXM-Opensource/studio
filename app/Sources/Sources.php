@@ -356,8 +356,10 @@ final class Sources
     /**
      * Für `health`: je aktiver Quelle mit Fehler eine Warnzeile (null = „!“ – gemeldet, aber kein Deploy-Fehler, denn die
      * Quelle liegt außerhalb der eigenen Installation) – nur wenn die Funktion an ist
+     *
+     * @param bool $categorized Zeilen mit Kategorie (Core\Health::rows)
      */
-    public static function health(): array
+    public static function health(bool $categorized = false): array
     {
         if (!self::enabled()) return [];
         $out = [];
@@ -365,10 +367,10 @@ final class Sources
         foreach (self::all() as $s) {
             if (!$s['active']) continue;
             if ($s['last_error']) {
-                $out[__('Externe Quelle „{name}“: {error}', ['name' => $s['name'], 'error' => mb_strimwidth((string) $s['last_error'], 0, 120, '…')])] = null;
+                $out[__('Externe Quelle „{name}“: {error}', ['name' => $s['name'], 'error' => mb_strimwidth((string) $s['last_error'], 0, 120, '…')])] = \Core\Health::cat(null, 'technical', $categorized);
                 $bad++;
             } elseif (!$s['table']) {
-                $out[__('Externe Quelle „{name}“: keine Zieltabelle', ['name' => $s['name']])] = null;
+                $out[__('Externe Quelle „{name}“: keine Zieltabelle', ['name' => $s['name']])] = \Core\Health::cat(null, 'setup', $categorized);
                 $bad++;
             }
         }

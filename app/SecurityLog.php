@@ -14,12 +14,16 @@ namespace Core;
  * Ereignisse: auth-failed (falsches Passwort/unbekanntes Konto), auth-limited (zu viele Versuche), 2fa-failed, passkey-failed,
  * reset-limited (Passwort vergessen zu oft), api-key-invalid, oidc-failed (Anmeldung per OpenID Connect abgewiesen: state, Token,
  * Konto), monitor-denied (Status-Abfrage mit ungültiger Signatur, Core\Monitoring), probe (typische Angriffsadresse wie /wp-login.php, /.env – nur
- * wenn keine Weiterleitung greift). Keine E-Mail-Adressen, keine Passwörter. Größer als 5 MB → security.log.1 (eine Vorgängerdatei).
+ * wenn keine Weiterleitung greift). Nur zur Nachvollziehbarkeit (kein Treffer für fail2ban, INFO): oidc-account (Konto bei der
+ * ersten Anmeldung über einen OpenID-Connect-Anbieter angelegt, Core\Oidc\Accounts – die Integritätsprüfung zeigt es als Info).
+ * Keine E-Mail-Adressen, keine Passwörter. Größer als 5 MB → security.log.1 (eine Vorgängerdatei).
  * Filter und Jails für fail2ban: deploy/fail2ban/ (Entwicklerhandbuch → Sicherheit → fail2ban).
  */
 final class SecurityLog
 {
     public const EVENTS = ['auth-failed', 'auth-limited', '2fa-failed', 'passkey-failed', 'reset-limited', 'api-key-invalid', 'oidc-failed', 'monitor-denied', 'probe'];
+    /** Ereignisse ohne Sperre (die Filter in deploy/fail2ban kennen sie nicht) */
+    public const INFO = ['oidc-account'];
     private const MAX_BYTES = 5_000_000;
     /** Adressen, die eine Website mit KLXM Studio nie hat – wer sie abfragt, sucht Lücken anderer Systeme */
     private const PROBE = '~^/(?:wp-login\.php|wp-admin(?:/|$)|wp-config|xmlrpc\.php|\.env|\.git/|\.svn/|\.aws/|\.ssh/|\.htpasswd|phpmyadmin|pma(?:/|$)|myadmin|'
@@ -77,13 +81,14 @@ final class SecurityLog
         if ($conf === '') return ['ok' => $ok, 'fails' => $fails];
         $missing = array_filter(array_diff(self::EVENTS, ['probe']), fn($e) => !str_contains($conf, $e));
         $eq('Filter klxm-studio-auth kennt alle Ereignisse', array_values($missing), []);
+        $eq('Info-Ereignisse sperren nie (nicht im Filter)', array_values(array_filter(self::INFO, fn($e) => str_contains($conf, $e))), []);
         return ['ok' => $ok, 'fails' => $fails];
     }
 
     /** Vorfall schreiben (still, wenn ausgeschaltet oder die Datei nicht schreibbar ist) */
     public static function write(string $event, ?string $ip = null): void
     {
-        if (!in_array($event, self::EVENTS, true) || !self::enabled()) return;
+        if ((!in_array($event, self::EVENTS, true) && !in_array($event, self::INFO, true)) || !self::enabled()) return;
         try {
             $f = self::file();
             if (!is_dir(dirname($f))) @mkdir(dirname($f), 0770, true);

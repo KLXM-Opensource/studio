@@ -279,7 +279,7 @@ final class Extensions
         if (!$x) return [];
         $out = [];
         foreach ($x->healthProviders as $fn) {
-            foreach ((array) self::safe($x, 'health', $fn, []) as $label => $ok) $out[(string) $label] = $ok === null ? null : (bool) $ok;
+            foreach ((array) self::safe($x, 'health', $fn, []) as $label => $ok) $out[(string) $label] = Health::value($ok);
         }
         return $out;
     }
@@ -590,13 +590,28 @@ final class Extensions
     public static function health(): array
     {
         $out = [];
+        foreach (self::healthRows() as $r) $out[$r['label']] = $r['ok'];
+        return $out;
+    }
+
+    /**
+     * Zeilen mit Kategorie (Core\Health::rows): Kategorie aus Extension::health($fn, $category), je Zeile überschreibbar;
+     * ohne Angabe technical. Eine fehlgeschlagene Prüfung ist ein technischer Fehler.
+     * @return list<array{label: string, ok: ?bool, category: string}>
+     */
+    public static function healthRows(): array
+    {
+        $out = [];
         foreach (self::$active as $x) {
-            foreach ($x->healthProviders as $fn) {
-                $rows = self::safe($x, 'health', $fn, ['Erweiterung ' . $x->name . ': Prüfung fehlgeschlagen' => false]);
-                foreach ((array) $rows as $label => $ok) $out[(string) $label] = $ok === null ? null : (bool) $ok;
+            foreach ($x->healthProviders as $k => $fn) {
+                $failed = 'Erweiterung ' . $x->name . ': Prüfung fehlgeschlagen';
+                $rows = self::safe($x, 'health', $fn, [$failed => ['ok' => false, 'category' => Health::TECHNICAL]]);
+                foreach ((array) $rows as $label => $ok) {
+                    $out[(string) $label] = Health::row((string) $label, $ok, $x->healthCategories[$k] ?? Health::TECHNICAL);
+                }
             }
         }
-        return $out;
+        return array_values($out);
     }
 
     /**
