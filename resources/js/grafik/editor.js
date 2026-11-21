@@ -42,6 +42,7 @@ import { checkOverlay, suggestAlt } from './check.js';
 import { ShapeBuilder } from './builder.js';
 import { duplicateAgain, repeatDialog } from './repeat.js';
 import { Warp } from './warp.js';
+import { MotionPersona, isCountText, hasMotion } from './motion.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -125,6 +126,9 @@ export class GraphicEditor {
     this.conn = new Connectors(this);   // Verbinder, Beschriftungen, Text in Formen (connect.js)
     this.opt.connRoute = 'ortho'; this.opt.connStart = 'none'; this.opt.connEnd = 'triangle'; this.opt.connSize = 4;
     this.build();
+    // Persona Motion (Zeitleiste, Bewegung, Interaktion) – hängt sich vor dem ersten Protokollschritt an getSvg() (abgeleitete Angaben)
+    this.motion = new MotionPersona(this);
+    this.registerPersona(this.motion.persona);
     this.load(this.doc.svg || '', t('Geöffnet'));
   }
 
@@ -162,8 +166,8 @@ export class GraphicEditor {
         <div class="ge-paper"></div>
         <svg class="ge-ov" aria-hidden="true"></svg>
         <textarea class="ge-textedit is-bare" hidden aria-label="${esc(t('Text bearbeiten'))}" spellcheck="true"></textarea>
-        <div class="ge-persona-area" hidden></div>
       </div>
+      <div class="ge-persona-area" hidden></div>
       <aside class="ge-side" aria-label="${esc(t('Bereiche'))}"></aside>
       <footer class="ge-status"><span class="ge-status__hint" id="${this.uid}-hint" aria-live="polite"></span><span class="ge-status__pos" data-pos></span><span class="ge-status__size" data-size></span></footer>
     </div>`);
@@ -2634,6 +2638,13 @@ export class GraphicEditor {
       { label: t('SVG für Desktop-Programme (Affinity, Illustrator, Inkscape, Figma)'), run: () => this.download('desktop') },
       ...(this.root.querySelector('[data-ge-ftoken],[data-ge-stoken],[data-ge-ctoken],[data-ge-fdark],[data-ge-sdark],[data-ge-cdark]') ? [{ label: t('SVG für Desktop-Programme – Dunkel-Fassung'), run: () => this.download('desktop-dark') }] : []),
       { label: t('PDF (Vektor)'), run: () => this.download('pdf') },
+      // Bewegung: Desktop/PDF als Standbild (Ende wie oben, Anfang hier), dazu eigenständiges animiertes SVG
+      ...(hasMotion(this.root) ? [
+        { sep: true },
+        { label: t('Animiertes SVG (eigenständig, CSS in der Datei)'), run: () => this.download('motion') },
+        { label: t('SVG für Desktop-Programme – Anfangsbild'), run: () => this.download('desktop-start') },
+        { label: t('PDF (Vektor) – Anfangsbild'), run: () => this.download('pdf-start') },
+      ] : []),
       { sep: true },
       { label: t('SVG-Datei importieren …'), run: () => this.importFile() },
       { sep: true },
@@ -2657,12 +2668,23 @@ export class GraphicEditor {
         const w = await this.webSvg();
         blob = new Blob([w.svg], { type: 'image/svg+xml' });
         toast(t('Für das Web optimiert: {a} → {b}', { a: kb(w.before), b: kb(w.after) }));
-      } else if (kind === 'desktop' || kind === 'desktop-dark') {
-        // Design-Farben sind schon feste Farben (Hex) – die Dunkel-Fassung setzt die Dunkel-Werte ein
-        blob = new Blob([desktopSvg(kind === 'desktop-dark' ? bakeScheme(this, this.getSvg(), 'dark') : this.getSvg())], { type: 'image/svg+xml' });
+      } else if (kind === 'motion') {
+        // eigenständig: Web-Fassung + Bewegung vom Server (dieselbe Ausgabe wie auf der Website, CSS als <style>)
+        const w = await this.webSvg();
+        const res = await this.api('POST', this.boot.urls.motionSvg, { svg: this.getSvg(), web: w.svg });
+        if (!res) return;
+        blob = new Blob([res.svg], { type: 'image/svg+xml' });
+      } else if (kind === 'desktop' || kind === 'desktop-dark' || kind === 'desktop-start') {
+        // Design-Farben sind schon feste Farben (Hex) – die Dunkel-Fassung setzt die Dunkel-Werte ein; Bewegung: Standbild
+        const dark = kind === 'desktop-dark';
+        let svg = this.getSvg();
+        if (hasMotion(this.root)) svg = this.motion.stillSvg(svg, kind === 'desktop-start' ? 'start' : 'end', dark);
+        blob = new Blob([desktopSvg(dark ? bakeScheme(this, svg, 'dark') : svg)], { type: 'image/svg+xml' });
       } else {
         ext = 'pdf';
-        const svg = await this.outlinedCopy(this.getSvg(), true);
+        let base = this.getSvg();
+        if (hasMotion(this.root)) base = this.motion.stillSvg(base, kind === 'pdf-start' ? 'start' : 'end');
+        const svg = await this.outlinedCopy(base, true);
         blob = await pdfBlob(this.boot.modules?.pdf, svg, m => toast(m, 'info'));
       }
     } catch (e) {
@@ -2672,7 +2694,7 @@ export class GraphicEditor {
     } finally { this.busy(false); }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = this.fileBase() + (kind === 'desktop' ? '-desktop' : kind === 'desktop-dark' ? '-desktop-dunkel' : '') + '.' + ext;
+    a.download = this.fileBase() + ({ desktop: '-desktop', 'desktop-dark': '-desktop-dunkel', 'desktop-start': '-desktop-anfang', 'pdf-start': '-anfang', motion: '-animiert' }[kind] || '') + '.' + ext;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
@@ -2689,6 +2711,7 @@ export class GraphicEditor {
   webFontTexts() {
     const files = this.boot.fontFiles || {};
     return [...this.root.querySelectorAll('text')].filter(tx => {
+      if (isCountText(tx)) return false;   // Zählen braucht echten Text
       const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
       return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());
     });
@@ -2707,6 +2730,7 @@ export class GraphicEditor {
     this.shadow.append(host);
     try {
       const texts = [...c.querySelectorAll('text')].filter(tx => {
+        if (isCountText(tx) && !all) return false;
         if (all) return true;
         const fam = (getProp(tx, 'font-family') || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
         return Object.keys(files).some(k => k.toLowerCase() === fam.toLowerCase());

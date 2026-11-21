@@ -118,7 +118,7 @@
   <h3 id="grafik-editor">Grafiken zeichnen und bearbeiten (Grafik-Editor)</h3>
   <p>Infografiken, einfache Schaubilder, Symbole und Skizzen für die Blockauswahl entstehen direkt in der Verwaltung – ohne
     Grafikprogramm. Der Editor ist aufgebaut wie Affinity Designer, Illustrator oder Fireworks: oben die <b>Personas</b>
-    (<b>Vektor</b>; <b>Motion</b> für Animationen folgt), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
+    (<b>Vektor</b> zum Zeichnen, <b>Motion</b> für Bewegung und Interaktion – siehe <a href="#grafik-motion">unten</a>), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
     Auswahl, links die <b>Werkzeuge</b>, rechts die Bereiche <b>Farbe · Farbfelder · Kontur · Darstellung</b>,
     <b>Ebenen · Bibliothek · Symbole</b> und <b>Transformieren · Protokoll</b>, unten eine Statuszeile mit Tipps zum Werkzeug.</p>
   <ol class="doc-steps">
@@ -189,6 +189,45 @@
       der Alt-Text in der Mediathek bleibt Pflicht. Schriften: In einer SVG als Bild zeigt der Browser nur Schriften, die auf dem
       Gerät vorhanden sind – deshalb wandelt das Speichern Texte in Schriften der Website auf Wunsch in Kurven um (siehe unten); im Editor bleiben sie Text.</li>
   </ul>
+  <h4 id="grafik-motion">Bewegung und Interaktion (Persona Motion)</h4>
+  <p>Oben links auf <b>Motion</b> umschalten: Unter der Zeichenfläche erscheint die <b>Zeitleiste</b>, rechts der Bereich
+    <b>Bewegung · Interaktion · Szene</b>. Die Grafik bleibt dieselbe – Motion legt nur fest, wie sie sich bewegt. Zurück in <b>Vektor</b>
+    bearbeiten Sie die Grundform; Hell | Dunkel gilt in beiden Personas.</p>
+  <ol class="doc-steps">
+    <li><b>Fertige Bewegung:</b> Objekt wählen, Beginn und Dauer (Sekunden) eintragen und eine Bewegung anklicken – <b>Einblenden</b>,
+      <b>Von links/rechts/oben/unten</b>, <b>Heranzoomen</b>, <b>Aufploppen</b>, <b>Drehen</b>, <b>Pulsieren</b>, <b>Wackeln</b>, <b>Schweben</b>,
+      <b>Linie zeichnen</b> (Linien und Formen), <b>Ausblenden</b>, <b>Zählen</b> (ein Text mit Zahl zählt bis zu seinem Wert hoch, z. B. „1.250 Projekte“)
+      und <b>Pfad folgen</b> (Objekt und zuletzt den Weg wählen; „Richtung folgen“ dreht es mit). Bei mehreren Objekten beginnt jedes um
+      <b>Versetzt</b> später. Die Bewegung spielt gleich einmal ab.</li>
+    <li><b>Zeitleiste:</b> eine Zeile je bewegtem Objekt, darunter je Eigenschaft (Position, Größe, Drehung, Deckkraft, Linie zeichnen, Füllung,
+      Kontur) eine Spur mit <b>Schlüsselbildern</b> (Rauten). Ins Lineal klicken oder ziehen setzt den <b>Abspielkopf</b> (rastet an Rauten und
+      halben Sekunden ein, <kbd>⌥</kbd> = frei), <kbd>Leertaste</kbd> spielt ab und hält an, <kbd>Pos1</kbd>/<kbd>Ende</kbd> springen an Anfang und Ende,
+      im Lineal bewegen <kbd>←</kbd>/<kbd>→</kbd> um ein Bild (<kbd>⇧</kbd> = eine Sekunde). Zoom mit − / + oder <kbd>⌘</kbd> + Mausrad, Magnet = Einrasten an/aus.</li>
+    <li><b>Schlüsselbilder setzen:</b> Abspielkopf an die Stelle, dann das Objekt auf der Fläche <b>ziehen</b> (oder <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd>) –
+      das ergibt ein Schlüsselbild „Position“; ohne Bewegung entsteht dabei auch der Anfang bei 0 s. Werte wie Größe, Drehung, Deckkraft und Farben
+      tragen Sie unter <b>Am Abspielkopf</b> ein; die Raute davor setzt oder entfernt das Schlüsselbild. <kbd>K</kbd> setzt Schlüsselbilder für alle Spuren
+      der Auswahl, ein Doppelklick in eine Spur ebenso. Bei 0 s und ohne Bewegung verschiebt Ziehen die Grundform wie in Vektor.</li>
+    <li><b>Rauten bearbeiten:</b> ziehen ändert den Zeitpunkt (<kbd>⇧</kbd>-Klick wählt mehrere, sie wandern gemeinsam), <kbd>←</kbd>/<kbd>→</kbd> verschiebt um 0,1 s
+      (<kbd>⇧</kbd> = 1 s), <kbd>⌫</kbd> löscht, ein Klick stellt den Abspielkopf darauf.</li>
+    <li><b>Verlauf:</b> für die gewählten Rauten (bzw. die am Abspielkopf) – <b>sanft</b>, <b>abbremsen</b>, <b>beschleunigen</b>, <b>gleichmäßig</b>,
+      <b>federnd</b>, <b>halten</b> (springt am Ende) oder eine <b>eigene Kurve</b>: Griffe im Kurven-Editor ziehen oder X1/Y1/X2/Y2 eintragen. Der Verlauf
+      gilt vom Schlüsselbild bis zum nächsten.</li>
+    <li><b>Szene:</b> Dauer, Verzögerung, Wiederholen (einmal … endlos), Richtung (vorwärts, rückwärts, hin und zurück) und <b>Auslöser</b>:
+      <b>sobald sichtbar</b> (Standard), <b>beim Laden</b>, <b>beim Zeigen auf die Grafik</b> oder <b>bei Klick auf die Grafik</b>. Je Objekt kann die Bewegung
+      unter <b>Start</b> auch <b>beim Zeigen auf dieses Objekt</b> oder <b>bei Klick auf einen Schalter</b> beginnen.</li>
+  </ol>
+  <p><b>Interaktion:</b> Ein Objekt wird zum <b>Link-Bereich</b> (Ziel über die gewohnte Linkauswahl – Seiten bleiben verknüpft, auch wenn sich ihre
+    Adresse ändert), bekommt einen <b>Namen für Screenreader</b> und einen <b>Tooltip</b> (erscheint beim Zeigen und bei Tastatur-Fokus) oder wird zum
+    <b>Schalter</b>: Ein Klick (oder <kbd>Enter</kbd>/<kbd>Leertaste</kbd>) blendet zugeordnete Bewegungen ein, ein zweiter wieder aus – etwa ein Infokasten
+    zu einem „i“. Die Tabulator-Reihenfolge auf der Website folgt den Ebenen; <b>Prüfen</b> meldet, wenn sie von der Lesereihenfolge abweicht, und
+    bringt die Ebenen auf Wunsch in die richtige Reihenfolge. Links ohne Namen und endlose Bewegung (länger als 5 Sekunden, nicht anhaltbar) meldet
+    Prüfen ebenfalls.</p>
+  <p><b>Auf der Website:</b> Grafiken mit Bewegung oder Links erscheinen in Bild-Blöcken wie andere Bilder – die Website bindet sie dafür direkt in die
+    Seite ein; Grafiken ohne Bewegung bleiben unverändert. Ohne JavaScript, bei „Bewegung reduzieren“ im Betriebssystem und wenn im Design
+    „Dezente Animationen“ aus ist, steht das fertige Bild (Endzustand) still da; Schleifen halten an, solange die Grafik nicht zu sehen ist; mit
+    dunklem Farbschema bewegt sich die dunkle Fassung. Im Bearbeiten-Modus der Website zeigt die Seite das Standbild. <b>Exportieren</b> bietet
+    zusätzlich ein <b>animiertes SVG (eigenständig)</b> für Präsentationen oder andere Websites (spielt beim Öffnen) und für Desktop-Programme bzw.
+    PDF das <b>Anfangsbild</b> (die üblichen Exporte zeigen das Endbild).</p>
   <h4 id="grafik-dunkel">Design-Farben, Hell und Dunkel</h4>
   <p>Wählen Sie eine Farbe unter <b>Farbfelder → Design der Website</b> (z. B. „Akzent“), merkt sich die Grafik die <b>Design-Farbe</b>, nicht nur
     den Farbwert: Ändern Sie später unter <b>Design</b> den Akzent, zeigt die Website die Grafik in der neuen Farbe – ohne sie neu zu speichern.

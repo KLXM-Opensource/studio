@@ -11,6 +11,31 @@ oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
 
+### Grafik-Editor: Persona Motion – Bewegung und Interaktion (Ausbaustufe 4)
+- **Persona Motion** im Grafik-Editor des Kerns (Umschalter oben links, Hell | Dunkel gilt weiter): **Zeitleiste** unter der Zeichenfläche –
+  Objekte als Zeilen, je Eigenschaft eine Spur (Position, Größe, Drehung, Deckkraft, Linie zeichnen, Füllung, Kontur) mit Schlüsselbildern,
+  Abspielkopf (klicken/ziehen, rastet an Rauten und halben Sekunden, ⌥ = frei, ←/→ je Bild), Leertaste = abspielen, Zoom, Einrasten; Rauten
+  ziehen (auch mehrere), mit ←/→ verschieben, ⌫ löschen, Doppelklick in eine Spur bzw. K = Schlüsselbild. Objekt auf der Fläche ziehen oder
+  Pfeiltasten = Schlüsselbild „Position“ am Abspielkopf; Werte am Abspielkopf mit Schlüsselbild-Schalter.
+- **Verlauf je Abschnitt:** sanft, abbremsen, beschleunigen, gleichmäßig, federnd, halten und eigene Kurve (Kurven-Editor mit Griffen, X1/Y1/X2/Y2).
+- **Fertige Bewegungen** (aus der Erweiterung Motion übernommen): Einblenden, von links/rechts/oben/unten, Heranzoomen, Aufploppen, Drehen,
+  Pulsieren, Wackeln, Schweben, Linie zeichnen, Ausblenden – dazu **Zählen** (Zahl im Text zählt hoch, deutsche/englische Schreibweise) und
+  **Pfad folgen** (optional in Laufrichtung gedreht); Beginn, Dauer und Versatz für mehrere Objekte.
+- **Szene:** Dauer, Verzögerung, Wiederholen (bis endlos), Richtung, Auslöser beim Laden / sobald sichtbar / beim Zeigen / bei Klick; je Objekt
+  „beim Zeigen auf dieses Objekt“ oder „bei Klick auf einen Schalter“.
+- **Interaktion:** Link-Bereiche (echte Links, Ziel über die Linkauswahl mit `page:ID`), Name für Screenreader, Tooltips (als `<title>` und
+  sichtbar bei Zeigen und Tastatur-Fokus), Schalter (Hotspot: an/aus, Bewegung vorwärts/rückwärts). Prüfen meldet endlose Bewegung (WCAG 2.2.2),
+  Links ohne Namen und eine Fokus-Reihenfolge, die von der Lesereihenfolge abweicht (mit „Ebenen in Lesereihenfolge bringen“).
+- **Website** (`Core\Graphics\Motion`): Grafiken mit Bewegung oder Links erscheinen inline – nur Darstellungsattribute und Klassen im SVG, eine
+  erzeugte CSS-Datei je Grafik und Fassung (`{Medienordner}/grafik/m/`, Browser-Cache), ids mit Präfix, kein `style`, keine Inline-Skripte (CSP).
+  Ruhe = Endbild: ohne JavaScript, bei „Bewegung reduzieren“ und mit „Dezente Animationen“ aus im Design steht das fertige Bild; Schleifen halten
+  außerhalb des Bildes an; dunkles Farbschema bewegt die dunkle Fassung. `js/graphic-motion.js` (≈ 3,6 KB) lädt nur bei Auslöser „sobald
+  sichtbar“/Klick, Schaltern, Zählen oder Schleifen. Grafiken ohne Bewegung bleiben `<img>` (bytegleiche Web-Fassung), Bearbeiten-Modus zeigt das Standbild.
+- **Export:** animiertes SVG (eigenständig, CSS in der Datei, `POST /admin/api/grafik/motion-svg`), Desktop-SVG und PDF als Standbild
+  (Ende; zusätzlich Anfangsbild). Die Erweiterung Motion läuft unverändert weiter.
+- `grafik:selftest` erweitert (Modell, Bereinigung, Ausgabe, Mediathek inline). Handbuch → Medien → Grafik-Editor → Bewegung und Interaktion,
+  Entwicklerhandbuch → Medien → Grafik-Editor → Bewegung und Interaktion.
+
 ### Design-Datei und Grafik-Fassungen bleiben einen Tag erhalten
 - Ändert sich das Design (oder eine Regel des Kits), bekommt die Design-Datei einen neuen Namen. Die alte wurde bisher sofort gelöscht – zwischengespeicherte Seiten (Seiten-Cache, Browser, Proxy) verwiesen dann auf eine fehlende Datei und zeigten die Website ohne ihr Design. Ältere Fassungen werden jetzt erst nach einem Tag entfernt; ebenso die hellen/dunklen Fassungen von Grafiken mit Design-Farben (`Core\Graphics\Themed`).
 ### Installation per Composer (Packagist)

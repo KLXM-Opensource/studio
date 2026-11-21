@@ -152,6 +152,8 @@ export function analyze(ed) {
     const user = root.querySelector(`[filter="url(#${CSS.escape(fe.parentNode.id || '')})"]`);
     if (c && user && (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255 < 0.25) add({ key: 'shadow', sev: 'info', mode: 'dark', el: user, title: t('Schatten im Dunkeln kaum sichtbar'), detail: t('Dunkle Schatten verschwinden auf dunklem Grund – dort wirkt eher ein helles Leuchten (Ebeneneffekte).') });
   }
+  // Bewegung und Interaktion (Persona Motion): endlose Schleifen, Links ohne Namen, Fokus- gegen Lesereihenfolge
+  ed.motion?.checks(add);
   return out;
 }
 

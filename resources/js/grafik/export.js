@@ -214,6 +214,10 @@ export function optimizeSvg(svg, opts = {}) {
     const cls = themeClasses(el);
     if (cls.length) el.setAttribute('class', [...(el.getAttribute('class') || '').split(/\s+/).filter(c => c && !/^ge-[td][fsc]-/.test(c)), ...cls].join(' '));
   }
+  // Bewegung/Interaktion (Persona Motion): Kennzeichen an der Wurzel – die Website bindet die Grafik dann inline ein (Core\Graphics\Motion)
+  if (root.hasAttribute('data-ge-motion') || root.querySelector('[data-ge-anim],[data-ge-link],[data-ge-tip],[data-ge-hot]')) {
+    root.setAttribute('class', [...(root.getAttribute('class') || '').split(/\s+/).filter(c => c && c !== 'ge-anim'), 'ge-anim'].join(' '));
+  }
   for (const el of all(root)) for (const a of [...el.attributes]) if (a.name === 'data-name' || a.name === 'data-locked' || a.name.startsWith('data-ge-')) el.removeAttribute(a.name);
   if (opts.safe) return ser(root);
   const refs = references(root);
