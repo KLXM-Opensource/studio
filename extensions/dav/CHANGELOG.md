@@ -1,5 +1,17 @@
 # Changelog – Erweiterung „dav“
 
+## 1.4.0 (2026-11-21)
+
+- **Adressbücher (Tabellenart „contacts“, Core) ohne Zuordnung:** Das Grundschema geht fest auf die vCard – N/FN, ORG mit Abteilung,
+  TITLE, Foto, alle Telefonnummern, E-Mail-, Post- und Webadressen mit Beschriftung (vCard-TYPE bzw. Apple-Beschriftung
+  `itemN.X-ABLabel`, z. B. „Geschäftsstelle“ oder eigene), Listen als CATEGORIES, Geburtstag, Notiz. Zurück aus der App: Beschriftung
+  aus TYPE/X-ABLabel; eine **neue oder geänderte Angabe ist nie von selbst öffentlich** – „Öffentlich“ bleibt nur bei unverändertem
+  Wert. Neue Kontakte aus Apps: „Auf der Website zeigen“ aus. Die Einstellungsseite zeigt für Adressbücher keine Zuordnung.
+- **Freigabe je Ziel (Core `Exposure`):** Felder, die bewusst nur für andere Ziele freigegeben sind (z. B. „Nur Website“: Vita,
+  Über mich), gehen weder an CardDAV noch an CalDAV und werden von Apps nie geschrieben. „Nie öffentlich“ und „Redaktion
+  entscheidet“ sehen die Apps der Redaktion weiter vollständig; Freigaben je Eintrag setzt eine App nie zurück.
+- Inhaltstabellen behalten die freie Zuordnung unverändert.
+
 ## 1.3.1 (2026-11-21)
 
 - **Datenschutz: neue Kontakte aus Apps bei Tabellen mit Detailseiten als Entwurf.** Ohne gespeicherte Einstellung schlägt die
