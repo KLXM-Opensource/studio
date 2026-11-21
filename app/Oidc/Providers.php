@@ -39,6 +39,7 @@ final class Providers
         'claim_values' => [],
         'domains' => [],                // optional: erlaubte Domains der E-Mail-Adresse
         'logout' => false,              // beim Abmelden auch beim Anbieter abmelden (RP-initiated logout)
+        'logo_media' => 0,              // optional: Logo aus der Mediathek (sonst logo_uri aus der Discovery, Core\Oidc\Logo)
     ];
 
     /** Alle Anbieter dieser Website (mit Standardwerten, Geheimnis entschlüsselt) @return array<string, array> */
@@ -134,6 +135,12 @@ final class Providers
         return __('Mit {name} anmelden', ['name' => $n]);
     }
 
+    /** Logo für den Anmelde-Link (dekorativ): Mediathek → Discovery (logo_uri, lokal abgelegt) → neutrales Symbol */
+    public static function logoHtml(array $p): string
+    {
+        return Logo::html($p);
+    }
+
     public static function accountLabel(?array $p): string
     {
         $l = trim((string) ($p['account_label'] ?? ''));
@@ -192,6 +199,7 @@ final class Providers
             'jit' => !empty($in['jit']), 'mfa' => ($in['mfa'] ?? '') === 'trust' ? 'trust' : 'amr',
             'claim' => preg_replace('~[^\w.:-]~', '', (string) ($in['claim'] ?? '')), 'claim_values' => $list('claim_values'),
             'domains' => array_map('strtolower', $list('domains')), 'logout' => !empty($in['logout']),
+            'logo_media' => max(0, (int) ($in['logo_media'] ?? 0)),
         ];
         if ($enabled && ($p['issuer'] === '' || $p['client_id'] === '')) return __('Zum Einschalten brauchen Sie Issuer-Adresse und Client-ID.');
         $old[$id] = $p;
