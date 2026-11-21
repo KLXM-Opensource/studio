@@ -134,7 +134,8 @@ final class GraphicsController extends AdminController
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
-                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'),
+                'clean' => url('/admin/api/grafik/clean'), 'motionSvg' => url('/admin/api/grafik/motion-svg'), 'dataValues' => url('/admin/api/grafik/data-values'), 'appIcon' => url('/admin/api/grafik/app-icon'), 'usage' => url('/admin/api/grafik/usage'),
+                'presence' => \Core\Http\Controllers\Admin\PresenceController::on() ? url('/admin/api/presence') : '',
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
                 'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'), 'partUpdate' => url('/admin/api/grafik/part/update'), 'partsImport' => url('/admin/api/grafik/parts/import'),
             ],
@@ -143,6 +144,10 @@ final class GraphicsController extends AdminController
             'prefs' => Graphics::prefs(app()->auth->user()),
             // Formatvorlagen für Text aus der Bibliothek der Website
             'textStyles' => Graphics::textStyles(),
+            // Persona Daten: Datentabellen mit Feldern, Öffnungszeiten, Sonnenzeiten, aktuelle Zustände (Core\Graphics\Bind)
+            'data' => \Core\Graphics\Bind::forEditor(),
+            // Persona Export: „Als Favicon/App-Symbol der Website übernehmen“ – wie die Grundeinstellungen (App-Icon & PWA)
+            'canAppIcon' => can('system.manage'),
         ];
     }
 
@@ -198,6 +203,49 @@ final class GraphicsController extends AdminController
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }
+    }
+
+    /**
+     * Aktuelle Werte für die Vorschau der Persona Daten: POST {defs: {name: {t: table, tb, a, f, w, l}}} → {values: {name: Wert}, states}.
+     * Nur veröffentlichte Einträge, wie auf der Website (geschützte Tabellen und Eingangs-Tabellen liefern nichts).
+     */
+    public function dataValues(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $defs = is_array($r->post['defs'] ?? null) ? $r->post['defs'] : [];
+        $states = [];
+        foreach (\Core\Graphics\Bind::STATES as $s) $states[$s] = \Core\Graphics\Bind::state($s);
+        return Response::json(['ok' => true, 'values' => \Core\Graphics\Bind::preview($defs), 'states' => $states]);
+    }
+
+    /**
+     * Favicon und App-Symbole der Website aus einem Bereich des Grafik-Editors (Persona Export): POST {png: Base64 (512 × 512), name}.
+     * Nichts Eigenes: das Bild kommt in die Mediathek und wird – wie in den Grundeinstellungen „App-Icon & PWA“ – als
+     * „Bild oder Logo“ gesetzt; Core\AppIcons erzeugt daraus alle Größen (GD, kein Imagick nötig, weil schon PNG). Recht: system.manage.
+     */
+    public function appIcon(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if (!can('system.manage')) return Response::fail(__('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.'), 403);
+        $raw = base64_decode((string) ($r->post['png'] ?? ''), true);
+        if (!is_string($raw) || strlen($raw) < 100 || strlen($raw) > 4_000_000) return Response::fail(__('Kein gültiges Bild übermittelt.'));
+        $info = @getimagesizefromstring($raw);
+        if (!$info || $info['mime'] !== 'image/png' || $info[0] !== $info[1] || $info[0] < 256 || $info[0] > 2048) {
+            return Response::fail(__('Erwartet wird ein quadratisches PNG (256–2048 px).'));
+        }
+        $tmp = tempnam(sys_get_temp_dir(), 'appicon');
+        if ($tmp === false || file_put_contents($tmp, $raw) === false) return Response::fail(__('Datei konnte nicht gespeichert werden.'));
+        try {
+            $name = Media::fileSlug('app-symbol-' . Graphics::cleanName((string) ($r->post['name'] ?? ''))) . '.png';
+            [$m, $err] = Media::import($tmp, $name, '', ['decorative' => true, 'title' => __('App-Symbol (Grafik-Editor)')]);
+        } finally {
+            @unlink($tmp);
+        }
+        if ($err || !$m) return Response::fail((string) ($err ?: __('Speichern fehlgeschlagen.')));
+        app()->settings->setMany(['sys.icon_mode' => 'image', 'sys.icon_image' => (int) $m['id']]);
+        if ($e = \Core\AppIcons::generate()) return Response::fail($e);
+        $this->changed();
+        return Response::json(['ok' => true, 'mediaId' => (int) $m['id'], 'icon' => \Core\AppIcons::url('icon-192.png')]);
     }
 
     /** SVG nur bereinigen (Einbettungen ohne Ablage, fremdes SVG vor dem Laden): POST {svg} → {svg} */
@@ -317,6 +365,16 @@ final class GraphicsController extends AdminController
         }
         if (!$r->wantsJson()) return $this->back('/admin/grafik', 'success', $id ? __('Blockvorschau gilt jetzt in der Blockauswahl.') : __('Blockvorschau aufgehoben.'));
         return Response::json(['ok' => true]);
+    }
+
+    /** Verwendet auf: GET ?ref=media:{id}|graphic:{id} → {items: [{label, url, preview}]} (Seiten, Blöcke, Einträge; Blockauswahl) */
+    public function usage(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $ref = $r->str('ref');
+        if (!preg_match('~^(media|graphic):\d+$~', $ref)) return Response::fail(__('Unbekannte Grafik.'), 404);
+        if (str_starts_with($ref, 'graphic:') && ($g = Graphics::find((int) substr($ref, 8))) && ($deny = $this->needKind($r, (string) $g['kind']))) return $deny;
+        return Response::json(['ok' => true, 'items' => Graphics::usages($ref)]);
     }
 
     /** Frühere Fassung laden: GET ?ref=media:{id}|graphic:{id}&id={version} */

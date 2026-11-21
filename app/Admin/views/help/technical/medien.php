@@ -255,7 +255,8 @@
         <li><b>Website</b> (<code>Media::pictureOf()</code> → <code>Motion::inline()</code>): Die Web-Fassung trägt an der Wurzel die Klasse <code>ge-anim</code>
           (<code>optimizeSvg</code>); nur dann liest der Server die Arbeitsfassung (<code>Graphics::source()</code>, gilt nur bei gleicher Datei) und baut
           <code>Motion::build()</code>: <code>&lt;style&gt;</code> der Grafik und <code>style</code>-Attribute wandern als Regeln mit Wurzel-Klasse in eine
-          CSS-Datei (<code>{Medienordner}/grafik/m/gm-{id}-{hash}.css</code>, Name aus Datei, Modell, Design-Werten und <code>Motion::VERSION</code>;
+          CSS-Datei (<code>{Medienordner}/grafik/m/gm-{id}-{hash}.css</code>, Name aus Datei, Modell, Design-Werten und <code>Motion::generator()</code> –
+          Fassung plus Prüfsumme von <code>Motion.php</code> und <code>graphic-motion.js</code>, nach einem Update entstehen neue Dateien von selbst;
           Verweise <code>url(#…)</code> aus <code>style</code> werden Darstellungsattribute), Klassen bekommen ein Präfix, ids je Einbindung
           (<code>{K}-id</code>, weitere Einbindungen <code>{K}n2-id</code>, Verweise mit). Bewegte Elemente in <code>&lt;g class="gm-a gm-aN"&gt;</code> mit
           <code>transform-box: view-box; transform-origin: p</code> und CSS <code>translate/rotate/scale/opacity/stroke-dashoffset</code> (eigene
@@ -275,6 +276,14 @@
           SiteController, vor dem Seiten-Cache): sichtbar ab 25 % (IntersectionObserver), Klick/Enter/Leertaste, Hotspots, Zählen (eigener Takt mit
           derselben Zeitrechnung, Format aus <code>data-gm-count</code>), <code>.is-off</code> außerhalb des Bildes; nichts bei „Bewegung reduzieren“ und
           <code>.gm-still</code>. Auslöser „beim Laden“ ohne Schleife und „beim Zeigen“ brauchen kein Skript.</li>
+        <li><b>Anhalten (WCAG 2.2.2):</b> <code>Motion::needsPause($scene)</code> – Auslöser Laden/Sichtbar/Klick und <code>dl + d·it &gt; 5 s</code> oder endlos.
+          Dann hüllt <code>Motion::inline()</code> das SVG in <code>&lt;span class="cms-gm-box {K}-box"&gt;</code> mit einem echten
+          <code>&lt;button class="cms-gm-pause" hidden&gt;</code> (36 px, unten rechts, Farben <code>--kit-bg</code>/<code>--kit-ink</code>/<code>--kit-accent</code>,
+          <code>forced-colors</code>) und einer Statusmeldung <code>role="status"</code>; Texte über <code>lt()</code> („Animation anhalten/fortsetzen“,
+          „Animation angehalten/läuft“). Das Skript macht den Knopf sichtbar und setzt <code>.is-paused</code> (CSS hält wie <code>.is-off</code> an, Zählen
+          pausiert); angehalten bleibt angehalten, auch nach Scrollen. Beim Auslöser „beim Laden“ spielt die Szene mit Knopf über
+          <code>.is-armed</code>/<code>.is-play</code> – ohne Skript steht das Endbild. Bei „Bewegung reduzieren“ verschwindet der Knopf. Geprüft in Chromium und
+          WebKit (Tastatur, Name, Drehpunkt <code>transform-box: view-box</code>, Dunkel-Fassung, Link-Bereiche, CSP).</li>
         <li><b>Export:</b> Desktop/PDF als Standbild (<code>stillSvg()</code>, Ende bzw. Anfang; schreibt <code>transform</code>, <code>opacity</code>, Farben,
           Strichlänge fest), <b>animiertes SVG</b> über <code>POST /admin/api/grafik/motion-svg {svg, web}</code> → <code>Motion::standalone()</code> (beide
           Fassungen bereinigt, CSS als <code>&lt;style&gt;</code>, Auslöser „beim Laden“, Links absolut, Zählen zeigt den Endwert).</li>
@@ -284,6 +293,56 @@
         <li><b>Grenzen:</b> keine Pfad-Morphs (CSS <code>d</code> fehlt in Safari) – „Pfad folgen“ tastet den Weg ab (36 Punkte, gleichmäßig über die
           Länge); Skalierung nur gleichmäßig; Zeigen/Klick-Auslöser starten nicht im eigenständigen SVG.</li>
       </ul></li>
+    <li id="grafik-daten-technik"><b>Persona Daten</b> (<code>data.js</code>, <code>bind.js</code>, <code>Core\Graphics\Bind</code>):
+      <ul>
+        <li><b>Modell</b> (nur Arbeitsfassung, <code>Svg::clean</code> mit <code>'editor'</code>, Base64-JSON): an der Wurzel <code>data-ge-data</code>
+          <code>{v: {name: {t: 'table', tb, a: count|sum|avg|min|max|latest, f, w: [Feld, op, Wert], l}}}</code>, am Element <code>data-ge-bind</code>
+          <code>[{p: text|w|h|r|fill|stroke|o|show, v, …}]</code> – Text <code>tpl</code> (mit <code>{v}</code>), <code>fmt</code> (num, pct, cur, time, raw),
+          <code>d</code>; Länge <code>a: [min, max]</code>, Anker <code>o</code> im Raum des Elternelements, <code>c</code> begrenzen; Drehung <code>g: [Grad, Grad]</code>;
+          Farbe <code>m: scale|steps</code>, <code>c</code> bzw. <code>s: [[ab, Farbe]]</code>, <code>b</code> Grundfarbe; Sichtbarkeit <code>op</code>, <code>x</code>,
+          <code>y</code>. Zustände: <code>@uhrzeit</code> (5-Minuten-Schritte), <code>@tag</code> (<code>date_sun_info</code> am Ort <code>Maps::siteLocation()</code>,
+          Vortag/Tag/Folgetag geprüft; ohne Ort 7–19 Uhr), <code>@offen</code> (<code>HeaderActions::ranges()</code>), <code>@wochentag</code>, <code>@monat</code>,
+          <code>@datum</code> (MMTT). Anker/Drehpunkt rechnet der Editor vor jedem Protokollschritt nach (<code>syncAnchors</code>, wie der Drehpunkt in Motion).</li>
+        <li><b>Website:</b> Die Web-Fassung trägt <code>ge-bound</code> an der Wurzel; gebundene Texte werden beim Speichern nicht in Kurven umgewandelt.
+          <code>Media::pictureOf()</code> → <code>Bind::forMedia()</code>: Werte (<code>Bind::current()</code>: alle eigenen Werte + benutzte Zustände, Tabellen über
+          <code>Entries::count/query</code> nur veröffentlicht, geschützte und Eingangs-Tabellen liefern nichts), <code>Bind::apply()</code> (Elemente nach id:
+          <code>transform</code> vorangestellt – <code>translate·scale·translate</code> bzw. <code>rotate(a x y)</code> –, <code>fill</code>/<code>stroke</code> am Element und
+          an Kindern mit eigener Farbe, Design-Klassen <code>ge-[td][fs]-…</code> dieser Eigenschaft weichen, <code>opacity</code>, Sichtbarkeit entfernt das
+          Element, Text in den ersten Textknoten, <code>&lt;desc&gt;</code> + Werte), bereinigt als Datei <code>{Medienordner}/grafik/b/gb-{id}-{hash}.svg</code>
+          (Hash aus Erzeuger, Datei, Modell, Werten, Sprache; ältere nach einem Tag weg). Der Datensatz zeigt dann auf diese Datei
+          (<code>file</code>, <code>_bound</code>, <code>_work</code>) – Design-Farben (<code>Themed</code>) und Bewegung (<code>Motion</code>, Arbeitsfassung aus
+          <code>_work</code>) greifen wie sonst. Alt-Text: <code>Bind::alt()</code> ersetzt <code>{name}</code>, sonst werden die Werte angehängt.</li>
+        <li><b>Cache:</b> Datentabellen leeren beim Speichern den Seiten-Cache (<code>Entries::changed</code>). Zeitabhängige Zustände melden
+          <code>PageCache::until(Bind::nextChange())</code> (nächster Sonnenauf-/-untergang, nächstes Öffnen/Schließen, nächste 5 Minuten, Mitternacht);
+          <code>PageCache::put()</code> schreibt <code>{hash}.until</code>, <code>get()</code> erzeugt die Seite nach Ablauf neu. Kein Inline-Skript, kein Polling.</li>
+        <li><b>Editor:</b> <code>POST /admin/api/grafik/data-values {defs}</code> → aktuelle Werte für die Vorschau; Boot <code>data</code> =
+          <code>Bind::forEditor()</code> (Tabellen mit Feldern, Öffnungszeiten, Sonnenzeiten heute, Zustände jetzt). Vorschau: Kopie mit eingesetzten Werten
+          über dem Dokument (<code>applyAll</code>, gleiche Rechnung wie <code>Bind::apply</code>), Dokument bleibt die gezeichnete Fassung.</li>
+      </ul></li>
+    <li id="grafik-stile-technik"><b>Objektstile</b> (<code>objstyles.js</code>): <code>data-ge-ostyles</code> an der Wurzel (Base64 <code>[{n, props, fx}]</code>,
+      <code>props</code> = <code>OBJ_PROPS</code>, <code>fx</code> = Modell der Ebeneneffekte), am Objekt <code>data-ge-os</code> = Name; Anwenden setzt alle
+      Eigenschaften (fehlende zurück) und legt je Objekt einen eigenen Filter an. <b>Zeichenflächen</b>: Bereiche mit <code>k: 'board'</code> in
+      <code>data-ge-slices</code>, <code>addBoard()</code> erweitert <code>viewBox</code>/<code>width</code>/<code>height</code> nach rechts (Formate
+      <code>BOARDS</code>). Symbole mit Instanzen (<code>&lt;symbol&gt;</code>/<code>&lt;use&gt;</code> mit Überschreibungen) sind vorgesehen
+      (<code>data-ge-over</code> lässt die Bereinigung schon als Base64 zu), aber noch nicht gebaut.</li>
+    <li id="grafik-collab-technik"><b>Zusammenarbeit</b> (<code>collab.js</code>): Fassungen aus <code>graphic_versions</code>
+      (<code>Graphics::versions()</code> mit <code>user</code> = wer durch Speichern ersetzt hat), Vergleich nebeneinander bzw. überblendet (zwei
+      <code>&lt;img&gt;</code>, <code>clip-path</code> über <code>--x</code>, Regler und Ziehen), „Wiederherstellen“ = <code>load()</code> + <code>commit()</code>.
+      <code>GET /admin/api/grafik/usage?ref=…</code> → <code>Graphics::usages()</code> (Mediathek: <code>Media::usages()</code>; eigene Ablage: Zuordnung in der
+      Blockauswahl), Vorschau als verkleinertes <code>&lt;iframe&gt;</code> (gleicher Ursprung, erst auf Wunsch). Präsenz: <code>Core\Presence</code> mit Typ
+      <code>graphic</code> und id = ref (<code>PresenceController::allowed()</code>: Recht <code>media.upload</code>, Grafik vorhanden; „zuletzt gespeichert“ aus
+      <code>graphic_versions</code>), Herzschlag alle 15 s, <code>leave</code> beim Schließen; <code>save()</code> fragt über <code>Collab::confirmSave()</code> nach,
+      wenn jemand anderes seit dem Öffnen gespeichert hat.</li>
+    <li id="grafik-export-technik"><b>Persona Export</b> (<code>slices.js</code>, <code>raster.js</code>): Bereiche an der Wurzel als
+      <code>data-ge-slices</code> = Base64 <code>[{id, n, x, y, w, h, f: [svg|svgd|pdf|ico|app|social|socialjpg], bg, snap: {16: 1, …}}]</code> (nur
+      Arbeitsfassung). Überlagerung über den Persona-Haken <code>overlay()</code> in <code>draw()</code>. Vektor-Ausgaben mit <code>viewBox</code> = Bereich
+      (<code>optimizeSvg</code>, <code>desktopSvg</code>, <code>pdfBlob</code>); Pixel-Ausgaben – die einzigen des Editors – im Browser: Texte vorher in Kurven,
+      <code>renderPng()</code> (SVG → <code>&lt;img&gt;</code> → <code>&lt;canvas&gt;</code>, „contain“, Hintergrund), <code>snapToPixels()</code> (Ecken gerader Kanten und
+      Linienstärken auf ganze Pixel der Zielgröße, ungerade Stärken auf halbe; nur ohne Drehung), <code>icoFile()</code> (PNG-Einträge wie
+      <code>Core\AppIcons</code>), <code>zipFile()</code> (ohne Kompression, kein Fremdcode). Dateien: <code>-favicon.ico</code>, <code>-favicon-16/32/48.png</code>,
+      <code>-apple-touch-icon-180.png</code>, <code>-icon-192/512.png</code>, <code>-icon-maskable-512.png</code>, <code>-social-1200x630.png/.jpg</code>.
+      <code>POST /admin/api/grafik/app-icon {png}</code> (zusätzlich <code>system.manage</code>): quadratisches PNG → <code>Media::import</code>,
+      <code>sys.icon_mode = image</code>, <code>sys.icon_image</code>, <code>AppIcons::generate()</code> – dieselbe Mechanik wie die Grundeinstellungen.</li>
     <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
       <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
       und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +

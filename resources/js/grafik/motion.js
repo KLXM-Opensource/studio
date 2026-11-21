@@ -1161,7 +1161,9 @@ export class MotionPersona {
   checks(add) {
     const root = this.root, sc = getScene(root);
     if (!hasMotion(root)) return;
-    if (animated(root).length && sc.it === 0 && sc.tr !== 'hover') add({ key: 'loop', sev: 'warn', mode: null, title: t('Endlose Bewegung'), detail: t('Bewegung, die länger als 5 Sekunden läuft, sollte sich anhalten lassen (WCAG 2.2.2). Besser: wenige Wiederholungen oder Auslöser „bei Klick“. Außerhalb des Bildes hält sie an, bei „Bewegung reduzieren“ steht das Endbild.') });
+    // WCAG 2.2.2: länger als 5 s oder endlos → auf der Website erscheint immer ein Knopf „Animation anhalten“ (Core\Graphics\Motion,
+    // nicht abschaltbar) – nur noch ein Hinweis, keine Warnung
+    if (animated(root).length && sc.tr !== 'hover' && (sc.it === 0 || sc.dl + sc.d * sc.it > 5)) add({ key: 'loop', sev: 'info', mode: null, title: sc.it === 0 ? t('Endlose Bewegung') : t('Bewegung länger als 5 Sekunden'), detail: t('Auf der Website erscheint in der Ecke der Grafik ein Knopf „Animation anhalten“ (WCAG 2.2.2), außerhalb des Bildes hält die Bewegung an, bei „Bewegung reduzieren“ steht das Endbild.') });
     for (const el of root.querySelectorAll('[data-ge-link]')) {
       const name = el.getAttribute('data-ge-linklabel') || el.getAttribute('data-ge-tip') || nameOf(el);
       if (!name) add({ key: 'linkname', sev: 'error', mode: null, el, title: t('Link ohne Namen'), detail: t('Ein Link-Bereich braucht einen Namen für Screenreader (Bereich Interaktion).') });

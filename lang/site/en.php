@@ -421,4 +421,14 @@ return [
 
     // Bewegte Grafiken (Core\Graphics\Motion)
     'Animation abspielen' => 'Play animation',
+    'Animation anhalten' => 'Pause animation',
+    'Animation fortsetzen' => 'Resume animation',
+    'Animation angehalten' => 'Animation paused',
+    'Animation läuft' => 'Animation playing',
+    'Nacht' => 'Night',
+    'Tag oder Nacht' => 'Day or night',
+    'Uhrzeit' => 'Time of day',
+    'geöffnet' => 'open',
+    'Öffnungsstatus' => 'Opening status',
+    'Wochentag' => 'Weekday',
 ];

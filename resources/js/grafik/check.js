@@ -154,6 +154,7 @@ export function analyze(ed) {
   }
   // Bewegung und Interaktion (Persona Motion): endlose Schleifen, Links ohne Namen, Fokus- gegen Lesereihenfolge
   ed.motion?.checks(add);
+  ed.dataP?.checks(add);
   return out;
 }
 

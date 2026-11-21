@@ -22,6 +22,7 @@ import { layoutText } from './text.js';
 import { paintIn, darkState, setDark, propOf, swatchMap, paintedElements, invertLightness, tokensToVars, DARK_ATTR, TOKEN_ATTR } from './scheme.js';
 import { buildCheckPanel, backgroundIn } from './check.js';
 import { buildFx } from './fx.js';
+import { buildObjectStyles } from './objstyles.js';
 
 const BLEND = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
 const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), screen: t('Negativ multiplizieren'), overlay: t('Ineinanderkopieren'), darken: t('Abdunkeln'), lighten: t('Aufhellen'),
@@ -480,9 +481,11 @@ export function buildPanels(ed) {
   </div>`;
   lookPanel.innerHTML = lookHtml('') + `<div class="ge-form">
     <label class="ge-lbl" data-radiusrow>${esc(t('Eckenradius'))} <input type="number" class="ge-in ge-in--s" data-radius min="0" max="9999" step="1"></label>
-  </div><div data-fxbox></div>`;
+  </div><div data-fxbox></div><div class="ge-form" data-osbox2></div>`;
   // Ebeneneffekte (fx.js): Schlagschatten, innerer Schatten, Leuchten, Weichzeichnen, Kontur außen, Farbüberlagerung
   const fx = buildFx(ed, lookPanel.querySelector('[data-fxbox]'), { sel, commit });
+  // Objektstile (objstyles.js): Aussehen unter einem Namen merken und anwenden
+  const ostyles = buildObjectStyles(ed, lookPanel.querySelector('[data-osbox2]'), { sel, commit });
   function bindLook(box) {
     box.querySelector('[data-op]').addEventListener('input', e => { box.querySelector('[data-opo]').textContent = e.target.value + ' %'; for (const el of sel()) setProp(el, 'opacity', +e.target.value >= 100 ? null : num(+e.target.value / 100, 2)); ed.draw(); });
     box.querySelector('[data-op]').addEventListener('change', () => commit(t('Deckkraft')));
@@ -504,6 +507,7 @@ export function buildPanels(ed) {
     rr.hidden = !(el && el.localName === 'rect');
     if (!rr.hidden) box.querySelector('[data-radius]').value = num(parseFloat(el.getAttribute('rx') || el.getAttribute('ry') || '0'), 2);
     fx.render();
+    ostyles.render();
   }
 
   // ================================================================= Ebenen

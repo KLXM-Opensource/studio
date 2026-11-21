@@ -439,9 +439,12 @@ final class Svg
                     if (strlen($v) <= 20000 && preg_match('~^[A-Za-z0-9+/=]+$~', $v)) $dst->setAttribute($name, $v);
                     continue;
                 }
-                // Bewegung eines Elements (Motion-Persona, data-ge-anim): nur Base64, bis 120 000 Zeichen (Pfad folgen = viele Schlüsselbilder)
-                if ($name === 'data-ge-anim') {
-                    if (strlen($v) <= 120000 && preg_match('~^[A-Za-z0-9+/=]+$~', $v)) $dst->setAttribute($name, $v);
+                // Bewegung eines Elements (Motion-Persona, data-ge-anim): nur Base64, bis 120 000 Zeichen (Pfad folgen = viele Schlüsselbilder);
+                // Daten-Persona (data-ge-bind am Element, data-ge-data an der Wurzel), Export-Bereiche (data-ge-slices), Zeichenflächen
+                // (data-ge-boards), Symbol-Überschreibungen (data-ge-over): ebenso nur Base64
+                $b64 = ['data-ge-anim' => 120000, 'data-ge-bind' => 20000, 'data-ge-data' => 40000, 'data-ge-slices' => 20000, 'data-ge-boards' => 20000, 'data-ge-over' => 20000, 'data-ge-ostyles' => 20000][$name] ?? 0;
+                if ($b64) {
+                    if (strlen($v) <= $b64 && preg_match('~^[A-Za-z0-9+/=]+$~', $v)) $dst->setAttribute($name, $v);
                     continue;
                 }
                 $v = mb_substr(trim((string) preg_replace('~[\x00-\x1f<>"]+~', ' ', $v)), 0, 4000);
