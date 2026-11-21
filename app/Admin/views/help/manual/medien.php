@@ -118,7 +118,7 @@
   <h3 id="grafik-editor">Grafiken zeichnen und bearbeiten (Grafik-Editor)</h3>
   <p>Infografiken, einfache Schaubilder, Symbole und Skizzen für die Blockauswahl entstehen direkt in der Verwaltung – ohne
     Grafikprogramm. Der Editor ist aufgebaut wie Affinity Designer, Illustrator oder Fireworks: oben die <b>Personas</b>
-    (<b>Vektor</b> zum Zeichnen, <b>Motion</b> für Bewegung und Interaktion, <b>Daten</b> für Werte und Zustände, <b>Export</b> für Bereiche,
+    (<b>Vektor</b> zum Zeichnen, <b>Bild</b> für Fotos mit Text als Pixelbild (<a href="#grafik-bild">unten</a>), <b>Motion</b> für Bewegung und Interaktion, <b>Daten</b> für Werte und Zustände, <b>Export</b> für Bereiche,
     Favicon und App-Symbole – siehe <a href="#grafik-motion">unten</a>), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
     Auswahl, links die <b>Werkzeuge</b>, rechts die Bereiche <b>Farbe · Farbfelder · Kontur · Darstellung</b>,
     <b>Ebenen · Bibliothek · Symbole</b> und <b>Transformieren · Protokoll</b>, unten eine Statuszeile mit Tipps zum Werkzeug.</p>
@@ -276,6 +276,59 @@
     lädt die Dateien herunter (mehrere als ZIP), <b>Alle Bereiche als ZIP</b> alles in Ordnern. Pixel-Formate entstehen nur hier beim Herunterladen –
     die Grafik selbst bleibt Vektor. Mit dem Recht für die Grundeinstellungen übernimmt <b>Als Favicon/App-Symbol der Website übernehmen</b> den Bereich
     für die ganze Website (Grundeinstellungen → App-Icon &amp; PWA zeigt danach dieses Bild).</p>
+  <h4 id="grafik-bild">Bilder mit Foto und Text (Persona Bild)</h4>
+  <p>Mit <b>Bild</b> mischen Sie wie in Fireworks: Fotos aus der Mediathek, Texte, Formen und Verläufe in einem Dokument – zum Beispiel ein
+    Kopfbild für eine Veranstaltung oder ein Bild für soziale Netzwerke. Das <b>Ergebnis ist immer ein Pixelbild der Mediathek</b> (doppelte Auflösung,
+    die Mediathek erzeugt daraus alle Größen als WebP); die <b>Arbeitsfassung</b> mit Ebenen und Texten bleibt erhalten und lässt sich jederzeit wieder
+    öffnen. Infografiken ohne Foto bleiben reine Vektorgrafiken.</p>
+  <ol class="doc-steps">
+    <li><b>Neues Bild:</b> Mediathek → <b>Neu</b> → <b>Bild mit Foto und Text (1200 × 630)</b>. Der Editor öffnet sich in der Persona <b>Bild</b>.</li>
+    <li><b>Foto einfügen:</b> Bereich <b>Bild</b> → Reiter <b>Foto</b> → <b>Foto aus der Mediathek …</b>. Das erste Foto füllt die ganze Fläche (Hintergrund),
+      weitere erscheinen halb so groß in der Mitte. Das Foto wird nicht kopiert, sondern mit der Mediathek verknüpft – in der Mediathek steht danach unter
+      <b>Verwendet auf</b> „Bild aus dem Grafik-Editor“.</li>
+    <li><b>Ausschnitt:</b> Ein Foto füllt immer seinen Rahmen. Ohne eigene Einstellung zeigt es den <b>Fokuspunkt</b> aus der Mediathek; mit <b>Zoom</b>,
+      <b>Lage waagerecht</b> und <b>Lage senkrecht</b> wählen Sie einen anderen Ausschnitt, <b>Fokuspunkt der Mediathek</b> stellt ihn zurück. Den Rahmen
+      ziehen Sie wie jedes Objekt größer oder kleiner – der Ausschnitt folgt.</li>
+    <li><b>Korrektur:</b> <b>Helligkeit</b>, <b>Kontrast</b>, <b>Sättigung</b> und <b>Weichzeichnen</b> (wie unter „Bild anpassen“ in der Mediathek, aber nur
+      für dieses Bild – das Foto in der Mediathek bleibt unverändert). Dazu <b>Deckkraft</b> und <b>Mischmodus</b>.</li>
+    <li><b>Verlauf darüber</b> legt einen Verlauf von durchsichtig nach dunkel über das Foto – Text darauf bleibt lesbar. Farben und Richtung ändern Sie wie bei
+      jedem Verlauf. <b>Mit Form darüber beschneiden:</b> Foto und eine Form darüber auswählen (<kbd>⇧</kbd>-Klick) – das Foto erscheint nur innerhalb der Form
+      (Kreis, abgerundetes Rechteck …). Masken und Ebeneneffekte wirken wie bei Vektoren.</li>
+    <li><b>Speichern</b> (<kbd>⌘</kbd><kbd>S</kbd>): Dateiname, Titel und <b>Alt-Text</b> – <b>Vorschlag aus den Textebenen</b> übernimmt die Texte des Bildes;
+      ergänzen Sie, was das Foto zeigt. Unter <b>Ausgabe</b> wählen Sie weißen Hintergrund (JPEG) oder Transparenz (PNG).</li>
+  </ol>
+  <p><b>Wieder bearbeiten:</b> In der Mediathek öffnet <b>Im Grafik-Editor bearbeiten</b> (Rechtsklick oder im großen Bearbeitungsfenster) die Arbeitsfassung.
+    Speichern ersetzt das Bild – ID, Alt-Text und alle Verwendungen auf Seiten bleiben. Bearbeiten Sie das fertige Bild dagegen mit „Bild bearbeiten“,
+    überschreibt das nächste Speichern im Grafik-Editor diese Änderung. Pinsel und Retusche gibt es bewusst nicht – dafür ist ein Bildprogramm da.</p>
+  <h4 id="grafik-formate">Formate für soziale Netzwerke</h4>
+  <p>Reiter <b>Formate</b>: Aus einem Entwurf entstehen die üblichen Größen – <b>Link-Vorschau 1200 × 630</b>, <b>Beitrag quadratisch 1080 × 1080</b>,
+    <b>Beitrag hoch 1080 × 1350</b>, <b>Story 1080 × 1920</b>, <b>Kopfbild 1920 × 1080</b> oder eine freie Größe. Formate ankreuzen, <b>Formate anlegen</b> –
+    jedes Format wird eine eigene Zeichenfläche rechts neben dem Hauptformat. Danach bessern Sie jedes Format einzeln nach (Text verschieben, Größe ändern);
+    <b>Neu aus dem Hauptformat erzeugen</b> (Pfeile) baut es wieder nach den Regeln auf, der Papierkorb entfernt es.</p>
+  <p>Wo eine Ebene in anderen Formaten landet, bestimmt ihr <b>Anker</b> (Reiter Formate, eine Ebene auswählen): waagerecht <b>links</b>, <b>Mitte</b>,
+    <b>rechts</b> oder <b>Breite wächst mit</b>, senkrecht <b>oben</b>, <b>Mitte</b>, <b>unten</b> oder <b>Höhe wächst mit</b>; dazu <b>feste Größe</b>, wenn
+    sie nicht mit dem Format wachsen soll (z. B. ein Logo). Ohne eigene Einstellung schlägt der Editor einen Anker aus der Lage vor – ein Hintergrundfoto
+    wächst mit, ein Titel unten links bleibt unten links. Fotos füllen ihren neuen Rahmen nach dem Fokuspunkt; Texte werden nie verzerrt.</p>
+  <p>Beim Speichern wird <b>jedes Format ein eigenes Bild in der Mediathek</b> (im Dialog lassen sich einzelne abwählen) – so laden Sie für jede Plattform
+    die passende Datei hoch. Erneutes Speichern ersetzt alle Bilder.</p>
+  <h4 id="grafik-vorlagen">Vorlagen zum Ausfüllen</h4>
+  <p>Die Agentur bzw. Administration gestaltet ein Bild einmal und gibt nur einzelne Ebenen frei; die Redaktion füllt danach ein Formular aus und bekommt
+    fertige Bilder – ohne Editor und ohne das Layout zu verändern.</p>
+  <ol class="doc-steps">
+    <li><b>Vorlage gestalten</b> (Recht <b>Vorlagen für Bilder gestalten</b>, unter Benutzer &amp; Rollen; standardmäßig nur die Administration): Bild wie
+      gewohnt gestalten, dann Reiter <b>Vorlage</b>. Ebene auswählen und unter <b>Freigeben als</b> festlegen: <b>Bild</b> (Fotos), <b>Text</b> (mit Bezeichnung,
+      einzeilig oder mehrzeilig, höchstens Zeichen, Zeilen und kleinste Schrift in %), <b>Farbe</b> (nur aus den Design-Farben der Website) oder
+      <b>Ein/Aus</b> (z. B. ein Verlauf oder ein Störer). Alles, was nicht freigegeben ist, bleibt gesperrt.</li>
+    <li><b>Als Vorlage speichern …</b> mit Namen – für <b>diese Website</b> oder <b>alle Websites der Installation</b>. Vorhandene Vorlagen finden Sie in der
+      <a href="<?= e(url('/admin/grafik')) ?>">Grafik-Ablage</a> unter <b>Vorlagen zum Ausfüllen</b> (bearbeiten, löschen, neue gestalten). Formate, die Sie
+      in der Vorlage schon angelegt und nachgebessert haben, verwendet das Formular so, wie sie sind.</li>
+    <li><b>Ausfüllen</b> (Redaktion): Mediathek → <b>Neu</b> → <b>Aus Vorlage erstellen …</b>, Vorlage wählen. Links die Felder – <b>Bild wählen …</b> öffnet
+      die Mediathek, Texte zeigen, wie viele Zeichen noch gehen –, rechts die <b>Vorschau</b> je Format. Wird ein Text zu lang, wird die Schrift kleiner, bis
+      zur kleinsten Größe der Vorlage; reicht das nicht, erscheint am Feld ein Hinweis. Formate ankreuzen, Dateiname und Alt-Text (Vorschlag aus den Texten)
+      prüfen, <b>Bilder erstellen</b>.</li>
+  </ol>
+  <p>Die fertigen Bilder stehen danach ausgewählt in der Mediathek. <b>Felder der Vorlage ändern …</b> (Rechtsklick auf das Bild) öffnet das Formular mit den
+    bisherigen Werten wieder – Speichern ersetzt die Bilder, ihre Verwendungen bleiben.</p>
   <h4 id="grafik-stile">Objektstile und Zeichenflächen</h4>
   <p><b>Objektstile</b> (Bereich <b>Darstellung</b>, unten): <b>Stil aus Auswahl …</b> merkt sich das Aussehen des gewählten Objekts – Füllung, Kontur
     (Farbe, Stärke, Strichmuster, Enden, Ecken), Deckkraft, Mischmodus und Ebeneneffekte – unter einem Namen. <b>Anwenden</b> gibt anderen Objekten

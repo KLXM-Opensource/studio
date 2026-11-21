@@ -1,7 +1,7 @@
 <?php
 /**
  * Verwaltung → Medien → Grafiken: eigene Ablage des Grafik-Editors (Symbole, Blockvorschauen, Bausteine) – nicht in der Mediathek.
- * @var array $groups  @var array $blocks
+ * @var array $groups  @var array $blocks  @var ?array $templates (Persona Bild: Vorlagen zum Ausfüllen, nur mit „graphics.templates“)
  */
 $labels = \Core\Graphics\Graphics::formatLabels();
 $titles = ['preview' => __('Blockvorschauen'), 'icon' => __('Symbole'), 'part' => __('Eigene Bausteine')];
@@ -59,3 +59,29 @@ $help = [
   <?php endif; ?>
 </section>
 <?php endforeach; ?>
+
+<?php if (is_array($templates ?? null)): /* Vorlagen zum Ausfüllen (Persona Bild) – nur mit „Vorlagen gestalten“ */ ?>
+<section class="adm-card ge-store" aria-labelledby="ge-h-template">
+  <h2 id="ge-h-template"><?= e(__('Vorlagen zum Ausfüllen')) ?> <span class="adm-muted">(<?= count($templates) ?>)</span></h2>
+  <p class="adm-muted"><?= e(__('Bilder mit freigegebenen Feldern (Bild, Text, Farbe, Ein/Aus): Die Redaktion füllt sie in der Mediathek aus (Neu → Aus Vorlage erstellen) und bekommt fertige Bilder je Format.')) ?></p>
+  <p><button type="button" class="adm-btn adm-btn--small" data-ge-open data-format="info" data-w="1200" data-h="630" data-out="jpeg" data-persona="bild"><?= icon('plus') ?> <?= e(__('Neue Vorlage gestalten')) ?></button></p>
+  <?php if (!$templates): ?>
+    <p class="ge-store__empty"><?= e(__('Noch keine.')) ?></p>
+  <?php else: ?>
+  <ul class="ge-store__grid">
+    <?php foreach ($templates as $tp): ?>
+    <li class="ge-store__item ge-store__item--template">
+      <span class="ge-store__pv" aria-hidden="true"><?= icon('image') ?></span>
+      <strong class="ge-store__name"><?= e($tp['name']) ?></strong>
+      <small class="adm-muted"><?= e($tp['width'] . ' × ' . $tp['height']) ?> · <?= e($tp['scope'] === 'network' ? __('alle Websites') : __('diese Website')) ?> · <?= e(__('{n} Felder', ['n' => count($tp['fields'])])) ?></small>
+      <span class="ge-store__acts">
+        <a class="adm-btn adm-btn--small" href="<?= e(url('/admin/grafik/editor?template=' . $tp['ref'])) ?>" data-ge-open data-template="<?= e($tp['ref']) ?>"><?= icon('pencil-simple') ?> <?= e(__('Bearbeiten')) ?></a>
+        <form method="post" action="<?= e(url('/admin/api/grafik/template/delete')) ?>" data-confirm="<?= e(__('„{name}“ löschen?', ['name' => $tp['name']])) ?>"><?= csrf_field() ?><input type="hidden" name="ref" value="<?= e($tp['ref']) ?>">
+          <button class="adm-btn adm-btn--small adm-btn--danger-text" type="submit"><?= e(__('Löschen')) ?></button></form>
+      </span>
+    </li>
+    <?php endforeach; ?>
+  </ul>
+  <?php endif; ?>
+</section>
+<?php endif; ?>

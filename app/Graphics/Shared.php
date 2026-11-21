@@ -22,7 +22,7 @@ final class Shared
     public static function all(): array
     {
         try {
-            $rows = Network::db()->fetchAll('SELECT id, name, folder, svg, width, height, site FROM graphic_shared ORDER BY folder, name, id');
+            $rows = Network::db()->fetchAll("SELECT id, name, folder, svg, width, height, site FROM graphic_shared WHERE kind IS NULL OR kind = '' OR kind = 'part' ORDER BY folder, name, id");
         } catch (\Throwable) {
             return [];   // Netzwerk-Datenbank nicht erreichbar: keine gemeinsamen Bausteine
         }

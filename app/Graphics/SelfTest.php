@@ -50,6 +50,7 @@ final class SelfTest
         self::sanitize();
         self::editorData();
         self::permissions();
+        self::bildClean();
         $db = app()->db;
         $db->pdo->beginTransaction();
         $files = [];
@@ -62,6 +63,7 @@ final class SelfTest
             self::themed($files);
             self::motion($files);
             self::bind($files);
+            self::bild($files);
         } catch (\Throwable $e) {
             self::$fails[] = 'Ausnahme: ' . $e->getMessage();
         } finally {
@@ -556,5 +558,139 @@ final class SelfTest
         if ($m2) $files[] = Media::path($m2);
         self::t(count(Graphics::versions('media:' . $m['id'])) === 1, 'vorige Fassung der Mediathek-Grafik gespeichert');
         self::t(str_contains((string) Graphics::version('media:' . $m['id'], Graphics::versions('media:' . $m['id'])[0]['id'] ?? 0), '#5B73AD'), 'Fassung enthält den alten Stand');
+    }
+
+    // ================================================================= Ausbaustufe 6: Persona Bild, Formate, Vorlagen
+
+    /** Foto-Ebenen sind nur Platzhalter mit Verweis (data-ge-photo) – nie Pixel; Website-SVGs bleiben reine Vektoren */
+    private static function bildClean(): void
+    {
+        $ph = base64_encode((string) json_encode(['m' => 7, 'fx' => 30, 'b' => 120]));
+        $fl = base64_encode((string) json_encode(['k' => 'f1', 'n' => 'Titel', 't' => 'text', 'max' => 40]));
+        $work = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" data-ge-out="jpeg"><rect data-ge-photo="' . $ph . '" x="0" y="0" width="1200" height="630" fill="#B8C0CC"/>'
+            . '<text x="60" y="560" data-ge-field="' . $fl . '" data-ge-anchor="l b k">Sommerfest</text>'
+            . '<image width="10" height="10" href="/media/foto.jpg"/><image width="10" height="10" href="https://example.org/foto.jpg"/></svg>';
+        $e = Svg::clean($work, ['editor' => true]);
+        try {
+            Svg::clean(str_replace('href="/media/foto.jpg"', 'href="data:image/png;base64,iVBORw0KGgo="', $work), ['editor' => true]);
+            self::t(false, 'Arbeitsfassung mit eingebettetem Foto abgelehnt');
+        } catch (\RuntimeException) {
+            self::t(true, '');
+        }
+        self::t(str_contains($e['svg'], 'data-ge-photo="' . $ph . '"') && str_contains($e['svg'], 'data-ge-field="' . $fl . '"'), 'Arbeitsfassung: Foto-Verweis und Feld bleiben (Base64)');
+        self::t(str_contains($e['svg'], 'data-ge-anchor="l b k"') && str_contains($e['svg'], 'data-ge-out="jpeg"'), 'Arbeitsfassung: Anker und Ausgabe bleiben');
+        self::t(!str_contains($e['svg'], '<image') && $e['images'] === 2, 'Arbeitsfassung: <image> (eingebettet oder Adresse) wird entfernt und gezählt');
+        $bad = Svg::clean('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect data-ge-photo="&lt;script&gt;" width="5" height="5"/></svg>', ['editor' => true]);
+        self::t(!str_contains($bad['svg'], 'data-ge-photo'), 'Arbeitsfassung: Foto-Verweis nur als Base64');
+        $w = Svg::clean($work, ['keep_ids' => true]);
+        self::t(!str_contains($w['svg'], 'data-ge-') && !str_contains($w['svg'], '<image'), 'Website-SVG: keine Editor-Daten, keine Bilder');
+        self::t(Compose::photoIds($e['svg']) === [7] && Compose::isRaster($e['svg']) && !Compose::isRaster(self::SAMPLE), 'Fotos der Arbeitsfassung erkannt (photoIds, isRaster)');
+        self::t(Compose::suggestAlt($e['svg']) === 'Sommerfest', 'Alt-Vorschlag aus den Textebenen');
+        // Felder einer Vorlage
+        $f = Templates::fields($e['svg']);
+        self::t(count($f) === 1 && $f[0]['k'] === 'f1' && ($f[0]['max'] ?? 0) === 40 && $f[0]['t'] === 'text', 'Felder der Vorlage gelesen');
+        self::t(Templates::cleanField(['k' => '<x>', 't' => 'text']) === null && Templates::cleanField(['k' => 'a', 't' => 'script']) === null, 'ungültige Felder verworfen');
+        $v = Templates::validate($e['svg'], ['f1' => str_repeat('x', 41), 'nope' => 'y'], []);
+        self::t(count($v['errors']) === 1 && mb_strlen((string) $v['vals']['f1']) === 40 && !isset($v['vals']['nope']), 'Text länger als erlaubt → Hinweis, gekürzt; unbekannte Felder fallen weg');
+        $v = Templates::validate($e['svg'], ['f1' => "<b>Fest</b>\nim Garten"], []);
+        self::t(!$v['errors'] && $v['vals']['f1'] === 'Fest im Garten', 'Text ohne Markup, einzeilig ohne Umbruch');
+        $col = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="5" height="5" data-ge-field="' . base64_encode('{"k":"c","n":"Farbe","t":"color"}') . '"/><rect data-ge-photo="' . $ph . '" width="5" height="5" data-ge-field="' . base64_encode('{"k":"i","n":"Foto","t":"image"}') . '"/></svg>';
+        $v = Templates::validate($col, ['c' => '#ff0000', 'i' => 999999], ['accent']);
+        self::t(count($v['errors']) === 2 && !isset($v['vals']['c']) && !isset($v['vals']['i']), 'Farbe nur aus Design-Farben, Bild nur aus der Mediathek');
+        self::t(Templates::validate($col, ['c' => 'accent'], ['accent'])['vals'] === ['c' => 'accent'], 'Design-Farbe angenommen');
+    }
+
+    /** Bild speichern (Mediathek, Ersetzen hält die ID), Verwendungen der Quellfotos, Vorlagen ablegen und Rechte */
+    private static function bild(array &$files): void
+    {
+        if (!function_exists('imagejpeg')) return;
+        $jpeg = function (int $w, int $h, array $rgb) use (&$files): string {
+            $im = imagecreatetruecolor($w, $h);
+            imagefill($im, 0, 0, (int) imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]));
+            $p = (string) tempnam(sys_get_temp_dir(), 'bild');
+            imagejpeg($im, $p, 90);
+            $files[] = $p;
+            return $p;
+        };
+        $track = function (?array $m) use (&$files): void { if ($m) foreach (Media::fileList($m) as $f) $files[] = Media::dir() . '/' . $f; };
+        [$src, $err] = Media::import($jpeg(800, 600, [40, 120, 60]), 'selbsttest-quellfoto.jpg', 'Selbsttest: Wiese');
+        self::t($src !== null, 'Quellfoto angelegt' . ($err ? " ($err)" : ''));
+        if (!$src) return;
+        $track($src);
+        $ph = base64_encode((string) json_encode(['m' => (int) $src['id']]));
+        $work = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" data-ge-out="jpeg"><rect data-ge-photo="' . $ph . '" width="1200" height="630" fill="#B8C0CC"/><text x="60" y="560">Selbsttest-Bild</text></svg>';
+        $res = Compose::save($work, ['name' => 'selbsttest-bild', 'alt' => 'Selbsttest: Bild mit Text'], null, [['board' => 'main', 'path' => $jpeg(1200, 630, [200, 30, 30])], ['board' => 's1', 'path' => $jpeg(1080, 1080, [30, 30, 200])]]);
+        $out = $res['outputs'];
+        self::t(isset($out['main'], $out['s1']) && !$res['errors'], 'Bild gespeichert: je Format ein Medium');
+        if (!isset($out['main'], $out['s1'])) return;
+        $main = Media::find((int) $out['main']['id']);
+        $track($main);
+        $track(Media::find((int) $out['s1']['id']));
+        self::t(($main['mime'] ?? '') === 'image/jpeg' && (int) ($main['width'] ?? 0) === 1200 && (string) ($main['alt'] ?? '') === 'Selbsttest: Bild mit Text', 'Ausgabe ist ein Pixelbild der Mediathek mit Alt-Text');
+        self::t(str_contains((string) ($main['variants_json'] ?? ''), 'webp'), 'Mediathek erzeugt die Größen (WebP)');
+        $g = Compose::find($res['id']);
+        self::t($g !== null && str_contains((string) $g['svg'], 'data-ge-photo') && !str_contains((string) $g['svg'], '<image'), 'Arbeitsfassung in der eigenen Ablage, Foto nur als Verweis');
+        self::t(Compose::forMedia((int) $out['main']['id']) === $res['id'], 'Mediathek → Arbeitsfassung (Bearbeiten)');
+        self::t(!in_array($res['id'], array_column(Graphics::all('part'), 'id'), true), 'Bilder liegen nicht bei den Bausteinen der Bibliothek');
+        self::t((Media::toJson((array) $main)['compose'] ?? null) === $res['id'], 'Media::toJson nennt die Arbeitsfassung');
+        $u = Media::usages((int) $src['id']);
+        self::t((bool) array_filter($u, fn($x) => str_contains((string) $x['label'], 'selbsttest-bild')), 'Quellfoto: „Verwendet auf“ zeigt das Bild');
+        self::t(isset(Compose::usedIds()[(int) $src['id']]), 'Quellfoto gilt als verwendet');
+        $res2 = Compose::save(str_replace('Selbsttest-Bild', 'Selbsttest-Bild 2', $work), ['name' => 'selbsttest-bild', 'alt' => 'Selbsttest: Bild mit Text'], $res['id'], [['board' => 'main', 'path' => $jpeg(1200, 630, [30, 200, 30])]]);
+        self::t(($res2['outputs']['main']['id'] ?? 0) === (int) $out['main']['id'], 'Erneut speichern ersetzt das Bild (ID bleibt)');
+        $track(Media::find((int) $out['main']['id']));
+        self::t(count(Graphics::versions('graphic:' . $res['id'])) === 1, 'vorige Arbeitsfassung als Fassung gespeichert');
+        self::t(array_keys(Compose::outputs($res['id'])) === ['main'] && Media::find((int) $out['s1']['id']) !== null, 'entferntes Format: Verbindung gelöst, Bild bleibt in der Mediathek');
+        try {
+            Compose::save($work, ['name' => 'x', 'alt' => 'x x x'], null, [['board' => 'main', 'path' => $jpeg(1, 1, [0, 0, 0]) . '-fehlt']]);
+            self::t(false, 'kein Bild → abgelehnt');
+        } catch (\RuntimeException) {
+            self::t(true, '');
+        }
+        try {
+            Templates::store('site', 'x', $work);
+            self::t(false, 'Vorlage ohne Felder abgelehnt');
+        } catch (\RuntimeException) {
+            self::t(true, '');
+        }
+        $tw = str_replace('<text x="60" y="560">', '<text x="60" y="560" data-ge-field="' . base64_encode('{"k":"t","n":"Titel","t":"text","max":30}') . '">', $work);
+        $tp = Templates::store('site', 'Selbsttest-Vorlage', $tw);
+        self::t(($tp['ref'] ?? '') !== '' && count($tp['fields'] ?? []) === 1 && in_array($tp['ref'] ?? '', array_column(Templates::all(), 'ref'), true), 'Vorlage gespeichert und gelistet');
+        self::t(!in_array('Selbsttest-Vorlage', array_column(Graphics::partsForEditor(), 'name'), true), 'Vorlagen erscheinen nicht unter den Bausteinen');
+        self::t(Templates::delete((string) ($tp['ref'] ?? '')) && Templates::get((string) ($tp['ref'] ?? '')) === null, 'Vorlage gelöscht');
+        $a = app()->auth;
+        $saved = [];
+        foreach (['loaded', 'user', 'role'] as $prop) $saved[$prop] = (new \ReflectionProperty($a, $prop))->getValue($a);
+        $sess = app()->session;
+        $started = new \ReflectionProperty($sess, 'started');
+        $was = $started->getValue($sess);
+        $started->setValue($sess, true);
+        $tok = bin2hex(random_bytes(16));
+        $_SESSION['_csrf'] = $tok;
+        $srv = ['HTTP_HOST' => 'www.example.org', 'HTTP_ACCEPT' => 'application/json'];
+        try {
+            $c = new GraphicsController();
+            self::actAs(['media.upload', 'pages.edit']);
+            self::t(!Templates::can() && Graphics::canKind(Compose::KIND) && !Graphics::canKind(Templates::KIND), 'Redaktion: Bilder ja, Vorlagen gestalten nein');
+            $r = $c->template(new Request('POST', '/admin/api/grafik/template', [], ['svg' => $tw, 'name' => 'x', '_csrf' => $tok], [], $srv));
+            self::t($r->status === 403, 'Vorlage speichern ohne Recht → 403');
+            $r = $c->templateDelete(new Request('POST', '/admin/api/grafik/template/delete', [], ['ref' => 'site:1', '_csrf' => $tok], [], $srv));
+            self::t($r->status === 403, 'Vorlage löschen ohne Recht → 403');
+            $r = $c->boot(new Request('GET', '/admin/api/grafik/boot', ['template' => 'site:1'], [], [], $srv));
+            self::t($r->status === 403, 'Vorlage im Editor öffnen ohne Recht → 403');
+            $r = $c->templates(new Request('GET', '/admin/api/grafik/templates', [], [], [], $srv));
+            self::t($r->status === 200, 'Vorlagen ausfüllen: Liste mit „media.upload“');
+            self::actAs(['media.upload', 'graphics.templates']);
+            self::t(Templates::can(), 'mit „graphics.templates“: Vorlagen gestalten');
+            self::actAs(['graphics.templates']);
+            self::t(!Templates::can(), 'ohne „media.upload“ auch mit Vorlagen-Recht nicht');
+        } catch (\Throwable $e) {
+            self::t(false, 'Rechte Vorlagen: ' . $e->getMessage());
+        } finally {
+            foreach ($saved as $prop => $v) (new \ReflectionProperty($a, $prop))->setValue($a, $v);
+            $started->setValue($sess, $was);
+            unset($_SESSION['_csrf']);
+        }
+        self::t(in_array('graphics.templates', \Core\Permissions::all(), true), 'Recht „Vorlagen gestalten“ im Katalog');
     }
 }

@@ -441,8 +441,11 @@ final class Svg
                 }
                 // Bewegung eines Elements (Motion-Persona, data-ge-anim): nur Base64, bis 120 000 Zeichen (Pfad folgen = viele Schlüsselbilder);
                 // Daten-Persona (data-ge-bind am Element, data-ge-data an der Wurzel), Export-Bereiche (data-ge-slices), Zeichenflächen
-                // (data-ge-boards), Symbol-Überschreibungen (data-ge-over): ebenso nur Base64
-                $b64 = ['data-ge-anim' => 120000, 'data-ge-bind' => 20000, 'data-ge-data' => 40000, 'data-ge-slices' => 20000, 'data-ge-boards' => 20000, 'data-ge-over' => 20000, 'data-ge-ostyles' => 20000][$name] ?? 0;
+                // (data-ge-boards), Symbol-Überschreibungen (data-ge-over): ebenso nur Base64. Persona Bild (Ausbaustufe 6): Foto-Ebene
+                // (data-ge-photo = Verweis auf die Mediathek-ID samt Ausschnitt/Korrektur – ein Platzhalter-Rechteck, nie ein <image>)
+                // und Felder einer Vorlage (data-ge-field) ebenso nur als Base64
+                $b64 = ['data-ge-anim' => 120000, 'data-ge-bind' => 20000, 'data-ge-data' => 40000, 'data-ge-slices' => 20000, 'data-ge-boards' => 20000, 'data-ge-over' => 20000, 'data-ge-ostyles' => 20000,
+                    'data-ge-photo' => 4000, 'data-ge-field' => 4000][$name] ?? 0;
                 if ($b64) {
                     if (strlen($v) <= $b64 && preg_match('~^[A-Za-z0-9+/=]+$~', $v)) $dst->setAttribute($name, $v);
                     continue;

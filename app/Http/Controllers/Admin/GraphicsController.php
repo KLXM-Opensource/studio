@@ -6,7 +6,9 @@ declare(strict_types=1);
 namespace Core\Http\Controllers\Admin;
 
 use Core\Graphics\Graphics;
+use Core\Graphics\Compose;
 use Core\Graphics\Library;
+use Core\Graphics\Templates;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Media;
@@ -29,6 +31,8 @@ final class GraphicsController extends AdminController
         return $this->view('grafik/index', [
             'css' => ['css/grafik.css'],
             'groups' => $groups,
+            // Vorlagen zum Ausfüllen (Persona Bild) – nur mit „graphics.templates“
+            'templates' => Templates::can() ? Templates::all() : null,
             'blocks' => Graphics::canKind('preview') ? Graphics::blockTypes() : [],
         ]);
     }
@@ -74,6 +78,8 @@ final class GraphicsController extends AdminController
             'id' => null, 'block' => null, 'ref' => null];
         $mediaId = (int) $r->str('media');
         $id = (int) $r->str('id');
+        // Bild aus dem Grafik-Editor (Persona Bild): „Bearbeiten“ in der Mediathek öffnet die Arbeitsfassung
+        if ($mediaId > 0 && ($cid = Compose::forMedia($mediaId))) { $id = $cid; $mediaId = 0; }
         if ($mediaId > 0) {
             $m = Media::find($mediaId);
             if (!$m || ($m['mime'] ?? '') !== Svg::MIME) return ['error' => __('Nur SVG-Grafiken lassen sich im Grafik-Editor bearbeiten.')];
@@ -88,9 +94,24 @@ final class GraphicsController extends AdminController
             }
             $doc = ['svg' => $svg, 'mediaId' => $mediaId, 'name' => pathinfo((string) $m['file'], PATHINFO_FILENAME), 'alt' => (string) ($m['alt'] ?? ''),
                 'title' => (string) ($m['title'] ?? ''), 'shared' => !empty($m['pool_ref']), 'ref' => 'media:' . $mediaId] + $doc;
+        } elseif (preg_match('~^(site|net):\d+$~', $r->str('template'))) {
+            // Vorlage gestalten (Persona Bild): nur mit „graphics.templates“
+            if (!Templates::can()) return ['denied' => __('Für Vorlagen fehlt Ihrer Rolle die Berechtigung.')];
+            $tp = Templates::get($r->str('template'));
+            if (!$tp) return ['error' => __('Vorlage nicht gefunden.')];
+            $doc = ['format' => 'info', 'target' => 'template', 'kind' => 'template', 'svg' => (string) $tp['svg'], 'name' => (string) $tp['name'],
+                'template' => $tp['ref'], 'templateScope' => $tp['scope'], 'ref' => $tp['scope'] === 'site' ? 'graphic:' . $tp['id'] : null] + $doc;
+        } elseif ($id > 0 && ($cg = Compose::find($id))) {
+            // Bild aus dem Grafik-Editor (Persona Bild): Arbeitsfassung, Ausgaben je Zeichenfläche
+            $doc = ['format' => 'info', 'target' => 'compose', 'kind' => Compose::KIND, 'svg' => (string) $cg['svg'], 'id' => (int) $cg['id'], 'name' => (string) $cg['name'],
+                'outputs' => Compose::outputs((int) $cg['id']), 'changedOutputs' => Compose::changedOutputs((int) $cg['id']), 'tpl' => $cg['tpl'] ? (string) $cg['tpl'] : null, 'vals' => $cg['vals'] ? json_decode((string) $cg['vals'], true) : null,
+                'ref' => 'graphic:' . (int) $cg['id']] + $doc;
+            $main = Compose::outputs((int) $cg['id'])['main'] ?? null;
+            if ($main && ($mm = Media::find($main))) $doc = array_merge($doc, ['alt' => (string) $mm['alt'], 'title' => (string) ($mm['title'] ?? ''), 'decorative' => !empty($mm['decorative']), 'mainMedia' => $main]);
         } elseif ($id > 0) {
             $g = Graphics::find($id);
             if (!$g) return ['error' => __('Grafik nicht gefunden.')];
+            if (in_array($g['kind'], [Compose::KIND, Templates::KIND], true)) return ['error' => __('Grafik nicht gefunden.')];
             if (!Graphics::canKind((string) $g['kind'])) return ['denied' => __('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.')];
             $fmt = $g['kind'] === 'part' ? 'info' : (string) $g['kind'];
             $doc = ['format' => $fmt, 'target' => 'graphics', 'kind' => (string) $g['kind'], 'svg' => (string) $g['svg'], 'id' => (int) $g['id'],
@@ -104,7 +125,7 @@ final class GraphicsController extends AdminController
             $svg = $fmt === 'preview' && $block ? Graphics::previewTemplate($block) : null;
             $blocks = $block ? Graphics::blockTypes() : [];
             $doc = ['format' => $fmt, 'target' => Graphics::FORMATS[$fmt]['store'], 'kind' => $fmt === 'info' ? null : $fmt,
-                'svg' => $svg ?? Graphics::blank($fmt, (int) $r->str('w'), (int) $r->str('h')), 'block' => $block,
+                'svg' => $svg ?? self::blankOut(Graphics::blank($fmt, (int) $r->str('w'), (int) $r->str('h')), $fmt === 'info' ? $r->str('out') : ''), 'block' => $block,
                 'name' => $block ? (string) ($blocks[$block] ?? $block) : ''] + $doc;
         }
         $doc['versions'] = $doc['ref'] ? Graphics::versions((string) $doc['ref']) : [];
@@ -148,7 +169,18 @@ final class GraphicsController extends AdminController
             'data' => \Core\Graphics\Bind::forEditor(),
             // Persona Export: „Als Favicon/App-Symbol der Website übernehmen“ – wie die Grundeinstellungen (App-Icon & PWA)
             'canAppIcon' => can('system.manage'),
+            // Persona Bild (Ausbaustufe 6): Fotos der Arbeitsfassung (Mediathek), Vorlagen gestalten (Recht „graphics.templates“)
+            'photos' => (object) Compose::photoInfo(Compose::photoIds((string) $doc['svg'])),
+            'canTemplates' => Templates::can(),
+            'compose' => ['maxPx' => Compose::MAX_PX, 'chunk' => url('/admin/media/chunk'), 'photos' => url('/admin/api/grafik/photos'), 'save' => url('/admin/api/grafik/compose'),
+                'templates' => url('/admin/api/grafik/templates'), 'template' => url('/admin/api/grafik/template'), 'templateDelete' => url('/admin/api/grafik/template/delete')],
         ];
+    }
+
+    /** Neues Bild (Persona Bild, out=jpeg|png): Pixel-Ausgabe an der leeren Fläche vormerken */
+    private static function blankOut(string $svg, string $out): string
+    {
+        return in_array($out, ['jpeg', 'png'], true) ? (string) preg_replace('~^<svg ~', '<svg data-ge-out="' . $out . '" ', $svg, 1) : $svg;
     }
 
     /**
@@ -375,6 +407,96 @@ final class GraphicsController extends AdminController
         if (!preg_match('~^(media|graphic):\d+$~', $ref)) return Response::fail(__('Unbekannte Grafik.'), 404);
         if (str_starts_with($ref, 'graphic:') && ($g = Graphics::find((int) substr($ref, 8))) && ($deny = $this->needKind($r, (string) $g['kind']))) return $deny;
         return Response::json(['ok' => true, 'items' => Graphics::usages($ref)]);
+    }
+
+    // ================================================================= Persona Bild: Fotos, Bilder, Vorlagen (Core\Graphics\Compose, Templates)
+
+    /** Angaben zu Fotos der Mediathek (Anzeige, Original, Maße, Fokuspunkt): GET ?ids=1,2,3 */
+    public function photos(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $ids = array_filter(array_map('intval', explode(',', $r->str('ids'))));
+        return Response::json(['ok' => true, 'photos' => (object) Compose::photoInfo($ids)]);
+    }
+
+    /**
+     * Bild speichern: POST {svg (Arbeitsfassung), id?, name, title, alt, decorative, outputs: [{board, upload (Upload-ID der
+     * Mechanik /admin/media/chunk), name}], tpl?, vals?}. Die Pixelbilder rendert der Browser; der Server prüft Art und Größe,
+     * legt sie in der Mediathek an bzw. ersetzt vorhandene (ID und Verwendungen bleiben).
+     */
+    public function compose(Request $r): Response
+    {
+        $user = $this->auth($r, 'media.upload');
+        $p = $r->post;
+        $outs = [];
+        $parts = [];
+        foreach (array_slice(is_array($p['outputs'] ?? null) ? $p['outputs'] : [], 0, 12) as $o) {
+            if (!is_array($o)) continue;
+            $part = MediaController::completedUpload($user, (string) ($o['upload'] ?? ''));
+            if ($part === null) { foreach ($parts as $x) MediaController::forgetUpload($x); return Response::fail(__('Upload unvollständig.')); }
+            $parts[] = $part;
+            $outs[] = ['board' => (string) ($o['board'] ?? 'main'), 'path' => $part, 'name' => (string) ($o['name'] ?? '')];
+        }
+        $tpl = is_string($p['tpl'] ?? null) && $p['tpl'] !== '' ? (string) $p['tpl'] : null;
+        $vals = null;
+        try {
+            if ($tpl !== null) {
+                $tp = Templates::get($tpl);
+                if (!$tp) throw new \RuntimeException(__('Vorlage nicht gefunden.'));
+                $v = Templates::validate((string) $tp['svg'], $p['vals'] ?? [], Templates::tokenNames());
+                if ($v['errors']) throw new \RuntimeException(implode(' ', $v['errors']));
+                $vals = $v['vals'];
+            }
+            $id = (int) ($p['id'] ?? 0) ?: null;
+            $meta = ['name' => (string) ($p['name'] ?? ''), 'title' => (string) ($p['title'] ?? ''), 'alt' => (string) ($p['alt'] ?? ''), 'decorative' => !empty($p['decorative'])];
+            $res = Compose::save((string) ($p['svg'] ?? ''), $meta, $id, $outs, $tpl, $vals);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        } finally {
+            foreach ($parts as $x) MediaController::forgetUpload($x);
+        }
+        if (!$res['outputs']) return Response::fail(implode(' ', $res['errors']) ?: __('Speichern fehlgeschlagen.'));
+        $this->changed();
+        return Response::json(['ok' => true, 'id' => $res['id'], 'outputs' => $res['outputs'], 'errors' => $res['errors'], 'versions' => Graphics::versions('graphic:' . $res['id'])]);
+    }
+
+    /** Vorlagen zum Ausfüllen (diese Website und alle Websites): GET → {templates: [...] mit SVG} */
+    public function templates(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $list = Templates::all(true);
+        $ids = [];
+        foreach ($list as $t) $ids = array_merge($ids, Compose::photoIds((string) $t['svg']));
+        return Response::json(['ok' => true, 'templates' => $list, 'canTemplates' => Templates::can(), 'swatches' => Graphics::swatches(),
+            'photos' => (object) Compose::photoInfo($ids), 'fontFiles' => Graphics::fontFiles()]);
+    }
+
+    /** Vorlage speichern: POST {svg, name, scope: site|network, ref?} – Recht „graphics.templates“ */
+    public function template(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if (!Templates::can()) return Response::fail(__('Für Vorlagen fehlt Ihrer Rolle die Berechtigung.'), 403);
+        try {
+            $ref = is_string($r->post['ref'] ?? null) && $r->post['ref'] !== '' ? (string) $r->post['ref'] : null;
+            $item = Templates::store((string) ($r->post['scope'] ?? 'site'), (string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''), $ref, (string) ($r->post['folder'] ?? ''));
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+        unset($item['svg']);
+        return Response::json(['ok' => true, 'item' => $item]);
+    }
+
+    /** Vorlage löschen: POST {ref} – Recht „graphics.templates“ */
+    public function templateDelete(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if (!Templates::can()) {
+            if (!$r->wantsJson()) return $this->back('/admin/grafik', 'error', __('Für Vorlagen fehlt Ihrer Rolle die Berechtigung.'));
+            return Response::fail(__('Für Vorlagen fehlt Ihrer Rolle die Berechtigung.'), 403);
+        }
+        $ok = Templates::delete((string) ($r->post['ref'] ?? ''));
+        if (!$r->wantsJson()) return $this->back('/admin/grafik', $ok ? 'success' : 'error', $ok ? __('Vorlage gelöscht.') : __('Vorlage nicht gefunden.'));
+        return $ok ? Response::json(['ok' => true]) : Response::fail(__('Vorlage nicht gefunden.'), 404);
     }
 
     /** Frühere Fassung laden: GET ?ref=media:{id}|graphic:{id}&id={version} */

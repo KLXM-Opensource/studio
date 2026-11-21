@@ -370,6 +370,12 @@ return function (Router $r): void {
     $r->post('/admin/api/grafik/data-values', [$gr, 'dataValues']);
     $r->post('/admin/api/grafik/app-icon', [$gr, 'appIcon']);
     $r->get('/admin/api/grafik/usage', [$gr, 'usage']);
+    // Persona Bild (Ausbaustufe 6): Fotos der Mediathek, Bilder speichern, Vorlagen zum Ausfüllen
+    $r->get('/admin/api/grafik/photos', [$gr, 'photos']);
+    $r->post('/admin/api/grafik/compose', [$gr, 'compose']);
+    $r->get('/admin/api/grafik/templates', [$gr, 'templates']);
+    $r->post('/admin/api/grafik/template', [$gr, 'template']);
+    $r->post('/admin/api/grafik/template/delete', [$gr, 'templateDelete']);
     $r->post('/admin/api/grafik/assign', [$gr, 'assign']);
     $r->post('/admin/api/grafik/{id}/delete', [$gr, 'delete']);
 

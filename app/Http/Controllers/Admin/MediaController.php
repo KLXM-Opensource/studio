@@ -501,6 +501,27 @@ final class MediaController extends AdminController
         return $this->tmpDir() . '/' . (int) $user['id'] . '-' . $uploadId;
     }
 
+    /**
+     * Vollständig übertragener Upload in Stücken (POST /admin/media/chunk) für andere Abnehmer derselben Mechanik – z. B. die
+     * Bildkompositionen des Grafik-Editors (Core\Graphics\Compose): Pfad der Datei oder null (unvollständig, beschädigt, fremd).
+     * Aufräumen übernimmt der Abnehmer (forgetUpload).
+     */
+    public static function completedUpload(array $user, string $uploadId): ?string
+    {
+        if (!preg_match('~^[a-zA-Z0-9\-]{8,64}$~', $uploadId)) return null;
+        $path = site()->storage('uploads') . '/' . (int) $user['id'] . '-' . $uploadId;
+        $meta = is_file("$path.json") ? (json_decode((string) file_get_contents("$path.json"), true) ?: []) : [];
+        if (!is_file("$path.part") || ($meta['next'] ?? 0) !== ($meta['total'] ?? -1) || filesize("$path.part") !== (int) ($meta['size'] ?? -1)) return null;
+        return "$path.part";
+    }
+
+    /** Teil-Upload entfernen (nach completedUpload) */
+    public static function forgetUpload(string $part): void
+    {
+        @unlink($part);
+        @unlink(substr($part, 0, -5) . '.json');
+    }
+
     /** Nimmt ein Stück entgegen (multipart: chunk, upload_id, index, total, size) */
     public function chunk(Request $r): Response
     {

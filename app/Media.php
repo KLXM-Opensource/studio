@@ -1881,6 +1881,8 @@ final class Media
                 $out[] = ['label' => $theme->settingsTitle() . ' → ' . $f['label'], 'url' => url('/admin/settings')];
             }
         }
+        // Bilder aus dem Grafik-Editor (Persona Bild), in denen das Foto steckt
+        foreach (Graphics\Compose::usagesOf($id) as $u) $out[] = $u;
         return $out;
     }
 
@@ -1937,6 +1939,8 @@ final class Media
             elseif (is_string($v)) $links($v);
             elseif (($f['type'] ?? '') === 'repeater' && is_array($v)) self::fieldsCollect([$f], [$f['name'] => $v], $ids);
         }
+        // Fotos in Bildern des Grafik-Editors (Persona Bild)
+        $ids += Graphics\Compose::usedIds();
         return $memo = $ids;
     }
 
@@ -2154,6 +2158,9 @@ final class Media
                 ? array_values(array_filter(array_keys(Lang::all()), fn($l) => $l !== Lang::default() && empty(self::translations($m)[$l]['alt']))) : [],
             // SVG (Core\Svg): keine Größen, kein Fokus/Zuschnitt; Ergebnis der Bereinigung für die Upload-Meldung
             'svg' => $m['mime'] === Svg::MIME,
+            // Bild aus dem Grafik-Editor (Persona Bild): „Bearbeiten“ öffnet die Arbeitsfassung (Core\Graphics\Compose)
+            'compose' => $isImg && self::$pool === null ? Graphics\Compose::forMedia((int) $m['id']) : null,
+            'compose_tpl' => $isImg && self::$pool === null && ($cg = Graphics\Compose::forMedia((int) $m['id'])) ? Graphics\Compose::templateOf($cg) : null,
             'note' => $m['mime'] === Svg::MIME && ($st = json_decode((string) $m['variants_json'], true)['svg'] ?? null) ? Svg::note($st) : null,
             'crops' => $isImg ? array_map(fn($c) => [
                 'x' => $c['x'], 'y' => $c['y'], 'w' => $c['w'], 'h' => $c['h'], 'width' => $c['W'], 'height' => $c['H'],

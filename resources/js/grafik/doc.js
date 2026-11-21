@@ -9,7 +9,7 @@ import { parseColor, toHex } from './color.js';
 import { t } from '../_i18n.js';
 
 /** Elemente, die in der Ebenenliste erscheinen und auswählbar sind */
-export const DRAWN = ['g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'use', 'switch', 'svg'];
+export const DRAWN = ['g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'use', 'switch', 'svg', 'image'];
 export const SHAPES = ['path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'use'];
 
 export function isDrawn(el) {
@@ -24,6 +24,7 @@ export function typeLabel(el) {
   return {
     g: t('Gruppe'), path: t('Kurve'), rect: t('Rechteck'), circle: t('Kreis'), ellipse: t('Ellipse'), line: t('Linie'),
     polyline: t('Linienzug'), polygon: t('Vieleck'), text: t('Text'), use: t('Verweis'), switch: t('Gruppe'), svg: t('Grafik'),
+    image: t('Foto'),   // Foto-Ebene der Persona Bild (photo.js)
   }[el.localName] || el.localName;
 }
 
@@ -152,7 +153,7 @@ export function applyTransform(el, T, root) {
   if (plain && axis && simplePaint(el, root)) {
     const a = Lp.a, d = Lp.d, e = Lp.e, f = Lp.f;
     const X = v => a * v + e, Y = v => d * v + f;
-    if (n === 'rect') {
+    if (n === 'rect' || n === 'image') {
       const x = X(g('x')), y = Y(g('y')), w = a * g('width'), hh = d * g('height');
       el.setAttribute('x', num(Math.min(x, x + w))); el.setAttribute('y', num(Math.min(y, y + hh)));
       el.setAttribute('width', num(Math.abs(w))); el.setAttribute('height', num(Math.abs(hh)));

@@ -141,6 +141,8 @@ final class Network
         // Grafik-Editor: Bausteine für alle Websites der Installation (Core\Graphics\Shared)
         $db->pdo->exec("CREATE TABLE IF NOT EXISTS graphic_shared (id $pk, name VARCHAR(191) NOT NULL, folder VARCHAR(191) NULL, svg " . ($my ? 'MEDIUMTEXT' : 'TEXT') . ",
             width INT NULL, height INT NULL, site VARCHAR(40) NULL, user_email VARCHAR(191) NULL, created_at VARCHAR(25), updated_at VARCHAR(25))$tail");
+        // Persona Bild: Vorlagen für alle Websites liegen in derselben Tabelle (kind = template; leer = Baustein)
+        $db->ensureColumns('graphic_shared', ['kind' => 'VARCHAR(12) NULL']);
         $db->ensureColumns('users', self::USER_COLUMNS);
         \Core\Passkeys::ensureTable($db);   // Passkeys der Netzwerk-Konten (eine Zeile je Domain)
     }
