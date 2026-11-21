@@ -1,24 +1,145 @@
+/*! NativeCSS 1.4.0 – components/table-sort.css | MIT © 2026 Thomas Skerbis und KLXM Crossmedia GmbH | https://github.com/skerbis/nativecss */
 /*
- * Sortierbare Tabellen (Datenliste „Tabelle“ → „Spalten sortierbar“) – nur bei Merkmal '@tablesort' (Core\Theme::conditionalCss).
- * Neutral: Farben aus der Umgebung (currentColor), Null-Spezifität über :where() – Regeln des Kits gewinnen; eine eigene
- * css/table-sort.css des Kits ersetzt diese Datei. Schaltflächen und Ansage erzeugt public/assets/js/table-sort.js.
- * Dazu ein weicher Schatten an der Kante, solange die Tabelle waagerecht weiter scrollt (scroll-getriebene Animation;
- * ältere Browser: ohne Schatten).
+ * KLXM Studio: Stile der Komponente „Sortierbare Tabelle“ von NativeCSS, unverändert bis zur Markierung „KLXM Studio“ unten.
+ * Nur mit Merkmal '@tablesort' (Core\Theme::conditionalCss); eine eigene css/table-sort.css des Kits ersetzt die Datei.
+ * Alles im Layer „components“ – jede Layer-freie Regel des Kits gewinnt. Ohne Tokens von NativeCSS gelten neutrale
+ * Rückfallwerte (currentColor, kein Zellen-Ausgleich).
  */
-:where(.tsort-btn){display:inline-flex;align-items:center;gap:.4em;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit;cursor:pointer}
-:where(.tsort-btn):focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:2px}
-:where(.tsort-ico){flex:none;width:.9em;height:.9em;background-color:currentColor;opacity:.45;
-  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 9l5-5 5 5M7 15l5 5 5-5'/%3E%3C/svg%3E") center/contain no-repeat;
-  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 9l5-5 5 5M7 15l5 5 5-5'/%3E%3C/svg%3E") center/contain no-repeat}
-:where(th[aria-sort]) .tsort-ico{opacity:1;
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E");
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E")}
-:where(th[aria-sort="descending"]) .tsort-ico{rotate:180deg}
-:where(th.dl-num) .tsort-btn{justify-content:flex-end}
-.tsort-status{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-@media (forced-colors:active){:where(.tsort-ico){background-color:CanvasText}}
+/**
+ * ncss - Sortierbare Tabelle (Layer "components"): Spaltenköpfe werden zu Schaltflächen,
+ * ein Klick sortiert nach der Spalte (auf-/absteigend), aria-sort am <th> und eine
+ * Live-Region sagen den Zustand an. Muster: WAI-ARIA APG "Sortable Table".
+ *
+ * Markup - eine normale Tabelle, entweder umschlossen oder per Attribut:
+ * <ncss-table-sort>
+ *   <table>
+ *     <caption>Zimmerpreise</caption>
+ *     <thead><tr><th>Zimmer</th><th data-sort-type="number">Preis</th><th>Anreise</th>
+ *                <th data-sort="false">Aktion</th></tr></thead>
+ *     <tbody><tr><td>Seeblick</td><td data-sort-value="189">189 €</td> …</tr></tbody>
+ *   </table>
+ * </ncss-table-sort>
+ * <table data-ncss-sort> … </table>                         (gleiches Verhalten)
+ * <script src="js/table-sort.js" defer></script>
+ *
+ * Ohne JavaScript bleibt es eine ganz normale Tabelle - die Schaltflächen entstehen erst
+ * durch das Script. Kombinierbar mit helpers/tables.css (.ncss-table-scroll,
+ * .ncss-table--compact); bei .ncss-table-stacked ist der Kopf auf schmalen Screens
+ * ausgeblendet, dort gibt es dann keine Sortier-Schaltflächen.
+ *
+ * Klassen (vom Script erzeugt): .ncss-table-sort-button (Schaltfläche im <th>),
+ *   .ncss-table-sort-icon (Pfeil, aria-hidden), .ncss-table-sort-status (Live-Region,
+ *   nur für Screenreader sichtbar).
+ *
+ * Anpassen: --ncss-table-sort-pad-block / --ncss-table-sort-pad-inline = Zellen-Padding, um das
+ *   die Schaltfläche die ganze Zelle füllt (Standard: Zellen-Padding von NativeCSS bzw. 0).
+ *   .ncss-table--compact setzt die kleineren Werte selbst.
+ *
+ * Abhängigkeiten (Cherry-Picking): js/table-sort.js; tokens.css/colors.css empfohlen - ohne
+ * sie greifen neutrale Rückfallwerte (currentColor, kein Zellen-Ausgleich), damit die Datei
+ * auch in fremden Designs funktioniert. Im Layer "components": jedes Layer-freie CSS der
+ * Seite gewinnt, eigene Regeln brauchen keine höhere Spezifität.
+ */
 
-/* Schatten an der Kante (Datenliste: .dl-tablewrap--sort) – nur Bild-Ebenen, die Hintergrundfarbe des Kits bleibt */
+@layer components {
+/* Ganze Datei im Layer "components" - gilt auch, wenn sie einzeln per <link> oder @import
+   ohne layer() geladen wird (schließende Klammer am Dateiende). */
+ncss-table-sort {
+  display: block;
+}
+
+.ncss-table-sort-button {
+  --_pb: var(--ncss-table-sort-pad-block, var(--ncss-space-2xs, 0px));
+  --_pi: var(--ncss-table-sort-pad-inline, var(--ncss-space-xs, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ncss-space-2xs, 0.4em);
+  /* Klickfläche über die ganze Zelle ziehen, ohne das Zellen-Padding zu verändern. */
+  inline-size: calc(100% + 2 * var(--_pi));
+  margin: calc(-1 * var(--_pb)) calc(-1 * var(--_pi));
+  padding: var(--_pb) var(--_pi);
+  border: 0;
+  border-radius: var(--ncss-radius-sm, 2px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+/* Kompakte Tabellen (helpers/tables.css) haben kleineres Zellen-Padding. */
+.ncss-table--compact .ncss-table-sort-button {
+  --_pb: var(--ncss-table-sort-pad-block, var(--ncss-space-3xs, 0px));
+  --_pi: var(--ncss-table-sort-pad-inline, var(--ncss-space-2xs, 0px));
+}
+th[data-sort-align="end"] .ncss-table-sort-button,
+th:is([align="right"], .ncss-text-end) .ncss-table-sort-button {
+  justify-content: flex-end;
+}
+@media (hover: hover) {
+  .ncss-table-sort-button:hover {
+    background-color: var(--ncss-color-bg-subtle, color-mix(in srgb, currentColor 8%, transparent));
+  }
+}
+.ncss-table-sort-button:focus-visible {
+  outline: var(--ncss-focus-ring-width, 2px) solid var(--ncss-color-focus-ring, currentColor);
+  outline-offset: calc(-1 * var(--ncss-focus-ring-width, 2px));
+}
+
+/* Pfeil: unsortiert ein blasser Doppelpfeil, sortiert ein deutlicher Pfeil nach oben bzw.
+   unten. Der Zustand steckt zusätzlich in aria-sort - nie nur in der Optik. */
+.ncss-table-sort-icon {
+  flex: none;
+  inline-size: 0.9em;
+  block-size: 0.9em;
+  background-color: currentColor;
+  opacity: 0.4;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 9l5-5 5 5M7 15l5 5 5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+th[aria-sort="ascending"] .ncss-table-sort-icon,
+th[aria-sort="descending"] .ncss-table-sort-icon {
+  opacity: 1;
+  color: var(--ncss-color-brand-on-soft, currentColor);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E");
+}
+th[aria-sort="descending"] .ncss-table-sort-icon {
+  rotate: 180deg;
+}
+
+.ncss-table-sort-status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (forced-colors: active) {
+  .ncss-table-sort-icon {
+    background-color: CanvasText;
+    opacity: 1;
+  }
+  th[aria-sort="ascending"] .ncss-table-sort-icon,
+  th[aria-sort="descending"] .ncss-table-sort-icon {
+    background-color: Highlight;
+  }
+}
+
+} /* @layer components */
+
+/* ---- KLXM Studio --------------------------------------------------------------------------------------------------- */
+/* Datenliste: Schaltfläche ohne Ausgleich für das Zellen-Padding (das Kit bestimmt es) – ein Kit setzt die beiden Werte
+   bei Bedarf selbst. Null-Spezifität, Layer-frei. */
+:where(.dl-table){--ncss-table-sort-pad-block:0px;--ncss-table-sort-pad-inline:0px}
+
+/* Schatten an der Kante (Datenliste: .dl-tablewrap--sort), solange die Tabelle waagerecht weiter scrollt – nur Bild-Ebenen,
+   die Hintergrundfarbe des Kits bleibt; ältere Browser ohne Schatten */
 @property --tsort-a{syntax:"<number>";inherits:false;initial-value:0}
 @property --tsort-b{syntax:"<number>";inherits:false;initial-value:0}
 @keyframes tsort-a{from{--tsort-a:0}to{--tsort-a:1}}

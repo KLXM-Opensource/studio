@@ -175,11 +175,12 @@ $reload = ($pages > 1 || $vfilters || !empty($d['visitor_search'])) ? \Core\Live
     $num = fn(string $f) => (Tables::field($t, $f)['type'] ?? '') === 'number' ? ' class="dl-num"' : '';
     $hl = str_starts_with((string) ($d['highlight_field'] ?? ''), $pfx) ? substr($d['highlight_field'], strlen($pfx)) : null;
     // Merkmale für Kits (Theme::markUsed): '@table' bei jeder Tabelle; „Spalten sortierbar“ → '@tablesort' lädt Kern-Skript
-    // js/table-sort.js und css/table-sort.css (Schaltflächen im Kopf, aria-sort, Schatten an der Kante) – nicht beim Bearbeiten
+    // js/table-sort.js und css/table-sort.css (Komponente von NativeCSS: Schaltflächen im Kopf, aria-sort, Ansage; dazu Schatten
+    // an der Kante) – nicht beim Bearbeiten. Zahlenspalten: Schaltfläche rechtsbündig (data-sort-align="end")
     $sortable = !empty($d['table_sort']) && !is_editing();
     app()->theme->markUsed('@table', $sortable ? '@tablesort' : ''); ?>
-  <div class="dl-tablewrap<?= $sortable ? ' dl-tablewrap--sort" role="region" tabindex="0" aria-label="' . e(trim(lt('Tabelle') . ': ' . strip_emphasis(trim((string) ($d['title'] ?? ''))), ': ')) : '' ?>"><table class="dl-table"<?= $sortable ? ' data-table-sort data-label-sorted="' . e(lt('Sortiert nach {column}, {direction}')) . '" data-label-ascending="' . e(lt('aufsteigend')) . '" data-label-descending="' . e(lt('absteigend')) . '"' : '' ?>>
-    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"<?= $num($f) ?>><?= e($colLabel($f)) ?></th><?php endforeach; ?></tr></thead>
+  <div class="dl-tablewrap<?= $sortable ? ' dl-tablewrap--sort" role="region" tabindex="0" aria-label="' . e(trim(lt('Tabelle') . ': ' . strip_emphasis(trim((string) ($d['title'] ?? ''))), ': ')) : '' ?>"><table class="dl-table"<?= $sortable ? ' data-ncss-sort data-label-sorted="' . e(lt('Sortiert nach {column}, {direction}')) . '" data-label-ascending="' . e(lt('aufsteigend')) . '" data-label-descending="' . e(lt('absteigend')) . '"' : '' ?>>
+    <thead><tr><?php foreach ($fields as $f): if ($f === $imageField) continue; ?><th scope="col"<?= $num($f) ?><?= $sortable && $num($f) !== '' ? ' data-sort-align="end"' : '' ?>><?= e($colLabel($f)) ?></th><?php endforeach; ?></tr></thead>
     <tbody>
     <?php foreach ($rows as $e): $url = $link($e); ?>
       <tr<?= $hl !== null && !empty($e[$hl]) ? ' class="dl-row--hl"' : '' ?>><?php foreach ($fields as $f): if ($f === $imageField) continue; ?>

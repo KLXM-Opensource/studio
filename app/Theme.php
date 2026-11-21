@@ -899,7 +899,8 @@ final class Theme
     {
         $types = $this->withUses($types);
         $out = [];
-        // Kern-Skript für sortierbare Tabellen (Datenliste → „Spalten sortierbar“) – für jedes Kit, nur mit Merkmal '@tablesort'
+        // Kern-Skript für sortierbare Tabellen (Datenliste → „Spalten sortierbar“; Komponente von NativeCSS, resources/js/table-sort.js)
+        // – für jedes Kit, nur mit Merkmal '@tablesort'
         if (in_array('@tablesort', $types, true)) $out[] = asset('js/table-sort.js');
         foreach ($this->def['conditional_css'] ?? [] as $file => $needs) {
             if (str_ends_with($file, '.js') && array_intersect($needs, $types)) {
