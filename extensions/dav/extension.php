@@ -16,7 +16,7 @@ spl_autoload_register(function (string $class): void {
 return [
     'name' => 'dav',
     'label' => 'CalDAV/CardDAV',
-    'version' => '1.3.0',
+    'version' => '1.3.1',
     'requires' => '>=1.0.0',
     'description' => 'Termine und Kontakte aus Datentabellen mit Kalender- und Adressbuch-Apps abgleichen (Apple, Thunderbird, DAVx⁵). Anmeldung mit App-Passwörtern.',
     'author' => 'KLXM Crossmedia GmbH and contributors',
