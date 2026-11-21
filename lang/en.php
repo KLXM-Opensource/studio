@@ -8071,4 +8071,9 @@ return [
     'Schritt 1' => 'Step 1',
     'Team' => 'Team',
     'Bild aus dem Grafik-Editor' => 'Image from the graphics editor',
+    // Impressum für E-Mails (Core\Mail\Imprint)
+    'E-Mails dieser Website enthalten derzeit kein Impressum: Bitte unten „Impressum für E-Mails“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen. Bis dahin ist der Newsletter-Versand gesperrt.' => 'Emails from this website currently contain no legal notice: please fill in “Legal notice for emails” below or select a legal notice page under Settings → Legal. Until then, newsletter sending is blocked.',
+    'E-Mails ohne Impressum – Grundeinstellungen → E-Mail-Versand → „Impressum für E-Mails“ ausfüllen oder eine Impressum-Seite festlegen' => 'Emails without a legal notice – fill in Basic settings → Email sending → “Legal notice for emails” or select a legal notice page',
+    'Impressum für E-Mails nicht prüfbar ({msg})' => 'Legal notice for emails could not be checked ({msg})',
+    'Versand gesperrt: E-Mails dieser Website hätten kein Impressum. Bitte unter Grundeinstellungen → E-Mail-Versand das „Impressum für E-Mails“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen.' => 'Sending blocked: emails from this website would have no legal notice. Please fill in “Legal notice for emails” under Basic settings → Email sending or select a legal notice page under Settings → Legal.',
 ];

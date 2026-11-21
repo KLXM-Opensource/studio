@@ -10,6 +10,18 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Impressum in jeder E-Mail
+- **Jede ausgehende E-Mail trägt ein Impressum** – Text- und HTML-Teil, zentral in `Core\Mailer` (Formulare, Eingangsbestätigungen, Passwort,
+  Einladungen, E-Mail-Änderung, Chat, Support, Freigaben, Benachrichtigungen, Erweiterungen). Text nach dem Signatur-Trenner „-- “, HTML als
+  dezente Fußzeile vor `</body>` (keine Bilder, Kontrast ≥ 7:1). Ein Filter `mail.message` kann es nicht entfernen.
+- Neue Grundeinstellung je Website **E-Mail-Versand → Impressum für E-Mails** (`sys.mail_imprint`, mehrzeilig: Name/Firma, Anschrift, Kontakt,
+  Vertretungsberechtigte, Register, USt-IdNr.), dazu immer der Link zur veröffentlichten Impressum-Seite (`imprint_page`) als absolute Adresse in der
+  Sprache der Mail (Mailer-Option `lang`). Netzwerk-Mails (`network`) nehmen die Angaben der Netzwerk-Website.
+- Fehlt beides: Mail geht trotzdem hinaus (Passwort-Reset blockiert nie), `health` und Systemübersicht melden den Fehler „E-Mails ohne Impressum“,
+  Grundeinstellungen → E-Mail-Versand zeigt einen Hinweis, Massenversand ist gesperrt (`Core\Mail\Imprint::bulkError()`).
+- Für Erweiterungen mit eigenem Layout: `Core\Mail\Imprint::get()` (`text`, `html`, `url`, `body`, `label`, `lang`), `appendText()`, `appendHtml()` und
+  Mailer-Option `'imprint' => 'included'` gegen Dopplung. Regel in `AGENTS.md`; `mail:selftest` prüft Text/HTML, Dopplung, Sprache, Netzwerk und Sperre.
+
 ### Mediathek: Hintergrund der Vorschau umschaltbar
 - Knopf in der Werkzeugleiste: Standard, hell, dunkel, kariert (je Browser gemerkt) – helle Logos und transparente PNG/SVG sind auf hellem Grund
   sonst unsichtbar.

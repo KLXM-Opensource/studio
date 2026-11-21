@@ -20,6 +20,9 @@ Entwicklerhandbuch (`/admin/hilfe/technik`).
   die sechs Slots (`pageList`, `pagePanel`, `tableActions`, `mediaPanel`, `dashboard`, `account`), typisierte Ereignisse
   (`Core\Events`), Tabellen mit `Core\Db\Table`. Keine Core-Dateien ändern, keine parallelen APIs. Fehlt eine Stelle:
   Vorschlag für einen neuen Slot im Core – mit Doku und Selbsttest.
+- **Jede E-Mail mit Impressum:** Mails nur über `Core\Mailer::send` (hängt das Impressum der Website an Text und HTML an) – nie
+  eigene Transporte oder `mail()`. Eigenes Layout mit Impressum aus `Core\Mail\Imprint::get()` plus Option `'imprint' => 'included'`;
+  Massenversand vorher mit `Imprint::bulkError()` sperren.
 - Formatieren mit `Core\Format` / `fmt()` statt eigener Helfer.
 - Live-Aktualisierung für Besucher nur über `Core\Live` (Kanäle `ext:{name}:…`, `Live::touch()`, `Live::attrs()`) –
   keine eigenen Streams oder Polling-Schleifen.

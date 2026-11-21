@@ -61,6 +61,8 @@ use Core\Fields;
     <?php endif; ?>
     <?php $gFields = $g['fields'];
     if ($g['id'] === 'mail'): // E-Mail-Versand: Konten-Liste (bzw. erstes Konto) und Verwendung vor den übrigen Feldern (system/_mail.php)
+      // Impressum für E-Mails (Core\Mail\Imprint): weder Text noch Impressum-Seite → deutlicher Hinweis oben im Reiter
+      if (\Core\Mail\Imprint::missing()): ?><p class="adm-flash adm-flash--error" id="mail-imprint-missing" role="status"><?= e(__('E-Mails dieser Website enthalten derzeit kein Impressum: Bitte unten „Impressum für E-Mails“ ausfüllen oder unter Einstellungen → Recht eine Impressum-Seite festlegen. Bis dahin ist der Newsletter-Versand gesperrt.')) ?> <a href="#f-f-sys-mail-imprint"><?= e(__('Zum Feld')) ?></a></p><?php endif;
       $std = array_values(\Core\Mail\Accounts::STANDARD_KEYS);
       $stdFields = array_values(array_filter($gFields, fn($f) => in_array($f['name'] ?? '', $std, true) || (($f['type'] ?? '') === 'heading' && ($f['label'] ?? '') === 'Konto „Standard“')));
       $gFields = array_values(array_filter($gFields, fn($f) => !in_array($f, $stdFields, true)));
