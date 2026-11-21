@@ -149,7 +149,8 @@ Copyright lines as in the fonts' own license files or name tables:
 |---|---|---|---|---|
 | Admin (core) | Lato | `@fontsource/lato` 5.3.0 | © 2010-2011 tyPoland Łukasz Dziedzic, RFN “Lato” | `public/assets/fonts/OFL-Lato.txt` |
 | Admin (core) | JetBrains Mono | `@fontsource/jetbrains-mono` 5.3.0 | © 2020 The JetBrains Mono Project Authors | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
-| basis, essenz, fluid, foto, galerie, immobilien, praxis | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `kits/{kit}/fonts/OFL.txt` |
+| praxis, immobilien | Inter TTF (server-side, app icons – not public) | `@expo-google-fonts/inter` 0.4.2 | © 2020 The Inter Project Authors | `kits/{kit}/fonts/OFL.txt` |
+| basis, essenz, fluid, foto, galerie | Inter TTF for app icons – not bundled; fetched on first use from Fontsource (`fontsource:inter:700`, jsDelivr) into `storage/pdf-fonts` | Fontsource | © 2020 The Inter Project Authors, SIL OFL 1.1 | https://fontsource.org/fonts/inter |
 | editorial | Playfair Display TTF (server-side, app icons and placeholders – not public) | `@expo-google-fonts/playfair-display` 0.4.2 | © 2017 The Playfair Display Project Authors, RFN “Playfair Display” | `kits/editorial/fonts/OFL.txt` |
 | nature | Fraunces TTF (server-side, app icons – not public) | `@expo-google-fonts/fraunces` 0.4.1 | © 2018 The Fraunces Project Authors | `kits/nature/fonts/OFL.txt` |
 | modern | Space Grotesk TTF (server-side, app icons – not public) | `@expo-google-fonts/space-grotesk` 0.4.1 | © 2020 The Space Grotesk Project Authors | `kits/modern/fonts/OFL.txt` |

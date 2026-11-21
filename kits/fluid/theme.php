@@ -96,7 +96,7 @@ return [
 
     // Schriften: Auswahl im Style-Editor (design.fonts); Vorladen übernimmt fluid_font_preloads()
     'fonts' => [
-        'icon' => 'fonts/Inter_700Bold.ttf',
+        'icon' => 'fontsource:inter:700',   // TTF für den App-Icon-Generator – lädt der Core beim ersten Bedarf (Fontsource, OFL)
     ],
     'app' => [
         'defaults' => ['icon_text' => 'F', 'icon_bg' => '#4338CA', 'icon_fg' => '#FFFFFF', 'icon_dot' => '#FDE68A', 'icon_dot_enabled' => true],

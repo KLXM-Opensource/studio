@@ -79,6 +79,12 @@
         }
     },
     "scripts": {
+        "post-install-cmd": [
+            "@php bin/vendor-clean.php"
+        ],
+        "post-update-cmd": [
+            "@php bin/vendor-clean.php"
+        ],
         "post-create-project-cmd": [
             "@php bin/console install"
         ]

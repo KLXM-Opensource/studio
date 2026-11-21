@@ -10,6 +10,13 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Kleinerer Download: Testdaten der Abhängigkeiten, App-Icon-Schrift
+- `bin/vendor-clean.php` (Composer `post-install-cmd`/`post-update-cmd`) entfernt Testordner aus `vendor/` – u. a. 17 MB Testdaten von
+  `wamania/php-stemmer` (über loupe); `vendor/` schrumpft von rund 41 auf 22 MB.
+- App-Icon-Schrift: `theme.php` → `'fonts' => ['icon' => 'fontsource:inter:700']` lädt die TTF beim ersten Bedarf (Fontsource, OFL) nach
+  `storage/pdf-fonts` (`Core\Pdf::ttf()`); basis, essenz, fluid, foto und galerie liefern keine eigene Inter-Kopie mehr (1,7 MB weniger).
+  `'fonts/datei.ttf'` im Kit geht weiter; ohne Internet greift wie bisher eine Systemschrift.
+
 ### Mediathek: Hintergrund der Vorschau umschaltbar
 - Knopf in der Werkzeugleiste: Standard, hell, dunkel, kariert (je Browser gemerkt) – helle Logos und transparente PNG/SVG sind auf hellem Grund
   sonst unsichtbar.

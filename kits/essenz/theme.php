@@ -98,7 +98,7 @@ return [
 
     // Schriften: Auswahl im Style-Editor (design.fonts); Vorladen übernimmt essenz_font_preloads()
     'fonts' => [
-        'icon' => 'fonts/Inter_700Bold.ttf',
+        'icon' => 'fontsource:inter:700',   // TTF für den App-Icon-Generator – lädt der Core beim ersten Bedarf (Fontsource, OFL)
     ],
     'app' => [
         'defaults' => ['icon_text' => 'E', 'icon_bg' => '#1B1B19', 'icon_fg' => '#F2F1ED', 'icon_dot' => '#D85B19', 'icon_dot_enabled' => true],

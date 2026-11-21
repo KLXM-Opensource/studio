@@ -133,7 +133,7 @@ return [
     // Nur Schriften, die es dort nicht gibt: selbst ausliefern (build.mjs + package.json, design.fonts → 'css') und hier
     // 'preload' => ['fonts/…woff2'] (relativ zu public/assets/kits/{kit}/).
     'fonts' => [
-        // 'icon' => 'fonts/Inter_700Bold.ttf',                    // TTF für den App-Icon-Generator (serverseitig)
+        // 'icon' => 'fontsource:inter:700',                        // TTF für den App-Icon-Generator (lädt der Core bei Bedarf; oder 'fonts/datei.ttf' im Kit)
     ],
     // Bildformate mit eigenem Zuschnitt in der Mediathek; Blöcke übergeben das Format: img($id, $sizes, ['ratio' => '4:3'])
     'image_ratios' => $ratios,

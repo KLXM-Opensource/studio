@@ -155,6 +155,21 @@ final class Pdf
         return null;
     }
 
+    /**
+     * Eine TTF-Datei einer Fontsource-Schrift (OFL, Google Fonts über jsDelivr) – geladen beim ersten Bedarf und danach lokal
+     * (storage/pdf-fonts). Auch für den App-Icon-Generator (theme.php → 'fonts' → 'icon' => 'fontsource:inter:700'), damit
+     * Kits keine eigenen TTF-Kopien mitliefern. null, wenn ungültig oder nicht ladbar (z. B. ohne Internet).
+     */
+    public static function ttf(string $id, string $w = '400', string $st = 'normal'): ?string
+    {
+        if (!preg_match('~^[a-z0-9][a-z0-9-]{0,63}$~', $id) || !preg_match('~^[1-9]00$~', $w) || !in_array($st, ['normal', 'italic'], true)) return null;
+        $f = self::fontFile($id, $w, $st);
+        if (is_file($f)) return $f;
+        $bin = self::download("https://cdn.jsdelivr.net/fontsource/fonts/$id@latest/latin-$w-$st.ttf");
+        if ($bin === null || @file_put_contents($f, $bin, LOCK_EX) === false) return null;
+        return $f;
+    }
+
     private static function download(string $url): ?string
     {
         try {

@@ -725,6 +725,8 @@ final class Theme
     public function iconFont(): ?string
     {
         $f = (string) ($this->def['fonts']['icon'] ?? '');
+        // 'fontsource:{id}:{stärke}' – TTF wird beim ersten Bedarf geladen (Core\Pdf::ttf), sonst Datei des Kits
+        if (preg_match('~^fontsource:([a-z0-9-]+)(?::([1-9]00))?$~', $f, $m)) return Pdf::ttf($m[1], $m[2] ?? '700');
         return $f !== '' ? $this->file($f) : null;
     }
 

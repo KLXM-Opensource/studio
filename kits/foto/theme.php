@@ -115,7 +115,7 @@ return [
 
     // Schriften: Auswahl im Style-Editor (design.fonts); Vorladen übernimmt foto_font_preloads()
     'fonts' => [
-        'icon' => 'fonts/Inter_700Bold.ttf',
+        'icon' => 'fontsource:inter:700',   // TTF für den App-Icon-Generator – lädt der Core beim ersten Bedarf (Fontsource, OFL)
     ],
     'app' => [
         'defaults' => ['icon_text' => 'F', 'icon_bg' => '#111111', 'icon_fg' => '#FFFFFF', 'icon_dot' => '#FF8F7A', 'icon_dot_enabled' => false],
