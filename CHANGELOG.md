@@ -11,6 +11,30 @@ oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
 
+### Grafik-Editor: Persona Bild, Formate für soziale Netzwerke, Vorlagen zum Ausfüllen (Ausbaustufe 6)
+- **Persona Bild** (gemischt wie in Fireworks): Fotos der Mediathek als Ebenen – per Verweis auf die Mediathek-ID, nicht eingebettet –, Ausschnitt
+  nach Fokuspunkt (Zoom, Lage), Korrektur (Helligkeit, Kontrast, Sättigung, Weichzeichnen – Begriffe wie Core\ImageFx), Deckkraft, Mischmodus,
+  „Verlauf darüber“, Beschneiden mit einer Form; keine Pinsel/Retusche. Ergebnis ist **immer ein Pixelbild der Mediathek** (im Browser gerendert,
+  Faktor 2, Texte mit Webschriften vorher in Kurven, JPEG oder PNG mit Transparenz; die Mediathek erzeugt alle Größen), die **Arbeitsfassung bleibt
+  ein bearbeitbares SVG** (`Core\Graphics\Compose`, Tabelle `graphic_media`). „Im Grafik-Editor bearbeiten“ in der Mediathek öffnet sie wieder,
+  Speichern ersetzt das Bild per `Media::replace` (ID und Verwendungen bleiben); die Quellfotos zeigen das Bild unter „Verwendet auf“. Alt-Text-Vorschlag
+  aus den Textebenen. Mediathek → Neu → „Bild mit Foto und Text“. `Core\Svg::clean` bleibt für Website-SVGs bei „nur Vektor“ – Fotos stehen in der
+  Arbeitsfassung nur als Platzhalter `data-ge-photo` (Base64), eingebettete Bilder werden weiter abgelehnt.
+- **Formate aus einem Entwurf:** Link-Vorschau 1200 × 630, Beitrag 1080 × 1080 und 1080 × 1350, Story 1080 × 1920, Kopfbild 1920 × 1080 oder frei – als
+  Zeichenflächen rechts daneben, gelegt nach **Anker-Regeln** je Ebene (links/Mitte/rechts/mitwachsen, oben/Mitte/unten/mitwachsen, feste Größe; ohne
+  Angabe ein Vorschlag aus der Lage), Fotos füllen ihren Rahmen nach dem Fokuspunkt. Danach einzeln nachbesserbar, „Neu aus dem Hauptformat“.
+  **Je Format ein eigenes Bild in der Mediathek** – jede Plattform braucht eine eigene Datei, und die Formate unterscheiden sich im Layout, nicht nur im
+  Zuschnitt (Zuschnitte der Mediathek könnten Texte nicht verschieben).
+- **Vorlagen zum Ausfüllen:** neues Recht **„Vorlagen für Bilder gestalten“** (`graphics.templates`, Standard nur Administration). Ebenen als Felder
+  freigeben – Bild, Text (einzeilig/mehrzeilig, Höchstlänge, Zeilen, kleinste Schrift), Farbe (nur Design-Farben), Ein/Aus –, alles andere bleibt gesperrt.
+  Vorlagen je Website oder für alle Websites der Installation (`graphic_shared`, Spalte `kind`), Verwaltung in der Grafik-Ablage. Die Redaktion füllt in der
+  Mediathek → Neu → **„Aus Vorlage erstellen …“** nur ein Formular aus (Medienwähler des Kerns, Live-Vorschau je Format, Text schrumpft bis zur Mindestgröße,
+  dann Hinweis) und bekommt fertige Bilder; „Felder der Vorlage ändern …“ öffnet das Formular wieder. Werte prüft `Templates::validate()` serverseitig.
+- Alle Aufrufe an das CMS laufen im Editor über ein Host-Objekt (`ed.cms`, `resources/js/grafik/host.js`). Neue Routen `GET /admin/api/grafik/photos`,
+  `POST /admin/api/grafik/compose`, `GET /admin/api/grafik/templates`, `POST /admin/api/grafik/template`, `POST /admin/api/grafik/template/delete`;
+  `MediaController::completedUpload()` für die Upload-Mechanik. `grafik:selftest` erweitert (Bereinigung, Speichern/Ersetzen, Verwendungen, Vorlagen,
+  Rechte). Handbuch → Medien → Grafik-Editor (Bilder mit Foto und Text, Formate, Vorlagen), Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Erweiterungen consent_kit und dav: Namensraum `Klxm\…`
 - `MyCms\Consent` → `Klxm\Consent` (consent_kit 1.4.0), `MyCms\Dav` → `Klxm\Dav` (dav 1.2.0) – Altname aus dem Code entfernt; vCard-Felder
   `X-MYCMS-*` bleiben (in CardDAV-Clients gespeichert).

@@ -29,7 +29,7 @@ async function json(url, opts = {}) {
 /** Editor als Overlay öffnen. Ergebnis: { saved: letzte Speicherung oder null, svg: Stand beim Schließen } */
 export async function open(opts = {}) {
   const q = new URLSearchParams();
-  for (const k of ['format', 'block', 'w', 'h']) if (opts[k] != null && opts[k] !== '') q.set(k, opts[k]);
+  for (const k of ['format', 'block', 'w', 'h', 'template', 'out']) if (opts[k] != null && opts[k] !== '') q.set(k, opts[k]);
   if (opts.mediaId) q.set('media', opts.mediaId);
   if (opts.id) q.set('id', opts.id);
   const back = document.activeElement;
@@ -80,6 +80,8 @@ export async function open(opts = {}) {
       <button type="button" class="ge-ib" data-close aria-label="${esc(t('Schließen'))}" title="${esc(t('Schließen'))} (Esc)">${ico('x')}</button>`;
     slot.querySelector('[data-max]').addEventListener('click', () => shell.toggleMax());
     slot.querySelector('[data-close]').addEventListener('click', () => close());
+    // Persona beim Öffnen (z. B. „bild“ für Neu → Bild, Vorlage gestalten)
+    if (opts.persona || ['compose', 'template'].includes(boot.doc.target)) ed.setPersona(opts.persona || 'bild');
     ed.stage.focus({ preventScroll: true });
   });
 }
@@ -100,12 +102,14 @@ export function mountPage() {
       if (embed) tell({ type: 'saved', block: r.item?.block || boot.doc.block, url: r.item?.url || null, active: !!r.item?.active });
       // neue Datei: Adresse anpassen, damit „Neu laden“ dieselbe Grafik öffnet
       const u = new URL(location.href);
-      if (r.target === 'media') { u.search = '?media=' + r.item.id; } else { u.search = '?id=' + r.item.id; }
+      if (r.compose) { u.search = '?id=' + r.compose; } else if (r.target === 'template') { u.search = '?template=' + r.item.ref; } else if (r.target === 'media') { u.search = '?media=' + r.item.id; } else { u.search = '?id=' + r.item.id; }
       history.replaceState(null, '', u);
     },
   });
   window.CMSGraphicEditor.page = ed;   // Instanz der eigenen Seite (Erweiterungen, Tests)
-  const back = boot.doc.target === 'graphics' ? boot.urls.store : boot.urls.media;
+  const per = new URLSearchParams(location.search).get('persona');
+  if (per || boot.doc.target === 'compose' || boot.doc.target === 'template') ed.setPersona(per || 'bild');
+  const back = boot.doc.target === 'graphics' || boot.doc.target === 'template' ? boot.urls.store : boot.urls.media;
   ed.el.querySelector('[data-shellbtns]').innerHTML = `<a class="adm-btn adm-btn--small adm-btn--ghost" href="${esc(back)}" data-back>${ico('x')} ${esc(t('Schließen'))}</a>`;
   ed.el.querySelector('[data-back]').addEventListener('click', async e => {
     if (embed) {

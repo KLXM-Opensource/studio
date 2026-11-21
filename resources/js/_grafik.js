@@ -36,6 +36,17 @@ export async function openGraphicEditor(opts = {}) {
   }
 }
 
+/** Vorlage ausfüllen (Persona Bild): Formular mit Vorschau, fertige Bilder in der Mediathek → Promise<{ saved }> */
+export async function fillGraphicTemplate(opts = {}) {
+  try {
+    const api = await load();
+    return await api.fill(opts);
+  } catch (e) {
+    toast(e.message, 'error');
+    return { saved: null };
+  }
+}
+
 export function initGrafik() {
   document.addEventListener('click', e => {
     const b = e.target.closest?.('[data-ge-open]');
@@ -44,7 +55,7 @@ export function initGrafik() {
     const d = b.dataset;
     // Übersicht „Grafiken“: nach dem Speichern neu laden, damit die Liste stimmt
     const block = d.blockFrom ? document.querySelector(d.blockFrom)?.value : d.block;
-    openGraphicEditor({ format: d.format, id: d.id, mediaId: d.media, block, returnFocus: b })
+    openGraphicEditor({ format: d.format, id: d.id, mediaId: d.media, block, template: d.template, w: d.w, h: d.h, out: d.out, persona: d.persona, returnFocus: b })
       .then(r => { if (r.saved && b.closest('.ge-store, .adm-head')) location.reload(); });
   });
 }

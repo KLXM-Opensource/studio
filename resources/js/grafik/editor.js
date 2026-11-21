@@ -47,6 +47,9 @@ import { DataPersona } from './data.js';
 import { ExportPersona } from './slices.js';
 import { Collab } from './collab.js';
 import { isBoundText } from './bind.js';
+import { Photos, toWork, isRasterDoc } from './photo.js';
+import { BildPersona } from './bild.js';
+import { studioHost } from './host.js';
 
 /** Größe lesbar (Byte → KB) */
 const kb = n => n < 1024 ? n + ' B' : (n / 1024).toLocaleString(undefined, { maximumFractionDigits: n < 10240 ? 1 : 0 }) + ' KB';
@@ -111,6 +114,11 @@ export class GraphicEditor {
     this.zoom = 1; this.panX = 0; this.panY = 0;
     this.history = []; this.hi = -1; this.savedAt = 0;
     this.listeners = {};
+    // Anbindung an das CMS (Mediathek, Speichern, Rechte, Vorlagen) – host.js; Einbettungen können ein eigenes Objekt mitgeben
+    this.cms = opts.cms || studioHost(boot);
+    // Foto-Ebenen (Persona Bild): Platzhalter der Arbeitsfassung ↔ Bilder im Editor (photo.js)
+    this.photos = new Photos({ root: null, info: { ...(boot.photos || {}) }, host: this.cms, onPaint: () => this.sv?.mode !== 'light' && this.sv?.refresh() });
+    Object.defineProperty(this.photos.ctx, 'root', { get: () => this.root });
     this.personas = [{ id: 'vector', label: t('Vektor'), icon: 'bezier-curve' }, { id: 'motion', label: t('Motion'), icon: 'film-strip', soon: true }];
     this.persona = 'vector';
     this.style = this.format === 'icon'
@@ -139,6 +147,12 @@ export class GraphicEditor {
     // Persona Export (Bereiche/Slices, Formate je Bereich, Favicon/App-Symbole/Social-Vorschau, ZIP – slices.js)
     this.exportP = new ExportPersona(this);
     this.registerPersona(this.exportP.persona);
+    // Persona Bild (Ausbaustufe 6): Fotos, Formate, Vorlagen – gleich nach Vektor (wie in Fireworks: Vektor | Bild)
+    this.bild = new BildPersona(this);
+    this.registerPersona(this.bild.persona);
+    this.personas.splice(1, 0, this.personas.pop());
+    this.renderPersonas();
+    this.on('change', () => this.photos.refresh());
     // Fassungen vergleichen, „Verwendet auf“, wer bearbeitet gerade (collab.js)
     this.collab = new Collab(this);
     this.load(this.doc.svg || '', t('Geöffnet'));
@@ -306,6 +320,7 @@ export class GraphicEditor {
       root = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"/>', 'image/svg+xml').documentElement;
     }
     root = document.importNode(root, true);
+    this.photos?.adopt(root);
     if (this.root) this.root.replaceWith(root); else this.shadow.append(root);
     this.root = root;
     this.scope = root;
@@ -327,6 +342,7 @@ export class GraphicEditor {
   /** SVG als Text (wie gespeichert) – der Server bereinigt es noch einmal */
   getSvg() {
     const c = this.root.cloneNode(true);
+    toWork(c);   // Fotos als Platzhalter mit Verweis auf die Mediathek (photo.js) – nie eingebettete Pixel
     c.removeAttribute('style');
     if (!c.getAttribute('xmlns')) c.setAttribute('xmlns', NS);
     return new XMLSerializer().serializeToString(c);
@@ -370,6 +386,7 @@ export class GraphicEditor {
     this.hi = i;
     const st = this.history[i];
     const parsed = document.importNode(new DOMParser().parseFromString(st.svg, 'image/svg+xml').documentElement, true);
+    this.photos.adopt(parsed);
     this.root.replaceWith(parsed);
     this.root = parsed;
     // betretene Gruppe bleibt betreten, solange es sie noch gibt
@@ -396,6 +413,9 @@ export class GraphicEditor {
     if (this.scope !== this.root && !this.scope.isConnected) this.scope = this.root;
     const nm = this.doc.name || this.doc.title || t('Neue Grafik');
     this.$('[data-name]').textContent = nm;
+    // Persona Bild: Pixel-Ausgabe → „Bild“ statt „Infografik“
+    const fl = this.$('.ge-fmt');
+    if (fl && this.format === 'info') fl.textContent = this.doc.target === 'template' ? t('Vorlage') : isRasterDoc(this.root) ? t('Bild') : ((this.boot.formatLabels || {})[this.doc.kind === 'part' ? 'part' : 'info'] || '');
     this.$('[data-dirty]').hidden = !this.dirty;
     this.el.querySelector('[data-act=undo]').disabled = this.hi <= 0;
     this.el.querySelector('[data-act=redo]').disabled = this.hi >= this.history.length - 1;
@@ -1082,7 +1102,9 @@ export class GraphicEditor {
     const hit = this.hitAt(e)?.el;
     if (hit && hit.localName === 'text') return this.beginText(hit, false, { clientX: e.clientX, clientY: e.clientY });
     // Klick in eine geschlossene Form: Text in der Form (zentriert, umbricht auf die Breite der Form)
-    if (hit && ['rect', 'ellipse', 'circle', 'polygon', 'path'].includes(hit.localName) && !isConn(hit) && (getProp(hit, 'fill') || 'none') !== 'none') {
+    // (Persona Bild: nicht in Flächen, die das halbe Bild bedecken – Verläufe über Fotos, Hintergründe)
+    const big = hit && isRasterDoc(this.root) && (() => { const b = docBounds(hit, this.root), v = this.vb; return b && b.w * b.h > v.w * v.h * 0.25; })();
+    if (hit && !big && ['rect', 'ellipse', 'circle', 'polygon', 'path'].includes(hit.localName) && !isConn(hit) && (getProp(hit, 'fill') || 'none') !== 'none') {
       const inner = this.conn.innerText(hit, '');
       return this.beginText(inner, true);
     }
@@ -3061,6 +3083,8 @@ export class GraphicEditor {
     if (!asNew && this.collab && !(await this.collab.confirmSave())) return null;
     if (this.compoundEdit) { this.scope = this.root; await this.endCompound(); }
     const d = this.doc;
+    // Persona Bild: Pixelbild(er) in die Mediathek bzw. Vorlage (bild.js)
+    if (d.target !== 'none' && (d.target === 'template' || d.target === 'compose' || isRasterDoc(this.root))) return this.bild.save(asNew);
     if (d.target === 'none') {
       // Einbettung ohne Ablage (z. B. Motion): bereinigtes SVG an den Aufrufer, der es selbst speichert
       const res = await this.api('POST', this.boot.urls.clean, { svg: this.getSvg() });

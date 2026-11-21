@@ -708,3 +708,69 @@ html.adm-ui[data-theme=dark] .gx-label { fill: #7DDBA6 }
 .gx-board { display: grid; gap: 6px; margin-top: 6px }
 .ge-os, .ge-os__acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
 .ge-os .ge-lbl { flex: 1 0 100% }
+
+/* ================================================================= Persona Bild (Ausbaustufe 6, bild.js) – gemischt wie in Fireworks:
+   der Bereich Bild steht oben, die übrigen Bereiche (Farbe, Ebenen, Text …) bleiben darunter erreichbar */
+.ge-pg--bild { flex: 0 0 auto }
+.ge-pg--bild[hidden] { display: none }
+.gb-panel, .gb-panel .ge-form { min-width: 0 }
+.gb-panel .ge-form { gap: 8px; grid-template-columns: minmax(0, 1fr) }
+.gb-panel .ge-lbl > .ge-in:not(.ge-in--s) { flex: 1 1 0; width: 0; min-width: 0 }
+.gb-panel .ge-row4 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+.gb-panel .ge-row4 .ge-in--s { width: 0; flex: 1 1 0; min-width: 0; max-width: 90px }
+.gb-panel .ge-h3 { margin: 6px 0 0 }
+.gb-info { display: flex; gap: 10px; align-items: center; min-width: 0 }
+.gb-info > span { display: grid; min-width: 0 }
+.gb-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px }
+.gb-info .ge-note { margin: 0 }
+.gb-thumb { width: 56px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--adm-line); flex: 0 0 auto }
+.gb-acts { display: flex; flex-wrap: wrap; gap: 6px }
+.gb-boards, .gb-fields { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px }
+.gb-boards li { display: flex; align-items: center; gap: 8px; min-height: 30px; font-size: 12px }
+.gb-boards .ge-note { margin: 0 }
+.gb-boards__acts { margin-left: auto; display: flex; gap: 2px }
+.gb-fmts { margin: 0; padding: 0; border: 0; display: grid; gap: 4px }
+.gb-fmts .ge-h3 { padding: 0 }
+.gb-fmts .ge-chk { font-size: 12px; color: var(--adm-t2) }
+.gb-seg { display: flex; flex-wrap: wrap; gap: 4px 10px }
+.gb-opt { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--adm-t2) }
+.gb-field { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 8px; padding: 6px 8px; border: 1px solid var(--adm-line); border-radius: 7px; background: var(--adm-card); color: var(--adm-ink); font: 600 12px var(--adm-font); text-align: left; cursor: pointer }
+.gb-field:hover { border-color: var(--adm-accent, #5B73AD) }
+.gb-field .ge-note { margin: 0 }
+
+/* ================================================================= Aus Vorlage erstellen (fill.js): Formular links, Vorschau rechts */
+.ge-fill { width: min(1180px, calc(100vw - 32px)); max-width: none; height: min(820px, calc(100vh - 32px)); max-height: none; padding: 0; border: 0; border-radius: 12px;
+  background: var(--adm-card); color: var(--adm-ink); box-shadow: 0 24px 64px rgba(0, 0, 0, .3); font: 14px/1.45 var(--adm-font) }
+.ge-fill[open] { display: flex; flex-direction: column }
+.ge-fill::backdrop { background: rgba(10, 12, 18, .55) }
+.ge-fill__head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--adm-line) }
+.ge-fill__head h2 { margin: 0 auto 0 0; font-size: 17px }
+.ge-fill__body { padding: 16px; overflow: auto }
+.ge-fill__hint { margin: 0 0 12px; color: var(--adm-t2) }
+.ge-fill__tpls { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px }
+.ge-fill__tpl { display: grid; gap: 8px; width: 100%; padding: 8px; border: 1px solid var(--adm-line); border-radius: 10px; background: var(--adm-card); color: var(--adm-ink); text-align: left; cursor: pointer; font: inherit }
+.ge-fill__tpl:hover, .ge-fill__tpl:focus-visible { border-color: var(--adm-a, #5B73AD) }
+.ge-fill__tpl img { width: 100%; aspect-ratio: 16 / 10; object-fit: contain; background: var(--adm-fill); border-radius: 6px }
+.ge-fill__tpl > span { display: grid; gap: 2px; font-size: 12px; color: var(--adm-t2) }
+.ge-fill__tpl strong { color: var(--adm-ink); font-size: 14px }
+.ge-fill__grid { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr) }
+.ge-fill__form { padding: 16px; overflow: auto; border-right: 1px solid var(--adm-line); display: grid; align-content: start; gap: 12px }
+.ge-fill__form fieldset { margin: 0; padding: 10px 12px; border: 1px solid var(--adm-line); border-radius: 8px; display: grid; gap: 6px }
+.ge-fill__form legend { padding: 0 4px; font-weight: 700; font-size: 13px }
+.ge-fill__l { font-weight: 600 }
+.ge-fill__img { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.ge-fill__img img { width: 64px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid var(--adm-line) }
+.ge-fill__img > span { flex: 1; min-width: 0; font-size: 12px; color: var(--adm-t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.ge-fill__colors { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) }
+.ge-fill__sw { display: flex; align-items: center; gap: 6px; font-size: 13px }
+.ge-fill__chip { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .25); flex: 0 0 auto }
+.ge-fill .f-help.is-warn { color: var(--adm-danger, #B42318); font-weight: 600 }
+.ge-fill__preview { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--adm-fill) }
+.ge-fill__tabs { display: flex; flex-wrap: wrap; gap: 4px }
+.ge-fill__tabs button { min-height: 30px; padding: 0 10px; border: 1px solid var(--adm-line); border-radius: 7px; background: var(--adm-card); color: var(--adm-t2); font: 600 12px var(--adm-font); cursor: pointer }
+.ge-fill__tabs button[aria-checked=true] { background: var(--adm-ink); border-color: var(--adm-ink); color: var(--adm-card) }
+.ge-fill__stage { flex: 1; min-height: 0 }
+.ge-fill__note { margin: 0; font-size: 12px; color: var(--adm-t2) }
+.ge-fill__foot { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--adm-line) }
+.ge-fill__status { color: var(--adm-t2); font-size: 13px }
+@media (max-width: 760px) { .ge-fill__grid { grid-template-columns: 1fr; overflow: auto } .ge-fill__form { border-right: 0; border-bottom: 1px solid var(--adm-line); overflow: visible } .ge-fill__stage { min-height: 260px } }

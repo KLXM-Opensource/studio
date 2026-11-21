@@ -9,7 +9,7 @@ import { captionsPanel, initCaptionsQueue } from './_captions.js';   // Untertit
 import { adjustDialog, applyFx, fxLabel } from './_imagefx.js';   // Bild anpassen (Core\ImageFx)
 import { fitDialog, fitLabel } from './_imagefit.js';   // Bild im Rahmen: füllen, einpassen, Originalformat (Core\ImageFit)
 import { editImage, editToolbar } from './_imageedit.js';
-import { openGraphicEditor } from './_grafik.js';   // Grafik-Editor (Core\Graphics): Neu → Grafik, SVG bearbeiten   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
+import { openGraphicEditor, fillGraphicTemplate } from './_grafik.js';   // Grafik-Editor (Core\Graphics): Neu → Grafik, SVG bearbeiten   // Bild bearbeiten (Core\ImageEdit): Zuschneiden, Drehen, Spiegeln, Ausrichten, Entzerren
 /*
  * Mediathek im Finder-Stil (KLXM Studio)
  *  - Seitenleiste: Mediathek, Sammlungen (Dateien per Drag & Drop hineinziehen), Tags
@@ -655,10 +655,18 @@ class Finder {
     if (r.saved?.target === 'media') this.load(r.saved.item.id);
   }
 
-  /** SVG der Mediathek im Grafik-Editor bearbeiten (neue Fassung derselben Datei – ID und Verwendungen bleiben) */
+  /** SVG der Mediathek im Grafik-Editor bearbeiten (neue Fassung derselben Datei – ID und Verwendungen bleiben); Bild aus dem
+   * Grafik-Editor (m.compose): Arbeitsfassung öffnen, Speichern ersetzt das Bild */
   async editGraphic(m) {
-    const r = await openGraphicEditor({ mediaId: m.id });
+    const r = await openGraphicEditor(m.compose ? { id: m.compose } : { mediaId: m.id });
     if (r.saved) this.load(r.saved.item?.id || m.id);
+  }
+
+  /** Aus Vorlage erstellen (Persona Bild): Formular ohne Editor; fertige Bilder erscheinen ausgewählt */
+  async fromTemplate(compose = null) {
+    const r = await fillGraphicTemplate({ id: compose, returnFocus: $('[data-newmenu]', this.root) });
+    const first = r.saved && Object.values(r.saved.outputs || {})[0];
+    if (first) this.load(first.id);
   }
 
   /** Knopf „Importieren aus …“: Quellen der Erweiterungen (Hook sources) – nur mit Schreibrecht im aktuellen Ort */
@@ -691,6 +699,9 @@ class Finder {
         [t('Infografik 16:9 (1600 × 900)'), info(1600, 900)],
         [t('Infografik quadratisch (1080 × 1080)'), info(1080, 1080)],
         [t('Infografik frei (800 × 500)'), info(800, 500)],
+        // Persona Bild: Foto und Text gemischt → Pixelbild; Vorlagen der Agentur nur ausfüllen
+        [t('Bild mit Foto und Text (1200 × 630)'), () => this.newGraphic({ format: 'info', w: 1200, h: 630, out: 'jpeg', persona: 'bild' })],
+        [t('Aus Vorlage erstellen …'), () => this.fromTemplate()],
         // Symbole/Blockvorschauen nur mit dem Recht der Art (Core\Graphics\Graphics::RIGHTS, data-grafik-kinds am <html>)
         ...(kinds.includes('icon') ? [[t('Symbol 24 × 24 (eigene Ablage)'), () => this.newGraphic({ format: 'icon' })]] : []),
         ...(kinds.includes('preview') ? [[t('Blockvorschau 160 × 100 (eigene Ablage)'), () => this.newGraphic({ format: 'preview' })]] : []),
@@ -1123,7 +1134,8 @@ class Finder {
     if (one) e.push(['Bearbeiten …', () => this.edit(one.id)], ['Quick Look', () => this.quickLook(one.id)]);
     if (one?.kind === 'image' && !one.svg) e.push(['Zuschneiden …', () => crop(one, Object.keys(this.meta.ratios)[0], () => this.load())]);
     if (one?.kind === 'image' && !one.editable) e.push([t('Bild bearbeiten …'), () => this.editImage(one)]);
-    if (one?.svg && !this.pool && !one.pool && document.documentElement.dataset.grafikJs) e.push([t('Im Grafik-Editor bearbeiten …'), () => this.editGraphic(one)]);
+    if ((one?.svg || one?.compose) && !this.pool && !one.pool && document.documentElement.dataset.grafikJs) e.push([t('Im Grafik-Editor bearbeiten …'), () => this.editGraphic(one)]);
+    if (one?.compose_tpl && !this.pool && document.documentElement.dataset.grafikJs) e.push([t('Felder der Vorlage ändern …'), () => this.fromTemplate(one.compose)]);
     if (one) e.push(['Datei ersetzen …', () => this.replace(one)], ['Original öffnen', () => open(one.kind === 'pdf' ? one.viewer : one.url, '_blank', 'noopener')]);
     if (ids.length > 1 && this.meta.zip) e.push([t('Als ZIP herunterladen'), () => { location.href = this.zipUrl(ids); }]);
     if (this.src.type === 'trash') e.push([t('Wiederherstellen'), async () => { await api.bulk({ ids, action: 'restore' }); this.sel.clear(); toast(t('Wiederhergestellt')); this.load(); }]);
@@ -1457,6 +1469,8 @@ class Finder {
             <h3 class="md-h3">${esc(t('Anpassen'))} <small>– ${esc(t('Effekte, Sättigung, Helligkeit, Kontrast, Schärfe'))}</small></h3>
             <div class="md-adjust" data-adjbox>${adjBox()}</div>${fitSection()}`
           : isImg ? `<div class="md-focus" data-focus title="Klicken: wichtigster Bildbereich (Fokuspunkt)"><img src="${esc(m.large)}" alt="" draggable="false"><span class="md-dot" style="left:${focus.x}%;top:${focus.y}%"></span></div>
+            ${m.compose && !this.ro && !this.pool && document.documentElement.dataset.grafikJs ? `<div class="md-gebar"><button type="button" class="adm-btn adm-btn--small" data-ge-edit>${ico('bezier-curve')} ${esc(t('Im Grafik-Editor bearbeiten'))}</button>
+              <span class="f-help">${esc(t('Bild aus dem Grafik-Editor: Ebenen und Texte ändern Sie dort – Speichern ersetzt dieses Bild.'))}</span></div>` : ''}
             <div class="md-iebar" data-iebar>${editToolbar(m, this.ro)}</div>
             <p class="f-help">Fokuspunkt: ins Bild klicken (z. B. aufs Gesicht). Dieser Bereich bleibt in jedem Format sichtbar.</p>
             <h3 class="md-h3">Zuschnitte je Format <small>– klicken zum Zoomen und Zuschneiden</small></h3>
