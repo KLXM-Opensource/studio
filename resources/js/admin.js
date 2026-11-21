@@ -558,6 +558,13 @@ d.addEventListener('click', e => {
     print();
   }
 });
+// Abonnieren: Dialog mit dem neuen Abo-Token (ohne JavaScript offen in der Seite) als modales Fenster – Fokus, Escape, Hintergrund
+$$('dialog[data-abo-dialog][open]').forEach(dlg => {
+  if (typeof dlg.showModal !== 'function') return;
+  dlg.close();
+  dlg.showModal();
+  $('button, [href], input', dlg)?.focus();
+});
 function initCounters(scope = d) {
   $$('[data-max]', scope).forEach(el => {
     if (el._init) return; el._init = true;

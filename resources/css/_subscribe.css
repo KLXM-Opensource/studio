@@ -1,0 +1,37 @@
+/* Daten → Tabelle → Abonnieren (Core\Data\Subscriptions, app/Admin/views/data/subscribe.php): Adressen, QR-Code, Abo-Tokens, Anleitung */
+.abo-lead{max-width:72ch;margin:-4px 0 16px}
+.abo-card{margin-bottom:16px}
+.abo-card h3,.abo-dlg h3{font-size:15px;margin:18px 0 8px}
+.abo-card>.adm-muted{margin-bottom:12px}
+.abo-addr{margin:0 0 12px}
+.abo-addr__label{display:block;font-size:13px;font-weight:600;color:var(--adm-t2);margin-bottom:4px}
+.abo-addr .adm-secret{flex-wrap:nowrap;align-items:center}
+.abo-addr .adm-secret code{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px;padding:8px 12px}
+.abo-dlg__grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}
+.abo-qr{margin:0;text-align:center}
+.abo-qr img{display:block;width:180px;height:180px;border-radius:8px;box-shadow:0 0 0 1px var(--adm-line);background:#fff;image-rendering:pixelated}
+.abo-qr figcaption{font-size:12px;color:var(--adm-t3);margin-top:6px;max-width:180px}
+.abo-app{border-top:1px solid var(--adm-line);margin-top:14px;padding-top:4px}
+.abo-list{margin:0 -20px 16px;overflow-x:auto}
+.abo-form{border-top:1px solid var(--adm-line);padding-top:4px;max-width:640px}
+.abo-scope .f-check{align-items:flex-start;margin:6px 0}
+.abo-guide{display:grid;gap:6px;max-width:80ch}
+.abo-guide__app{border:1px solid var(--adm-line);border-radius:8px;background:var(--adm-surface)}
+.abo-guide__app summary{cursor:pointer;padding:9px 12px;font-weight:600}
+.abo-guide__app p{margin:0;padding:0 12px 12px;color:var(--adm-t2)}
+.abo-guide code{overflow-wrap:anywhere}
+/* Dialog mit dem neuen Token: ohne JavaScript offen in der Seite, mit JavaScript modal (resources/js/admin.js, data-abo-dialog) */
+.abo-dlg{position:static;display:block;width:auto;max-width:860px;margin:0 0 16px;padding:20px 22px;border:0;border-radius:12px;
+  background:var(--adm-surface);color:inherit;box-shadow:0 0 0 2px var(--adm-a)}
+.abo-dlg:modal{position:fixed;margin:auto;max-height:calc(100dvh - 32px);width:min(860px,calc(100vw - 32px));overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.abo-dlg:not([open]){display:none}
+.abo-dlg::backdrop{background:rgba(10,12,20,.55)}
+.abo-dlg h2{margin-top:0}
+.abo-dlg__warn{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--adm-warn-bg);margin-bottom:14px}
+.abo-dlg__warn svg{flex:none;margin-top:2px}
+.abo-dlg__foot{margin:16px 0 0;text-align:right}
+@media (max-width:640px){
+  .abo-dlg__grid{grid-template-columns:1fr}
+  .abo-qr{justify-self:center}
+  .abo-dlg{padding:16px}
+}
