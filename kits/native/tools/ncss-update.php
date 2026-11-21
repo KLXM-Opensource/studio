@@ -30,6 +30,7 @@ const NCSS_FILES = [
     'components/marquee.css', 'js/marquee.js',
     'components/scrolly.css', 'js/scrolly.js',
     'components/compare.css', 'js/compare.js',
+    'js/media-core.js',   // gemeinsamer Kern von Video- und Audioplayer (ab NativeCSS 1.4.0)
     'components/video-player.css', 'js/video-player.js',
     'components/audio-player.css', 'js/audio-player.js',
     'components/video-bg.css', 'js/video-bg.js',

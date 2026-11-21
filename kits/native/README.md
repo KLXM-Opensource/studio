@@ -34,7 +34,7 @@ Pakete „Vergleichstabelle“) bindet die View über `native_parent_view('typ')
 Kopfleiste, Navigation, Off-Canvas, Fußbereich, Brücke. Reihenfolge der Layer steht in der Datei selbst – ein
 `<style>` im Kopf erlaubt die CSP der Website nicht. Jede Komponente lädt über `conditional_css`, ausgelöst vom Block,
 der Variante oder einem Merkmal (`Theme::markUsed`, z. B. `stats:@count`, `logos:@marquee`, `video:@player`,
-`@videobg`, `@morph`, `@reveal`, `@nv-cards`). Player-Skripte (Video ≈ 23 KB, Audio ≈ 17 KB) laden nur mit eigener Datei.
+`@videobg`, `@morph`, `@reveal`, `@nv-cards`). Player-Skripte (Video ≈ 10 KB, Audio ≈ 5 KB, dazu einmal der gemeinsame Kern `js/ncss-media-core.js` ≈ 13 KB) laden nur mit eigener Datei.
 
 ## Struktur
 

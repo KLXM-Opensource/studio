@@ -57,6 +57,9 @@ not part of the distribution. **Service**: an online service contacted at runtim
   GmbH. The visitor display settings `<ncss-preferences>` (`js/preferences.js`, `js/preferences-early.js`,
   `css/preferences.css`) are copied unchanged into `kits/fluid/assets` (built to `public/assets/kits/fluid`); the
   markup of its filter component is reused by `kits/fluid` (own script and stylesheet).
+  The sortable table component (`dist/js/table-sort.js`, `dist/components/table-sort.css`, NativeCSS 1.4.0) is copied
+  unchanged into the core assets `resources/js/table-sort.js` and `resources/css/table-sort.css` (license header in
+  the sources; built to `public/assets/{js,css}/table-sort.*`).
 
 ## 1. Browser assets in `public/assets` (Bundled)
 
@@ -131,8 +134,8 @@ bundled by `tools/build.mjs` into the kit's stylesheets and scripts (`css/site.c
 
 | Component | Version | License | Shipped as | License text |
 |---|---|---|---|---|
-| NativeCSS, © 2026 Thomas Skerbis and KLXM Crossmedia GmbH – https://github.com/skerbis/nativecss | 1.1.0 (8bb3e3f) | MIT | `kits/native/vendor/ncss/`, bundled into `public/assets/kits/native/{css,js}/` | `kits/native/vendor/ncss/LICENSE.txt`, `public/assets/kits/native/LICENSE-nativecss.txt` |
-| Reading fonts of `<ncss-preferences>` (shipped with NativeCSS): Atkinson Hyperlegible Next (© 2020-2024 The Atkinson Hyperlegible Next Project Authors), Lexend (© 2018 The Lexend Project Authors, RFN “RevReading Lexend”), OpenDyslexic (© Abbie Gonzalez, RFN “OpenDyslexic”) | as in NativeCSS 1.1.0 | OFL-1.1 | `public/assets/kits/native/fonts/*/*.woff2` (loaded only when a visitor picks them) | `public/assets/kits/native/fonts/*/OFL.txt` |
+| NativeCSS, © 2026 Thomas Skerbis and KLXM Crossmedia GmbH – https://github.com/skerbis/nativecss | 1.4.0 | MIT | `kits/native/vendor/ncss/`, bundled into `public/assets/kits/native/{css,js}/` | `kits/native/vendor/ncss/LICENSE.txt`, `public/assets/kits/native/LICENSE-nativecss.txt` |
+| Reading fonts of `<ncss-preferences>` (shipped with NativeCSS): Atkinson Hyperlegible Next (© 2020-2024 The Atkinson Hyperlegible Next Project Authors), Lexend (© 2018 The Lexend Project Authors, RFN “RevReading Lexend”), OpenDyslexic (© Abbie Gonzalez, RFN “OpenDyslexic”) | as in NativeCSS 1.4.0 | OFL-1.1 | `public/assets/kits/native/fonts/*/*.woff2` (loaded only when a visitor picks them) | `public/assets/kits/native/fonts/*/OFL.txt` |
 
 ## 2. Fonts (Bundled)
 

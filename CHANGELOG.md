@@ -6,6 +6,11 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 
 ## 1.0.0
 
+### Sortierbare Tabellen: eine Umsetzung, die von NativeCSS
+- Datenliste „Spalten sortierbar“ nutzt die Komponente „Sortierbare Tabelle“ von NativeCSS 1.4.0 (MIT) statt eines eigenen Skripts – unverändert übernommen als Kern-Asset (`resources/js/table-sort.js`, `resources/css/table-sort.css`, Lizenzkopf; der Kern hängt nicht am Kit native), weiter nur über das Merkmal `@tablesort`. Gleiches Verhalten (Schaltflächen im Kopf, `aria-sort`, Ansage, Zahl/Datum/Text, stabil, leere Zellen ans Ende), dazu: Datum mit Uhrzeit und Zeitzone, Uhrzeiten, `colspan`, Event `ncss-table-sort-change`, Klasse `is-sortable`.
+- Markup: `<table data-ncss-sort>` statt `data-table-sort`, Zahlenspalten mit `data-sort-align="end"`; Klassen `.ncss-table-sort-button`, `.ncss-table-sort-icon`, `.ncss-table-sort-status` statt `.tsort-btn`, `.tsort-ico`, `.tsort-status` (kein mitgeliefertes Kit nutzte die alten Klassen). Stile im Layer `components` mit neutralen Rückfallwerten – jede Regel des Kits gewinnt; eine eigene `css/table-sort.css` des Kits ersetzt die Datei weiterhin. Schatten an der Kante unverändert.
+- Kit NativeCSS: NativeCSS 1.4.0 (`kits/native/vendor/ncss`). Video- und Audioplayer teilen sich den neuen Kern `js/media-core.js` (Hülle `js/ncss-media-core.js`, lädt über `video:@player`/`video:@audio` vor den Playern): Player-Skripte 23,8 → 9,7 KB bzw. 17,8 → 5,0 KB, Kern 13,2 KB, mit beiden Playern auf einer Seite rund 30 % weniger. Der Audioplayer kennt dieselben Tasten wie der Videoplayer (Lautstärke mit Pfeil hoch/runter, N/P, `<`/`>`). Kein eigener Tabellen-Sortierer im Kit – es nutzt den des Kerns.
+
 
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
