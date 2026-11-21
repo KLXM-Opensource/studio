@@ -10,6 +10,28 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Grafik-Editor als eigenes Paket (`klxm/studio-grafik`), neue Andockstellen für Erweiterungen
+- **Der Grafik-Editor wird nicht mehr mit dem Core ausgeliefert.** Er ist jetzt die Erweiterung „grafik“ (Composer `klxm/studio-grafik`, Typ
+  `klxm-studio-extension`, MIT, Namensraum `Klxm\Grafik`) mit eigenem Repository, eigenem Handbuch-/Entwicklerhandbuch-Kapitel, eigenen
+  Übersetzungen und eigenem Selbsttest (`grafik:selftest`). Einschalten je Website unter Funktionen & Erweiterungen bzw. `'extensions' => ['grafik']`.
+  Die Ausbaustufen unten beschreiben den Editor, der nun im Paket lebt; Adressen (`/admin/grafik`, `/admin/grafik/editor`, `/admin/api/grafik/*`),
+  Rechte (`graphics.templates` meldet das Paket an) und gespeicherte Daten bleiben gleich.
+- **Im Core bleibt die Anzeige** – vorhandene Grafiken erscheinen ohne Paket unverändert: `Core\Svg` (auch die Editor-Daten der Arbeitsfassung),
+  `Core\Graphics\Themed` (Design-Farben, hell/dunkel), `Motion` (Bewegung, Knopf „Animation anhalten“), `Bind` (Daten und Zustände) und neu
+  `Core\Graphics\Store` (Ablage-Ordner, Arbeitsfassung, Fotos in Bildern mit Foto und Text gelten weiter als verwendet). Die Tabellen
+  `graphics`, `graphic_versions`, `graphic_sources`, `graphic_media`, `graphic_shared` bleiben im Schema des Cores. Selbsttest der Anzeige:
+  `graphics:selftest` (ersetzt den Anzeige-Teil des früheren `grafik:selftest`).
+- **Neue Integrationspunkte** (allgemein, Entwicklerhandbuch → Erweiterungen → „Editoren andocken“, geprüft in `extensions:selftest`):
+  `Extension::adminData()` (Angaben für Verwaltungs-Skripte als JSON, `CMSAdmin.extData(name)`), `Extension::previewEditor()` („Vorschau gestalten“
+  in der Blockauswahl, Nachricht `klxm-preview-editor`), Mediathek-Haken `create` (Menü „Neu“), `edit` („Bearbeiten mit …“ im Kontextmenü und im
+  Fenster „Bearbeiten“) und `side` (Links in der Seitenleiste), Filter `media.usages` und `presence.object`. Build: `extensions/{name}/build.mjs`
+  (`vendors`, `esbuild`, `built`), eigene `package.json` je Erweiterung, Kern-Helfer über `klxm-studio/…`; `tools/licenses.mjs` prüft auch die
+  Pakete der Erweiterungen.
+- Entfernt aus dem Core: `Core\Graphics\Graphics`, `Compose`, `Library`, `Templates`, `Shared`, der `GraphicsController`, die Ansichten
+  `grafik/*`, `resources/js/grafik*`, `_grafik.js`, `grafik.css`, die Bibliotheken Paper.js, paperjs-offset, fontkit, jsPDF, svg2pdf.js und hyphen
+  (samt Lizenzen, `THIRD-PARTY-NOTICES.md`) sowie `CMSAdmin.graphic` (setzt jetzt das Paket) und die Attribute `data-grafik-*` am `<html>`.
+  `Media::toJson()` liefert `compose`/`compose_tpl` nicht mehr – das Paket gibt `ext.grafik` aus.
+
 
 ### Grafik-Editor: Persona Bild, Formate für soziale Netzwerke, Vorlagen zum Ausfüllen (Ausbaustufe 6)
 - **Persona Bild** (gemischt wie in Fireworks): Fotos der Mediathek als Ebenen – per Verweis auf die Mediathek-ID, nicht eingebettet –, Ausschnitt
