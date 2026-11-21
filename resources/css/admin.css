@@ -3826,6 +3826,11 @@ html.adm-ui .adm-tabs-form--side .adm-secnav a[aria-current=page] .adm-tabs__bad
 .rep-row{display:flex;align-items:flex-start;gap:8px;border:0;padding:0;margin:0 0 6px;background:none}
 .rep-item.rep-row.is-collapsed>.rep-fields{display:grid}   /* Zeilen klappen nie ein */
 .rep-row .rep-row__fields{flex:1;display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,2fr) auto;gap:0 8px;align-items:start}
+/* Wert bekommt den Platz (Telefonnummer, E-Mail): Beschriftung fest, Schalter so breit wie nötig */
+.rep-row .rep-row__fields:not(:has([name$="[street]"])){display:flex;flex-wrap:wrap;align-items:flex-start}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>*{flex:0 0 auto}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f-vis,.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:first-child{flex:0 1 150px;min-width:110px}
+.rep-row .rep-row__fields:not(:has([name$="[street]"]))>.f:not(.f--bool):not(:first-child){flex:1 1 220px;min-width:0}
 .rep-row .rep-row__fields>.f,.rep-row .rep-row__fields>.f-vis>.f{grid-column:auto;margin:0}
 .rep-row .rep-row__fields>.f-vis{grid-column:1/2}
 .rep-row .rep-row__fields .f>label:not(.f-check),.rep-row .rep-row__fields .f>.f-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
