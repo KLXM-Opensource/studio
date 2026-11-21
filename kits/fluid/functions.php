@@ -636,7 +636,9 @@ function fluid_filter(\Core\Block $b, array $cats): array
         }
         $item[$i] = implode(' ', array_unique($nums));
     }
-    if (count($names) < 2 || is_editing()) return ['open' => '', 'bar' => '', 'item' => []];
+    // Gemeinsame Regel (Core\Blocks\ListFilter): Leiste erst ab zwei Kategorien – die Kategorien stammen aus den Karten selbst,
+    // haben also immer Treffer; „Filter erst ab … Einträgen“ gilt hier nicht (Karten pflegt die Redaktion von Hand)
+    if (!\Core\Blocks\ListFilter::enoughButtons(count($names)) || is_editing()) return ['open' => '', 'bar' => '', 'item' => []];
     app()->theme->markUsed('@filter');
     $id = $b->domId() . '-f';
     $bar = '<fieldset class="ncss-filter-bar"><legend>' . e(lt('Filtern nach Kategorie')) . '</legend>'

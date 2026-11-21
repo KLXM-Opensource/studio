@@ -10,6 +10,24 @@ Erste veröffentlichte Version von KLXM Studio (MIT). Installation mit `composer
 oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten Assets); Anforderungen: PHP ≥ 8.4.1 und
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
+### Besucher-Filter wachsen mit: erst ab genug Einträgen, nur belegte Optionen
+- **Eine gemeinsame Regel für alle Listen mit Filtern** (`Core\Blocks\ListFilter`): Datenliste (Filter-Schaltflächen, zweite
+  Reihe, Suchfeld, A–Z), Kalender (nach Kategorie), Rubrik-Leiste im Kit editorial, Schlagworte und Suche der Downloads sowie
+  Karten-Kategorien im Kit fluid. Redaktionen schalten Filter einmal ein – bei wenigen Einträgen wirkt die Seite weder leer noch überladen.
+- **Neu im Block: „Filter erst ab … Einträgen anzeigen“** (leer = 8, 0 = immer). **Achtung, geändertes Verhalten bestehender
+  Seiten:** Zeigt eine Liste weniger als 8 Einträge (veröffentlicht; beim Kalender: kommende Termine), verschwinden Filterleiste,
+  Suchfeld und A–Z-Leiste – bei den fluid-Downloads die Suche und die Schlagworte (der Umschalter Liste/Kacheln bleibt ab drei Dateien).
+  Wer die Leiste immer will, trägt 0 ein.
+- **Nur Optionen mit Treffern:** Kategorien ohne (kommende) Einträge erscheinen nicht mehr als Schaltfläche; gezählt mit
+  derselben Abfrage wie die Liste in einer Abfrage (`Entries::facets`). Wahl „Filter-Schaltflächen → Alle Optionen, auch ohne
+  Einträge“ stellt das alte Verhalten her. Bleibt weniger als zwei Schaltflächen übrig, entfällt die Leiste; die A–Z-Leiste
+  erscheint erst ab zwei Anfangsbuchstaben.
+- **Geteilte Links mit ausgeblendetem Filter** zeigen die ganze Liste (Parameter ignoriert, kein leeres Ergebnis, kein 404); eine
+  gewählte Option ohne Treffer bleibt bei sichtbarer Leiste als aktive Schaltfläche stehen.
+- **Kit-Vorgabe** `'list_filter'` in `theme.php` für Blöcke ohne eigene Angabe; das Kit praxis behält damit das bisherige
+  Verhalten (alle Optionen, Filter immer). Handbuch → Daten, Entwicklerhandbuch → Daten → „Besucher-Filter: gemeinsame Regel“;
+  Selbsttest `blocks:selftest`.
+
 ### Agentur Hub: offene Spezifikationen für andere Systeme
 - **`docs/agentur-hub/`** beschreibt, wie KLXM Studio, REDAXO 6 (AddOn `klxm_hub`), REDAXO 5 (AddOn in Arbeit) und eigene
   Lösungen am Agentur Hub teilnehmen: `oidc-profil.md` (Discovery inkl. optionalem `logo_uri`, Code-Flow mit PKCE S256, `state`,

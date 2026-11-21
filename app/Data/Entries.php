@@ -109,6 +109,42 @@ final class Entries
         return (int) Tables::db($table)->fetchValue("SELECT COUNT(*) FROM {$table['table']}" . ($where ? ' WHERE ' . implode(' AND ', $where) : ''), $params);
     }
 
+    /**
+     * Trefferzahlen für Besucher-Filter (Core\Blocks\ListFilter): Anzahl der Einträge zu $o (wie count, ohne limit/offset) und je
+     * Auswahl-/Mehrfachauswahl-Feld die Einträge je Option – eine einzige Abfrage über die Filterspalten, kein N+1.
+     * @param list<string> $fields Feldnamen (andere Typen werden übergangen)
+     * @return array{total: int, counts: array<string, array<string, int>>}
+     */
+    public static function facets(array $table, array $fields, array $o = []): array
+    {
+        unset($o['limit'], $o['offset']);
+        $cols = [];
+        foreach ($fields as $n) {
+            $f = Tables::field($table, (string) $n);
+            if ($f && in_array($f['type'], ['select', 'multiselect'], true)) $cols[$f['name']] = $f['type'];
+        }
+        $counts = array_fill_keys(array_keys($cols), []);
+        if (\Core\PageAccess::hidesTable($table)) return ['total' => 0, 'counts' => $counts];
+        if (!$cols) return ['total' => self::count($table, $o), 'counts' => []];
+        if (\Core\PageAccess::audience($table) !== 'all') {
+            $rows = self::query($table, $o);   // geschützte Tabelle: nur, was dieser Besucher sieht (bereits dekodiert)
+        } else {
+            [$where, $params] = self::where($table, $o);
+            $rows = Tables::db($table)->fetchAll('SELECT ' . implode(', ', array_keys($cols)) . " FROM {$table['table']}"
+                . ($where ? ' WHERE ' . implode(' AND ', $where) : ''), $params);
+        }
+        foreach ($rows as $r) {
+            foreach ($cols as $n => $type) {
+                $v = $r[$n] ?? null;
+                $vals = $type === 'multiselect' ? (is_array($v) ? $v : (json_decode((string) $v, true) ?: [])) : [$v];
+                foreach (array_unique(array_map('strval', array_filter((array) $vals, fn($x) => $x !== null && $x !== ''))) as $k) {
+                    $counts[$n][$k] = ($counts[$n][$k] ?? 0) + 1;
+                }
+            }
+        }
+        return ['total' => count($rows), 'counts' => $counts];
+    }
+
     private static function where(array $table, array $o): array
     {
         self::guard($table);
