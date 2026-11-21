@@ -303,7 +303,7 @@ final class Motion
         $svg = str_replace(['__GM__', 'class="__GMCLASS__"', '__GMPLAY__'], ['g', 'class="cms-gm ' . $out['key'] . '"', ''], $out['svg']);
         $svg = (string) preg_replace_callback('~__GMHREF(\d+)__~', function ($x) use ($out) {
             $h = \Core\Blocks\Runtime::resolveLink((string) ($out['links'][(int) $x[1]] ?? ''));
-            return e(str_starts_with($h, '/') ? rtrim(url('/'), '/') . $h : $h);
+            return e(str_starts_with($h, '/') ? abs_url($h) : $h);
         }, $svg);
         $svg = str_replace(' aria-label="__GMALT__"', '', $svg);
         $css = str_replace(']]>', '', $out['css']);

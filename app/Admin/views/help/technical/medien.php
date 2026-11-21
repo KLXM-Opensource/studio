@@ -78,7 +78,9 @@
       Ausbaustufe 3a: <code>fontpicker.js</code> (Schriftauswahl), <code>typo.js</code> (OpenType, Absatz-Einstellungen, Silbentrennung),
       <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).
       Ausbaustufe 3b: <code>scheme.js</code> (Design-Farben, Hell/Dunkel, Ansicht), <code>check.js</code> (Prüfen), <code>builder.js</code> (Formgitter),
-      <code>repeat.js</code> (Wiederholen), <code>fx.js</code> (Ebeneneffekte), <code>warp.js</code> (Perspektive, Hülle).</li>
+      <code>repeat.js</code> (Wiederholen), <code>fx.js</code> (Ebeneneffekte), <code>warp.js</code> (Perspektive, Hülle).
+      Ausbaustufe 4: <code>anim.js</code> (Modell der Bewegung, Zeitrechnung, Vorschau, Standbild), <code>motion.js</code> (Persona Motion:
+      Zeitleiste, Bereich Bewegung/Interaktion/Szene, Prüfen-Hinweise).</li>
     <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
       <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
       <table class="doc-table">
@@ -230,6 +232,58 @@
       de Casteljau in 4 bzw. 6 Stücke geteilt, deren Kontrollpunkte abgebildet werden. Ergebnis im Raum des Elternelements ohne <code>transform</code>;
       Rechtecke, Ellipsen … werden Pfade. Sitzung mit Schnappschuss (Esc stellt exakt her), ein Schritt im Protokoll. Neigen: <code>skewX</code> um den
       Bezugspunkt in der Lage des Rahmens.</li>
+    <li id="grafik-motion-technik"><b>Bewegung und Interaktion</b> (Ausbaustufe 4, <code>anim.js</code>, <code>motion.js</code>, <code>Core\Graphics\Motion</code>,
+      <code>js/graphic-motion.js</code>):
+      <ul>
+        <li><b>Modell</b> (nur Arbeitsfassung, alles im Dokument – Rückgängig/Wiederholen gelten exakt wie für jede Änderung, Kopieren/Duplizieren
+          nimmt die Bewegung mit): Szene am <code>&lt;svg&gt;</code> <code>data-ge-motion="d=4;dl=0;it=1;dir=normal;tr=view"</code> (Dauer, Verzögerung in s,
+          Wiederholungen, 0 = endlos, Richtung wie <code>animation-direction</code>, Auslöser <code>load|view|hover|click</code>). Je Element
+          <code>data-ge-anim</code> = Base64(JSON) <code>{p: [px, py], k: {pos: [[t, dx, dy, e]], s|r|o|w: [[t, v, e]], f|c: [[t, '#hell', e, '#dunkel']]},
+          n?: {a, b, d, g, p, t0, t1, e}, tr?: 'hover', on?: 'hotspot-id'}</code> – Zeiten in Sekunden, Werte relativ zur Grundform (Versatz im Raum des
+          Elternelements, Faktor, Grad, Deckkraft-Faktor, Anteil gezeichnet), <code>e</code> = Verlauf ab diesem Schlüsselbild
+          (<code>smooth|out|in|linear|spring|hold</code> oder <code>[x1, y1, x2, y2]</code>). <code>p</code> (Drehpunkt = Mitte des Rahmens im Raum des
+          Elternelements) und die Lage sichtbarer Tooltips (<code>data-ge-tipbox</code>) leitet der Editor vor jedem <code>getSvg()</code> aus der
+          Geometrie ab (ohne Vorschau, Abweichungen unter ¼ % bleiben stehen – Textmaße schwanken mit dem Zoom). Interaktion:
+          <code>data-ge-link</code> (<code>page:ID</code> u. a. aus der Linkauswahl, URL, <code>mailto:</code>, <code>tel:</code>), <code>data-ge-linklabel</code>,
+          <code>data-ge-tip</code>, <code>data-ge-hot="1"</code>. Animierte/verlinkte Elemente bekommen eine <code>id</code> (bleibt mit <code>keep_ids</code>).
+          <code>Svg::clean</code> mit <code>editor</code> nimmt <code>data-ge-anim</code> nur als Base64 bis 120 000 Zeichen.</li>
+        <li><b>Rechnung:</b> Bewegung um den Drehpunkt <code>X = T(p)·translate(dx, dy)·rotate(r)·scale(s)·T(−p)</code>; Verlauf je Abschnitt als
+          cubic-bezier (<code>bez()</code>, wie CSS). Vorschau im Editor: eigenes <code>&lt;style data-ge-motion-preview&gt;</code> im Shadow Root mit
+          <code>transform: matrix(X·M)</code> (M = <code>transform</code>-Attribut), Deckkraft, Farben, Strichlänge aus <code>getTotalLength()</code> –
+          das Dokument ändert sich beim Abspielen nicht; Zähler ändern nur den Textknoten und werden vor <code>getSvg()</code> zurückgesetzt; Verbinder
+          rechnen während der Vorschau nicht neu. Ein Test vergleicht die angehaltene Website-Animation mit der Editor-Rechnung (Abweichung 0).</li>
+        <li><b>Website</b> (<code>Media::pictureOf()</code> → <code>Motion::inline()</code>): Die Web-Fassung trägt an der Wurzel die Klasse <code>ge-anim</code>
+          (<code>optimizeSvg</code>); nur dann liest der Server die Arbeitsfassung (<code>Graphics::source()</code>, gilt nur bei gleicher Datei) und baut
+          <code>Motion::build()</code>: <code>&lt;style&gt;</code> der Grafik und <code>style</code>-Attribute wandern als Regeln mit Wurzel-Klasse in eine
+          CSS-Datei (<code>{Medienordner}/grafik/m/gm-{id}-{hash}.css</code>, Name aus Datei, Modell, Design-Werten und <code>Motion::VERSION</code>;
+          Verweise <code>url(#…)</code> aus <code>style</code> werden Darstellungsattribute), Klassen bekommen ein Präfix, ids je Einbindung
+          (<code>{K}-id</code>, weitere Einbindungen <code>{K}n2-id</code>, Verweise mit). Bewegte Elemente in <code>&lt;g class="gm-a gm-aN"&gt;</code> mit
+          <code>transform-box: view-box; transform-origin: p</code> und CSS <code>translate/rotate/scale/opacity/stroke-dashoffset</code> (eigene
+          <code>@keyframes</code> je Eigenschaft, <code>animation-timing-function</code> je Schlüsselbild), Farben am Element (<code>gm-cN</code>, mit
+          Dunkel-Keyframes), Linie zeichnen über <code>pathLength="1"</code>. Ruhe = Endzustand; <code>.is-armed</code> Anfang, <code>.is-play</code> spielt,
+          <code>.is-off</code> hält an, Hotspots <code>.is-hN</code>/<code>.was-hN</code> (eigene Dauer = letztes Schlüsselbild, aus = rückwärts), Zeigen über
+          <code>:hover</code>/<code>:focus-within</code> ohne Skript. <code>@media (prefers-reduced-motion: reduce)</code> und <code>.gm-still</code> (Design-Token
+          <code>motion</code> mit Klasse aus, z. B. „Dezente Animationen“) zeigen den Endzustand. Hell/Dunkel: Farben, die sich zwischen
+          <code>Themed::render()</code> hell und dunkel unterscheiden, als Regeln unter <code>.is-dark</code> bzw. <code>@media (prefers-color-scheme: dark)</code>
+          ohne <code>.is-light</code>; <code>js/graphic-scheme.js</code> setzt die Klassen an <code>svg.cms-scheme-img</code>. Markup im Zwischenspeicher
+          <code>storage/…/cache/grafik-motion/</code> (Platzhalter für ids, Links, Alt-Text); Links löst <code>Runtime::resolveLink()</code> bei jeder
+          Ausgabe auf. <code>role="img"</code> + <code>aria-label</code> (Alt-Text; dekorativ: <code>aria-hidden</code>), mit Links/Schaltern <code>role="group"</code>,
+          Auslöser Klick <code>role="button"</code>; <code>&lt;title&gt;</code>/<code>&lt;desc&gt;</code> bleiben. Links als <code>&lt;a href&gt;</code> mit
+          <code>aria-label</code>, Tooltip als <code>&lt;title&gt;</code> plus Schild <code>.gm-tipN</code> (<code>:has(:hover, :focus-visible)</code>), Schalter
+          <code>role="button" tabindex="0" aria-pressed</code>. Im Bearbeiten-Modus und mit <code>'static' =&gt; true</code> bleibt es das <code>&lt;img&gt;</code>.</li>
+        <li><b>Skript</b> <code>js/graphic-motion.js</code> (≈ 3,6 KB, Modul) nur auf Seiten mit <code>data-gm-js</code> (<code>Motion::inject()</code> im
+          SiteController, vor dem Seiten-Cache): sichtbar ab 25 % (IntersectionObserver), Klick/Enter/Leertaste, Hotspots, Zählen (eigener Takt mit
+          derselben Zeitrechnung, Format aus <code>data-gm-count</code>), <code>.is-off</code> außerhalb des Bildes; nichts bei „Bewegung reduzieren“ und
+          <code>.gm-still</code>. Auslöser „beim Laden“ ohne Schleife und „beim Zeigen“ brauchen kein Skript.</li>
+        <li><b>Export:</b> Desktop/PDF als Standbild (<code>stillSvg()</code>, Ende bzw. Anfang; schreibt <code>transform</code>, <code>opacity</code>, Farben,
+          Strichlänge fest), <b>animiertes SVG</b> über <code>POST /admin/api/grafik/motion-svg {svg, web}</code> → <code>Motion::standalone()</code> (beide
+          Fassungen bereinigt, CSS als <code>&lt;style&gt;</code>, Auslöser „beim Laden“, Links absolut, Zählen zeigt den Endwert).</li>
+        <li><b>Erweiterung Motion:</b> bleibt unverändert lauffähig. Ihr Block kann künftig eine Mediendatei mit Bewegung über <code>Media::picture()</code>
+          ausgeben; eine Übernahme bestehender Szenen ist möglich (Element → Gruppe mit <code>data-ge-anim</code>: Schlüsselbilder <code>t·dur</code>,
+          <code>dx/dy</code> → <code>pos</code>, <code>s/r/o/draw</code> → <code>s/r/o/w</code>, Verlauf je Element → je Schlüsselbild; <code>trigger</code> → <code>tr</code>).</li>
+        <li><b>Grenzen:</b> keine Pfad-Morphs (CSS <code>d</code> fehlt in Safari) – „Pfad folgen“ tastet den Weg ab (36 Punkte, gleichmäßig über die
+          Länge); Skalierung nur gleichmäßig; Zeigen/Klick-Auslöser starten nicht im eigenständigen SVG.</li>
+      </ul></li>
     <li id="grafik-pruefen-technik"><b>Prüfen</b> (<code>check.js</code>): <code>analyze(ed)</code> → Hinweise
       <code>{key, sev: error|warn|info, mode: light|dark|null, el, title, detail, fix?}</code>: Titel/Beschreibung/Alt-Text, Kontrast Text 4,5:1 (groß 3:1)
       und Nicht-Text 3:1 (Konturen, Verbinder, kleine Flächen &lt; 4 % der Fläche) je Schema über <code>backgroundIn()</code> (Abschnitts-Hintergrund +
@@ -274,7 +328,7 @@
       bzw. <code>?media={id}</code> / <code>?id={id}</code>, <code>GET /admin/api/grafik/boot</code> (gleiche Parameter, JSON für das Overlay),
       <code>POST …/save</code>, <code>…/part</code> (eigener Baustein: <code>scope</code> site|network, <code>folder</code>, <code>id</code> = ersetzen),
       <code>…/part/update</code> (umbenennen, Ordner, <code>action: delete</code>), <code>…/parts/import</code>, <code>…/prefs</code>, <code>…/styles</code>,
-      <code>…/clean</code> (nur bereinigen), <code>…/assign</code>, <code>…/{id}/delete</code>, <code>GET …/version?ref&amp;id</code>.</li>
+      <code>…/clean</code> (nur bereinigen), <code>…/motion-svg</code> (animiertes SVG), <code>…/assign</code>, <code>…/{id}/delete</code>, <code>GET …/version?ref&amp;id</code>.</li>
     <li><b>Einbetten (z. B. Motion):</b>
       <pre><code>const r = await CMSAdmin.graphic.open({
   format: 'info',              // 'info' | 'icon' | 'preview'
@@ -287,13 +341,14 @@
 const ed = CMSGraphicEditor.mount(el, boot, { onSave });   // boot = JSON von /admin/api/grafik/boot
 ed.on('change', e => …); ed.on('selection', list => …); ed.getSvg(); ed.setSvg(svg); ed.root  // das SVG
 ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed, area) { … }, unmount() { … } });</code></pre>
-      Personas teilen das Dokument; eine Persona bekommt unter der Zeichenfläche eine eigene Fläche (<code>area</code>, z. B. Zeitleiste).
-      Animationen sollten sich an <code>id</code>s der Elemente hängen – die bleiben beim Speichern erhalten.</li>
+      Personas teilen das Dokument; eine Persona bekommt unter der Zeichenfläche eine eigene Fläche (<code>area</code>, z. B. Zeitleiste) – die
+      Persona Motion des Kerns nutzt genau diese Stelle (<code>ed.motion</code>, <code>MotionPersona</code>).
+      Animationen hängen sich an <code>id</code>s der Elemente – die bleiben beim Speichern erhalten.</li>
     <li><b>Bibliothek:</b> <code>Core\Graphics\Library</code> (Bausteine aus Motion), eigene Bausteine (<code>kind = part</code>, nur in der
       Datenbank), Symbole aus <code>public/assets/icons/icons.svg</code>. Farbfelder: Tokens vom Typ <code>color</code> aus
       <code>Core\Design</code>; Schriften: die Schriften des Designs plus allgemeine Familien.</li>
     <li><b>Grenzen heute:</b> keine Bilder in Grafiken (gewollt); Strichmuster und Pfeilspitzen werden bei „Kontur in Fläche“ nicht
-      mitgewandelt; Absatz-Einstellungen gelten je Text (nicht je Absatz); Verbinder umgehen keine Hindernisse; Motion-Persona ist nur vorbereitet.</li>
+      mitgewandelt; Absatz-Einstellungen gelten je Text (nicht je Absatz); Verbinder umgehen keine Hindernisse.</li>
     <li><b>Selbsttest:</b> <code>php bin/console grafik:selftest --site=key</code> – Editor-Ausgabe übersteht die Bereinigung (idempotent),
       Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl (auch je Variante),
       Fassungen, Arbeitsfassung/Web-Fassung, Editor-Daten nur mit <code>editor</code>, Pixelbilder gezählt, Rechte je Art (403);
@@ -301,7 +356,10 @@ ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed
       Austauschdatei bereinigt bzw. abgelehnt, Ordner/Umbenennen, Formatvorlagen der Website bereinigt;
       Ausbaustufe 3b: Klassen der Design-Farben überstehen die Bereinigung, <code>Themed::render()</code> hell/dunkel (Attribut, <code>style</code>,
       eigene Dunkel-Farbe vor Token, „same“, unbekannter Token, Verlaufsstopp), bytegleich ohne Design-Farben, Fassungen je Website,
-      <code>&lt;picture&gt;</code> mit <code>&lt;source&gt;</code> nur bei dunklem Farbschema, Skript nur auf Seiten mit solchen Grafiken.</li>
+      <code>&lt;picture&gt;</code> mit <code>&lt;source&gt;</code> nur bei dunklem Farbschema, Skript nur auf Seiten mit solchen Grafiken;
+      Ausbaustufe 4: Bewegung nur als Base64 in der Arbeitsfassung, unsichere Links verworfen, Ausgabe ohne <code>style</code>/<code>&lt;style&gt;</code>,
+      ids mit Präfix, Hülle mit Drehpunkt, Links/Tooltips/Schalter, reduzierte Bewegung, eigenständiges SVG, Mediathek inline statt <code>&lt;img&gt;</code>
+      (Grafik ohne Bewegung bleibt Bild, <code>'static'</code>), Skript nur bei Bedarf.</li>
   </ul>
 
   <h3 id="video-vorschau">Vorschaubilder für Videos (<code>Core\VideoThumbs</code>, <code>Core\Ffmpeg</code>)</h3>
