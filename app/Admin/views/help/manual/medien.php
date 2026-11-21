@@ -272,6 +272,14 @@
     lädt die Dateien herunter (mehrere als ZIP), <b>Alle Bereiche als ZIP</b> alles in Ordnern. Pixel-Formate entstehen nur hier beim Herunterladen –
     die Grafik selbst bleibt Vektor. Mit dem Recht für die Grundeinstellungen übernimmt <b>Als Favicon/App-Symbol der Website übernehmen</b> den Bereich
     für die ganze Website (Grundeinstellungen → App-Icon &amp; PWA zeigt danach dieses Bild).</p>
+  <h4 id="grafik-stile">Objektstile und Zeichenflächen</h4>
+  <p><b>Objektstile</b> (Bereich <b>Darstellung</b>, unten): <b>Stil aus Auswahl …</b> merkt sich das Aussehen des gewählten Objekts – Füllung, Kontur
+    (Farbe, Stärke, Strichmuster, Enden, Ecken), Deckkraft, Mischmodus und Ebeneneffekte – unter einem Namen. <b>Anwenden</b> gibt anderen Objekten
+    dasselbe Aussehen; <b>Aus Auswahl aktualisieren</b> übernimmt Änderungen in den Stil und passt alle Objekte mit diesem Stil an. Löschen entfernt nur
+    den Stil, die Objekte behalten ihr Aussehen. Alles ist ein Schritt im Protokoll.</p>
+  <p><b>Zeichenflächen</b> (Persona <b>Export</b> → <b>Zeichenfläche hinzufügen</b>): weitere Formate im selben Dokument, z. B. ein quadratischer Beitrag,
+    ein Hochformat, eine Social-Vorschau, DIN A4 oder ein App-Symbol. Die Fläche wächst nach rechts, jede Zeichenfläche ist ein Bereich mit Rahmen und
+    eigenen Formaten und wird für sich exportiert. Auf der Website erscheint die ganze Grafik – für einzelne Formate den Export nutzen.</p>
   <h4 id="grafik-fassungen">Fassungen, Verwendet auf, wer arbeitet gerade</h4>
   <p>Neben dem Namen der Grafik stehen zwei Knöpfe: <b>Fassungen vergleichen</b> (Uhr) zeigt die früheren Fassungen – jedes Speichern legt eine an,
     mit Datum und Person. Wählen Sie eine Fassung (auch mit <kbd>↑</kbd>/<kbd>↓</kbd>) und vergleichen Sie <b>nebeneinander</b> oder

@@ -703,3 +703,8 @@ html.adm-ui[data-theme=dark] .gx-label { fill: #7DDBA6 }
 @media (max-width: 1600px) { .ge-personas button { padding: 0 9px } .ge-personas button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap } }
 .ge-doctitle { flex: 0 1 auto; min-width: 72px }
 @media (max-width: 1180px) { .ge-top [data-act=export], .ge-top [data-shellbtns] .adm-btn { font-size: 0; gap: 0; padding-inline: 8px } .ge-top [data-act=export] svg.ico, .ge-top [data-shellbtns] .adm-btn svg.ico { width: 16px; height: 16px } .ge-doctitle .ge-fmt { display: none } }
+.gx-slice--board { fill: none; stroke: var(--adm-t2); stroke-dasharray: none; stroke-width: 1 }
+.gx-slice--board.is-sel { fill: none; stroke: #12A150; stroke-width: 2 }
+.gx-board { display: grid; gap: 6px; margin-top: 6px }
+.ge-os, .ge-os__acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.ge-os .ge-lbl { flex: 1 0 100% }

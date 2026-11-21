@@ -32,8 +32,11 @@ die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsberei
   Links und verkleinerter Vorschau der Seiten; **Präsenz**: wer die Grafik gerade bearbeitet, steht oben, Speichern fragt nach, wenn jemand anderes
   inzwischen gespeichert hat (`Core\Presence`, Typ `graphic`). Unter 1600 px zeigen die Personas nur Symbole (Name bleibt für Screenreader), Hell |
   Dunkel | Nebeneinander behält unter 1280 px seinen Namen für Screenreader (vorher fehlte er).
+- **Objektstile** (Bereich Darstellung): Aussehen – Füllung, Kontur, Deckkraft, Mischmodus, Ebeneneffekte – als Stil merken, anwenden, aus der Auswahl
+  aktualisieren (alle Objekte mit dem Stil folgen), löschen. **Zeichenflächen** in Export: weitere Formate im selben Dokument (quadratischer Beitrag,
+  Hochformat, Social-Vorschau, Breitbild, DIN A4, App-Symbol), Export je Zeichenfläche.
 - Neue Routen `POST /admin/api/grafik/data-values`, `POST /admin/api/grafik/app-icon`, `GET /admin/api/grafik/usage`; `Core\Svg::clean` (Arbeitsfassung) lässt `data-ge-bind`,
-  `data-ge-data`, `data-ge-slices` nur als Base64 zu. `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Daten und Zustände; Export),
+  `data-ge-data`, `data-ge-slices`, `data-ge-ostyles` nur als Base64 zu. `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Daten und Zustände; Export),
   Entwicklerhandbuch → Medien → Grafik-Editor.
 
 ### Grafik-Editor: Persona Motion – Bewegung und Interaktion (Ausbaustufe 4)

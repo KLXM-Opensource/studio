@@ -232,6 +232,10 @@ final class SelfTest
         $sx = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-ge-slices="' . $sl . '"><rect width="10" height="10" data-ge-slices="&lt;script&gt;"/></svg>';
         self::t(str_contains(Svg::clean($sx, ['editor' => true])['svg'], 'data-ge-slices="' . $sl . '"') && substr_count(Svg::clean($sx, ['editor' => true])['svg'], 'data-ge-slices') === 1
             && !str_contains(Svg::clean($sx, ['keep_ids' => true])['svg'], 'data-ge-slices'), 'Export: Bereiche nur als Base64 in der Arbeitsfassung, nie in der Web-Fassung');
+        $os = base64_encode('[{"n":"Hervorhebung","props":{"fill":"#e5484d"},"fx":null}]');
+        $ox = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-ge-ostyles="' . $os . '"><rect width="10" height="10" data-ge-os="Hervorhebung" data-ge-ostyles="x y"/></svg>';
+        $oc = Svg::clean($ox, ['editor' => true])['svg'];
+        self::t(str_contains($oc, 'data-ge-ostyles="' . $os . '"') && substr_count($oc, 'data-ge-ostyles') === 1 && str_contains($oc, 'data-ge-os="Hervorhebung"'), 'Objektstile: Base64 an der Wurzel, Name am Objekt');
         $model = Bind::model($w);
         self::t($model !== null && isset($model['values']['plaetze']) && !isset($model['values']['Böse']) && count($model['items']['balken'] ?? []) === 2, 'Daten: Modell bereinigt (Namen, unbekannte Eigenschaft entfällt)');
         if (!$model) return;

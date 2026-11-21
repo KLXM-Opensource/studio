@@ -319,6 +319,12 @@
           <code>Bind::forEditor()</code> (Tabellen mit Feldern, Öffnungszeiten, Sonnenzeiten heute, Zustände jetzt). Vorschau: Kopie mit eingesetzten Werten
           über dem Dokument (<code>applyAll</code>, gleiche Rechnung wie <code>Bind::apply</code>), Dokument bleibt die gezeichnete Fassung.</li>
       </ul></li>
+    <li id="grafik-stile-technik"><b>Objektstile</b> (<code>objstyles.js</code>): <code>data-ge-ostyles</code> an der Wurzel (Base64 <code>[{n, props, fx}]</code>,
+      <code>props</code> = <code>OBJ_PROPS</code>, <code>fx</code> = Modell der Ebeneneffekte), am Objekt <code>data-ge-os</code> = Name; Anwenden setzt alle
+      Eigenschaften (fehlende zurück) und legt je Objekt einen eigenen Filter an. <b>Zeichenflächen</b>: Bereiche mit <code>k: 'board'</code> in
+      <code>data-ge-slices</code>, <code>addBoard()</code> erweitert <code>viewBox</code>/<code>width</code>/<code>height</code> nach rechts (Formate
+      <code>BOARDS</code>). Symbole mit Instanzen (<code>&lt;symbol&gt;</code>/<code>&lt;use&gt;</code> mit Überschreibungen) sind vorgesehen
+      (<code>data-ge-over</code> lässt die Bereinigung schon als Base64 zu), aber noch nicht gebaut.</li>
     <li id="grafik-collab-technik"><b>Zusammenarbeit</b> (<code>collab.js</code>): Fassungen aus <code>graphic_versions</code>
       (<code>Graphics::versions()</code> mit <code>user</code> = wer durch Speichern ersetzt hat), Vergleich nebeneinander bzw. überblendet (zwei
       <code>&lt;img&gt;</code>, <code>clip-path</code> über <code>--x</code>, Regler und Ziehen), „Wiederherstellen“ = <code>load()</code> + <code>commit()</code>.

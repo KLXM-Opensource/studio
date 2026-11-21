@@ -25,6 +25,15 @@ const FORMAT_LABEL = {
 };
 const RASTER = ['ico', 'app', 'social', 'socialjpg'];
 export const ICON_SIZES = [16, 24, 32, 48];
+/** Formate für weitere Zeichenflächen (Artboards) */
+export const BOARDS = [
+  { id: 'square', w: 1080, h: 1080, f: ['svg', 'pdf', 'social'], label: () => t('Beitrag quadratisch 1080 × 1080') },
+  { id: 'story', w: 1080, h: 1920, f: ['svg', 'pdf'], label: () => t('Hochformat 1080 × 1920') },
+  { id: 'social', w: 1200, h: 630, f: ['svg', 'social'], label: () => t('Social-Vorschau 1200 × 630') },
+  { id: 'wide', w: 1920, h: 1080, f: ['svg', 'pdf'], label: () => t('Breitbild 1920 × 1080') },
+  { id: 'a4', w: 595, h: 842, f: ['pdf', 'svgd'], label: () => t('DIN A4 hoch (595 × 842 pt)') },
+  { id: 'icon', w: 512, h: 512, f: ['svg', 'ico', 'app'], label: () => t('App-Symbol 512 × 512') },
+];
 
 const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
@@ -106,12 +115,12 @@ export class ExportPersona {
     for (const s of [...this.slices, ...(this.drag?.ghost ? [this.drag.ghost] : [])]) {
       const a = ed.toOv({ x: s.x, y: s.y }), b = ed.toOv({ x: s.x + s.w, y: s.y + s.h });
       const sel = s.id === this.cur;
-      out.push(`<rect class="gx-slice${sel ? ' is-sel' : ''}" x="${a.x}" y="${a.y}" width="${b.x - a.x}" height="${b.y - a.y}"/>`);
+      out.push(`<rect class="gx-slice${s.k === 'board' ? ' gx-slice--board' : ''}${sel ? ' is-sel' : ''}" x="${a.x}" y="${a.y}" width="${b.x - a.x}" height="${b.y - a.y}"/>`);
       if ((s.f || []).includes('app')) {
         const r = Math.min(b.x - a.x, b.y - a.y) * 0.4;
         out.push(`<circle class="gx-safe" cx="${(a.x + b.x) / 2}" cy="${(a.y + b.y) / 2}" r="${r}"/>`);
       }
-      if (s.n) out.push(`<text class="gx-label${sel ? ' is-sel' : ''}" x="${a.x + 4}" y="${a.y - 5}">${esc(s.n)} · ${num(s.w)} × ${num(s.h)}</text>`);
+      if (s.n) out.push(`<text class="gx-label${sel ? ' is-sel' : ''}" x="${a.x + 4}" y="${a.y - 5}">${esc(s.n)}${s.k === 'board' ? '' : ` · ${num(s.w)} × ${num(s.h)}`}</text>`);
       if (sel && !this.drag?.ghost) for (const [hx, hy] of [[a.x, a.y], [b.x, a.y], [a.x, b.y], [b.x, b.y]]) out.push(`<rect class="gx-h" x="${hx - 4}" y="${hy - 4}" width="8" height="8"/>`);
     }
     return out.join('');
@@ -226,6 +235,29 @@ export class ExportPersona {
     this.ed.commit(t('Bereich gelöscht'));
   }
 
+  /**
+   * Zeichenfläche hinzufügen (Artboard): ein weiteres Format im selben Dokument – die Fläche wächst nach rechts, die neue Zeichenfläche
+   * ist ein Bereich mit Rahmen und eigenen Formaten (Export je Zeichenfläche). Ein Schritt im Protokoll.
+   */
+  addBoard(key) {
+    const B = BOARDS.find(b => b.id === key);
+    if (!B) return;
+    const ed = this.ed, vb = ed.vb, list = this.slices, gap = Math.round(Math.max(40, Math.min(vb.w, vb.h) * 0.08));
+    const x = Math.round(vb.x + vb.w + gap), y = Math.round(vb.y);
+    const nw = x + B.w - vb.x, nh = Math.max(vb.h, B.h);
+    const num2 = v => String(Math.round(v * 100) / 100);
+    ed.root.setAttribute('viewBox', `${num2(vb.x)} ${num2(vb.y)} ${num2(nw)} ${num2(nh)}`);
+    if (ed.root.hasAttribute('width')) ed.root.setAttribute('width', num2(nw));
+    if (ed.root.hasAttribute('height')) ed.root.setAttribute('height', num2(nh));
+    const id = 's' + (Math.max(0, ...list.map(s => +String(s.id).slice(1) || 0)) + 1);
+    list.push({ id, k: 'board', n: B.label(), x, y, w: B.w, h: B.h, f: B.f, bg: '#ffffff', snap: { 16: 1, 24: 1, 32: 1, 48: 1 } });
+    setSlices(ed.root, list);
+    this.cur = id;
+    ed.fitted = false;
+    ed.commit(t('Zeichenfläche „{name}“ hinzugefügt', { name: B.label() }));
+    ed.fit();
+  }
+
   /** Bereich mit Vorgabe: ganze Zeichenfläche, Symbol (quadratisch, Mitte) oder Social-Vorschau (1,905 : 1) */
   addPreset(kind) {
     const vb = this.ed.vb, list = this.slices;
@@ -255,7 +287,10 @@ export class ExportPersona {
         : `<p class="ge-note">${esc(t('Noch keine Bereiche. Auf der Fläche einen Bereich aufziehen oder eine Vorlage wählen.'))}</p>`}
       <div class="gx-presets"><button type="button" class="adm-btn adm-btn--small" data-preset="all" data-focuskey="p-all">${ico('frame-corners')} ${esc(t('Ganze Zeichenfläche'))}</button>
         <button type="button" class="adm-btn adm-btn--small" data-preset="icon" data-focuskey="p-icon">${ico('squares-four')} ${esc(t('App-Symbol (quadratisch)'))}</button>
-        <button type="button" class="adm-btn adm-btn--small" data-preset="social" data-focuskey="p-social">${ico('share-network')} ${esc(t('Social-Vorschau'))}</button></div></div>
+        <button type="button" class="adm-btn adm-btn--small" data-preset="social" data-focuskey="p-social">${ico('share-network')} ${esc(t('Social-Vorschau'))}</button></div>
+      <div class="gx-board"><label class="ge-lbl">${esc(t('Zeichenfläche hinzufügen'))} <select class="ge-in" data-board data-focuskey="p-boardsel">${BOARDS.map(b => `<option value="${b.id}">${esc(b.label())}</option>`).join('')}</select></label>
+        <button type="button" class="adm-btn adm-btn--small" data-act="board" data-focuskey="p-board">${ico('plus')} ${esc(t('Hinzufügen'))}</button>
+        <p class="ge-note">${esc(t('Weitere Formate im selben Dokument: die Fläche wächst nach rechts, jede Zeichenfläche wird für sich exportiert. Auf der Website erscheint die ganze Grafik.'))}</p></div></div>
       ${s ? `<div class="ge-form gx-props">
         <label class="ge-lbl">${esc(t('Name'))} <input type="text" class="ge-in" data-sf="n" data-focuskey="f-n" maxlength="60" value="${esc(s.n || '')}"></label>
         <div class="ge-row4">${['x', 'y', 'w', 'h'].map(k => `<label>${esc({ x: 'X', y: 'Y', w: t('B'), h: t('H') }[k])} <input type="number" class="ge-in ge-in--s" step="1" ${k === 'w' || k === 'h' ? 'min="1"' : ''} data-sf="${k}" data-focuskey="f-${k}" value="${esc(num(s[k]))}" aria-label="${esc({ x: t('X-Position'), y: t('Y-Position'), w: t('Breite'), h: t('Höhe') }[k])}"></label>`).join('')}</div>
@@ -285,6 +320,7 @@ export class ExportPersona {
       const b = e.target.closest('button');
       if (!b) return;
       if (b.dataset.preset) { this.addPreset(b.dataset.preset); return; }
+      if (b.dataset.act === 'board') { this.addBoard(S.querySelector('[data-board]')?.value || 'square'); return; }
       if (b.dataset.act === 'del' && this.cur) { this.remove(this.cur); return; }
       if (b.dataset.act === 'one' && this.slice) { this.download([this.slice]); return; }
       if (b.dataset.act === 'zip') { this.download(this.slices, true); return; }
