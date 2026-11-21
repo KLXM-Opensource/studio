@@ -14,7 +14,7 @@ function loadLib(cfg, node) {
     l.rel = 'stylesheet'; l.href = cfg.css; l.dataset.maplibreCss = '';
     if (root instanceof ShadowRoot) root.prepend(l); else document.head.append(l);
   }
-  if (!lib) lib = import(cfg.vendor + 'maplibre-gl.mjs');
+  if (!lib) lib = import(cfg.lib);   // Version im Pfad (Core\Maps::lib())
   return lib;
 }
 const parse = s => {

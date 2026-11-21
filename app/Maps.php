@@ -160,6 +160,18 @@ final class Maps
 
     // ------------------------------------------------------------------ Ausgabe
 
+    /**
+     * Adresse des MapLibre-Moduls mit Version im Pfad (public/assets/vendor/maplibre/{version}/, tools/build.mjs): /assets/ wird
+     * ein Jahr zwischengespeichert – eine neue Version hat so eine neue Adresse. Ohne VERSION-Datei: alter Ablageort.
+     */
+    public static function lib(): string
+    {
+        static $ver = null;
+        $ver ??= trim((string) @file_get_contents(ROOT . '/public/assets/vendor/maplibre/VERSION'));
+        $dir = preg_match('~^\d+\.\d+\.\d+[\w.-]*$~', $ver) ? $ver . '/' : '';
+        return base_path() . '/assets/vendor/maplibre/' . $dir . 'maplibre-gl.mjs';
+    }
+
     public static function styleUrl(?string $style = null): string
     {
         $style = $style && isset(self::STYLES[$style]) ? $style : (string) setting('sys.map_style', 'liberty');
@@ -199,7 +211,7 @@ final class Maps
             'zoom' => $zoom,
             'bounds' => self::bounds($p),
             'label' => $label,
-            'vendor' => base_path() . '/assets/vendor/maplibre/',
+            'lib' => self::lib(),
             'css' => asset('vendor/maplibre/maplibre-gl.css'),
             'i18n' => $t['maplibre'],
             // 3D-Ansicht: geneigt, leicht gedreht, Gebäude mit Höhe (Theme: project → map → 3d, Option '3d')

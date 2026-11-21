@@ -73,16 +73,16 @@ extension package with its own `THIRD-PARTY-NOTICES.md`.
 | Editor.js (`@editorjs/editorjs`), © CodeX | 2.31.7 | Apache-2.0 | `public/assets/vendor/editorjs/editorjs.umd.js` | `LICENSE-editorjs.txt` |
 | – bundled: `@editorjs/caret` 1.1.0, `@editorjs/dom` 1.1.0, `@editorjs/helpers` 1.2.2, `codex-notifier` 1.1.2, `codex-tooltip` 1.0.6 | | MIT | inside `editorjs.umd.js` | `THIRD-PARTY-LICENSES.txt` |
 | editorjs-drag-drop, © 2021 kommitters Open Source | 1.1.16 | MIT | `public/assets/vendor/editorjs/drag-drop.js` | `LICENSE-drag-drop.txt` |
-| MapLibre GL JS (`maplibre-gl`), © 2023 MapLibre contributors; contains code © 2020 Mapbox (BSD-3-Clause), glfx.js © 2011 Evan Wallace (MIT), d3-color © 2010-2016 Mike Bostock (BSD-3-Clause) | 6.11.2 | BSD-3-Clause | `public/assets/vendor/maplibre/` | `LICENSE.txt` |
+| MapLibre GL JS (`maplibre-gl`), © 2023 MapLibre contributors; contains code © 2020 Mapbox (BSD-3-Clause), glfx.js © 2011 Evan Wallace (MIT), d3-color © 2010-2016 Mike Bostock (BSD-3-Clause) | 6.19.0 | BSD-3-Clause | `public/assets/vendor/maplibre/{version}/` (plus the frozen 6.11.2 files directly in `vendor/maplibre/` for pages cached before the switch) | `LICENSE.txt` |
 | – bundled: @mapbox/point-geometry, @maplibre/geojson-vt, @maplibre/maplibre-gl-style-spec, earcut, kdbush, potpack, quickselect, tinyqueue (ISC); @mapbox/tiny-sdf, @mapbox/unitbezier (BSD-2-Clause); @mapbox/vector-tile, pbf (BSD-3-Clause); @maplibre/mlt (MIT OR Apache-2.0); @maplibre/vt-pbf, bidi-js, gl-matrix, murmurhash-js, @mapbox/jsonlint-lines-primitives, json-stringify-pretty-compact and others (MIT) | | see left | inside the MapLibre bundle | `THIRD-PARTY-LICENSES.txt` (generated) |
 | Apache ECharts (`echarts`), © The Apache Software Foundation – diagrams (`Core\Charts`, engine `echarts`), tree-shaken: line, bar, pie, canvas | 6.1.0 | Apache-2.0 | `public/assets/js/charts-echarts.mjs` | `public/assets/vendor/echarts/LICENSE.txt`, `NOTICE.txt` |
 | – bundled: `zrender` 6.1.0 (BSD-3-Clause), `tslib` 2.3.0 (0BSD) | | see left | inside `charts-echarts.mjs` | `public/assets/vendor/echarts/THIRD-PARTY-LICENSES.txt` (generated) |
-| Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.3.289 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
+| Mozilla PDF.js (`pdfjs-dist`), © Mozilla Foundation | 6.5.438 | Apache-2.0 | `public/assets/vendor/pdfjs/` | `LICENSE.txt` |
 | Lato (`@fontsource/lato`), © 2010-2011 tyPoland Łukasz Dziedzic, Reserved Font Name “Lato” | 5.3.0 | OFL-1.1 | `public/assets/fonts/lato-*.woff2` (admin UI), `resources/fonts/pdf/lato-*.ttf` (PDF) | `public/assets/fonts/OFL-Lato.txt` |
 | JetBrains Mono (`@fontsource/jetbrains-mono`), © 2020 The JetBrains Mono Project Authors | 5.3.0 | OFL-1.1 | `public/assets/fonts/jetbrains-mono-*.woff2` (admin code) | `public/assets/fonts/OFL-JetBrains-Mono.txt` |
 | Phosphor Icons, thin/light/regular/bold/fill (`@phosphor-icons/core`) | 2.1.1 | MIT | `public/assets/icons/styles/{thin,light,regular,bold,fill}.svg` (website icon style) | `public/assets/icons/LICENSE.txt` |
-| Lucide (`lucide-static`), © Lucide Contributors | 1.52.0 | ISC | `public/assets/icons/styles/lucide.svg` (website icon style, mapping `resources/icons/sets.json`; formatting toolbar `resources/js/_rte_icons.js`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
-| Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.49.0 | MIT | `public/assets/icons/styles/tabler.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
+| Lucide (`lucide-static`), © Lucide Contributors | 1.75.0 | ISC | `public/assets/icons/styles/lucide.svg` (website icon style, mapping `resources/icons/sets.json`; formatting toolbar `resources/js/_rte_icons.js`) | `public/assets/icons/styles/LICENSE-lucide.txt` |
+| Tabler Icons (`@tabler/icons`), © Paweł Kuna | 3.52.0 | MIT | `public/assets/icons/styles/tabler.svg` (website icon style, mapping `resources/icons/sets.json`) | `public/assets/icons/styles/LICENSE-tabler.txt` |
 | Phosphor Icons, duotone (`@phosphor-icons/core`), © 2023 Phosphor Icons | 2.1.1 | MIT | `public/assets/icons/*.svg` (core, one sprite per topic, `icons.svg`), `sites/*.svg` (generated per website), `icons-map.json`, `catalog.json` | `public/assets/icons/LICENSE.txt` |
 
 Phosphor: the sprites are built by `tools/icons.mjs` from the curated list in `resources/icons/icons.json`; path data
@@ -106,14 +106,16 @@ Installed from `kits/frameworks/package.json` and copied/built by `kits/framewor
 
 ### 1.3 Components bundled inside PDF.js (`public/assets/vendor/pdfjs/`)
 
+Code that must match the PDF.js version (`pdf.min.mjs`, `pdf.worker.min.mjs`, `wasm/`) lies in `{version}/` (e.g. `6.5.438/`); data files stay at the top level.
+
 | Component | License | License text |
 |---|---|---|
 | CMaps (`cmaps/*.bcmap`, not bundled – only after `php bin/console pdfjs:cmaps`), © 1990-2009 Adobe Systems Incorporated | BSD-3-Clause-style (Adobe) | `cmaps/LICENSE` |
 | Foxit standard fonts (`standard_fonts/Foxit*.pfb`), © 2014 PDFium Authors | BSD-3-Clause | `standard_fonts/LICENSE_FOXIT` |
 | Liberation Sans (`standard_fonts/LiberationSans-*.ttf`), © 2007-2011 Red Hat, Inc. | GNU GPL v2 with font embedding exception (Red Hat Liberation font license) | `standard_fonts/LICENSE_LIBERATION` |
-| JBIG2 decoder (`wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `wasm/LICENSE_JBIG2`, `wasm/LICENSE_PDFJS_JBIG2` |
-| OpenJPEG (`wasm/openjpeg*`); PDF.js wrapper © 2024 Mozilla Foundation | BSD-2-Clause; wrapper BSD | `wasm/LICENSE_OPENJPEG`, `wasm/LICENSE_PDFJS_OPENJPEG` |
-| qcms (`wasm/qcms_bg.wasm`), © 2009-2024 Mozilla Corporation, © 1998-2007 Marti Maria | MIT | `wasm/LICENSE_QCMS`, `wasm/LICENSE_PDFJS_QCMS` |
+| JBIG2 decoder (`{version}/wasm/jbig2*`), © 2014 The PDFium Authors; PDF.js wrapper | BSD-3-Clause; wrapper Apache-2.0 | `{version}/wasm/LICENSE_JBIG2`, `{version}/wasm/LICENSE_PDFJS_JBIG2` |
+| OpenJPEG (`{version}/wasm/openjpeg*`); PDF.js wrapper © 2024 Mozilla Foundation | BSD-2-Clause; wrapper BSD | `{version}/wasm/LICENSE_OPENJPEG`, `{version}/wasm/LICENSE_PDFJS_OPENJPEG` |
+| qcms (`{version}/wasm/qcms_bg.wasm`), © 2009-2024 Mozilla Corporation, © 1998-2007 Marti Maria | MIT | `{version}/wasm/LICENSE_QCMS`, `{version}/wasm/LICENSE_PDFJS_QCMS` |
 | ICC colour profile (`iccs/*.icc`) | CC0-1.0 | `iccs/LICENSE` |
 
 The Liberation fonts are separate font files that PDF.js loads to render PDFs without embedded fonts. They are not
@@ -261,10 +263,10 @@ Notes:
 
 | Tool | Version | License | Purpose |
 |---|---|---|---|
-| esbuild | 0.25.12 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
+| esbuild | 0.28.2 | MIT | Minifying CSS/JS (`tools/build.mjs`) |
 | PHPStan (`phpstan/phpstan`, `tools/phpstan/`), © Ondřej Mirtes | 2.3.1 | MIT | Static analysis during development; installed into `tools/phpstan/vendor` (with `dompdf/dompdf` for type information only), never deployed |
 | `@tailwindcss/cli` (with `@tailwindcss/oxide`, lightningcss), © Tailwind Labs, Inc. / Devon Govett (MPL-2.0 for lightningcss 1.32.0) | 4.3.3 | MIT (lightningcss: MPL-2.0) | Building `kits/frameworks` Tailwind CSS (`kits/frameworks/build.mjs`) |
-| Playwright / playwright-core, © Microsoft Corporation | 1.62.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
+| Playwright / playwright-core, © Microsoft Corporation | 1.65.1 | Apache-2.0 | Recording the tutorial videos (`tools/tutorials/record.mjs`); downloads its own browser builds |
 | @napi-rs/canvas | 1.0.9 | MIT | Optional dependency of pdfjs-dist, not used at runtime |
 | Piper TTS (`piper-tts`, OHF-Voice/piper1-gpl), incl. espeak-ng phonemizer | 1.8.0 | GPL-3.0-or-later | Tutorial narration (section 5), run locally via pipx |
 | ffmpeg | operator's system | LGPL-2.1+/GPL-2.0+ depending on build | Encoding tutorial videos (build-only, output goes to the product website); also optional for transcription (section 6) |

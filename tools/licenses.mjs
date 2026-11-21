@@ -55,7 +55,9 @@ const BUILD_ONLY = new Set(['esbuild', 'playwright']);
 // Ausnahmen: 'paket' => Begründung (nur mit Begründung und Verweis auf THIRD-PARTY-NOTICES.md eintragen)
 const ALLOW = {};
 
-// Lizenzdateien, die neben mitgelieferten Dateien in public/ liegen müssen (nach `pnpm --dir tools build`)
+// Lizenzdateien, die neben mitgelieferten Dateien in public/ liegen müssen (nach `pnpm --dir tools build`);
+// WASM von PDF.js liegt im Versionsordner vendor/pdfjs/{version}/ (tools/build.mjs)
+const PDFJS = 'public/assets/vendor/pdfjs/' + (() => { try { return fs.readFileSync(path.join(ROOT, 'public/assets/vendor/pdfjs/VERSION'), 'utf8').trim() + '/'; } catch { return ''; } })();
 const REQUIRED_FILES = [
   'public/assets/vendor/editorjs/LICENSE-editorjs.txt',
   'public/assets/vendor/editorjs/LICENSE-drag-drop.txt',
@@ -66,9 +68,9 @@ const REQUIRED_FILES = [
   'public/assets/vendor/pdfjs/iccs/LICENSE',
   'public/assets/vendor/pdfjs/standard_fonts/LICENSE_FOXIT',
   'public/assets/vendor/pdfjs/standard_fonts/LICENSE_LIBERATION',
-  'public/assets/vendor/pdfjs/wasm/LICENSE_JBIG2',
-  'public/assets/vendor/pdfjs/wasm/LICENSE_OPENJPEG',
-  'public/assets/vendor/pdfjs/wasm/LICENSE_QCMS',
+  PDFJS + 'wasm/LICENSE_JBIG2',
+  PDFJS + 'wasm/LICENSE_OPENJPEG',
+  PDFJS + 'wasm/LICENSE_QCMS',
   'public/assets/fonts/OFL-Lato.txt',
   'public/assets/icons/LICENSE.txt',
 ];
