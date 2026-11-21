@@ -158,7 +158,8 @@ final class Metrics
             $add('maintenance', 0, 'err', 'wrench', 1, __('Wartungsmodus ist eingeschaltet'), __('Besucher sehen nur den Wartungshinweis.'), '/admin/system#website', __('Wartungsmodus prüfen'));
         }
         // Verwaltung noch unter der üblichen Adresse /admin (Standard) – sollte geändert werden (Core\AdminPath); nur, wer es darf
-        if (\Core\AdminPath::canManage() && !\Core\AdminPath::custom() && !\Core\AdminPath::fromEnv()) {
+        // mehrere Websites: gehört in den Netzwerk-Bereich (Core\Network\Area), nicht auf die Übersicht einer Website
+        if (\Core\AdminPath::canManage() && !\Core\AdminPath::custom() && !\Core\AdminPath::fromEnv() && !\Core\Network\Area::active()) {
             $add('adminpath', 1, 'warn', 'shield-check', 1, __('Adresse der Verwaltung ändern'),
                 __('Die Anmeldung liegt noch unter /admin – dort suchen automatische Login-Scanner zuerst. Eine eigene Adresse hält sie fern.'),
                 '/admin/system#adminpath', __('Adresse ändern'));

@@ -296,7 +296,7 @@ final class SystemController extends AdminController
     public function networkHost(Request $r): Response
     {
         $user = $this->auth($r, 'system.manage');
-        $back = $r->str('back') === 'network' ? '/admin/network/administratoren#net-host' : '/admin/system#adminpath';
+        $back = $r->str('back') === 'network' ? '/admin/network/anmeldung#net-host' : '/admin/system#adminpath';
         if (!\Core\NetworkHost::canManage()) return $this->back($back, 'error', __('Die Netzwerk-Domain kann nur die Netzwerk-Administration auf der Netzwerk-Website ändern.'));
         $row = Mfa::row($user);
         $hash = (string) ($row['password_hash'] ?? '');

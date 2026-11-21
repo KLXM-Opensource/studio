@@ -7,7 +7,7 @@
 $s = $b['support'];
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Branding & Support')) ?></h1>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e(__('Branding & Support')) ?></h1>
     <p class="adm-muted"><?= e($network
       ? __('Ihr Logo und Ihre Support-Angaben für alle Websites dieser Installation – auf der Anmeldeseite, in der Werkzeugleiste der Website und unter Hilfe & Support. Nur die Netzwerk-Administration kann sie ändern.')
       : __('Ihr Logo und Ihre Support-Angaben – auf der Anmeldeseite, in der Werkzeugleiste der Website und unter Hilfe & Support.')) ?></p></div>

@@ -13,7 +13,9 @@ use Core\AI\Ai;
 use Core\AI\Profiles;
 use Core\Features;
 
-if (!Features::on('ai')) return;
+// Netzwerk-Bereich (Netzwerk → KI-Verbindungen, Core\Network\Area): Verbindungen gelten für die Installation – auch wenn die KI auf der
+// Netzwerk-Website selbst aus ist
+if (!Features::on('ai') && !\Core\Network\Area::here()) return;
 $integrator = Features::integrator();
 $cfg = Ai::config();
 $profiles = $cfg['profiles'];

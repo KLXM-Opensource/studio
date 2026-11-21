@@ -34,11 +34,13 @@ final class NetworkController extends AdminController
     }
 
     /** Bereiche unter /admin/network/{bereich} (ohne Bereich: Websites) */
-    public const SECTIONS = ['administratoren', 'email', 'neu', 'geteilt', 'speicher', 'protokoll'];
+    public const SECTIONS = ['administratoren', 'anmeldung', 'email', 'neu', 'geteilt', 'ki', 'speicher', 'protokoll'];
 
     public function section(Request $r, string $section): Response
     {
         if (!in_array($section, self::SECTIONS, true)) throw new HttpException(404);
+        // KI-Verbindungen nur im Netzwerk-Bereich mehrerer Websites (Einzelinstallation: Grundeinstellungen → KI)
+        if ($section === 'ki' && !\Core\Network\Area::active()) return Response::redirect(url('/admin/system#ki'));
         return $this->index($r, $section);
     }
 
@@ -355,10 +357,19 @@ final class NetworkController extends AdminController
     public function authPolicy(Request $r): Response
     {
         $user = $this->network($r);
-        if ($err = \Core\Mfa::saveNetPolicy($r->post)) return $this->back('/admin/network/administratoren', 'error', $err);
+        if ($err = \Core\Mfa::saveNetPolicy($r->post)) return $this->back('/admin/network/anmeldung#net-auth', 'error', $err);
         $p = \Core\Mfa::netPolicy();
         Network::log('auth.policy', null, (string) $user['email'], implode(', ', array_keys(array_filter($p))));
-        return $this->back('/admin/network/administratoren', 'success', __('Anmelde-Richtlinie der Netzwerk-Konten gespeichert.'));
+        return $this->back('/admin/network/anmeldung#net-auth', 'success', __('Anmelde-Richtlinie der Netzwerk-Konten gespeichert.'));
+    }
+
+    /** „Systemmeldungen an“ (Core\Network\SystemMail): Empfänger für Meldungen der ganzen Installation */
+    public function systemMail(Request $r): Response
+    {
+        $user = $this->network($r);
+        if ($err = \Core\Network\SystemMail::save($r->str('system_to'))) return $this->back('/admin/network/email#systemmeldungen', 'error', $err);
+        Network::log('mail.system-to', null, (string) $user['email'], implode(', ', \Core\Network\SystemMail::configured()) ?: '–');
+        return $this->back('/admin/network/email#systemmeldungen', 'success', __('Empfänger für Systemmeldungen gespeichert.'));
     }
 
     public function accountAction(Request $r, string $id, string $action): Response

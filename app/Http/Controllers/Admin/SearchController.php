@@ -113,6 +113,16 @@ final class SearchController extends AdminController
             if (\Core\KitPackages::canManage()) $more[] = [__('Kits'), __('Grundeinstellungen'), '/admin/system/kits', 'package', 'kit theme paket'];
             if (\Core\Domains::available()) $more[] = [__('Domain'), __('Grundeinstellungen'), '/admin/system/domain', 'globe', 'domain adresse hauptadresse weiterleitung'];
         }
+        // Netzwerk-Bereich (Core\Network\Area): umgezogene Punkte nicht mehr unter „Grundeinstellungen“, dafür die Seiten des Netzwerks
+        if (\Core\Network\Area::active()) {
+            $more = array_values(array_filter($more, fn($m) => \Core\Network\Area::path((string) $m[2]) === (string) $m[2]
+                && !in_array((string) $m[2], ['/admin/system#pools', '/admin/system#adminpath'], true)));
+            if (\Core\Network\Network::isNetworkUser() && \Core\Network\Network::isNetworkSite()) {
+                foreach (\Core\Network\Area::nav() as $g) foreach ($g['items'] as [$nk, $nh, $nl, $ni]) {
+                    $more[] = [$nl, __('Netzwerk'), $nh, $ni, mb_strtolower('netzwerk network ' . $nk . ' ' . $nl)];
+                }
+            }
+        }
         if (\Core\Features::canView()) {
             foreach (\Core\Features::catalog() as $key => $def) {
                 $more[] = [(string) $def[0], __('Funktionen & Erweiterungen'), '/admin/funktionen#f-' . preg_replace('~[^a-z0-9]~', '-', $key), 'toggle-right',

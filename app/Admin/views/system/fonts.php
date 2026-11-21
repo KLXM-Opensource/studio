@@ -14,7 +14,7 @@ $qs = fn(array $p) => url('/admin/system/fonts') . '?' . http_build_query(array_
 $preview = fn(string $id) => url('/admin/system/fonts/preview/' . $id);
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Schriften')) ?></h1>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e(__('Schriften')) ?></h1>
     <p class="adm-muted"><?= e(__('Schriften aus dem Google-Fonts-Katalog einmalig auf den Server laden und von der eigenen Domain ausliefern – ohne Verbindung der Besucher zu Google (DSGVO). Installierte Schriften stehen allen Websites dieser Installation im Style-Editor (Design) zur Verfügung.')) ?></p></div>
 </header>
 

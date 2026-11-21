@@ -8,7 +8,7 @@ $kinds = ['webdav' => 'WebDAV', 'sftp' => 'SFTP', 'ftps' => 'FTPS', 'ftp' => __(
 $err = fn(string $k) => isset($errors[$k]) ? '<p class="f-error">' . e($errors[$k]) . '</p>' : '';
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><a href="<?= e(url('/admin/system')) ?>"><?= e(__('Grundeinstellungen')) ?></a></p><h1><?= e(__('Sicherung außer Haus')) ?></h1>
+  <div><p class="adm-eyebrow"><?= \Core\Network\Area::crumb() ?></p><h1><?= e(__('Sicherung außer Haus')) ?></h1>
     <p class="adm-muted"><?= e(__('Kopiert jede Nacht die neuesten Sicherungen der Websites, Medien-Pools und geteilten Tabellen sowie die Installation (Konfiguration, Daten der Erweiterungen, eigene Kits und Erweiterungen – ohne den Kern) verschlüsselt auf einen anderen Server. Fällt dieser Server aus, lässt sich alles wiederherstellen.')) ?></p></div>
   <?php if ($targets): ?>
   <form method="post" action="<?= e(url('/admin/system/sicherung/run')) ?>"><?= csrf_field() ?><button class="adm-btn adm-btn--primary" type="submit"><?= icon('cloud-arrow-up') ?> <?= e(__('Jetzt sichern')) ?></button></form>

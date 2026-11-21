@@ -82,6 +82,15 @@ return function (Router $r): void {
     $r->get('/admin/sso/domain', [Admin\HandoverController::class, 'land']);
     $r->get('/admin/network/media-usages', [Admin\NetworkController::class, 'mediaUsages']);   // signiert, zwischen Websites (MediaPools::usagesElsewhere)
     $r->get('/admin/network', [Admin\NetworkController::class, 'index']);
+    // Netzwerk-Bereich (Core\Network\Area): installationsweite Seiten mit eigenem Controller – dieselben wie unter /admin/system/…
+    // in Einzelinstallationen; alte Adressen leiten in Netzwerken hierher weiter (Area::redirect)
+    $r->get('/admin/network/aufgaben', [Admin\CronController::class, 'index']);
+    $r->get('/admin/network/sicherung', [Admin\OffsiteBackupController::class, 'index']);
+    $r->get('/admin/network/kits', [Admin\KitsController::class, 'index']);
+    $r->get('/admin/network/schriften', [Admin\FontsController::class, 'index']);
+    $r->get('/admin/network/branding', [Admin\BrandingController::class, 'index']);
+    $r->get('/admin/network/integritaet', [Admin\IntegrityController::class, 'index']);
+    $r->post('/admin/network/system-mail', [Admin\NetworkController::class, 'systemMail']);   // „Systemmeldungen an“ (Core\Network\SystemMail)
     $r->get('/admin/network/{section}', [Admin\NetworkController::class, 'section']);   // Bereiche (NetworkController::SECTIONS)
     $r->post('/admin/network/open', [Admin\NetworkController::class, 'open']);
     $r->post('/admin/network/mail', [Admin\MailAccountsController::class, 'network']);        // E-Mail-Konto des Netzwerks (Core\Mail\Accounts)

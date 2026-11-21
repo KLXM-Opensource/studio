@@ -47,14 +47,15 @@ $pkHosts = \Core\HostHandover::passkeyHosts($me);
 $section ??= '';
 $nm = \Core\Mail\Accounts::network();
 $secs = ['' => [__('Websites'), 'globe', (string) count($stats)], 'administratoren' => [__('Administratoren'), 'users-three', (string) count($accounts)],
+    'anmeldung' => [__('Anmeldung & Domain'), 'lock-key', ''],
     'email' => [__('E-Mail'), 'envelope-simple', $nm && \Core\Mail\Accounts::ready($nm) ? '' : '!'], 'geteilt' => [__('Geteilt'), 'share-network', ''],
     'speicher' => [__('Speicher'), 'hard-drives', ''], 'protokoll' => [__('Protokoll'), 'clock-counter-clockwise', '']];
 $secUrl = fn(string $k) => url('/admin/network' . ($k === '' ? '' : '/' . $k));
 // Alte Sprungmarken (/admin/network#konten …) auf die Bereiche umleiten (resources/js/_network.js)
-$oldHash = ['konten' => 'administratoren', 'net-invite' => 'administratoren', 'net-auth' => 'administratoren', 'email' => 'email', 'neu' => 'neu', 'geteilt' => 'geteilt', 'speicher' => 'speicher', 'protokoll' => 'protokoll'];
+$oldHash = ['konten' => 'administratoren', 'net-invite' => 'administratoren', 'net-auth' => 'anmeldung', 'net-host' => 'anmeldung', 'email' => 'email', 'neu' => 'neu', 'geteilt' => 'geteilt', 'speicher' => 'speicher', 'protokoll' => 'protokoll'];
 ?>
 <header class="adm-head">
-  <div><p class="adm-eyebrow"><?= e(__('Netzwerk-Administration')) ?></p><h1><?= e(match ($section) { '' => __('Alle Websites'), 'neu' => __('Neue Website'), 'email' => __('E-Mail-Konto des Netzwerks'), default => $secs[$section][0] }) ?></h1>
+  <div><p class="adm-eyebrow"><?= e(__('Netzwerk-Administration')) ?></p><h1><?= e(match ($section) { '' => __('Alle Websites'), 'neu' => __('Neue Website'), 'email' => __('E-Mail des Netzwerks'), 'anmeldung' => __('Anmeldung & Domain'), 'ki' => __('KI-Verbindungen'), 'geteilt' => __('Geteilte Medien & Daten'), default => $secs[$section][0] ?? '' }) ?></h1>
     <?php if ($section === ''): ?><p class="adm-muted"><?= e(__('„Öffnen“ meldet Sie mit Ihrem Netzwerk-Konto in der Verwaltung der jeweiligen Website an.')) ?></p><?php endif; ?></div>
   <div class="adm-head__actions">
     <?php if ($section === ''): ?><a class="adm-btn adm-btn--ghost adm-btn--small" href="<?= e(url('/admin/network?refresh=1')) ?>" title="<?= e(__('Stand: {time}', ['time' => date('H:i:s', $oldest)])) ?>"><?= icon('arrows-clockwise') ?> <?= e(__('Aktualisieren')) ?></a><?php endif; ?>
@@ -69,8 +70,10 @@ foreach ($secs as $k => [$label, $ico, $badge]) {
 }
 ?>
 <?php if ($section === ''): // alte Sprungmarken (/admin/network#email …) leiten um – resources/js/_network.js ?><span hidden data-net-oldhash="<?= e(json_encode(array_map($secUrl, $oldHash), JSON_UNESCAPED_SLASHES)) ?>"></span><?php endif; ?>
-<?= \Core\AdminUi::open($items, $section === 'neu' ? '' : $section, __('Bereiche des Netzwerks'), false) ?>
+<?php // Mehrere Websites: Seitenleiste des Netzwerk-Bereichs (layout.php, Core\Network\Area) – sonst die Bereichsliste wie bisher
+$ownNav = !\Core\Network\Area::active(); ?>
+<?= $ownNav ? \Core\AdminUi::open($items, $section === 'neu' ? '' : $section, __('Bereiche des Netzwerks'), false) : '' ?>
 <div class="net-page net-page--<?= e($section === '' ? 'websites' : $section) ?>">
 <?php include __DIR__ . '/_' . ($section === '' ? 'websites' : ($section === 'administratoren' ? 'admins' : $section)) . '.php'; ?>
 </div>
-<?= \Core\AdminUi::close() ?>
+<?= $ownNav ? \Core\AdminUi::close() : '' ?>
