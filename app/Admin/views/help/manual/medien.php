@@ -118,7 +118,8 @@
   <h3 id="grafik-editor">Grafiken zeichnen und bearbeiten (Grafik-Editor)</h3>
   <p>Infografiken, einfache Schaubilder, Symbole und Skizzen für die Blockauswahl entstehen direkt in der Verwaltung – ohne
     Grafikprogramm. Der Editor ist aufgebaut wie Affinity Designer, Illustrator oder Fireworks: oben die <b>Personas</b>
-    (<b>Vektor</b> zum Zeichnen, <b>Motion</b> für Bewegung und Interaktion – siehe <a href="#grafik-motion">unten</a>), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
+    (<b>Vektor</b> zum Zeichnen, <b>Motion</b> für Bewegung und Interaktion, <b>Daten</b> für Werte und Zustände, <b>Export</b> für Bereiche,
+    Favicon und App-Symbole – siehe <a href="#grafik-motion">unten</a>), darunter die <b>Kontextleiste</b> mit den Optionen des Werkzeugs und der
     Auswahl, links die <b>Werkzeuge</b>, rechts die Bereiche <b>Farbe · Farbfelder · Kontur · Darstellung</b>,
     <b>Ebenen · Bibliothek · Symbole</b> und <b>Transformieren · Protokoll</b>, unten eine Statuszeile mit Tipps zum Werkzeug.</p>
   <ol class="doc-steps">
@@ -220,14 +221,57 @@
     Adresse ändert), bekommt einen <b>Namen für Screenreader</b> und einen <b>Tooltip</b> (erscheint beim Zeigen und bei Tastatur-Fokus) oder wird zum
     <b>Schalter</b>: Ein Klick (oder <kbd>Enter</kbd>/<kbd>Leertaste</kbd>) blendet zugeordnete Bewegungen ein, ein zweiter wieder aus – etwa ein Infokasten
     zu einem „i“. Die Tabulator-Reihenfolge auf der Website folgt den Ebenen; <b>Prüfen</b> meldet, wenn sie von der Lesereihenfolge abweicht, und
-    bringt die Ebenen auf Wunsch in die richtige Reihenfolge. Links ohne Namen und endlose Bewegung (länger als 5 Sekunden, nicht anhaltbar) meldet
-    Prüfen ebenfalls.</p>
+    bringt die Ebenen auf Wunsch in die richtige Reihenfolge. Links ohne Namen meldet Prüfen ebenfalls.</p>
+  <p><b>Anhalten (WCAG 2.2.2):</b> Läuft eine Bewegung von selbst (beim Laden, sobald sichtbar oder nach einem Klick) länger als 5 Sekunden oder
+    endlos, zeigt die Website in der Ecke der Grafik einen Knopf <b>„Animation anhalten“</b> – mit Maus und Tastatur bedienbar, Screenreader hören
+    „Animation angehalten“ bzw. „Animation läuft“. Angehalten bleibt angehalten, auch wenn man weiterscrollt. Der Knopf lässt sich nicht abschalten;
+    Prüfen weist nur darauf hin.</p>
   <p><b>Auf der Website:</b> Grafiken mit Bewegung oder Links erscheinen in Bild-Blöcken wie andere Bilder – die Website bindet sie dafür direkt in die
     Seite ein; Grafiken ohne Bewegung bleiben unverändert. Ohne JavaScript, bei „Bewegung reduzieren“ im Betriebssystem und wenn im Design
     „Dezente Animationen“ aus ist, steht das fertige Bild (Endzustand) still da; Schleifen halten an, solange die Grafik nicht zu sehen ist; mit
     dunklem Farbschema bewegt sich die dunkle Fassung. Im Bearbeiten-Modus der Website zeigt die Seite das Standbild. <b>Exportieren</b> bietet
     zusätzlich ein <b>animiertes SVG (eigenständig)</b> für Präsentationen oder andere Websites (spielt beim Öffnen) und für Desktop-Programme bzw.
     PDF das <b>Anfangsbild</b> (die üblichen Exporte zeigen das Endbild).</p>
+  <h4 id="grafik-daten">Daten und Zustände (Persona Daten)</h4>
+  <p>Mit <b>Daten</b> zeigt eine Grafik, was gerade gilt: ein Balken so lang wie die Zahl der Anmeldungen, ein Text mit den freien Plätzen,
+    eine Sonne tagsüber und ein Mond nachts, „Jetzt geöffnet“ nach den Öffnungszeiten der Website. Die Website rechnet die Werte bei jedem Aufruf
+    ein – ohne JavaScript, Texte bleiben Text.</p>
+  <ol class="doc-steps">
+    <li><b>Wert anlegen</b> (Bereich <b>Werte</b> → <b>Wert aus Datentabelle …</b>): Bezeichnung, Datentabelle und Kennzahl – <b>Anzahl der Einträge</b>,
+      <b>Summe</b>, <b>Durchschnitt</b>, <b>Kleinster</b> oder <b>Größter Wert</b> eines Zahlenfelds, der <b>Neueste Eintrag</b> – optional nur Einträge, bei
+      denen ein Feld einen Wert hat (z. B. Kategorie = Kurse). Es zählen nur veröffentlichte Einträge, wie auf der Website. Dazu kommen die
+      <b>Zustände der Website</b>: Uhrzeit, Tag oder Nacht (Sonnenauf- und -untergang am Ort der Website, ohne Ort 7–19 Uhr), Öffnungsstatus (aus den
+      Öffnungszeiten), Wochentag, Monat und Datum.</li>
+    <li><b>Binden</b> (Bereich <b>Bindung</b>): Objekt wählen, unter <b>Eigenschaft binden</b> eine Eigenschaft wählen und <b>Binden</b> –
+      <b>Text</b> (Vorlage mit <code>{v}</code>, z. B. „Noch {v} Plätze frei“, Format Zahl, Prozent, Betrag oder Uhrzeit),
+      <b>Breite</b> oder <b>Höhe</b> (bei „bis“ so lang wie gezeichnet, bei „von“ null; wächst von links, der Mitte oder rechts bzw. unten),
+      <b>Drehung</b> (Winkel von–bis, um die Mitte – z. B. ein Zeiger), <b>Füllung</b> oder <b>Kontur</b> (Verlauf zwischen zwei Farben oder
+      <b>Schwellen</b>: ab einem Wert eine andere Farbe), <b>Deckkraft</b> und <b>Sichtbarkeit</b> (sichtbar, wenn der Wert über/unter einer Schwelle
+      liegt; bei Tag/Nacht und Öffnungsstatus einfach „am Tag“, „in der Nacht“, „wenn geöffnet“, „wenn geschlossen“). Jede Änderung ist ein
+      Schritt im Protokoll.</li>
+    <li><b>Vorschau:</b> Unter der Zeichenfläche stehen <b>Beispielwerte</b> (Regler und Zahl, „aktuell“ übernimmt den Wert der Website), der
+      <b>Uhrzeit-Regler</b>, Wochentag und Datum. Die Fläche zeigt sofort das Ergebnis, die Plaketten „Tag/Nacht“ und „geöffnet/geschlossen“ den
+      Zustand. Das Dokument bleibt die gezeichnete Fassung; zum Bearbeiten einfach ziehen – während des Ziehens sehen Sie die Grundform.</li>
+  </ol>
+  <p><b>Barrierefreiheit:</b> Die Beschreibung der Grafik nennt die aktuellen Werte. Im <b>Alt-Text</b> der Mediathek setzt <code>{name}</code> den
+    Wert ein (z. B. „Freie Plätze: {freie_plaetze}“); ohne Platzhalter werden die Werte angehängt. Ändern sich die Einträge der Tabelle, zeigt die Grafik
+    beim nächsten Aufruf die neuen Werte; Seiten mit Zuständen (Uhrzeit, Tag/Nacht, geöffnet) hält die Website nur bis zum nächsten Wechsel im
+    Zwischenspeicher.</p>
+  <h4 id="grafik-export-persona">Export: Bereiche, Favicon, App-Symbole, Social-Vorschau</h4>
+  <p>In <b>Export</b> ziehen Sie auf der Fläche <b>Bereiche</b> auf (wie Slices in Fireworks oder Affinity; <kbd>⇧</kbd> = quadratisch), verschieben sie
+    durch Ziehen, ändern die Größe an den Ecken oder mit X/Y/B/H und <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> (<kbd>⇧</kbd> = 10), <kbd>⌫</kbd> löscht.
+    Vorlagen: <b>Ganze Zeichenfläche</b>, <b>App-Symbol (quadratisch)</b>, <b>Social-Vorschau</b> (1200 × 630). Je Bereich wählen Sie die <b>Formate</b>:</p>
+  <ul>
+    <li><b>SVG fürs Web</b>, <b>SVG für Desktop-Programme</b> und <b>PDF (Vektor)</b> – nur der Ausschnitt des Bereichs.</li>
+    <li><b>Favicon</b>: favicon.ico mit 16, 32 und 48 px und dieselben Größen als PNG; <b>App-Symbole</b>: 180 px fürs iPhone, 192 und 512 px,
+      „maskable“ 512 px. Der gestrichelte Kreis zeigt die <b>Schutzzone</b> (80 %) – Android schneidet außen ab. Symbol-Bereiche bleiben quadratisch.</li>
+    <li><b>Social-Vorschau</b> 1200 × 630 als PNG oder JPEG (für Links in sozialen Netzwerken und Messengern).</li>
+  </ul>
+  <p>Unten zeigt die Leiste jede <b>Symbolgröße</b> (16, 24, 32, 48 px) in echter Größe und vergrößert. <b>Pixelraster</b> richtet Kanten und Linien je
+    Größe an ganzen Pixeln aus – kleine Symbole werden scharf statt verschwommen; abschalten, wenn eine Form dadurch leidet. <b>Bereich exportieren</b>
+    lädt die Dateien herunter (mehrere als ZIP), <b>Alle Bereiche als ZIP</b> alles in Ordnern. Pixel-Formate entstehen nur hier beim Herunterladen –
+    die Grafik selbst bleibt Vektor. Mit dem Recht für die Grundeinstellungen übernimmt <b>Als Favicon/App-Symbol der Website übernehmen</b> den Bereich
+    für die ganze Website (Grundeinstellungen → App-Icon &amp; PWA zeigt danach dieses Bild).</p>
   <h4 id="grafik-dunkel">Design-Farben, Hell und Dunkel</h4>
   <p>Wählen Sie eine Farbe unter <b>Farbfelder → Design der Website</b> (z. B. „Akzent“), merkt sich die Grafik die <b>Design-Farbe</b>, nicht nur
     den Farbwert: Ändern Sie später unter <b>Design</b> den Akzent, zeigt die Website die Grafik in der neuen Farbe – ohne sie neu zu speichern.

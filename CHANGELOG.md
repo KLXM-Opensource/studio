@@ -11,6 +11,27 @@ oder über das Installations-ZIP der GitHub-Releases (mit `vendor/` und gebauten
 die Erweiterungen im README. Die Abschnitte unten beschreiben die Funktionsbereiche dieses Stands.
 
 
+### Grafik-Editor: Personas Daten und Export, Anhalten von Bewegung (Ausbaustufe 5)
+- **Animation anhalten (WCAG 2.2.2):** Läuft Bewegung von selbst (beim Laden, sobald sichtbar, nach Klick) länger als 5 Sekunden oder endlos, zeigt die
+  Website in der Ecke der Grafik einen echten Knopf „Animation anhalten/fortsetzen“ (Tastatur, Statusmeldung für Screenreader, Farben aus dem Kit,
+  `forced-colors`); angehalten bleibt angehalten, auch nach Scrollen. Ohne Skript und bei „Bewegung reduzieren“ steht das Endbild – auch beim Auslöser
+  „beim Laden“. Prüfen warnt nicht mehr, sondern weist auf den Knopf hin. Geprüft in Chromium und WebKit (Drehpunkt, Dunkel-Fassung, Link-Bereiche, CSP).
+- **Dateinamen der Bewegungs-CSS** enthalten die Prüfsumme von `Motion.php` und `graphic-motion.js` (`Motion::generator()`): nach einem Update kann keine
+  alte CSS mehr aus dem Zwischenspeicher kommen, auch wenn niemand `Motion::VERSION` erhöht.
+- **Persona Daten:** Text, Breite/Höhe (mit Anker), Drehung, Füllung/Kontur (Verlauf oder Schwellen), Deckkraft und Sichtbarkeit an **Werte aus
+  Datentabellen** binden (Anzahl, Summe, Durchschnitt, Kleinster, Größter, Neuester Eintrag, optional gefiltert; nur veröffentlichte Einträge) oder an
+  **Zustände**: Uhrzeit, Tag/Nacht nach Sonnenstand am Ort der Website, geöffnet nach den Öffnungszeiten, Wochentag, Monat, Datum. Vorschau mit
+  Beispielwerten, Uhrzeit-Regler, Wochentag und Datum; jede Änderung ein Schritt im Protokoll. Die Website setzt die Werte **serverseitig** ein
+  (`Core\Graphics\Bind`, Datei je Zustand unter `{Medienordner}/grafik/b/`, kein JavaScript), Text bleibt Text, `<desc>` und Alt-Text (`{name}`) nennen
+  die Werte. Zeitabhängige Zustände geben dem Seiten-Cache eine Frist bis zum nächsten Wechsel (`PageCache::until`, Datei `{hash}.until`).
+- **Persona Export:** Bereiche (Slices) aufziehen, verschieben, an den Ecken und per Zahlen/Pfeiltasten ändern; Formate je Bereich: SVG fürs Web, SVG für
+  Desktop-Programme, PDF (Vektor) und – als einzige Pixel-Ausgaben – Favicon (ICO 16/32/48 + PNG), App-Symbole (180/192/512, maskable mit Schutzzone) und
+  Social-Vorschau 1200 × 630 (PNG/JPEG). Symbolgrößen 16/24/32/48 mit Ausrichtung am Pixelraster je Größe, alle Bereiche als ZIP. „Als Favicon/App-Symbol
+  der Website übernehmen“ nutzt `Core\AppIcons` (Bild aus der Mediathek, Recht „system.manage“).
+- Neue Routen `POST /admin/api/grafik/data-values`, `POST /admin/api/grafik/app-icon`; `Core\Svg::clean` (Arbeitsfassung) lässt `data-ge-bind`,
+  `data-ge-data`, `data-ge-slices` nur als Base64 zu. `grafik:selftest` erweitert. Handbuch → Medien → Grafik-Editor (Daten und Zustände; Export),
+  Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Grafik-Editor: Persona Motion – Bewegung und Interaktion (Ausbaustufe 4)
 - **Persona Motion** im Grafik-Editor des Kerns (Umschalter oben links, Hell | Dunkel gilt weiter): **Zeitleiste** unter der Zeichenfläche –
   Objekte als Zeilen, je Eigenschaft eine Spur (Position, Größe, Drehung, Deckkraft, Linie zeichnen, Füllung, Kontur) mit Schlüsselbildern,
