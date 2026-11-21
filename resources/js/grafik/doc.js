@@ -30,7 +30,12 @@ export function typeLabel(el) {
 export function nameOf(el) {
   const n = el.getAttribute('data-name');
   if (n) return n;
-  if (el.localName === 'text') { const s = el.textContent.trim().replace(/\s+/g, ' '); if (s) return s.slice(0, 40); }
+  if (el.localName === 'text') {
+    // Zeilen mit eingefügtem Trennstrich (Silbentrennung, data-ge-soft=h) wieder zusammensetzen
+    const s = !el.querySelector('tspan[data-ge-soft="h"]') ? el.textContent.trim().replace(/\s+/g, ' ') : [...el.childNodes].map(n => n.nodeType === 1 && n.getAttribute?.('data-ge-soft') === 'h' ? '\u0000' + n.textContent : n.textContent + ' ').join('')
+      .replace(/-\s*\u0000/g, '').replace(/\u0000/g, '').trim().replace(/\s+/g, ' ');
+    if (s) return s.slice(0, 40);
+  }
   const id = el.getAttribute('id');
   if (id && !/^(svg_|path|rect|g|ge-)\d*/i.test(id)) return id.replace(/_x([0-9A-F]{2})_/g, (m, c) => String.fromCharCode(parseInt(c, 16))).replace(/_/g, ' ');
   return typeLabel(el);
@@ -66,6 +71,10 @@ const norm = (name, v) => {
  * Eigenschaft setzen: als Attribut; steht sie schon im style-Attribut oder gewinnt eine Klassenregel, als Stil.
  * value null/'' = entfernen (erbt wieder).
  */
+/** CSS-Eigenschaften ohne Darstellungsattribut (nur im style-Attribut gültig – Core\Svg erlaubt sie dort) */
+export const CSS_ONLY = ['font-variation-settings', 'font-feature-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps',
+  'font-variant-position', 'font-kerning', 'font-optical-sizing'];
+
 export function setProp(el, name, value) {
   if (value === null || value === undefined || value === '') {
     el.removeAttribute(name);
@@ -74,6 +83,7 @@ export function setProp(el, name, value) {
     return;
   }
   value = String(value);
+  if (CSS_ONLY.includes(name)) { el.removeAttribute(name); el.style.setProperty(name, value); return; }
   if (el.style?.getPropertyValue(name)) { el.style.setProperty(name, value); return; }
   el.setAttribute(name, value);
   let comp = '';

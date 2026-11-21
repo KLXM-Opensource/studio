@@ -72,7 +72,9 @@
       <code>text.js</code>/<code>textedit.js</code>/<code>textpanel.js</code> (Textmodell mit Läufen, Satz/Umbruch, Bearbeitung auf der Fläche,
       Bereich Zeichen/Absatz), <code>outline.js</code> (Text in Kurven), <code>guides.js</code> (Lineale, Hilfslinien, Raster),
       <code>clip.js</code> (Beschneiden, Masken, Ausstanzen per Maske), <code>gradhandles.js</code> (Verlaufswerkzeug),
-      <code>export.js</code> (Web-Optimierung, Desktop-SVG, PDF).</li>
+      <code>export.js</code> (Web-Optimierung, Desktop-SVG, PDF).
+      Ausbaustufe 3a: <code>fontpicker.js</code> (Schriftauswahl), <code>typo.js</code> (OpenType, Absatz-Einstellungen, Silbentrennung),
+      <code>styles.js</code> (Absatz-/Zeichenvorlagen), <code>connect.js</code> (Verbinder, Text in Formen, Baum anordnen, Lesereihenfolge).</li>
     <li><b>Bibliotheken auf Abruf</b> (eigene ES-Module, per <code>import()</code> erst beim ersten Gebrauch; Adressen in
       <code>boot.modules</code>; Lizenzen in <code>public/assets/vendor/grafik/</code>, siehe <code>THIRD-PARTY-NOTICES.md</code>):
       <table class="doc-table">
@@ -86,6 +88,10 @@
           Gewicht, <code>gvar</code> für einfache Glyphen nachgerüstet).</td></tr>
         <tr><td><code>js/grafik-pdf.mjs</code></td><td>jsPDF 4.2 + svg2pdf.js 2.8 (ohne html2canvas/DOMPurify/canvg)</td><td>MIT</td><td>≈ 488 KB / 160 KB</td>
           <td>PDF als Vektor; Texte vorher in Kurven, Filter und Mischmodi fehlen im PDF (Hinweis).</td></tr>
+        <tr><td><code>js/grafik-hyph-de.mjs</code>, <code>js/grafik-hyph-en.mjs</code></td><td>hyphen 1.14 + TeX-Trennmuster de-1996 bzw. en-us (hyph-utf8)</td>
+          <td>ISC; Muster MIT bzw. frei mit Hinweis</td><td>≈ 288 KB / 103 KB bzw. 48 KB / 18 KB</td>
+          <td>Silbentrennung im Textrahmen (Liang-Algorithmus), je Sprache erst beim Einschalten bzw. Öffnen einer Grafik mit Trennung geladen.
+          Lizenztexte <code>LICENSE-hyphen.txt</code>, <code>LICENSE-hyphen-patterns.txt</code>.</td></tr>
       </table></li>
     <li><b>Arbeitsfassung und Web-Fassung:</b> <code>POST …/save</code> nimmt <code>svg</code> (Arbeitsfassung des Editors) und <code>web</code>
       (im Browser optimiert). Ausgeliefert wird die Web-Fassung (nach <code>Svg::clean</code>); die Arbeitsfassung mit Ebenennamen,
@@ -114,6 +120,56 @@
       gemessenen Breiten um (kein <code>foreignObject</code>), Text auf Pfad als <code>&lt;textPath href&gt;</code>. In Kurven: Positionen je
       Zeichen vom Browser (<code>getStartPositionOfChar</code>, Drehung auf Pfaden), Glyphen von fontkit (Ligaturen per Layout je Lauf).
       Schriftdateien: <code>boot.fontFiles</code> aus <code>Graphics::fontFiles()</code> (Schriften-Manager + Lato der Verwaltung).</li>
+    <li><b>Schriftauswahl</b> (<code>fontpicker.js</code>): Kombinationsfeld nach WAI-ARIA (<code>role=combobox</code>,
+      <code>aria-activedescendant</code>, zwei Listboxen für Schriften und Schnitte, Abschnitte als <code>role=group</code>). Einträge aus
+      <code>boot.fontFiles</code> (jetzt mit <code>axes</code> und <code>category</code> aus dem Manifest des Schriften-Managers) und
+      <code>boot.fonts</code>, dazu Systemstapel. Vorschau: <code>ed.textPreview(props|null)</code> setzt Eigenschaften ohne Schritt im
+      Protokoll (Schnappschuss, Esc stellt ihn wieder her), Übernehmen über <code>ed.textProps(props)</code> (ein Schritt). Favoriten und
+      „Zuletzt verwendet“ je Konto: <code>Core\UiPrefs</code> Schlüssel <code>grafik</code> (<code>fontFav</code>, <code>fontRecent</code>,
+      <code>colorMode</code>, <code>libFav</code>, <code>libSiteColors</code>) über <code>POST /admin/api/grafik/prefs {key, value}</code>,
+      bereinigt in <code>Graphics::prefs()</code>. Achsen variabler Schriften liest <code>outline.js → fontInfo()</code> per fontkit
+      (<code>variationAxes</code>); <code>wght</code> wird <code>font-weight</code>, alle anderen <code>font-variation-settings</code> (nur
+      im <code>style</code>, siehe <code>doc.js → CSS_ONLY</code>) – „In Kurven umwandeln“ setzt alle Achsen (<code>fontAt(url, coords)</code>).</li>
+    <li><b>OpenType</b> (<code>typo.js</code>): eine Eigenschaft <code>font-feature-settings</code> je Text bzw. Lauf; geschrieben wird nur die
+      Abweichung von den Standards (<code>liga</code>, <code>calt</code>, <code>kern</code> an). Welche Merkmale die Schrift hat (GSUB/GPOS,
+      Namen der Stilsätze/Zeichenvarianten aus <code>featureParams</code> und der <code>name</code>-Tabelle), liefert <code>fontInfo()</code>.
+      <code>ed.textFeature({tag: 1|0|null})</code> führt je Lauf zusammen (markierte Zeichen behalten ihre übrigen Merkmale). Hoch-/Tiefstellen
+      ohne <code>sups</code>/<code>subs</code>: <code>baseline-shift="super|sub"</code> + <code>font-size="60%"</code>. In Kurven: dieselben
+      Merkmale an <code>font.layout(text, features)</code>; Brüche: fontkit wendet <code>frac</code> nur um U+2044 an – <code>/</code> zwischen
+      Ziffern wird dafür ersetzt (gleiche Länge).</li>
+    <li><b>Absatz</b> (<code>data-ge-para="al:justify;pb:6;pa:12;li:0;ri:0;fi:16;hy:de"</code>, nur Arbeitsfassung): <code>text.js → layoutText</code>
+      bricht mit Einzügen je Zeile um, Silbentrennung teilt ein Wort an der letzten passenden Trennstelle (mind. 2 Zeichen vorn, 3 hinten) und
+      schreibt einen echten Trennstrich; die Folgezeile trägt <code>data-ge-soft="h"</code>, <code>readText</code> entfernt den Strich wieder.
+      Blocksatz: <code>word-spacing</code> je Zeile (Rest der Breite ÷ Leerzeichen), letzte Zeile eines Absatzes links, Zeilen ohne Leerzeichen
+      bleiben. Abstand vor/nach: <code>dy</code> der ersten Zeile eines Absatzes in Einheiten der Zeichenfläche. Die Web-Fassung braucht keine
+      dieser Angaben – Positionen, Wortabstände und Trennstriche stehen schon im SVG. H/V skalieren: Skalierung um den Ankerpunkt in
+      <code>transform</code>, Wert in <code>data-ge-sx</code>/<code>-sy</code>.</li>
+    <li><b>Vorlagen</b> (<code>styles.js</code>): <code>data-ge-styles</code> am <code>&lt;svg&gt;</code> = Base64-JSON
+      <code>{p: [{n, props, para}], c: [{n, props}]}</code> (<code>Svg::clean</code> mit <code>editor</code> nimmt hier nur Base64 bis 20 000
+      Zeichen); Verwendung am Text <code>data-ge-ps</code>, am Lauf <code>data-ge-cs</code>. Bibliothek der Website: Einstellung
+      <code>graphic_text_styles</code> (<code>Graphics::textStyles()</code>, <code>saveTextStyles()</code> bereinigt Eigenschaften und Werte),
+      <code>POST /admin/api/grafik/styles</code> mit dem Recht wie eigene Bausteine.</li>
+    <li><b>Farbe</b> (<code>color.js</code>): Kanäle für Hex, RGB, HSL, HSB, OKLCH (OKLab nach Ottosson, außerhalb von sRGB wird die
+      Buntheit verringert); jede CSS-Farbangabe über den Canvas gelesen. Gespeichert wird Hex + <code>fill-opacity</code>. Kontrast nach
+      WCAG zum Hintergrund (Flächen davor in der Zeichenreihenfolge über Weiß). <b>Andockstelle für Design-Farben als Variablen</b>
+      (Ausbaustufe 3b): Farbangabe als Objekt <code>{kind: 'value'|'token', value, token, alpha}</code> (<code>paintValue()</code>,
+      <code>ed.panels.paintValue(which)</code>, <code>setPaintValue(which, v)</code>); Farbfelder des Designs tragen <code>token</code>
+      (<code>Graphics::swatches()</code>), angewendet wird Hex und der Token am Element gemerkt (<code>data-ge-ftoken</code>,
+      <code>data-ge-stoken</code>, Bausteine mit „Farben der Website“ <code>data-ge-ctoken</code>); jede andere Farbe entfernt ihn.
+      3b kann daraus CSS-Variablen und eine Hell/Dunkel-Fassung erzeugen.</li>
+    <li><b>Verbinder</b> (<code>connect.js</code>): gewöhnlicher <code>&lt;path&gt;</code> mit Markern; Beziehung in
+      <code>data-ge-conn="a=form-1@r;b=form-2@l;r=ortho;m=0.5;hs=none;he=triangle;s=4"</code> (Seite t/r/b/l, <code>a</code> = automatisch,
+      <code>n3</code> = Knoten 3; freies Ende <code>@x,y</code>). <code>Connectors.update()</code> läuft vor jedem Zeichnen und jedem
+      Protokollschritt (Verbinder neu berechnen, Beschriftung <code>text[data-ge-for]</code> in die Mitte, Text in Formen
+      <code>text[data-ge-in]</code> zentrieren und umbrechen). Fehlt die Form, wird das Ende frei (letzte Lage). Spitzen als
+      <code>marker</code> je Art/Größe/Farbe (<code>data-ge-head</code>), der Pfad endet vor der Spitze. <code>layoutTree()</code> ordnet
+      Bäume (Kinder über Verbinder a → b), <code>describe()</code> liefert die Lesereihenfolge für <code>&lt;desc&gt;</code>.</li>
+    <li><b>Bibliothek</b>: <code>Library::all()</code> mit Gruppen Flussdiagramm, Organigramm, Hinweise &amp; Pfeile (Fläche für Text:
+      <code>data-ge-box</code>, Platzhalter <code>text</code>, Absätze mit <code>|</code>). Eigene Bausteine: Spalte <code>graphics.folder</code>,
+      <code>Graphics::partsForEditor()</code>, <code>updatePart()</code>; für alle Websites: <code>Core\Graphics\Shared</code> in der
+      Netzwerk-Datenbank (Tabelle <code>graphic_shared</code>, <code>Network::ensureSchema</code>). Austauschdatei
+      <code>{format: 'klxm-grafik-bausteine', version: 1, items: [{name, folder, svg}]}</code> – <code>Graphics::importParts()</code> bereinigt
+      jedes SVG. Beim Einfügen wird <code>var(--token, ersatz)</code> zur Farbe des Tokens der Website.</li>
     <li><b>Protokoll:</b> jede Änderung speichert das SVG als Text (höchstens 200 Schritte bzw. ca. 40 MB); Rückgängig ersetzt das Dokument.</li>
     <li><b>Speichern:</b> <code>POST /admin/api/grafik/save</code> – das SVG aus dem Browser läuft immer durch
       <code>Core\Svg::clean($svg, ['keep_ids' => true])</code> (ids für Ebenen und spätere Animationen bleiben, <code>data-name</code> =
@@ -135,8 +191,9 @@
     <li><b>Routen</b> (alle mit Anmeldung und Recht <code>media.upload</code>, POST mit CSRF; Löschen <code>media.delete</code>; je Art zusätzlich siehe Rechte):
       <code>GET /admin/grafik</code> (Übersicht der Ablage), <code>GET /admin/grafik/editor?format=info|icon|preview&amp;w&amp;h&amp;block</code>
       bzw. <code>?media={id}</code> / <code>?id={id}</code>, <code>GET /admin/api/grafik/boot</code> (gleiche Parameter, JSON für das Overlay),
-      <code>POST …/save</code>, <code>…/part</code> (eigener Baustein), <code>…/clean</code> (nur bereinigen), <code>…/assign</code>,
-      <code>…/{id}/delete</code>, <code>GET …/version?ref&amp;id</code>.</li>
+      <code>POST …/save</code>, <code>…/part</code> (eigener Baustein: <code>scope</code> site|network, <code>folder</code>, <code>id</code> = ersetzen),
+      <code>…/part/update</code> (umbenennen, Ordner, <code>action: delete</code>), <code>…/parts/import</code>, <code>…/prefs</code>, <code>…/styles</code>,
+      <code>…/clean</code> (nur bereinigen), <code>…/assign</code>, <code>…/{id}/delete</code>, <code>GET …/version?ref&amp;id</code>.</li>
     <li><b>Einbetten (z. B. Motion):</b>
       <pre><code>const r = await CMSAdmin.graphic.open({
   format: 'info',              // 'info' | 'icon' | 'preview'
@@ -155,10 +212,12 @@ ed.registerPersona({ id: 'motion', label: 'Motion', icon: 'film-strip', mount(ed
       Datenbank), Symbole aus <code>public/assets/icons/icons.svg</code>. Farbfelder: Tokens vom Typ <code>color</code> aus
       <code>Core\Design</code>; Schriften: die Schriften des Designs plus allgemeine Familien.</li>
     <li><b>Grenzen heute:</b> keine Bilder in Grafiken (gewollt); Strichmuster und Pfeilspitzen werden bei „Kontur in Fläche“ nicht
-      mitgewandelt; Blocksatz und Silbentrennung fehlen im Textrahmen; Motion-Persona ist nur vorbereitet.</li>
+      mitgewandelt; Absatz-Einstellungen gelten je Text (nicht je Absatz); Verbinder umgehen keine Hindernisse; Motion-Persona ist nur vorbereitet.</li>
     <li><b>Selbsttest:</b> <code>php bin/console grafik:selftest --site=key</code> – Editor-Ausgabe übersteht die Bereinigung (idempotent),
       Schadcode fällt weg, Ablage erscheint nicht in <code>Media::all()</code>, Blockvorschau wirkt in der Blockauswahl (auch je Variante),
-      Fassungen, Arbeitsfassung/Web-Fassung, Editor-Daten nur mit <code>editor</code>, Pixelbilder gezählt, Rechte je Art (403).</li>
+      Fassungen, Arbeitsfassung/Web-Fassung, Editor-Daten nur mit <code>editor</code>, Pixelbilder gezählt, Rechte je Art (403);
+      Ausbaustufe 3a: Formatvorlagen nur als Base64, Typografie bleibt in beiden Fassungen, persönliche Einstellungen bereinigt,
+      Austauschdatei bereinigt bzw. abgelehnt, Ordner/Umbenennen, Formatvorlagen der Website bereinigt.</li>
   </ul>
 
   <h3 id="video-vorschau">Vorschaubilder für Videos (<code>Core\VideoThumbs</code>, <code>Core\Ffmpeg</code>)</h3>

@@ -275,6 +275,8 @@ final class Database
         $this->ensureColumns('users', ['locale' => 'VARCHAR(10) NULL', 'appearance' => 'VARCHAR(10) NULL',
             'favorites' => 'TEXT NULL']);   // Favoriten der Verwaltung (JSON, Core\Favorites)
         $this->ensureColumns('users', ['ui_prefs' => 'TEXT NULL']);   // persönliche Oberfläche: Akzentfarbe u. a. (JSON, Core\Accent)
+        // Grafik-Editor: Ordner der eigenen Bausteine (Bibliothek)
+        $this->ensureColumns('graphics', ['folder' => "$str NULL"]);
         // Sperre, Sitzungs-Version, Netzwerk-Schatten-Konten, Zwei-Faktor-Anmeldung (Core\Network, Core\Totp)
         $this->ensureColumns('users', Network\Network::USER_COLUMNS);
         // Passkeys (WebAuthn) je Konto und Domain (Core\Passkeys)

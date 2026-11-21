@@ -107,8 +107,8 @@ async function vendors() {
   copy(nm('maplibre-gl/LICENSE.txt'), path.join(ml, 'LICENSE.txt'));
   bundledLicenses('maplibre-gl', path.join(ml, 'THIRD-PARTY-LICENSES.txt'));
 
-  // Grafik-Editor (Core\Graphics): Paper.js (Geometrie), fontkit (Text in Kurven), jsPDF + svg2pdf.js (PDF-Export) – gebündelt in
-  // resources/js/grafik-{paper,fonts,pdf}.mjs, nur auf Abruf geladen; hier Lizenzen und eingebettete Pakete
+  // Grafik-Editor (Core\Graphics): Paper.js (Geometrie), fontkit (Text in Kurven), jsPDF + svg2pdf.js (PDF-Export), hyphen
+  // (Silbentrennung) – gebündelt in resources/js/grafik-{paper,fonts,pdf,hyph-de,hyph-en}.mjs, nur auf Abruf geladen; hier Lizenzen und eingebettete Pakete
   const gv = path.join(PUB, 'assets/vendor/grafik');
   copy(nm('paper/LICENSE.txt'), path.join(gv, 'LICENSE-paper.txt'));
   copy(nm('paperjs-offset/LICENSE'), path.join(gv, 'LICENSE-paperjs-offset.txt'));
@@ -118,6 +118,9 @@ async function vendors() {
   copy(nm('svg2pdf.js/LICENSE'), path.join(gv, 'LICENSE-svg2pdf.txt'));
   bundledLicenses('jspdf', path.join(gv, 'THIRD-PARTY-LICENSES-jspdf.txt'));
   bundledLicenses('svg2pdf.js', path.join(gv, 'THIRD-PARTY-LICENSES-svg2pdf.txt'));
+  // Silbentrennung in Textrahmen (grafik-hyph-{de,en}.mjs): hyphen (ISC) + TeX-Trennmuster (de-1996 MIT, en-us frei mit Hinweis)
+  copy(path.join(ROOT, 'resources/licenses/LICENSE_HYPHEN.txt'), path.join(gv, 'LICENSE-hyphen.txt'));
+  copy(path.join(ROOT, 'resources/licenses/LICENSE_HYPHEN_PATTERNS.txt'), path.join(gv, 'LICENSE-hyphen-patterns.txt'));
 
   // Mozilla PDF.js (Viewer für PDF-Dateien)
   const pdf = path.join(PUB, 'assets/vendor/pdfjs');

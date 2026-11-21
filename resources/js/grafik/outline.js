@@ -13,7 +13,8 @@
 import { NS, num, pt, docMatrix, parentMatrix, fmtMatrix, pathToString, parsePath } from './geom.js';
 import { getProp } from './doc.js';
 import { t } from '../_i18n.js';
-import { firstFamily } from './textpanel.js';
+import { firstFamily } from './fontpicker.js';
+import { fontkitFeatures } from './typo.js';
 
 let fkP = null;
 const fontCache = new Map();   // url → Promise<font>
@@ -30,19 +31,20 @@ const bytesCache = new Map();   // url → Promise<Uint8Array>
  * eine TTF-Instanz (liest dann die komprimierten Tabellen falsch) – daher eine frische WOFF2-Instanz mit gesetzten
  * Achsenwerten (variationCoords, wie getVariation sie berechnet).
  */
-async function fontAt(ed, url, wght = null) {
-  const key = url + '|' + (wght ?? '');
+async function fontAt(ed, url, coords = null) {
+  if (typeof coords === 'number') coords = { wght: coords };
+  const key = url + '|' + (coords ? JSON.stringify(coords) : '');
   if (!fontCache.has(key)) {
     fontCache.set(key, (async () => {
       const fk = await loadFontkit(ed.boot.modules?.fonts);
       if (!bytesCache.has(url)) bytesCache.set(url, fetch(url, { credentials: 'same-origin' }).then(r => { if (!r.ok) throw new Error('font ' + r.status); return r.arrayBuffer(); }).then(b => new Uint8Array(b)));
       const font = fk.create(await bytesCache.get(url));
-      if (wght != null && font.fvar) {
+      if (coords && font.fvar) {
         // WOFF2: Glyf-Tabelle erst ohne Varianten entpacken (fontkit stolpert dort sonst über zusammengesetzte Glyphen),
         // danach die Achsenwerte setzen und den Varianten-Rechner neu erzeugen lassen
         Object.defineProperty(font, '_variationProcessor', { value: null, configurable: true, writable: true });
         font.getGlyph(0);
-        font.variationCoords = font.fvar.axis.map(a => a.axisTag.trim() === 'wght' ? Math.max(a.minValue, Math.min(a.maxValue, wght)) : a.defaultValue);
+        font.variationCoords = font.fvar.axis.map(a => { const v = coords[a.axisTag.trim()]; return v != null ? Math.max(a.minValue, Math.min(a.maxValue, v)) : a.defaultValue; });
         delete font._variationProcessor;
         font._glyphs = {};
         patchWoff2Variations(font);
@@ -77,6 +79,42 @@ function patchWoff2Variations(font) {
   proto.__geVar = true;
 }
 
+/** font-variation-settings ('"wdth" 87, "opsz" 24') ↔ { wdth: 87, opsz: 24 } */
+export function parseVariations(v) {
+  const o = {};
+  for (const m of String(v || '').matchAll(/["']([A-Za-z0-9 ]{4})["']\s+(-?[\d.]+)/g)) o[m[1]] = parseFloat(m[2]);
+  return o;
+}
+export const fmtVariations = o => Object.entries(o || {}).map(([k, v]) => `'${k}' ${num(v, 2)}`).join(', ');
+
+/**
+ * Angaben zu einer Schrift aus ihrer Datei (latin, Normalschnitt): Achsen variabler Schriften und OpenType-Merkmale
+ * (GSUB/GPOS) mit den Namen aus der Schrift (Stilsätze ss01–ss20, Zeichenvarianten cv01–cv99). null ohne Datei.
+ * @return {Promise<{axes: Object, features: Map<string, string|null>, font}|null>}
+ */
+const infoCache = new Map();
+export function fontInfo(ed, family) {
+  const files = filesFor(ed, family, 400, 'normal');
+  if (!files?.length) return Promise.resolve(null);
+  const url = files[0].url;
+  if (!infoCache.has(url)) infoCache.set(url, fontAt(ed, url).then(font => {
+    const axes = {};
+    for (const [tag, a] of Object.entries(font.variationAxes || {})) axes[tag.trim()] = { min: a.min, max: a.max, default: a.default, name: a.name };
+    const features = new Map();
+    for (const tb of [font.GSUB, font.GPOS]) for (const f of tb?.featureList || []) {
+      if (features.has(f.tag) && features.get(f.tag)) continue;
+      let name = null;
+      try {
+        const id = f.feature?.featureParams?.nameID;
+        if (id) { const r = font.name?.records?.fontFeatures?.[id]; name = r ? (r.de || r.en || Object.values(r)[0]) : null; }
+      } catch { /* ohne Namen */ }
+      features.set(f.tag, name);
+    }
+    return { axes, features, font };
+  }).catch(e => { infoCache.delete(url); throw e; }));
+  return infoCache.get(url);
+}
+
 const normW = w => w === 'bold' ? 700 : w === 'bolder' ? 700 : w === 'lighter' ? 300 : w === 'normal' || !w ? 400 : parseInt(w, 10) || 400;
 
 /** Dateien einer Familie für Schnitt und Stil, nach Zeichensatz (latin zuerst) */
@@ -87,7 +125,7 @@ function filesFor(ed, family, weight, style) {
   if (!cand.length) cand = f.files.filter(x => x.style === 'normal');
   const vari = cand.filter(x => x.weight === null);
   let pick;
-  if (vari.length) pick = vari.map(x => ({ ...x, wght: weight }));
+  if (vari.length) pick = vari.map(x => ({ ...x, coords: { wght: weight } }));
   else {
     const ws = [...new Set(cand.map(x => x.weight))].sort((a, b) => Math.abs(a - weight) - Math.abs(b - weight) || b - a);
     pick = cand.filter(x => x.weight === ws[0]);
@@ -104,7 +142,9 @@ async function fontsFor(ed, el) {
     const files = filesFor(ed, fam, weight, style);
     if (!files) continue;
     const out = [];
-    for (const f of files) out.push(await fontAt(ed, f.url, f.wght ?? null));
+    // weitere Achsen (Breite, optische Größe …) aus font-variation-settings
+    const extra = parseVariations(getProp(el, 'font-variation-settings'));
+    for (const f of files) out.push(await fontAt(ed, f.url, f.coords || Object.keys(extra).length ? { ...(f.coords || {}), ...extra } : null));
     return { fonts: out, family: fam };
   }
   return { fonts: null, family: firstFamily(stack) };
@@ -155,12 +195,17 @@ export async function outlineText(ed, text) {
   for (const run of runs) {
     const { fonts, family } = await fontsFor(ed, run.el);
     if (!fonts) return { error: t('Für die Schrift „{font}“ liegt keine Schriftdatei vor – bitte eine installierte Schrift wählen (Bereich Zeichen) und erneut umwandeln.', { font: family }) };
-    const fs = parseFloat(getProp(run.el, 'font-size')) || 16;
+    // berechnete Größe (Läufe können relativ sein, z. B. 60 % beim nachgebildeten Hochstellen)
+    const fs = parseFloat(getComputedStyle(run.el).fontSize) || parseFloat(getProp(run.el, 'font-size')) || 16;
     let d = '';
     // Glyphen je Zeichensatz-Datei: erste Datei, die das Zeichen kennt (latin, latin-ext …)
     const str = run.chars.map(c => c.ch).join('');
     const main = fonts[0];
-    const layout = main.layout(str);
+    // dieselben OpenType-Merkmale wie im Browser (Ligaturen, Kapitälchen, Ziffern, Stilsätze …)
+    const feats = fontkitFeatures(getProp(run.el, 'font-feature-settings'));
+    // Brüche: fontkit wendet frac nur um den Bruchstrich U+2044 an (der Browser auf die ganze Ziffernfolge) – / zwischen
+    // Ziffern daher als Bruchstrich übergeben (gleiche Länge, die Zuordnung zu den Zeichen bleibt)
+    const layout = main.layout(feats.frac ? str.replace(/(?<=\d)\/(?=\d)/g, '\u2044') : str, feats);
     let ci = 0;
     for (const g of layout.glyphs) {
       const cps = g.codePoints?.length || 1;
@@ -203,8 +248,10 @@ export async function outlineText(ed, text) {
   if (!parts.length) return { error: t('Der Text enthält keine Zeichen.') };
   // Ergebnis im Raum des Textes (dessen transform bleibt)
   const KEEP_OUT = ['x', 'y', 'dx', 'dy', 'rotate', 'textLength', 'lengthAdjust', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor',
-    'letter-spacing', 'word-spacing', 'text-decoration', 'dominant-baseline', 'data-ge-frame', 'data-ge-lh', 'font-kerning', 'xml:space'];
-  const copyAttrs = (from, to) => { for (const a of from.attributes) if (!KEEP_OUT.includes(a.name) && a.name !== 'href') to.setAttribute(a.name, a.value); to.style?.removeProperty('font-kerning'); to.style?.removeProperty('font-family'); };
+    'letter-spacing', 'word-spacing', 'text-decoration', 'dominant-baseline', 'data-ge-frame', 'data-ge-lh', 'data-ge-para', 'data-ge-sx', 'data-ge-sy', 'data-ge-ps',
+    'font-kerning', 'xml:space', 'baseline-shift'];
+  const CSS_OUT = ['font-kerning', 'font-family', 'font-feature-settings', 'font-variation-settings', 'font-variant-ligatures', 'font-variant-numeric', 'font-variant-caps', 'font-variant-position'];
+  const copyAttrs = (from, to) => { for (const a of from.attributes) if (!KEEP_OUT.includes(a.name) && a.name !== 'href') to.setAttribute(a.name, a.value); for (const p of CSS_OUT) to.style?.removeProperty(p); if (to.getAttribute('style') === '') to.removeAttribute('style'); };
   let out;
   if (parts.length === 1 && parts[0].el === text) {
     out = document.createElementNS(NS, 'path');

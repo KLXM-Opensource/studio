@@ -35,6 +35,9 @@ importers:
       fontkit:
         specifier: 2.0.4
         version: 2.0.4
+      hyphen:
+        specifier: 1.14.1
+        version: 1.14.1
       jspdf:
         specifier: 4.2.1
         version: 4.2.1
@@ -449,6 +452,9 @@ packages:
   html2canvas@1.4.1:
     resolution: {integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==}
     engines: {node: '>=8.0.0'}
+
+  hyphen@1.14.1:
+    resolution: {integrity: sha512-kvL8xYl5QMTh+LwohVN72ciOxC0OEV79IPdJSTwEXok9y9QHebXGdFgrED4sWfiax/ODx++CAMk3hMy4XPJPOw==}
 
   iobuffer@5.4.0:
     resolution: {integrity: sha512-DRebOWuqDvxunfkNJAlc3IzWIPD5xVxwUNbHr7xKB8E6aLJxIPfNX3CoMJghcFjpv6RWQsrcJbghtEwSPoJqMA==}
@@ -907,6 +913,8 @@ snapshots:
       css-line-break: 2.1.0
       text-segmentation: 1.0.3
     optional: true
+
+  hyphen@1.14.1: {}
 
   iobuffer@5.4.0: {}
 

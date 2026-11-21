@@ -345,7 +345,8 @@ final class Graphics
             foreach (\Core\Design::tokens() as $name => $t) {
                 if (($t['type'] ?? '') !== 'color') continue;
                 $c = \Core\Design::color($values[$name] ?? ($t['default'] ?? null));
-                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c];
+                // token = Name des Design-Tokens (Andockstelle für Farben als Variablen: der Editor merkt ihn am Element)
+                if ($c !== null) $out[] = ['name' => __((string) ($t['label'] ?? $name)), 'color' => $c, 'token' => (string) $name];
             }
         } catch (\Throwable) {
             // Kit ohne Design-Tokens: keine Farbfelder des Designs
@@ -357,7 +358,8 @@ final class Graphics
      * Schriftdateien für „Text in Kurven umwandeln“ (fontkit liest WOFF2 und variable Schriften): installierte Schriften des
      * Schriften-Managers (Core\Fonts) und Lato der Verwaltung. [Familie => ['files' => [[url, subset, style, weight|null]],
      * 'css' => font.css oder null]] – weight null = variable Schrift (Achse wght).
-     * @return array<string, array{files: list<array{url: string, subset: string, style: string, weight: ?int}>, css: ?string}>
+     * Dazu axes (variable Schriften: Tag => min/max/default) und category (serif, sans-serif, …) für die Schriftauswahl.
+     * @return array<string, array{files: list<array{url: string, subset: string, style: string, weight: ?int}>, css: ?string, axes?: ?array<string, array{min: float, max: float, default: float}>, category?: ?string}>
      */
     public static function fontFiles(): array
     {
@@ -375,7 +377,13 @@ final class Graphics
                     $info = $parse((string) ($file['file'] ?? ''));
                     if ($info) $files[] = ['url' => \Core\Fonts::url($id . '/' . $file['file'])] + $info;
                 }
-                if ($files) $out[$family] = ['files' => $files, 'css' => \Core\Fonts::cssUrl((string) $id)];
+                // Achsen (variable Schriften) und Art (Serife, serifenlos …) für die Schriftauswahl
+                $axes = [];
+                foreach ((array) ($f['axes'] ?? []) as $tag => $a) {
+                    if (is_string($tag) && preg_match('~^[A-Za-z]{4}$~', $tag) && is_array($a)) $axes[$tag] = ['min' => (float) ($a['min'] ?? 0), 'max' => (float) ($a['max'] ?? 0), 'default' => (float) ($a['default'] ?? 0)];
+                }
+                if ($files) $out[$family] = ['files' => $files, 'css' => \Core\Fonts::cssUrl((string) $id), 'axes' => $axes ?: null,
+                    'category' => preg_match('~^[a-z-]{1,20}$~', (string) ($f['category'] ?? '')) ? (string) $f['category'] : null];
             }
         } catch (\Throwable) {
             // ohne Schriften-Manager: nur die Schrift der Verwaltung
@@ -389,6 +397,166 @@ final class Graphics
             if ($files) $out['Lato'] = ['files' => $files, 'css' => null];
         }
         return $out;
+    }
+
+    // ================================================================= Bibliothek: Ordner, Namen, Austausch als Datei
+
+    /** Name ohne Markup, gekürzt */
+    public static function cleanName(string $name): string
+    {
+        return mb_substr(trim((string) preg_replace('~\s+~u', ' ', strip_tags($name))), 0, 120);
+    }
+
+    /** Ordnername (frei, ohne Markup; leer = ohne Ordner) */
+    public static function cleanFolder(string $folder): string
+    {
+        return mb_substr(trim((string) preg_replace('~[\x00-\x1f<>/\\\\]+~u', ' ', strip_tags($folder))), 0, 60);
+    }
+
+    /** Eigene Bausteine der Website für den Editor (mit SVG und Ordner) */
+    public static function partsForEditor(): array
+    {
+        $out = [];
+        foreach (app()->db->fetchAll("SELECT id, name, folder, svg, width, height, updated_at FROM graphics WHERE kind = 'part' ORDER BY folder, name, id") as $r) {
+            $out[] = ['id' => (int) $r['id'], 'kind' => 'part', 'name' => (string) $r['name'], 'folder' => (string) ($r['folder'] ?? ''), 'svg' => (string) $r['svg'],
+                'width' => (int) $r['width'], 'height' => (int) $r['height'], 'updated_at' => (string) $r['updated_at']];
+        }
+        return $out;
+    }
+
+    /** Baustein der Website umbenennen bzw. in einen Ordner legen */
+    public static function updatePart(int $id, ?string $name, ?string $folder): bool
+    {
+        $g = self::find($id);
+        if (!$g || $g['kind'] !== 'part') return false;
+        $row = ['updated_at' => now()];
+        if ($name !== null && ($n = self::cleanName($name)) !== '') $row['name'] = $n;
+        if ($folder !== null) $row['folder'] = self::cleanFolder($folder);
+        app()->db->update('graphics', $row, 'id = :id', ['id' => $id]);
+        return true;
+    }
+
+    /**
+     * Bausteine aus einer Austauschdatei (JSON des Editors: {format: 'klxm-grafik-bausteine', version: 1, items: [{name, folder, svg}]}).
+     * Jedes SVG wird bereinigt; ungültige Einträge werden übersprungen. Rückgabe: [gespeichert (Einträge), übersprungen]
+     * @return array{0: list<array<string, mixed>>, 1: int}
+     */
+    public static function importParts(mixed $data, string $scope = 'site'): array
+    {
+        if (!is_array($data) || ($data['format'] ?? '') !== 'klxm-grafik-bausteine' || !is_array($data['items'] ?? null)) {
+            throw new \RuntimeException(__('Das ist keine Austauschdatei des Grafik-Editors.'));
+        }
+        $done = []; $skipped = 0;
+        foreach (array_slice($data['items'], 0, 200) as $it) {
+            if (!is_array($it) || !is_string($it['svg'] ?? null) || strlen($it['svg']) > Svg::MAX_BYTES) { $skipped++; continue; }
+            try {
+                if ($scope === 'network') {
+                    $done[] = Shared::store((string) ($it['name'] ?? ''), $it['svg'], (string) ($it['folder'] ?? '')) + ['scope' => 'network'];
+                } else {
+                    $item = self::store('part', (string) ($it['name'] ?? ''), $it['svg']);
+                    self::updatePart($item['id'], null, (string) ($it['folder'] ?? ''));
+                    $done[] = ['id' => $item['id'], 'name' => $item['name'], 'folder' => self::cleanFolder((string) ($it['folder'] ?? '')), 'svg' => (string) (self::find($item['id'])['svg'] ?? ''), 'scope' => 'site'];
+                }
+            } catch (\RuntimeException) {
+                $skipped++;
+            }
+        }
+        return [$done, $skipped];
+    }
+
+    // ================================================================= Formatvorlagen für Text (Bibliothek der Website)
+
+    /** Eigenschaften, die eine Vorlage tragen darf (Zeichen bzw. Absatz) */
+    private const STYLE_PROPS = ['font-family', 'font-weight', 'font-style', 'font-size', 'fill', 'letter-spacing', 'text-decoration', 'font-feature-settings', 'font-variation-settings'];
+    private const STYLE_PARA = ['data-ge-para', 'data-ge-lh', 'text-anchor', 'word-spacing'];
+
+    /** @return array{p: list<array<string, mixed>>, c: list<array<string, mixed>>} Absatz- und Zeichenvorlagen der Website */
+    public static function textStyles(): array
+    {
+        return self::cleanStyles(app()->settings->get('graphic_text_styles', []));
+    }
+
+    /** Vorlagen der Website speichern (bereinigt: bekannte Eigenschaften, Werte ohne Markup, url(), Ausdrücke) */
+    public static function saveTextStyles(mixed $styles): array
+    {
+        $clean = self::cleanStyles($styles);
+        app()->settings->set('graphic_text_styles', $clean);
+        return $clean;
+    }
+
+    /** @return array{p: list<array<string, mixed>>, c: list<array<string, mixed>>} */
+    public static function cleanStyles(mixed $in): array
+    {
+        $out = ['p' => [], 'c' => []];
+        $val = fn(mixed $v): ?string => is_scalar($v) && ($s = trim((string) $v)) !== '' && mb_strlen($s) <= 300
+            && !preg_match('~[<>{}@\\\\]|url\(|expression|javascript:|data:~i', $s) ? $s : null;
+        foreach (['p', 'c'] as $kind) {
+            foreach (is_array($in[$kind] ?? null) ? $in[$kind] : [] as $st) {
+                if (!is_array($st)) continue;
+                $n = trim(strip_tags((string) ($st['n'] ?? '')));
+                if ($n === '' || mb_strlen($n) > 60) continue;
+                $props = [];
+                foreach (self::STYLE_PROPS as $k) if (($v = $val($st['props'][$k] ?? null)) !== null) $props[$k] = $v;
+                $row = ['n' => $n, 'props' => $props];
+                if ($kind === 'p') {
+                    $para = [];
+                    foreach (self::STYLE_PARA as $k) if (($v = $val($st['para'][$k] ?? null)) !== null) $para[$k] = $v;
+                    $row['para'] = $para;
+                }
+                $out[$kind][] = $row;
+                if (count($out[$kind]) >= 100) break;
+            }
+        }
+        return $out;
+    }
+
+    // ================================================================= Persönliche Einstellungen (Core\UiPrefs, Schlüssel „grafik“)
+
+    /** Farbmodi des Bereichs „Farbe“ */
+    public const COLOR_MODES = ['hex', 'rgb', 'hsl', 'hsb', 'oklch'];
+
+    /**
+     * Einstellungen des Editors je Konto: Favoriten und zuletzt verwendete Schriften (Stapel bzw. Familien), Farbmodus.
+     * @return array{fontFav: list<string>, fontRecent: list<string>, colorMode: string, libFav: list<string>, libSiteColors: bool}
+     */
+    public static function prefs(?array $user): array
+    {
+        $p = \Core\UiPrefs::get($user, 'grafik', []);
+        return self::cleanPrefs(is_array($p) ? $p : []);
+    }
+
+    /** Ein Wert setzen (fontFav, fontRecent, colorMode) – unbekannte Schlüssel und Werte werden verworfen */
+    public static function setPref(int $userId, string $key, mixed $value): array
+    {
+        $raw = app()->db->fetchValue('SELECT ui_prefs FROM users WHERE id = ?', [$userId]);
+        $all = json_decode((string) $raw, true);
+        $cur = is_array($all) && is_array($all['grafik'] ?? null) ? $all['grafik'] : [];
+        if (!in_array($key, ['fontFav', 'fontRecent', 'colorMode', 'libFav', 'libSiteColors'], true)) throw new \RuntimeException(__('Unbekannte Einstellung.'));
+        $cur[$key] = $value;
+        $clean = self::cleanPrefs($cur);
+        \Core\UiPrefs::set($userId, 'grafik', $clean);
+        return $clean;
+    }
+
+    /** Nur Text ohne Markup, begrenzte Längen (Schriftnamen bzw. -stapel) */
+    private static function cleanPrefs(array $p): array
+    {
+        $list = function (mixed $v, int $max): array {
+            $out = [];
+            foreach (is_array($v) ? $v : [] as $s) {
+                if (!is_string($s)) continue;
+                $s = trim($s);
+                if ($s === '' || mb_strlen($s) > 120 || !preg_match('~^[\p{L}\p{N} ,\'"_.-]+$~u', $s)) continue;
+                if (!in_array($s, $out, true)) $out[] = $s;
+                if (count($out) >= $max) break;
+            }
+            return $out;
+        };
+        $mode = is_string($p['colorMode'] ?? null) && in_array($p['colorMode'], self::COLOR_MODES, true) ? $p['colorMode'] : 'hex';
+        // Favoriten der Bibliothek: lib:{id} (mitgeliefert), part:{id} (Website), net:{id} (alle Websites)
+        $fav = array_values(array_unique(array_filter(is_array($p['libFav'] ?? null) ? $p['libFav'] : [], fn($v) => is_string($v) && preg_match('~^(lib|part|net):[a-z0-9_-]{1,60}$~i', $v))));
+        return ['fontFav' => $list($p['fontFav'] ?? [], 60), 'fontRecent' => $list($p['fontRecent'] ?? [], 8), 'colorMode' => $mode,
+            'libFav' => array_slice($fav, 0, 200), 'libSiteColors' => !empty($p['libSiteColors'])];
     }
 
     /** Schriften für Text: Kit-Schriften (Core\Design::fonts) und allgemeine Familien */

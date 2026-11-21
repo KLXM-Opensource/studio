@@ -60,7 +60,46 @@ export class TextEditor {
       return;
     }
     if (mod && k === 's') { e.preventDefault(); this.ed.endText(); this.ed.save(e.shiftKey); return; }
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !mod && !e.altKey && this.lineMove(e.key === 'ArrowUp' ? -1 : 1, e.shiftKey)) { e.preventDefault(); return; }
+    if (e.key !== 'Shift') this.goalX = null;
     requestAnimationFrame(() => this.ed.draw());
+  }
+
+  /**
+   * Pfeil hoch/runter: Schreibmarke in die Zeile darüber/darunter an dieselbe waagerechte Stelle (wie in Textprogrammen –
+   * auch über automatisch umbrochene Zeilen im Textrahmen). Rückgabe: true, wenn behandelt.
+   */
+  lineMove(d, extend) {
+    const lines = this.map?.lines || [];
+    if (lines.length < 2) return false;
+    const ta = this.ta, back = ta.selectionDirection === 'backward';
+    const focus = extend ? (back ? ta.selectionStart : ta.selectionEnd) : (d < 0 ? ta.selectionStart : ta.selectionEnd);
+    const anchor = extend ? (back ? ta.selectionEnd : ta.selectionStart) : null;
+    let li = lines.findIndex(l => focus >= l.p0 && focus <= l.p1 && !(focus === l.p1 && lines[lines.indexOf(l) + 1]?.p0 === focus));
+    if (li < 0) li = lines.findIndex(l => focus <= l.p1);
+    const to = li + d;
+    let target;
+    if (to < 0) target = 0;
+    else if (to >= lines.length) target = this.plain.length;
+    else {
+      const cur = this.caretPos(focus);
+      if (this.goalX == null && cur) this.goalX = cur.x;
+      const ln = lines[to];
+      let best = ln.p0, bd = Infinity;
+      for (let i = ln.p0; i <= ln.p1; i++) {
+        if (i === ln.p1 && lines[to + 1]?.p0 === i) continue;   // Ende vor Trennstrich = Anfang der nächsten Zeile
+        const c = this.caretPos(i);
+        if (!c) continue;
+        const dd = Math.abs(c.x - (this.goalX ?? 0));
+        if (dd < bd) { bd = dd; best = i; }
+      }
+      target = best;
+    }
+    if (extend) ta.setSelectionRange(Math.min(anchor, target), Math.max(anchor, target), target < anchor ? 'backward' : 'forward');
+    else ta.setSelectionRange(target, target);
+    this.place();
+    this.ed.draw();
+    return true;
   }
 
   /** Eigenschaft für die Auswahl umschalten (alles fett → normal, sonst fett); ohne Auswahl: gilt für das nächste Getippte */

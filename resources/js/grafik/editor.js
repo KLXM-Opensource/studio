@@ -27,7 +27,10 @@ import { parseColor, hex } from './color.js';
 import { h, iconBtn, menu, closeMenus, modal, MOD, ALT, SHIFT, isMac } from './ui.js';
 import { buildPanels } from './panels.js';
 import { TextEditor } from './textedit.js';
-import { readText, layoutText, transformCase } from './text.js';
+import { readText, layoutText, transformCase, styleRange, mapRange } from './text.js';
+import { parseFeatures, fmtFeatures, paraOf, setPara, loadHyphens, preloadHyphens, setHyphenModules } from './typo.js';
+import { fontPicker, fontItems, itemFor, WEIGHTS } from './fontpicker.js';
+import { Connectors, isConn, parseConn, HEADS } from './connect.js';
 import { booleanOp, simplifyD, outlineStroke, offsetArea, pathLike, makeCompound, recomputeCompound, isCompound } from './bool.js';
 import { makeClip, releaseClip, clipOf } from './clip.js';
 import { outlineAll } from './outline.js';
@@ -50,6 +53,7 @@ const TOOLS = [
   { id: 'ellipse', icon: 'circle', key: 'E', label: () => t('Ellipse') },
   { id: 'polygon', icon: 'polygon', key: 'G', label: () => t('Vieleck und Stern') },
   { id: 'line', icon: 'line-segment', key: 'L', label: () => t('Linie und Pfeil') },
+  { id: 'connector', icon: 'flow-arrow', key: 'C', label: () => t('Verbinder') },
   { id: 'text', icon: 'text-t', key: 'T', label: () => t('Text') },
   { id: 'gradient', icon: 'gradient', key: 'F', label: () => t('Verlauf') },
   { id: 'eyedropper', icon: 'eyedropper', key: 'I', label: () => t('Pipette') },
@@ -66,7 +70,8 @@ const HINTS = {
   ellipse: () => t('Ziehen = Ellipse, ⇧ = Kreis, ⌥ = von der Mitte aus.'),
   polygon: () => t('Ziehen = Vieleck bzw. Stern (Ecken und Stern in der Kontextleiste), ⇧ = gleichmäßig.'),
   line: () => t('Ziehen = Linie, ⇧ = in 45°-Schritten. Pfeilspitzen in der Kontextleiste.'),
-  text: () => t('Klick = Text an dieser Stelle. Esc oder Klick daneben beendet die Eingabe.'),
+  text: () => t('Klick = Text an dieser Stelle, Klick in eine Form = Text in der Form (zentriert, umbrochen). Esc oder Klick daneben beendet die Eingabe.'),
+  connector: () => t('Von einer Form zur nächsten ziehen – die Enden haften an den Ankerpunkten (Seiten, Mitte = automatisch, Knoten). Verbinder folgen, wenn Formen sich bewegen. Doppelklick auf einen Verbinder = Beschriftung.'),
   eyedropper: () => t('Klick auf ein Objekt übernimmt seine Füllung und Kontur für die Auswahl.'),
   gradient: () => t('Ziehen auf einem Objekt = Verlauf anlegen bzw. neu ausrichten. Griffe ziehen, Doppelklick auf die Linie = Farbstopp, ⌫ = Stopp löschen. X = Füllung/Kontur.'),
   hand: () => t('Ziehen = Ansicht verschieben (auch mit gedrückter Leertaste in jedem Werkzeug).'),
@@ -100,8 +105,13 @@ export class GraphicEditor {
       fontWeight: '400', anchor: 'start', snap: true, grid: this.format === 'icon',
     };
     this.recent = [];
+    // persönliche Einstellungen (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
+    this.prefs = { fontFav: [], fontRecent: [], colorMode: 'hex', ...(boot.prefs || {}) };
+    setHyphenModules(boot.modules?.hyphen);
     this.loadFonts();
     this.nodeSel = new Set();   // ausgewählte Knoten (Direktauswahl): "s:i"
+    this.conn = new Connectors(this);   // Verbinder, Beschriftungen, Text in Formen (connect.js)
+    this.opt.connRoute = 'ortho'; this.opt.connStart = 'none'; this.opt.connEnd = 'triangle'; this.opt.connSize = 4;
     this.build();
     this.load(this.doc.svg || '', t('Geöffnet'));
   }
@@ -149,7 +159,7 @@ export class GraphicEditor {
     this.paper = this.$('.ge-paper');
     this.ov = this.$('.ge-ov');
     this.shadow = this.paper.attachShadow({ mode: 'open' });
-    this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible}</style>';
+    this.shadow.innerHTML = '<style>:host{display:block}:host>svg{display:block;width:100%;height:100%;overflow:visible;-webkit-user-select:none;user-select:none}</style>';
     this.renderPersonas();
     this.renderTools();
     this.rulers = new Guides(this);
@@ -259,6 +269,7 @@ export class GraphicEditor {
     if (label) { this.history = []; this.hi = -1; this.commit(label); this.savedAt = this.hi; }
     this.fitted = false;
     this.fit();
+    preloadHyphens(root);
     this.changed(false);
   }
 
@@ -280,6 +291,7 @@ export class GraphicEditor {
 
   // ================================================================= Protokoll (Rückgängig / Wiederholen)
   commit(label) {
+    this.conn?.update();
     const svg = this.getSvg();
     if (this.hi >= 0 && this.history[this.hi].svg === svg) return;
     this.history.length = this.hi + 1;
@@ -421,6 +433,7 @@ export class GraphicEditor {
   // ================================================================= Zeichnen der Überlagerung
   draw() {
     if (!this.root || !this.ov) return;
+    this.conn?.update();
     const ov = this.ov, out = [];
     const r = this.stage.getBoundingClientRect();
     ov.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
@@ -438,7 +451,9 @@ export class GraphicEditor {
     }
     if (this.tool === 'gradient') out.push(this.grad.overlay());
     else if (this.tool === 'node') out.push(this.drawNodes());
+    else if (this.sel.length && !this.textEl && this.sel.every(isConn)) out.push(this.drawConnSel(this.tool === 'select'));
     else if (this.sel.length && !this.textEl) out.push(this.drawSelection());
+    if (this.tool === 'connector' || this.connDrag) out.push(this.drawAnchors());
     if (this.guides?.length) for (const g of this.guides) {
       const a = this.toOv(g.a), b = this.toOv(g.b);
       out.push(`<line class="ge-ov__guide" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`);
@@ -457,6 +472,7 @@ export class GraphicEditor {
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('pointerdown', e => this.nodeDown(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-node]')) el.addEventListener('dblclick', e => this.nodeToggle(e, el.dataset.node));
     for (const el of ov.querySelectorAll('[data-gh]')) el.addEventListener('pointerdown', e => this.grad.down(e, el.dataset.gh));
+    for (const el of ov.querySelectorAll('[data-ch]')) el.addEventListener('pointerdown', e => this.connHandleDown(e, el.dataset.ch));
     for (const el of ov.querySelectorAll('[data-guide]')) {
       el.addEventListener('pointerdown', e => { if (e.button !== 0 || this.tool === 'hand' || this.space) return; e.stopPropagation(); e.preventDefault(); this.rulers.dragGuide(e, +el.dataset.guide); });
       el.addEventListener('dblclick', e => { e.stopPropagation(); this.rulers.dialog(+el.dataset.guide); });
@@ -508,7 +524,7 @@ export class GraphicEditor {
       const p = this.toDoc(e.clientX, e.clientY);
       this.$('[data-pos]').textContent = `X ${num(p.x, 1)}  Y ${num(p.y, 1)}`;
       if (this.drag) return;
-      if (this.tool === 'select' || this.tool === 'node') {
+      if (this.tool === 'select' || this.tool === 'node' || this.tool === 'connector') {
         const hit = this.hitAt(e)?.el || null;
         if (hit !== this.hover) { this.hover = hit; this.draw(); }
       }
@@ -574,6 +590,7 @@ export class GraphicEditor {
       case 'pencil': return this.pencilDown(e, p);
       case 'rect': case 'ellipse': case 'polygon': case 'line': return this.shapeDown(e, p);
       case 'text': return this.textDown(e, p);
+      case 'connector': return this.connDown(e, p);
       case 'eyedropper': return this.eyedrop(e);
       case 'gradient': return this.grad.stageDown(e, p);
       case 'zoom': { const r = this.stage.getBoundingClientRect(); return this.setZoom(this.zoom * (e.altKey ? 0.5 : 2), e.clientX - r.left, e.clientY - r.top); }
@@ -723,6 +740,12 @@ export class GraphicEditor {
     const hit = this.hitAt(e);
     if (!hit) return;
     if (isCompound(hit.el)) { this.editCompound(hit.el); return; }
+    // Baustein mit Text in der Form (Flussdiagramm, Organigramm): Doppelklick bearbeitet gleich den Text
+    if (hit.el.localName === 'g') {
+      const inner = [...hit.el.querySelectorAll('text[data-ge-in]')];
+      const t1 = inner.find(x => x.contains(hit.raw)) || (inner.length === 1 ? inner[0] : null);
+      if (t1) { this.scope = hit.el; return this.beginText(t1, false, { clientX: e.clientX, clientY: e.clientY }); }
+    }
     if (['g', 'switch'].includes(hit.el.localName)) {
       // Gruppe betreten (wie in Vektorprogrammen): danach wählt ein Klick die Teile
       this.scope = hit.el;
@@ -732,6 +755,7 @@ export class GraphicEditor {
       return;
     }
     if (hit.el.localName === 'text') return this.beginText(hit.el, false, { clientX: e.clientX, clientY: e.clientY });
+    if (isConn(hit.el)) return this.connLabel(hit.el);
     if (['path', 'rect', 'ellipse', 'circle', 'polygon', 'polyline', 'line'].includes(hit.el.localName)) { this.select([hit.el]); this.setTool('node'); }
   }
 
@@ -845,6 +869,7 @@ export class GraphicEditor {
 
   /** Pfeilspitzen (marker) nach den Vorgaben der Kontextleiste – Farbe wie die Kontur */
   applyArrows(el, start = this.opt.arrowStart, end = this.opt.arrowEnd) {
+    if (isConn(el)) return this.conn.applyHeads(el);   // Farbe geändert: Spitzen der Verbinder nachziehen
     for (const [attr, on] of [['marker-start', start], ['marker-end', end]]) {
       if (!on) { setProp(el, attr, null); continue; }
       const color = hex(getProp(el, 'stroke')) || '#1F2430';
@@ -949,6 +974,11 @@ export class GraphicEditor {
     e.preventDefault();   // kein mousedown-Fokus auf die Zeichenfläche – die Eingabe bekommt ihn
     const hit = this.hitAt(e)?.el;
     if (hit && hit.localName === 'text') return this.beginText(hit, false, { clientX: e.clientX, clientY: e.clientY });
+    // Klick in eine geschlossene Form: Text in der Form (zentriert, umbricht auf die Breite der Form)
+    if (hit && ['rect', 'ellipse', 'circle', 'polygon', 'path'].includes(hit.localName) && !isConn(hit) && (getProp(hit, 'fill') || 'none') !== 'none') {
+      const inner = this.conn.innerText(hit, '');
+      return this.beginText(inner, true);
+    }
     const r = this.stage.getBoundingClientRect();
     let box = null;
     this.track(e, (p, ev) => {
@@ -990,6 +1020,155 @@ export class GraphicEditor {
     else this.changed(false);
   }
 
+  // ---------------------------------------------------------------- Verbinder (connect.js)
+  /** Ziel unter dem Zeiger: Form und nächster Ankerpunkt (Bildschirmabstand ≤ 14 px), sonst Form mit „automatisch“ */
+  connTarget(e, exclude = null) {
+    const list = this.shadow.elementsFromPoint ? this.shadow.elementsFromPoint(e.clientX, e.clientY) : [];
+    let el = null;
+    for (const raw of list) { const p = this.pickable(raw); if (p && p !== exclude && !isConn(p) && !p.hasAttribute?.('data-ge-for')) { el = p; break; } }
+    // Ankerpunkte der zuletzt gezeigten Form gelten auch knapp außerhalb (Seitenmitten liegen auf dem Rand)
+    const cand = el ? [el] : (this.hover && this.hover !== exclude && !isConn(this.hover) ? [this.hover] : []);
+    const r = this.stage.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    for (const c of cand) {
+      let best = null;
+      for (const a of this.conn.anchors(c)) {
+        const q = this.toOv(a.p), d = Math.hypot(q.x - mx, q.y - my);
+        if (d <= 14 && (!best || d < best.d)) best = { ...a, d };
+      }
+      if (best) return { el: c, side: best.side };
+      if (c === el) return { el: c, side: 'a' };
+    }
+    return null;
+  }
+
+  /** Verbinder-Werkzeug: von einer Form (bzw. einem Punkt) zur nächsten ziehen */
+  connDown(e, p0) {
+    const start = this.connTarget(e);
+    const endOf = (tg, p) => tg ? { id: this.ensureId(tg.el), side: tg.side } : { x: this.snapPoint(p).x, y: this.snapPoint(p).y };
+    const a = endOf(start, p0);
+    let el = null;
+    this.connDrag = { from: start?.el || null };
+    this.track(e, (p, ev) => {
+      if (!el) {
+        if (Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 5) return;
+        el = this.conn.create(a, { x: p.x, y: p.y }, { r: this.opt.connRoute, hs: this.opt.connStart, he: this.opt.connEnd, s: this.opt.connSize });
+      }
+      const tg = this.connTarget(ev, start?.el);
+      this.connDrag.to = tg;
+      this.hover = tg?.el || null;
+      this.conn.setEnd(el, 'b', endOf(tg, p));
+      this.draw();
+    }, () => {
+      this.connDrag = null;
+      if (!el) return;
+      this.sel = [el];
+      this.commit(t('Verbinder'));
+    });
+  }
+
+  /** id für eine Form (Verbinder verweisen per id) */
+  ensureId(el) { if (!el.id) el.id = uid(this.root, el.localName === 'g' ? 'gruppe-' : 'form-'); return el.id; }
+
+  /** Ankerpunkte der Form unter dem Zeiger (bzw. Ziel beim Ziehen) */
+  drawAnchors() {
+    const els = new Set();
+    if (this.hover && !isConn(this.hover) && this.root.contains(this.hover)) els.add(this.hover);
+    if (this.connDrag?.from) els.add(this.connDrag.from);
+    let s = '';
+    for (const el of els) {
+      const c = corners(el, this.root);
+      if (c) s += `<polygon class="ge-ov__hover" points="${c.map(p => { const q = this.toOv(p); return q.x + ',' + q.y; }).join(' ')}"/>`;
+      for (const a of this.conn.anchors(el)) {
+        const q = this.toOv(a.p), on = this.connDrag?.to?.el === el && this.connDrag.to.side === a.side;
+        s += a.side === 'a' ? `<circle class="ge-ov__anc ge-ov__anc--auto${on ? ' is-on' : ''}" cx="${q.x}" cy="${q.y}" r="${on ? 7 : 5}"/>`
+          : `<rect class="ge-ov__anc${a.magnet ? ' ge-ov__anc--mag' : ''}${on ? ' is-on' : ''}" x="${q.x - (on ? 5 : 4)}" y="${q.y - (on ? 5 : 4)}" width="${on ? 10 : 8}" height="${on ? 10 : 8}" transform="rotate(45 ${q.x} ${q.y})"/>`;
+      }
+    }
+    return s;
+  }
+
+  /** Auswahl aus Verbindern: Linie hervorgehoben, Griffe an den Enden, Griff für den Knick (rechtwinklig) */
+  drawConnSel(handles = true) {
+    let s = '';
+    for (const c of this.sel) {
+      const g = c.__ge;
+      if (!g) continue;
+      const A = this.toOv(g.A), B = this.toOv(g.B);
+      try {
+        const M = docMatrix(c, this.root), len = c.getTotalLength(), pts = [];
+        for (let i = 0; i <= 40; i++) { const q = c.getPointAtLength(len * i / 40); pts.push(this.toOv(pt(M, q.x, q.y))); }
+        s += `<polyline class="ge-ov__connsel" points="${pts.map(p => p.x + ',' + p.y).join(' ')}"/>`;
+      } catch { /* nicht gezeichnet */ }
+      // Griffe nur mit dem Auswahlwerkzeug (mit dem Verbinder-Werkzeug beginnt dort ein neuer Verbinder)
+      if (!handles || this.sel.length > 1 || isLocked(c)) continue;
+      const o = parseConn(c);
+      s += `<circle class="ge-ov__h ge-ov__cend${o.a?.id ? ' is-attached' : ''}" data-ch="a" cx="${A.x}" cy="${A.y}" r="6"/><circle class="ge-ov__h ge-ov__cend${o.b?.id ? ' is-attached' : ''}" data-ch="b" cx="${B.x}" cy="${B.y}" r="6"/>`;
+      if (o.r === 'ortho' && g.pts && g.pts.length >= 4) {
+        // mittlerer Abschnitt: Griff in seiner Mitte
+        const i = Math.floor((g.pts.length - 1) / 2), p1 = g.pts[i], p2 = g.pts[i + 1];
+        const q = this.toOv({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }), vert = Math.abs(p1.x - p2.x) < 0.01;
+        s += `<rect class="ge-ov__h ge-ov__cmid ${vert ? 'is-v' : 'is-h'}" data-ch="m" x="${q.x - (vert ? 4 : 8)}" y="${q.y - (vert ? 8 : 4)}" width="${vert ? 8 : 16}" height="${vert ? 16 : 8}" rx="3"/>`;
+      }
+    }
+    return s;
+  }
+
+  /** Griff eines Verbinders ziehen: Ende neu anhängen bzw. Knick verschieben */
+  connHandleDown(e, k) {
+    e.stopPropagation(); e.preventDefault();
+    const c = this.sel[0];
+    if (!c || !isConn(c)) return;
+    if (k === 'm') {
+      const g = c.__ge, i = Math.floor((g.pts.length - 1) / 2), p1 = g.pts[i], p2 = g.pts[i + 1];
+      const vert = Math.abs(p1.x - p2.x) < 0.01;
+      const A = g.A, B = g.B;
+      this.track(e, p => {
+        const m = vert ? (p.x - A.x) / ((B.x - A.x) || 1) : (p.y - A.y) / ((B.y - A.y) || 1);
+        this.conn.set(c, { m: Math.max(0, Math.min(1, m)) });
+        this.draw();
+      }, () => this.commit(t('Knick verschoben')));
+      return;
+    }
+    this.connDrag = { from: null };
+    this.track(e, (p, ev) => {
+      const other = parseConn(c)[k === 'a' ? 'b' : 'a'];
+      const tg = this.connTarget(ev, other?.id ? this.conn.byId(other.id) : null);
+      this.connDrag.to = tg;
+      this.hover = tg?.el || null;
+      const sp = this.snapPoint(p);
+      this.conn.setEnd(c, k, tg ? { id: this.ensureId(tg.el), side: tg.side } : { x: sp.x, y: sp.y });
+      this.draw();
+    }, () => { this.connDrag = null; this.commit(t('Verbinder umgehängt')); });
+  }
+
+  /** Beschriftung eines Verbinders anlegen bzw. bearbeiten */
+  connLabel(c) {
+    const isNew = !this.root.querySelector(`text[data-ge-for="${CSS.escape(c.id || '-')}"]`);
+    const lab = this.conn.label(c, isNew ? '' : undefined);
+    this.beginText(lab, isNew);
+  }
+
+  /** Einstellungen der ausgewählten Verbinder (Kontextleiste) bzw. Vorgabe für neue */
+  connSet(patch) {
+    const list = this.sel.filter(isConn);
+    for (const [k, v] of Object.entries(patch)) this.opt[{ r: 'connRoute', hs: 'connStart', he: 'connEnd', s: 'connSize' }[k]] = v;
+    if (!list.length) { this.renderCtx(true); return; }
+    for (const c of list) this.conn.set(c, patch);
+    this.commit(t('Verbinder geändert'));
+  }
+
+  /** Verschieben um tx/ty (Zeichenflächen-Koordinaten) – z. B. Baum anordnen */
+  moveBy(el, tx, ty) { applyTransform(el, new DOMMatrix().translate(tx, ty), this.root); }
+
+  /** Organigramm/Baum anordnen: ausgewählte Wurzel und alles, was über Verbinder daran hängt */
+  arrangeTree(dir = 'down') {
+    const rootEl = this.sel.find(el => !isConn(el));
+    if (!rootEl || !rootEl.id) { toast(t('Bitte die oberste Form des Baums auswählen (mit Verbindern zu den übrigen).'), 'info'); return; }
+    const moved = this.conn.layoutTree(rootEl, dir, this.format === 'info' ? 40 : 6);
+    if (!moved.length) { toast(t('Nichts anzuordnen – an der Form hängen keine Verbinder.'), 'info'); return; }
+    this.commit(dir === 'down' ? t('Baum angeordnet (von oben)') : t('Baum angeordnet (von links)'));
+  }
+
   // ---------------------------------------------------------------- Pipette
   eyedrop(e) {
     const hit = this.hitAt(e);
@@ -997,7 +1176,11 @@ export class GraphicEditor {
     if (!src) return;
     const fill = getProp(src, 'fill'), stroke = getProp(src, 'stroke'), sw = getProp(src, 'stroke-width');
     if (!this.sel.length) { this.style.fill = fill; this.style.stroke = stroke; this.paintFs(); this.panels.refresh(); return; }
-    for (const el of this.sel) eachShape(el, s => { setProp(s, 'fill', fill); setProp(s, 'stroke', stroke); if (stroke && stroke !== 'none') setProp(s, 'stroke-width', sw); });
+    for (const el of this.sel) eachShape(el, s => {
+      setProp(s, 'fill', fill); setProp(s, 'stroke', stroke); if (stroke && stroke !== 'none') setProp(s, 'stroke-width', sw);
+      // Farbe des Designs (Token) wandert mit
+      for (const a of ['data-ge-ftoken', 'data-ge-stoken']) { const v = src.getAttribute(a); if (v) s.setAttribute(a, v); else s.removeAttribute(a); }
+    });
     this.commit(t('Farbe übernommen'));
   }
 
@@ -1475,7 +1658,7 @@ export class GraphicEditor {
    * sonst für die ganzen Texte der Auswahl (Läufe verlieren dieselbe Eigenschaft, damit sie überall gilt).
    */
   textProp(prop, value) {
-    const runProp = ['font-weight', 'font-style', 'fill', 'text-decoration', 'letter-spacing', 'font-family', 'font-size'].includes(prop);
+    const runProp = ['font-weight', 'font-style', 'fill', 'text-decoration', 'letter-spacing', 'font-family', 'font-size', 'baseline-shift', 'font-feature-settings'].includes(prop);
     if (this.textEd && runProp && this.textEd.range[0] !== this.textEd.range[1]) { this.textEd.format({ [prop]: value }); this.panels.refresh(); return; }
     const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
     if (!list.length) { this.renderCtx(); this.panels.refresh(); return; }
@@ -1490,11 +1673,20 @@ export class GraphicEditor {
     this.commit(t('Schrift geändert'));
   }
 
-  /** Absatz: anchor (Ausrichtung), lh (Zeilenabstand), frame (Rahmenbreite), offset (Startversatz auf dem Pfad, %) */
-  textPara(k, v) {
+  /**
+   * Absatz: anchor (Ausrichtung start|middle|end|justify), lh (Zeilenabstand), frame (Rahmenbreite), offset (Startversatz
+   * auf dem Pfad, %), ws (Wortabstand), pb/pa (Abstand vor/nach Absätzen), li/ri/fi (Einzüge links/rechts/erste Zeile),
+   * hy (Silbentrennung: '', 'de', 'en' – Trennmuster werden vorher geladen)
+   */
+  async textPara(k, v) {
     const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (k === 'hy' && v) { this.busy(true); await loadHyphens(v); this.busy(false); }
     for (const el of list) {
       if (k === 'anchor') {
+        // Blocksatz = links ausgerichtet, Wortabstände füllen die Zeilen des Textrahmens
+        const just = v === 'justify';
+        if (just !== (paraOf(el).al === 'justify')) setPara(el, { al: just ? 'justify' : '' });
+        if (just) v = 'start';
         const w = parseFloat(el.getAttribute('data-ge-frame')) || 0, tp = el.querySelector('textPath');
         if (w && !tp) {
           // Textrahmen: linke Kante bleibt, x wandert mit der Ausrichtung
@@ -1516,9 +1708,99 @@ export class GraphicEditor {
       } else if (k === 'lh') { el.setAttribute('data-ge-lh', num(v, 3)); this.retext(el); }
       else if (k === 'frame') { this.setTextFrame(el, v, false); }
       else if (k === 'offset') { const tp = el.querySelector('textPath'); if (tp) tp.setAttribute('startOffset', num(v, 2) + '%'); }
+      else if (k === 'ws') { setProp(el, 'word-spacing', v ? num(v, 3) : null); this.retext(el); }
+      else if (['pb', 'pa', 'li', 'ri', 'fi', 'hy'].includes(k)) { setPara(el, { [k]: v }); this.retext(el); }
     }
     if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.place(); this.draw(); this.panels.refresh(); return; }
-    this.commit({ anchor: t('Ausrichtung geändert'), lh: t('Zeilenabstand geändert'), frame: t('Textrahmen geändert'), offset: t('Startversatz geändert') }[k]);
+    this.commit({ anchor: t('Ausrichtung geändert'), lh: t('Zeilenabstand geändert'), frame: t('Textrahmen geändert'), offset: t('Startversatz geändert'),
+      ws: t('Wortabstand geändert'), pb: t('Abstand vor Absatz'), pa: t('Abstand nach Absatz'), li: t('Einzug links'), ri: t('Einzug rechts'), fi: t('Einzug erste Zeile'),
+      hy: t('Silbentrennung') }[k]);
+  }
+
+  /**
+   * OpenType-Merkmale ändern (patch: { tag: 1|0|null }, null = Standard): während der Bearbeitung mit markiertem Bereich nur
+   * für diese Zeichen (jeder Lauf behält seine übrigen Merkmale), sonst für die ganzen Texte samt ihren Läufen.
+   */
+  textFeature(patch) {
+    const merge = cur => { const o = parseFeatures(cur); for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; } return fmtFeatures(o) || null; };
+    const te = this.textEd;
+    if (te && te.range[0] !== te.range[1]) {
+      const base = getProp(te.el, 'font-feature-settings', false);
+      te.model = mapRange(te.model, te.range[0], te.range[1], s => ({ ...s, 'font-feature-settings': merge(s['font-feature-settings'] ?? base) }));
+      te.dirty = true; te.relayout(); te.ta.setSelectionRange(...te.range); this.draw(); this.panels.refresh();
+      return;
+    }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (!list.length) return;
+    for (const el of list) {
+      setProp(el, 'font-feature-settings', merge(getProp(el, 'font-feature-settings', false)));
+      for (const r of el.querySelectorAll('tspan')) { const v = r.style.getPropertyValue('font-feature-settings'); if (v) setProp(r, 'font-feature-settings', merge(v)); }
+      if (el.hasAttribute('data-ge-frame') || el.querySelector('tspan[dy]')) this.retext(el);
+    }
+    if (te) { te.dirty = true; te.before = null; this.draw(); this.panels.refresh(); return; }
+    this.commit(t('OpenType geändert'));
+  }
+
+  /**
+   * Hoch-/Tiefstellen: mit den Merkmalen sups/subs der Schrift (has = Schrift kennt sie), sonst Ersatz mit Grundlinienversatz
+   * und 60 % Schriftgröße. pos: 'sups' | 'subs' | '' (normal)
+   */
+  textPosition(pos, has) {
+    const te = this.textEd, sel = te && te.range[0] !== te.range[1];
+    const patch = { sups: pos === 'sups' && has ? 1 : null, subs: pos === 'subs' && has ? 1 : null };
+    const fake = pos && !has ? { 'baseline-shift': pos === 'sups' ? 'super' : 'sub', 'font-size': '60%' } : { 'baseline-shift': null };
+    if (sel) {
+      const base = getProp(te.el, 'font-feature-settings', false);
+      te.model = mapRange(te.model, te.range[0], te.range[1], s => {
+        const o = parseFeatures(s['font-feature-settings'] ?? base);
+        for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; }
+        const n = { ...s, 'font-feature-settings': fmtFeatures(o) || null, ...fake };
+        if (!pos || has) { if (/%$/.test(n['font-size'] || '')) delete n['font-size']; delete n['baseline-shift']; }
+        for (const k of Object.keys(n)) if (n[k] === null) delete n[k];
+        return n;
+      });
+      te.dirty = true; te.relayout(); te.ta.setSelectionRange(...te.range); this.draw(); this.panels.refresh();
+      return;
+    }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    for (const el of list) {
+      const o = parseFeatures(getProp(el, 'font-feature-settings', false));
+      for (const [k, v] of Object.entries(patch)) { if (v === null) delete o[k]; else o[k] = v; }
+      setProp(el, 'font-feature-settings', fmtFeatures(o) || null);
+      // ganzer Text: Ersatz über die Läufe (ein Grundlinienversatz am Text selbst verschöbe nur alles)
+      const m = readText(el);
+      const all = mapRange(m, 0, Infinity, s => {
+        const n = { ...s, ...fake };
+        if (!pos || has) { if (/%$/.test(n['font-size'] || '')) delete n['font-size']; delete n['baseline-shift']; }
+        for (const k of Object.keys(n)) if (n[k] === null) delete n[k];
+        return n;
+      });
+      layoutText(el, all);
+    }
+    if (te) { te.model = readText(te.el); te.dirty = true; te.before = null; te.relayout(); this.draw(); this.panels.refresh(); return; }
+    this.commit(t('Position geändert'));
+  }
+
+  /** Horizontal/vertikal skalieren (Prozent) – als Skalierung des Textes um seinen Ankerpunkt (data-ge-sx/-sy merken den Wert) */
+  textScale(axis, pct) {
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    for (const el of list) {
+      const a = axis === 'x' ? 'data-ge-sx' : 'data-ge-sy';
+      const old = (parseFloat(el.getAttribute(a)) || 100) / 100, nw = Math.max(1, Math.min(1000, pct || 100)) / 100;
+      if (Math.abs(old - nw) < 1e-6) continue;
+      const x = parseFloat((el.getAttribute('x') || '0').split(/[\s,]+/)[0]) || 0, y = parseFloat((el.getAttribute('y') || '0').split(/[\s,]+/)[0]) || 0;
+      const k = nw / old;
+      const M = (el.transform?.baseVal?.consolidate()?.matrix ? DOMMatrix.fromMatrix(el.transform.baseVal.consolidate().matrix) : new DOMMatrix())
+        .multiply(new DOMMatrix().translate(x, y).scale(axis === 'x' ? k : 1, axis === 'y' ? k : 1).translate(-x, -y));
+      // SVGMatrix rechnet mit 32 Bit: auf 6 Stellen runden, damit 100 % wieder ohne Transformation endet
+      for (const k2 of ['a', 'b', 'c', 'd']) M[k2] = Math.round(M[k2] * 1e6) / 1e6;
+      for (const k2 of ['e', 'f']) M[k2] = Math.round(M[k2] * 1e3) / 1e3 || 0;
+      const f = fmtMatrix(M);
+      if (f) el.setAttribute('transform', f); else el.removeAttribute('transform');
+      if (Math.abs(nw - 1) < 1e-6) el.removeAttribute(a); else el.setAttribute(a, num(nw * 100, 2));
+    }
+    if (this.textEd) { this.textEd.dirty = true; this.textEd.before = null; this.textEd.place(); this.draw(); this.panels.refresh(); return; }
+    this.commit(axis === 'x' ? t('Horizontal skaliert') : t('Vertikal skaliert'));
   }
 
   /** Groß-/Kleinschreibung als echte Zeichen (während der Bearbeitung: Auswahl, sonst ganze Texte) */
@@ -1572,6 +1854,79 @@ export class GraphicEditor {
     this.commit(t('Vom Pfad gelöst'));
   }
 
+  /**
+   * Vorschau einer Schrift (Schriftauswahl: Zeiger oder Pfeile auf einer Schrift) – wirkt sofort auf die markierten Zeichen
+   * bzw. die ausgewählten Texte, ohne Schritt im Protokoll. null = zurücknehmen. Übernehmen geht danach über textProp().
+   */
+  textPreview(props) {
+    const te = this.textEd;
+    const texts = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (!this._preview) {
+      if (!props) return;
+      this._preview = te && te.range[0] !== te.range[1]
+        ? { te, model: te.model, range: te.range }
+        : { els: texts.map(el => ({ el, attrs: [...el.attributes].map(a => [a.name, a.value, a.namespaceURI]), kids: [...el.childNodes].map(n => n.cloneNode(true)) })) };
+    }
+    const pv = this._preview;
+    // erst zurück auf den Stand vor der Vorschau
+    if (pv.te) { pv.te.model = pv.model; }
+    else for (const s of pv.els) {
+      const el = s.el;
+      for (const a of [...el.attributes]) el.removeAttributeNS(a.namespaceURI, a.localName);
+      for (const [n, v, ns] of s.attrs) ns ? el.setAttributeNS(ns, n, v) : el.setAttribute(n, v);
+      while (el.firstChild) el.firstChild.remove();
+      for (const k of s.kids) el.append(k.cloneNode(true));
+    }
+    if (!props) {
+      if (pv.te) pv.te.relayout(); else this.textEd?.relayout();
+      this._preview = null;
+      this.draw();
+      return;
+    }
+    if (pv.te) { pv.te.model = styleRange(pv.model, pv.range[0], pv.range[1], props); pv.te.relayout(); }
+    else for (const s of pv.els) {
+      for (const [k, v] of Object.entries(props)) {
+        setProp(s.el, k, v);
+        for (const r of s.el.querySelectorAll('tspan')) { r.removeAttribute(k); r.style?.removeProperty(k); }
+      }
+      if (s.el.hasAttribute('data-ge-frame') || s.el.querySelector('tspan[dy]')) this.retext(s.el);
+    }
+    this.draw();
+  }
+
+  /** Mehrere Zeichen-Eigenschaften als ein Schritt (Schriftauswahl: Familie + Schnitt) */
+  textProps(props) {
+    if (this._preview) this.textPreview(null);
+    const te = this.textEd;
+    if (te && te.range[0] !== te.range[1]) { te.format(props); this.panels.refresh(); return; }
+    const list = this.textEl ? [this.textEl] : this.sel.filter(el => el.localName === 'text');
+    if (props['font-family']) this.opt.fontFamily = props['font-family'];
+    if ('font-weight' in props) this.opt.fontWeight = props['font-weight'] || '400';
+    if (!list.length) { this.renderCtx(true); this.panels.refresh(); return; }
+    for (const el of list) {
+      for (const [k, v] of Object.entries(props)) {
+        setProp(el, k, v);
+        for (const r of el.querySelectorAll('tspan')) { r.removeAttribute(k); r.style?.removeProperty(k); if (r.getAttribute('style') === '') r.removeAttribute('style'); }
+      }
+      if (el.hasAttribute('data-ge-frame') || el.querySelector('tspan[dy]')) this.retext(el);
+    }
+    if (te) { te.dirty = true; te.before = null; this.draw(); this.panels.refresh(); this.renderCtx(true); return; }
+    this.commit(t('Schrift geändert'));
+  }
+
+  /** Persönliche Einstellung merken (Core\UiPrefs) – sofort im Editor, gespeichert gebündelt */
+  setPref(key, value) {
+    this.prefs[key] = value;
+    if (!this.boot.urls?.prefs) return;
+    clearTimeout(this._prefT?.[key]);
+    (this._prefT ||= {})[key] = setTimeout(() => {
+      fetch(this.boot.urls.prefs, { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-Token': csrf() }, body: JSON.stringify({ key, value }) }).catch(() => {});
+    }, 300);
+  }
+
+  /** Kurze Meldung für Bildschirmleser (Statuszeile, aria-live) */
+  announce(msg) { this.hint(msg); clearTimeout(this._annT); this._annT = setTimeout(() => this.hint(), 4000); }
+
   /** Raster ein/aus (zeigen und einrasten) */
   toggleGrid() { this.opt.grid = !this.opt.grid; this.snapCache = null; this.renderCtx(true); this.draw(); }
 
@@ -1612,6 +1967,17 @@ export class GraphicEditor {
     if (!this.sel.length) return;
     const off = this.format === 'icon' ? 1 : 10;
     const clones = this.sel.map(el => { const c = el.cloneNode(true); el.after(c); this.freshIds(c); applyTransform(c, new DOMMatrix().translate(off, off), this.root); return c; });
+    // Text in einer Form: Kopie gehört zur Kopie der Form
+    this.sel.forEach((el, i) => {
+      if (!el.id || isConn(el)) return;
+      const inner = this.root.querySelector(`text[data-ge-in="${CSS.escape(el.id)}"]`);
+      if (!inner || this.sel.includes(inner)) return;
+      if (!clones[i].id) clones[i].id = uid(this.root, 'form-');
+      const ti = inner.cloneNode(true);
+      ti.removeAttribute('id');
+      ti.setAttribute('data-ge-in', clones[i].id);
+      clones[i].after(ti);
+    });
     this.sel = clones;
     this.commit(t('Dupliziert'));
   }
@@ -1620,6 +1986,11 @@ export class GraphicEditor {
     if (this.tool === 'node' && this.nodeSel.size) return this.deleteNodes();
     const list = this.sel.filter(el => !isLocked(el));
     if (!list.length) return;
+    // mit dem Verbinder seine Beschriftung, mit der Form ihr Text (Verbinder an der Form werden an ihrer Stelle gelöst)
+    for (const el of list) for (const n of [el, ...el.querySelectorAll('[id]')]) {
+      if (!n.id) continue;
+      for (const t2 of this.root.querySelectorAll(`text[data-ge-for="${CSS.escape(n.id)}"], text[data-ge-in="${CSS.escape(n.id)}"]`)) if (!list.includes(t2)) t2.remove();
+    }
     list.forEach(el => el.remove());
     this.sel = [];
     this.commit(t('Gelöscht'));
@@ -1921,13 +2292,35 @@ export class GraphicEditor {
     if (this.tool === 'pencil') html += `<label class="ge-ctx__f">${esc(t('Glättung'))} <input type="range" data-opt="smooth" min="0" max="1" step="0.05" value="${o.smooth}"></label>`;
     if (this.tool === 'text' || (n === 1 && this.sel[0].localName === 'text')) {
       const el = n === 1 && this.sel[0].localName === 'text' ? this.sel[0] : null;
-      const ff = el ? getProp(el, 'font-family').replace(/["']/g, '') : o.fontFamily, fs = el ? parseFloat(getProp(el, 'font-size')) : o.fontSize;
+      const fs = el ? parseFloat(getProp(el, 'font-size')) : o.fontSize;
       const fw = el ? getProp(el, 'font-weight') : o.fontWeight, an = el ? (getProp(el, 'text-anchor') || 'start') : o.anchor;
-      const fonts = [...new Set([ff, ...(this.boot.fonts || [])])].filter(Boolean);
-      html += `<label class="ge-ctx__f">${esc(t('Schrift'))} <select class="ge-in" data-text="font-family">${fonts.map(f => `<option${f === ff ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select></label>`
+      html += `<span class="ge-ctx__f"><span aria-hidden="true">${esc(t('Schrift'))}</span><span data-fpslot></span></span>`
         + `<label class="ge-ctx__f">${esc(t('Größe'))} <input type="number" class="ge-in ge-in--s" data-text="font-size" value="${esc(num(fs || 16, 2))}" min="1" max="2000" step="1"></label>`
-        + `<label class="ge-ctx__f">${esc(t('Stärke'))} <select class="ge-in" data-text="font-weight">${[['300', t('Leicht')], ['400', t('Normal')], ['700', t('Fett')], ['900', t('Schwarz')]].map(([v, l]) => `<option value="${v}"${String(fw) === v || (fw === 'bold' && v === '700') || (fw === 'normal' && v === '400') ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`
+        + (() => {
+          // Stärken, die die Schrift hat (variable Schriften: Bereich der Achse), dazu die aktuelle
+          const it = itemFor(this.fontItems ||= fontItems(this.boot), el ? getProp(el, 'font-family') : o.fontFamily);
+          const cur = fw === 'bold' ? 700 : fw === 'normal' || !fw ? 400 : parseInt(fw, 10) || 400;
+          const ws = [...new Set([...(it ? it.styles.map(s => s.w) : [300, 400, 700, 900]), cur])].sort((a, b) => a - b);
+          return `<label class="ge-ctx__f">${esc(t('Stärke'))} <select class="ge-in" data-text="font-weight">${ws.map(w => `<option value="${w}"${w === cur ? ' selected' : ''}>${esc(WEIGHTS[w]?.() || String(w))}</option>`).join('')}</select></label>`;
+        })()
         + `<span class="ge-seg" role="group" aria-label="${esc(t('Ausrichtung'))}">${[['start', 'align-left', t('Links')], ['middle', 'align-center-horizontal', t('Mitte')], ['end', 'align-right', t('Rechts')]].map(([v, i, l]) => `<button type="button" class="ge-ib" data-text-anchor="${v}" aria-pressed="${an === v}" aria-label="${esc(l)}" title="${esc(l)}">${ico(i)}</button>`).join('')}</span>`;
+    }
+    // Verbinder: Art, Spitzen, Größe, Beschriftung (Werkzeug aktiv oder Verbinder ausgewählt)
+    const conns = this.sel.filter(isConn);
+    if (this.tool === 'connector' || (n && conns.length === n)) {
+      const co = conns.length ? parseConn(conns[0]) : { r: o.connRoute, hs: o.connStart, he: o.connEnd, s: o.connSize };
+      const headOpts = cur => [['none', t('Keine')], ['arrow', t('Pfeil')], ['triangle', t('Dreieck')], ['open', t('Dreieck offen')], ['circle', t('Kreis')], ['diamond', t('Raute')], ['bar', t('Strich')]]
+        .map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`).join('');
+      html += `<span class="ge-seg" role="radiogroup" aria-label="${esc(t('Verlauf des Verbinders'))}">${[['straight', 'line-segment', t('Gerade')], ['ortho', 'arrow-elbow-right-down', t('Rechtwinklig')], ['curve', 'bezier-curve', t('Gebogen')]]
+        .map(([v, i, l]) => `<button type="button" class="ge-ib" role="radio" data-conn-r="${v}" aria-checked="${co.r === v}" aria-label="${esc(l)}" title="${esc(l)}">${ico(i)}</button>`).join('')}</span>`
+        + `<label class="ge-ctx__f">${esc(t('Anfang'))} <select class="ge-in" data-conn-h="hs">${headOpts(co.hs)}</select></label>`
+        + `<label class="ge-ctx__f">${esc(t('Ende'))} <select class="ge-in" data-conn-h="he">${headOpts(co.he)}</select></label>`
+        + `<label class="ge-ctx__f">${esc(t('Spitzengröße'))} <input type="number" class="ge-in ge-in--s" data-conn-s value="${esc(num(co.s, 1))}" min="1" max="20" step="0.5"></label>`
+        + (conns.length === 1 ? `<button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-cmd="connlabel">${ico('text-t')} ${esc(t('Beschriftung'))}</button>` : '');
+    }
+    // Baum anordnen: eine Form, an der Verbinder hängen
+    if (n === 1 && !isConn(this.sel[0]) && this.sel[0].id && this.root.querySelector(`path[data-ge-conn*="a=${CSS.escape(this.sel[0].id)}@"]`)) {
+      html += `<span class="ge-seg" role="group" aria-label="${esc(t('Baum anordnen'))}">${iconBtn('tree-structure', t('Baum anordnen (von oben nach unten)'), 'data-cmd="treedown"')}${iconBtn('arrow-elbow-right-down', t('Baum anordnen (von links nach rechts)'), 'data-cmd="treeright"')}</span>`;
     }
     if (n && this.tool === 'select') {
       html += `<span class="ge-ctx__sep"></span><span class="ge-seg" role="group" aria-label="${esc(t('Ausrichten'))}">`
@@ -1972,9 +2365,19 @@ export class GraphicEditor {
     }
     html += `<span class="ge-ctx__grow"></span>${chk('snap', t('Einrasten'))}${chk('grid', t('Raster'))}
       <button type="button" class="adm-btn adm-btn--small adm-btn--ghost" data-act="docset">${ico('sliders-horizontal')} ${esc(t('Dokument …'))}</button>`;
+    // Schriftauswahl (eigene Komponente, bleibt über Neuaufbauten erhalten)
+    const fpVal = this.tool === 'text' || (n === 1 && this.sel[0].localName === 'text') ? (n === 1 && this.sel[0].localName === 'text' ? getProp(this.sel[0], 'font-family') : o.fontFamily) : null;
+    if (fpVal !== null) {
+      this.ctxFp ||= fontPicker(this, { compact: true, label: t('Schrift'), prefs: () => this.prefs, setPref: (k, v) => this.setPref(k, v),
+        onPreview: p => this.textPreview(p), onPick: p => this.textProps(p) });
+      this.ctxFp.set(fpVal);
+    }
     if (ctx._html === html) return;   // unverändert: nicht neu aufbauen (Symbole flackern sonst)
     ctx._html = html;
+    this.ctxFp?.close(true);
     ctx.innerHTML = html;
+    const slot = ctx.querySelector('[data-fpslot]');
+    if (slot && this.ctxFp) slot.replaceWith(this.ctxFp.el);
     function chk2(k, label, on) { return `<label class="ge-ctx__f ge-ctx__chk"><input type="checkbox" data-arrow="${k}"${on ? ' checked' : ''}> ${esc(label)}</label>`; }
     ctx.querySelectorAll('[data-opt]').forEach(i => i.addEventListener('change', () => {
       const k = i.dataset.opt;
@@ -1983,9 +2386,10 @@ export class GraphicEditor {
     }));
     ctx.querySelectorAll('[data-text]').forEach(i => i.addEventListener('change', () => {
       const a = i.dataset.text, v = i.value;
-      if (a === 'font-family') o.fontFamily = v; if (a === 'font-size') o.fontSize = +v; if (a === 'font-weight') o.fontWeight = v;
-      const el = this.sel.length === 1 && this.sel[0].localName === 'text' ? this.sel[0] : null;
-      if (el) { setProp(el, a, a === 'font-size' ? num(+v) : v); this.commit(t('Schrift geändert')); }
+      if (a === 'font-size') o.fontSize = +v; if (a === 'font-weight') o.fontWeight = v;
+      // wie im Bereich Zeichen: während der Bearbeitung nur für die markierten Zeichen
+      if (a === 'font-size') this.textProp('font-size', num(Math.max(1, +v), 2));
+      else this.textProp('font-weight', v === '400' ? null : v);
     }));
     ctx.querySelectorAll('[data-text-anchor]').forEach(b => b.addEventListener('click', () => {
       o.anchor = b.dataset.textAnchor;
@@ -2024,6 +2428,12 @@ export class GraphicEditor {
     ctx.querySelector('[data-cmd=compedit]')?.addEventListener('click', () => this.editCompound(this.sel[0]));
     ctx.querySelector('[data-cmd=compflat]')?.addEventListener('click', () => this.compoundSet(this.sel[0], 'flatten'));
     ctx.querySelector('[data-act=docset]').addEventListener('click', () => this.docSettings());
+    ctx.querySelectorAll('[data-conn-r]').forEach(b => b.addEventListener('click', () => this.connSet({ r: b.dataset.connR })));
+    ctx.querySelectorAll('[data-conn-h]').forEach(s => s.addEventListener('change', () => this.connSet({ [s.dataset.connH]: s.value })));
+    ctx.querySelector('[data-conn-s]')?.addEventListener('change', e => this.connSet({ s: Math.max(1, Math.min(20, +e.target.value || 4)) }));
+    ctx.querySelector('[data-cmd=connlabel]')?.addEventListener('click', () => this.connLabel(this.sel[0]));
+    ctx.querySelector('[data-cmd=treedown]')?.addEventListener('click', () => this.arrangeTree('down'));
+    ctx.querySelector('[data-cmd=treeright]')?.addEventListener('click', () => this.arrangeTree('right'));
   }
 
   // ================================================================= Kopfzeile: Speichern, Export, Zoom
@@ -2212,13 +2622,23 @@ export class GraphicEditor {
           <label class="f">${esc(t('Unterteilungen'))}<input type="number" name="gsub" min="1" max="20" step="1" value="${esc(readGrid(this.root, f).sub)}"></label></div>
         <label class="f">${esc(t('Titel in der Grafik'))}<input name="title" maxlength="180" value="${esc(title)}"><span class="f-help">${esc(t('Wird als <title> gespeichert – Screenreader lesen ihn, wenn die Grafik direkt eingebunden ist.'))}</span></label>
         <label class="f">${esc(t('Beschreibung in der Grafik'))}<textarea name="desc" rows="3" maxlength="1000">${esc(desc)}</textarea><span class="f-help">${esc(t('Ausführlicher Text für Infografiken (<desc>). Texte in der Grafik bleiben Text.'))}</span></label>
+        ${this.root.querySelector('path[data-ge-conn]') ? `<button type="button" class="adm-btn adm-btn--small" data-flowdesc>${ico('flow-arrow')} ${esc(t('Ablauf des Diagramms als Beschreibung einfügen'))}</button>` : ''}
         ${vers.length ? `<h3 class="ge-modal__h3">${esc(t('Frühere Fassungen'))}</h3><ul class="ge-versions">${vers.map(v => `<li><span>${esc(new Date(v.created_at.replace(' ', 'T')).toLocaleString())}</span><button type="button" class="adm-btn adm-btn--small" data-ver="${v.id}">${esc(t('Laden'))}</button></li>`).join('')}</ul>` : ''}`,
-      onOpen: (d, finish) => d.querySelectorAll('[data-ver]').forEach(b => b.addEventListener('click', async () => {
+      onOpen: (d, finish) => {
+        // Lesereihenfolge der Verbinder (connect.js describe) – für Bildschirmleser, die die Grafik nicht sehen
+        d.querySelector('[data-flowdesc]')?.addEventListener('click', () => {
+          const ta = d.querySelector('[name=desc]');
+          const flow = this.conn.describe();
+          ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + t('Ablauf:') + '\n' + flow;
+          ta.focus();
+        });
+        d.querySelectorAll('[data-ver]').forEach(b => b.addEventListener('click', async () => {
         const res = await this.api('GET', this.boot.urls.version + '?ref=' + encodeURIComponent(this.doc.ref) + '&id=' + b.dataset.ver);
         if (!res?.ok) return;
         finish(null);
         this.load(res.svg); this.commit(t('Frühere Fassung geladen'));
-      })),
+      }));
+      },
     });
     if (!r) return;
     if (f === 'info') {

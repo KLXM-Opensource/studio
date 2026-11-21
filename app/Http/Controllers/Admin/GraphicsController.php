@@ -114,23 +114,32 @@ final class GraphicsController extends AdminController
             'formatLabels' => Graphics::formatLabels(),
             'library' => Library::forEditor(),
             'libraryGroups' => Library::groups(),
-            'parts' => array_map(fn($p) => $p + ['svg' => (string) (Graphics::find((int) $p['id'])['svg'] ?? '')], Graphics::all('part')),
+            'parts' => Graphics::partsForEditor(),
+            // Bausteine für alle Websites der Installation (Netzwerk-Datenbank), Löschen mit Recht „Dateien löschen“
+            'sharedParts' => Graphics::canKind('part') ? \Core\Graphics\Shared::all() : [],
+            'canDeleteParts' => can('media.delete'),
             // eigene Bausteine speichern (Bibliothek der Website) nur mit Recht „blocks.build“
             'canParts' => Graphics::canKind('part'),
             'swatches' => Graphics::swatches(),
             'fonts' => Graphics::fonts(),
             'fontFiles' => Graphics::fontFiles(),
             // Bibliotheken auf Abruf (nur beim ersten Gebrauch): Geometrie, Text in Kurven, PDF-Export
-            'modules' => ['paper' => asset('js/grafik-paper.mjs'), 'fonts' => asset('js/grafik-fonts.mjs'), 'pdf' => asset('js/grafik-pdf.mjs')],
+            'modules' => ['paper' => asset('js/grafik-paper.mjs'), 'fonts' => asset('js/grafik-fonts.mjs'), 'pdf' => asset('js/grafik-pdf.mjs'),
+                // Silbentrennung in Textrahmen (Trennmuster je Sprache)
+                'hyphen' => ['de' => asset('js/grafik-hyph-de.mjs'), 'en' => asset('js/grafik-hyph-en.mjs')]],
             'blocks' => Graphics::blockTypes(),
             'icons' => url('/assets/icons/catalog.json'),
             'urls' => [
                 'save' => url('/admin/api/grafik/save'), 'part' => url('/admin/api/grafik/part'), 'version' => url('/admin/api/grafik/version'),
                 'clean' => url('/admin/api/grafik/clean'),
                 'delete' => url('/admin/api/grafik/{id}/delete'), 'media' => url('/admin/media'), 'store' => url('/admin/grafik'),
-                'page' => url('/admin/grafik/editor'),
+                'page' => url('/admin/grafik/editor'), 'prefs' => url('/admin/api/grafik/prefs'), 'styles' => url('/admin/api/grafik/styles'), 'partUpdate' => url('/admin/api/grafik/part/update'), 'partsImport' => url('/admin/api/grafik/parts/import'),
             ],
             'canMediaSvg' => \Core\Features::on('media.svg', false),
+            // persönlich (Core\UiPrefs „grafik“): Schrift-Favoriten, zuletzt verwendete Schriften, Farbmodus
+            'prefs' => Graphics::prefs(app()->auth->user()),
+            // Formatvorlagen für Text aus der Bibliothek der Website
+            'textStyles' => Graphics::textStyles(),
         ];
     }
 
@@ -185,17 +194,82 @@ final class GraphicsController extends AdminController
         }
     }
 
+    /** Persönliche Einstellung des Editors (Schrift-Favoriten, zuletzt verwendet, Farbmodus): POST {key, value(JSON)} */
+    public function prefs(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        $user = app()->auth->user();
+        if (!$user) return Response::fail(__('Nicht angemeldet.'), 403);
+        // JSON-Anfrage: Liste bzw. Text direkt; Formular: JSON-Text
+        $value = $r->post['value'] ?? null;
+        if (is_string($value) && ($value[0] ?? '') === '[') $value = json_decode($value, true);
+        try {
+            return Response::json(['ok' => true, 'prefs' => Graphics::setPref((int) $user['id'], (string) ($r->post['key'] ?? ''), $value)]);
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+    }
+
+    /** Formatvorlagen für Text in der Bibliothek der Website speichern (Recht wie eigene Bausteine): POST {styles: {p, c}} */
+    public function styles(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'part')) return $deny;
+        return Response::json(['ok' => true, 'styles' => Graphics::saveTextStyles($r->post['styles'] ?? [])]);
+    }
+
     /** Eigenen Baustein speichern: POST {svg, name} */
     public function part(Request $r): Response
     {
         $this->auth($r, 'media.upload');
         if ($deny = $this->needKind($r, 'part')) return $deny;
+        // scope: site (diese Website) | network (alle Websites der Installation); id = ersetzen (Durch Auswahl ersetzen)
+        $scope = (string) ($r->post['scope'] ?? 'site');
+        $id = (int) ($r->post['id'] ?? 0) ?: null;
+        $folder = (string) ($r->post['folder'] ?? '');
         try {
-            $item = Graphics::store('part', (string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''));
+            if ($scope === 'network') {
+                return Response::json(['ok' => true, 'item' => \Core\Graphics\Shared::store((string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''), $folder, $id) + ['scope' => 'network']]);
+            }
+            if ($id && (Graphics::find($id)['kind'] ?? '') !== 'part') return Response::fail(__('Baustein nicht gefunden.'), 404);
+            $item = Graphics::store('part', (string) ($r->post['name'] ?? ''), (string) ($r->post['svg'] ?? ''), $id);
+            if (isset($r->post['folder']) || !$id) Graphics::updatePart($item['id'], null, $folder);
         } catch (\RuntimeException $e) {
             return Response::fail($e->getMessage());
         }
-        return Response::json(['ok' => true, 'item' => $item + ['svg' => (string) (Graphics::find($item['id'])['svg'] ?? '')]]);
+        $g = (array) Graphics::find($item['id']);
+        return Response::json(['ok' => true, 'item' => $item + ['svg' => (string) ($g['svg'] ?? ''), 'folder' => (string) ($g['folder'] ?? ''), 'scope' => 'site']]);
+    }
+
+    /** Baustein umbenennen, in einen Ordner legen oder löschen: POST {id, scope, action: update|delete, name?, folder?} */
+    public function partUpdate(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'part')) return $deny;
+        $id = (int) ($r->post['id'] ?? 0);
+        $net = ($r->post['scope'] ?? 'site') === 'network';
+        if (($r->post['action'] ?? '') === 'delete') {
+            if (!can('media.delete')) return Response::fail(__('Für diese Grafik fehlt Ihrer Rolle die Berechtigung.'), 403);
+            $ok = $net ? \Core\Graphics\Shared::delete($id) : ((Graphics::find($id)['kind'] ?? '') === 'part' && Graphics::delete($id));
+            return $ok ? Response::json(['ok' => true]) : Response::fail(__('Baustein nicht gefunden.'), 404);
+        }
+        $name = isset($r->post['name']) ? (string) $r->post['name'] : null;
+        $folder = isset($r->post['folder']) ? (string) $r->post['folder'] : null;
+        $ok = $net ? \Core\Graphics\Shared::update($id, $name, $folder) : Graphics::updatePart($id, $name, $folder);
+        return $ok ? Response::json(['ok' => true]) : Response::fail(__('Baustein nicht gefunden.'), 404);
+    }
+
+    /** Bausteine aus einer Austauschdatei übernehmen: POST {data: {format, version, items}, scope} */
+    public function partsImport(Request $r): Response
+    {
+        $this->auth($r, 'media.upload');
+        if ($deny = $this->needKind($r, 'part')) return $deny;
+        try {
+            [$items, $skipped] = Graphics::importParts($r->post['data'] ?? null, (string) ($r->post['scope'] ?? 'site'));
+        } catch (\RuntimeException $e) {
+            return Response::fail($e->getMessage());
+        }
+        return Response::json(['ok' => true, 'items' => $items, 'skipped' => $skipped]);
     }
 
     /** Grafik der eigenen Ablage löschen (Recht „Dateien löschen“) */

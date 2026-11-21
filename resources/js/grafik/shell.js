@@ -104,6 +104,7 @@ export function mountPage() {
       history.replaceState(null, '', u);
     },
   });
+  window.CMSGraphicEditor.page = ed;   // Instanz der eigenen Seite (Erweiterungen, Tests)
   const back = boot.doc.target === 'graphics' ? boot.urls.store : boot.urls.media;
   ed.el.querySelector('[data-shellbtns]').innerHTML = `<a class="adm-btn adm-btn--small adm-btn--ghost" href="${esc(back)}" data-back>${ico('x')} ${esc(t('Schließen'))}</a>`;
   ed.el.querySelector('[data-back]').addEventListener('click', async e => {

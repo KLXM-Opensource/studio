@@ -78,6 +78,8 @@ const REQUIRED_FILES = [
   'public/assets/vendor/grafik/THIRD-PARTY-LICENSES-fontkit.txt',
   'public/assets/vendor/grafik/LICENSE-jspdf.txt',
   'public/assets/vendor/grafik/LICENSE-svg2pdf.txt',
+  'public/assets/vendor/grafik/LICENSE-hyphen.txt',
+  'public/assets/vendor/grafik/LICENSE-hyphen-patterns.txt',
   'public/assets/icons/LICENSE.txt',
 ];
 

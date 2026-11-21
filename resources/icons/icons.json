@@ -733,6 +733,31 @@
           "Pfeil runter",
           "Arrow down",
           "nach unten hinten"
+        ],
+        "text-align-justify": [
+          "Blocksatz",
+          "Justify",
+          "text ausrichtung absatz"
+        ],
+        "flow-arrow": [
+          "Verbinder",
+          "Connector",
+          "pfeil diagramm fluss verbindung"
+        ],
+        "arrow-elbow-right-down": [
+          "Rechtwinklig",
+          "Elbow",
+          "winkel pfeil verbinder"
+        ],
+        "line-segments": [
+          "Linienzug",
+          "Polyline",
+          "linie strecke verbinder"
+        ],
+        "folder-star": [
+          "Favoriten-Ordner",
+          "Favourite folder",
+          "ordner stern favorit"
         ]
       }
     },

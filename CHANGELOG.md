@@ -19,6 +19,26 @@ und im Handbuch für die Redaktion (`/admin/hilfe`).
 ### Karte folgt der Wahl Hell/Dunkel der Website
 - Karten (`resources/js/map.mjs`) nehmen den dunklen Stil jetzt, wenn die Website an der Stelle der Karte tatsächlich dunkel ist – auch bei Hell/Dunkel-Schalter, Darstellungs-Knopf und dunklen Abschnitten. Vorher zählte nur die Einstellung des Geräts: Gerät dunkel und Website hell ergab eine dunkle Karte auf heller Seite. Erkennung wie bei den Diagrammen (helle Schrift = dunkler Grund), Wechsel ohne Neuladen. Gilt für alle Kits.
 
+### Grafik-Editor: Schrift, Typografie, Farbmodelle, Diagramme und Bibliothek (Ausbaustufe 3a)
+
+- **Schriftauswahl mit Vorschau** im Bereich Zeichen und in der Kontextleiste: jede Schrift im eigenen Schriftbild, Filtern beim Tippen,
+  Abschnitte Zuletzt verwendet, Favoriten (je Konto), Schriften der Website, Systemschriften; Schnitte mit Vorschau; Live-Vorschau am Text
+  (Esc nimmt zurück); vollständig per Tastatur (WAI-ARIA Combobox). Variable Schriften: Regler für alle Achsen aus der Datei.
+- **Farbmodelle** Hex, RGB, HSL, HSB, OKLCH mit Reglern und Zahlen je Kanal, beliebige CSS-Farbangaben im Farbfeld, Modus je Konto,
+  Kontrast zum Hintergrund (WCAG) bei Text. Gespeichert wird weiter Hex. Andockstelle für Design-Farben als Variablen (Token am Element).
+- **Typografie:** Reiter OpenType (Ligaturen, Kapitälchen, Ziffern, Brüche, Null mit Schrägstrich, Hoch-/Tiefstellen, Stilsätze und
+  Zeichenvarianten – nur, was die Schrift kann), Blocksatz und **Silbentrennung Deutsch/Englisch** im Textrahmen, Wortabstand, Abstand
+  vor/nach Absätzen, Einzüge, Grundlinienversatz, horizontal/vertikal skalieren, Pfeil hoch/runter über umbrochene Zeilen.
+  „In Kurven umwandeln“ übernimmt alle Merkmale. **Absatz- und Zeichenvorlagen** (in der Grafik und in der Bibliothek der Website).
+- **Diagramme:** Werkzeug Verbinder (C) – Enden haften an Ankerpunkten und folgen beim Verschieben/Skalieren; gerade, rechtwinklig
+  (Knick verschiebbar), gebogen; Pfeilspitzen je Ende; Beschriftung; Text in Formen (zentriert, umbrochen). Bibliothek Flussdiagramm,
+  Organigramm (Baum anordnen), Hinweise und Pfeile; Ablauf als Beschreibung (<desc>).
+- **Bibliothek:** Ordner, Favoriten, Umbenennen, Durch Auswahl ersetzen, Löschen; Bausteine für alle Websites der Installation;
+  Austauschdatei (JSON, beim Einlesen bereinigt); Design-Farben (var(--token)) beim Einfügen.
+- Neue Abhängigkeit **hyphen** 1.14 (ISC) mit TeX-Trennmustern de-1996 (MIT) und en-us (frei mit Hinweis), nur auf Abruf
+  (`grafik-hyph-de.mjs`, `grafik-hyph-en.mjs`) – einmal `pnpm install` in `tools/`. Spalte `graphics.folder`, Tabelle `graphic_shared`
+  (Netzwerk-Datenbank), additiv. `grafik:selftest` erweitert. Handbuch und Entwicklerhandbuch → Medien → Grafik-Editor.
+
 ### Grafik-Editor: Formen kombinieren, Text-Werkzeuge, Lineale, Masken, Export (Ausbaustufe 2)
 - **Formen kombinieren** direkt auf den Bézierkurven (Paper.js, MIT, nachgeladen): Vereinen, **Abziehen/Ausstanzen** – auch mit
   Text als Stanze (Löcher zeigen den Hintergrund) –, Schnittmenge, Ausschluss, Teilen; **zusammengesetzte Form** (Originale bleiben

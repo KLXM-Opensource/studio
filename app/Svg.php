@@ -431,6 +431,11 @@ final class Svg
             }
             // Editor-Daten der Arbeitsfassung (nur mit 'editor'): kurze Werte ohne Markup und ohne url(…)
             if ($this->editor && ($name === 'data-locked' || preg_match('~^data-ge-[a-z]{1,20}$~', $name))) {
+                // Formatvorlagen der Grafik (data-ge-styles): nur Base64, bis 20 000 Zeichen – sonst verworfen
+                if ($name === 'data-ge-styles') {
+                    if (strlen($v) <= 20000 && preg_match('~^[A-Za-z0-9+/=]+$~', $v)) $dst->setAttribute($name, $v);
+                    continue;
+                }
                 $v = mb_substr(trim((string) preg_replace('~[\x00-\x1f<>"]+~', ' ', $v)), 0, 4000);
                 if ($v !== '' && !$this->dangerous($v) && !str_contains($v, 'url(')) $dst->setAttribute($name, $v);
                 continue;
