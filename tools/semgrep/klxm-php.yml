@@ -1,0 +1,178 @@
+# Semgrep-Regeln für die festen Projektregeln von KLXM Studio (AGENTS.md → Sicherheit, Erweiterungen).
+# Lauf (aus dem Projektordner, ohne Konto, ohne Metriken):
+#   docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.184.0 semgrep scan --config tools/semgrep/ --metrics=off --error
+# Fehlalarm an einer Stelle: Kommentar `// nosemgrep: <regel-id> – Begründung` an die Zeile; ganze Dateien über paths.exclude.
+rules:
+  # ---------------------------------------------------------------- E-Mail nur über Core\Mailer
+  - id: klxm-mail-only-core-mailer
+    languages: [php]
+    severity: ERROR
+    message: >-
+      E-Mails nur über Core\Mailer::send (hängt das Impressum an, nutzt die Konten aus Core\Mail\Accounts) –
+      kein mail()/mb_send_mail() und keine eigenen Symfony-Transporte.
+    patterns:
+      - pattern-either:
+          - pattern: mail(...)
+          - pattern: mb_send_mail(...)
+          - pattern: \Symfony\Component\Mailer\Transport::fromDsn(...)
+          - pattern: \Symfony\Component\Mailer\Transport::fromDsns(...)
+          - pattern: new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(...)
+          - pattern: new \Symfony\Component\Mailer\Transport\SendmailTransport(...)
+          - pattern: new \Symfony\Component\Mailer\Mailer(...)
+    paths:
+      exclude:
+        - /app/Mailer.php
+        - /app/Mail/
+        - "*/vendor/*"
+
+  # ---------------------------------------------------------------- HTTP nach außen nur über Core\Http\Fetch
+  - id: klxm-http-only-core-fetch
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Abrufe nach außen nur über Core\Http\Fetch (SSRF-Schutz: nur öffentliche Adressen, Größen- und Zeitgrenzen,
+      keine Weiterleitungen auf interne Hosts) – kein eigenes curl_*, file_get_contents/fopen mit URL oder Stream-Kontext für http.
+    pattern-either:
+      - pattern: curl_init(...)
+      - pattern: curl_multi_init(...)
+      - pattern: fsockopen(...)
+      - pattern: stream_socket_client(...)
+      - patterns:
+          - pattern-either:
+              - pattern: file_get_contents("$URL", ...)
+              - pattern: fopen("$URL", ...)
+              - pattern: file("$URL", ...)
+              - pattern: readfile("$URL", ...)
+              - pattern: copy("$URL", ...)
+              - pattern: getimagesize("$URL", ...)
+          - metavariable-regex:
+              metavariable: $URL
+              regex: (?i)^(https?|ftp)://
+      - patterns:
+          - pattern-either:
+              - pattern: file_get_contents("$URL" . $X, ...)
+              - pattern: fopen("$URL" . $X, ...)
+          - metavariable-regex:
+              metavariable: $URL
+              regex: (?i)^(https?|ftp)://
+      - pattern: stream_context_create([..., 'http' => $CTX, ...], ...)
+      - pattern: stream_context_create([..., 'https' => $CTX, ...], ...)
+    paths:
+      exclude:
+        - /app/Http/Fetch.php
+        - "*/vendor/*"
+
+  # ---------------------------------------------------------------- unsichere PHP-Funktionen
+  - id: klxm-no-eval
+    languages: [php]
+    severity: ERROR
+    message: eval() führt beliebigen Code aus – nicht verwenden.
+    pattern: eval(...)
+
+  - id: klxm-no-extract
+    languages: [php]
+    severity: ERROR
+    message: >-
+      extract() erzeugt Variablen aus Daten und kann bestehende überschreiben. Nur der Template-Renderer (Core\Theme::capture)
+      darf es – mit EXTR_SKIP und festen Schlüsseln aus dem Code.
+    pattern: extract(...)
+    paths:
+      exclude:
+        - "*/vendor/*"
+
+  - id: klxm-unserialize-allowed-classes
+    languages: [php]
+    severity: ERROR
+    message: >-
+      unserialize() ohne ['allowed_classes' => false] kann bei manipulierten Daten Objekte erzeugen (Object Injection).
+      Für Daten JSON verwenden; sonst allowed_classes setzen.
+    patterns:
+      - pattern: unserialize($X, ...)
+      - pattern-not: "unserialize($X, ['allowed_classes' => false])"
+      - pattern-not: "unserialize($X, ['allowed_classes' => [...]])"
+    paths:
+      exclude:
+        - "*/vendor/*"
+
+  - id: klxm-weak-password-hash
+    languages: [php]
+    severity: ERROR
+    message: >-
+      md5/sha1/crc32 sind für Passwörter ungeeignet – password_hash()/password_verify() verwenden
+      (für Tokens: hash('sha256', …) bzw. hash_hmac()).
+    patterns:
+      - pattern-either:
+          - pattern: md5($P, ...)
+          - pattern: sha1($P, ...)
+          - pattern: crc32($P)
+          - pattern: hash('md5', $P, ...)
+          - pattern: hash('sha1', $P, ...)
+      - metavariable-regex:
+          metavariable: $P
+          regex: (?i).*(pass|passwort|password|pwd|kennwort).*
+    paths:
+      exclude:
+        - "*/vendor/*"
+
+  - id: klxm-timing-safe-compare
+    languages: [php]
+    severity: WARNING
+    message: >-
+      Geheimnisse (Token, Signatur, HMAC, CSRF, Schlüssel) nie mit ==/=== vergleichen – die Laufzeit verrät, wie viele
+      Zeichen stimmen. hash_equals($erwartet, $eingabe) verwenden.
+    pattern-either:
+      - patterns:
+          - pattern-either:
+              - pattern: $A == $B
+              - pattern: $A != $B
+              - pattern: $A === $B
+              - pattern: $A !== $B
+          - metavariable-regex:
+              metavariable: $A
+              regex: (?i)^(\(string\)\s*)?(\$|self::|static::)[^=]*(\btoken\b|token['_\]]|_token\b|\bsig\b|sig['_\]]|signature|hmac|csrf|secret\b|nonce|digest)
+          - metavariable-pattern:
+              metavariable: $B
+              patterns:
+                # Vergleiche mit festen Werten (leer, null, Zahl, Text) sind kein Geheimnisvergleich
+                - pattern: $Z
+                - pattern-not: "'...'"
+                - pattern-not: '"..."'
+                - pattern-not: "null"
+                - pattern-not: "false"
+                - pattern-not: "true"
+                - pattern-not: "[]"
+                - pattern-not-regex: ^-?\d+$
+                - pattern-not: strlen(...)
+                - pattern-not: count(...)
+                # Konstanten (T_RETURN, SODIUM_…)
+                - pattern-not-regex: ^\\?[A-Z][A-Z0-9_]*$
+      - patterns:
+          - pattern-either:
+              - pattern: $B == $A
+              - pattern: $B != $A
+              - pattern: $B === $A
+              - pattern: $B !== $A
+          - metavariable-regex:
+              metavariable: $A
+              regex: (?i)^(\(string\)\s*)?(\$|self::|static::)[^=]*(\btoken\b|token['_\]]|_token\b|\bsig\b|sig['_\]]|signature|hmac|csrf|secret\b|nonce|digest)
+          - metavariable-pattern:
+              metavariable: $B
+              patterns:
+                - pattern: $Z
+                - pattern-not: "'...'"
+                - pattern-not: '"..."'
+                - pattern-not: "null"
+                - pattern-not: "false"
+                - pattern-not: "true"
+                - pattern-not: "[]"
+                - pattern-not-regex: ^-?\d+$
+                - pattern-not: strlen(...)
+                - pattern-not: count(...)
+                # Konstanten (T_RETURN, SODIUM_…)
+                - pattern-not-regex: ^\\?[A-Z][A-Z0-9_]*$
+    paths:
+      exclude:
+        - "*/vendor/*"
+        - "*Test.php"
+        - /app/Admin/views/   # Ansichten vergleichen keine Geheimnisse (Auswahl, Design-Tokens)
+        - /kits/*/tools/      # Entwickler-Skripte der Kits

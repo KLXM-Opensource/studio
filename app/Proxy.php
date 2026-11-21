@@ -313,7 +313,7 @@ final class Proxy
         $ua = CMS_NAME . '/' . CMS_VERSION . ' (+' . (setting('sys.site_url') ?: 'server') . ')';
         $max = (int) ($src['max'] ?? 5 * 1024 * 1024);
         if (function_exists('curl_init')) {
-            $ch = curl_init($url);
+            $ch = curl_init($url);  // nosemgrep: klxm-http-only-core-fetch – nur Hosts registrierter Proxy-Quellen (Proxy::http), https, keine Weiterleitungen, Größengrenze
             $size = 0;
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 8, CURLOPT_CONNECTTIMEOUT => 3,
@@ -326,7 +326,7 @@ final class Proxy
             $type = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
             if (!is_string($body)) return null;
         } else {
-            $ctx = stream_context_create(['http' => ['timeout' => 8, 'follow_location' => 0, 'user_agent' => $ua, 'header' => implode("\r\n", $headers), 'ignore_errors' => true]]);
+            $ctx = stream_context_create(['http' => ['timeout' => 8, 'follow_location' => 0, 'user_agent' => $ua, 'header' => implode("\r\n", $headers), 'ignore_errors' => true]]);  // nosemgrep: klxm-http-only-core-fetch – wie oben, Rückfall ohne curl
             $body = @file_get_contents($url, false, $ctx, 0, $max + 1);
             if ($body === false) return null;
             $status = 0;

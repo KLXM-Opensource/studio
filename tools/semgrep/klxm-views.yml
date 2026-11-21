@@ -1,0 +1,66 @@
+# Semgrep-Regeln für Website-Ansichten (CSP der Website: script-src 'self', style-src 'self').
+# Gilt für Ansichten und Blöcke des Kerns und der Kits – nicht für die Verwaltung (dort sind Inline-Stile erlaubt)
+# und nicht für E-Mail-Vorlagen (Mailprogramme brauchen Inline-Stile).
+rules:
+  - id: klxm-view-no-style-attribute
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Kein style-Attribut in Website-Ansichten – die CSP (style-src 'self') blockiert es. Klasse verwenden oder den Wert per
+      CSSOM setzen (el.style.setProperty in einer Skriptdatei).
+    pattern-regex: (?i)<[a-z][^<>]*\sstyle\s*=\s*["']
+    paths: &views
+      include:
+        - /app/Views/
+        - /app/Blocks/*.php
+        - /kits/*/templates/
+        - /kits/*/blocks/
+        - /extensions/*/views/site/
+      exclude:
+        - /app/Blocks/[A-Z]*.php   # Klassen (Runtime, SelfTest …), keine Vorlagen
+        - /app/Views/mail/
+        - /kits/*/templates/mail/
+        - "*/node_modules/*"
+
+  - id: klxm-view-no-inline-script
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Kein Inline-Skript in Website-Ansichten – die CSP (script-src 'self') blockiert es. Skript als Datei laden; Daten als
+      <script type="application/json"> (json_encode mit JSON_HEX_TAG | JSON_HEX_AMP) übergeben.
+    patterns:
+      - pattern-regex: (?i)<script\b[^>]*>
+      - pattern-not-regex: (?i)<script\b[^>]*\ssrc\s*=
+      - pattern-not-regex: (?i)<script\b[^>]*\stype\s*=\s*["']application/(ld\+)?json["']
+      - pattern-not-regex: (?i)<script\b[^>]*\stype\s*=\s*["']importmap["']
+    paths: *views
+
+  - id: klxm-view-no-event-handler
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Keine Event-Handler-Attribute (onclick=, onload= …) in Website-Ansichten – die CSP blockiert sie. Listener in einer
+      Skriptdatei registrieren (addEventListener, data-Attribute als Haken).
+    pattern-regex: (?i)<[a-z][^<>]*\son[a-z]{3,}\s*=\s*["']
+    paths: *views
+
+  - id: klxm-view-echo-without-escape
+    languages: [php]
+    severity: INFO
+    message: >-
+      Hinweis: Ausgabe ohne e() – nur in Ordnung, wenn der Wert bereits sicheres HTML ist (rich(), inline(), icon(),
+      Fragment/Block-HTML, json_encode mit JSON_HEX_TAG). Sonst e() verwenden.
+    patterns:
+      - pattern: echo $X;
+      # nur einfache Variablen und Array-Zugriffe ($html, $b['text']) – Funktionsaufrufe wie e(), rich(), icon() nicht
+      - metavariable-regex:
+          metavariable: $X
+          regex: ^\$\w+(\[[^\]]*\])*$
+    paths:
+      include:
+        - /app/Views/
+        - /app/Blocks/*.php
+        - /kits/*/templates/
+        - /kits/*/blocks/
+      exclude:
+        - /app/Blocks/[A-Z]*.php

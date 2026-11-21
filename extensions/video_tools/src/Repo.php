@@ -121,14 +121,14 @@ final class Repo
         $row = app()->db->fetch('SELECT * FROM video_meta WHERE media_id = ?', [$id]);
         $sig = self::sig($m);
         $probeOk = Ffmpeg::available();
-        $stale = !$row || $row['sig'] !== $sig || $refresh || ($probeOk && $row['source'] !== 'ffprobe');
+        $stale = !$row || $row['sig'] !== $sig || $refresh || ($probeOk && $row['source'] !== 'ffprobe');  // nosemgrep: klxm-timing-safe-compare – Cache-Kennung der Videodatei (Größe/Zeit), kein Geheimnis
         if ($stale) {
             $file = self::path($m);
             $head = str_contains((string) $m['mime'], 'mp4') ? Mp4Info::read($file) : null;
             $info = ($probeOk ? Ffmpeg::probe($file) : null) ?? ($head ?? ['ok' => false, 'streams' => [], 'size' => (int) @filesize($file)]);
             $info['source'] ??= 'php';
             if ($head) $info['faststart'] = $head['faststart'];
-            $loud = $row && $row['sig'] === $sig && $row['loud'] ? json_decode((string) $row['loud'], true) : null;
+            $loud = $row && $row['sig'] === $sig && $row['loud'] ? json_decode((string) $row['loud'], true) : null;  // nosemgrep: klxm-timing-safe-compare – Cache-Kennung der Videodatei (Größe/Zeit), kein Geheimnis
             $a = Analyzer::assess($info, $loud);
             $data = ['sig' => $sig, 'info' => json_encode($info), 'loud' => $loud ? json_encode($loud) : null, 'score' => $a['score'], 'optimized' => $a['optimized'] ? 1 : 0,
                 'faststart' => $info['faststart'] === null ? null : ($info['faststart'] ? 1 : 0), 'source' => $info['source'], 'checked_at' => now()];
@@ -167,7 +167,7 @@ final class Repo
         $n = 0;
         foreach ($rows as $r) {
             $m = Media::find((int) $r['id']);
-            if (!$m || $r['vt_sig'] === self::sig($m)) continue;
+            if (!$m || $r['vt_sig'] === self::sig($m)) continue;  // nosemgrep: klxm-timing-safe-compare – Cache-Kennung der Videodatei (Größe/Zeit), kein Geheimnis
             try { self::meta($m); } catch (\Throwable $e) { error_log('[video_tools] meta ' . $m['id'] . ': ' . $e->getMessage()); }
             if (++$n >= max(1, $limit)) break;
         }

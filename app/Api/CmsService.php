@@ -126,7 +126,7 @@ final class CmsService
     public function changeStatus(int $id): array
     {
         $row = \Core\Review\Queue::find($id);
-        if (!$row || !isset($this->token['id']) || (int) $row['token_id'] !== (int) $this->token['id']) {
+        if (!$row || !isset($this->token['id']) || (int) $row['token_id'] !== (int) $this->token['id']) {  // nosemgrep: klxm-timing-safe-compare – Vergleich von Token-IDs (Zahlen), nicht des Tokens
             throw new ApiError(404, 'Einreichung nicht gefunden (sichtbar sind nur Einreichungen dieses Tokens).');
         }
         return \Core\Review\Queue::publicJson($row);

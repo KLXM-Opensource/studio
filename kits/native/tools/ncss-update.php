@@ -115,7 +115,7 @@ if (isset($opt['from'])) {
     if (!class_exists(ZipArchive::class)) $fail('PHP-Erweiterung zip fehlt.');
     $t = $tmpDir();
     $url = 'https://codeload.github.com/' . NCSS_REPO . '/zip/' . rawurlencode($ref);
-    $data = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 60, 'header' => "User-Agent: ncss-update\r\n"]]));
+    $data = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 60, 'header' => "User-Agent: ncss-update\r\n"]]));  // nosemgrep: klxm-http-only-core-fetch – Entwickler-Skript (Kommandozeile) lädt NativeCSS von codeload.github.com, läuft ohne App
     if ($data === false || $data === '') $fail('Download fehlgeschlagen: ' . $url);
     file_put_contents($t . '/ncss.zip', $data);
     $zip = new ZipArchive();

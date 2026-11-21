@@ -401,7 +401,7 @@ final class Theme
 
     public static function capture(string $__file, array $__vars): string
     {
-        extract($__vars, EXTR_SKIP);
+        extract($__vars, EXTR_SKIP);  // nosemgrep: klxm-no-extract – Template-Renderer: Variablen aus dem Code, EXTR_SKIP
         ob_start();
         try {
             include $__file;
