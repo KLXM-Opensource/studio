@@ -70,6 +70,9 @@ final class Mailer
      *        smime: Zertifikat(e) der Empfänger (PEM) – die ganze Nachricht (Text, HTML, Anhänge) wird mit S/MIME verschlüsselt
      *               (openssl_pkcs7_encrypt über Symfony SMimeEncrypter, AES-256-CBC); unverschlüsselt bleiben nur Kopfzeilen wie der Betreff
      *        require_tls: SMTP nur mit TLS (siehe dsn())
+     *        imprint: 'included' – die Mail enthält das Impressum schon selbst (eigenes Layout aus Core\Mail\Imprint::get(), z. B.
+     *                 Newsletter); sonst hängt der Mailer es immer an Text (nach „-- “) und HTML (Fußzeile vor </body>) an
+     *        lang: Sprache für das Impressum (Link auf die Impressum-Seite dieser Sprache), Standard: Sprache der Anfrage
      * @return string|null Fehlermeldung oder null bei Erfolg
      */
     /** Test-Umleitung aus den Grundeinstellungen (sys.mail_redirect): gültige Adressen, leer = aus */
@@ -101,6 +104,7 @@ final class Mailer
         if (!$dump && !filter_var($from, FILTER_VALIDATE_EMAIL)) {
             return 'Keine gültige Absender-Adresse eingetragen.';
         }
+        $included = ($o['imprint'] ?? '') === 'included';   // vor dem Filter festhalten – ein Filter kann das Impressum nicht abschalten
         // Erweiterungen (Extension::filter 'mail.message'): ändern oder mit false unterdrücken – nie Mails zur Kontosicherheit;
         // Test-Umleitung und Staging-Schutz gelten danach weiter
         if (empty($o['account']) && Extensions::filters('mail.message')) {
@@ -112,6 +116,13 @@ final class Mailer
                 $to = array_values(array_filter((array) ($m['to'] ?? $to), fn($a) => is_string($a) && filter_var($a, FILTER_VALIDATE_EMAIL))) ?: $to;
                 $o = is_array($m['options'] ?? null) ? $m['options'] : $o;
             }
+        }
+        // Impressum in jeder Mail (Core\Mail\Imprint): Text nach „-- “, HTML als Fußzeile vor </body> – nach dem Filter, damit es
+        // keine Erweiterung entfernt. Eigenes Layout mit Impressum aus Imprint::get(): 'imprint' => 'included' (nie doppelt).
+        if (!$included) {
+            $imp = Mail\Imprint::get(isset($o['lang']) ? (string) $o['lang'] : null, !empty($o['network']));
+            $text = Mail\Imprint::appendText($text, $imp);
+            if (isset($o['html']) && $o['html'] !== '') $o['html'] = Mail\Imprint::appendHtml((string) $o['html'], $imp);
         }
         $redirected = false;
         // Test-Umleitung (Grundeinstellungen → E-Mail-Versand, auch live): alle E-Mails an die Test-Adresse(n) – nie Mails zur

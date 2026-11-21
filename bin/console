@@ -1107,7 +1107,8 @@ switch ($cmd) {
                 + Core\KitPackages::health()   // Kit-Pakete: verdeckte Namen, nicht veröffentlichte Assets, Core-Version (nur Hinweise)
                 + Core\Fragments::health()     // überschriebene Kern-Fragmente mit geändertem Original, ignorierte Kit-Dateien (nur Hinweis)
                 + Core\Fonts::health()         // Kit-Schriften installiert? (fehlend: Hinweis – fonts:sync)
-                + Core\Mail\Accounts::health(); // E-Mail-Konten: Netzwerk-Konto, Zwecke mit fehlendem Konto (nur Hinweise)
+                + Core\Mail\Accounts::health()  // E-Mail-Konten: Netzwerk-Konto, Zwecke mit fehlendem Konto (nur Hinweise)
+                + Core\Mail\Imprint::health();  // Impressum für E-Mails: weder Text noch Impressum-Seite = Fehler
             $bad = 0;
             // null = Warnung (z. B. externe Quelle nicht erreichbar): wird gemeldet, blockiert aber keinen Deploy
             foreach ($checks as $label => $ok) { echo ($ok === null ? '  ! ' : ($ok ? '  ✓ ' : '  ✗ ')) . $label . "\n"; $bad += $ok === false ? 1 : 0; }

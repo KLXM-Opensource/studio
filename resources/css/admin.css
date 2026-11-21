@@ -109,7 +109,7 @@ body.adm--bare{display:block}
 
 /* Badges */
 .adm-badge{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:6px;background:var(--adm-ok-bg);color:var(--adm-ok);font-size:12px;font-weight:700}
-.adm-badge--warn{background:color-mix(in srgb,var(--adm-warn) 14%,transparent);color:var(--adm-warn)}
+.adm-badge--warn{background:color-mix(in srgb,var(--adm-warn) 14%,transparent);color:color-mix(in srgb,var(--adm-warn) 88%,var(--adm-ink))}   /* Mischung mit der Textfarbe: Kontrast ≥ 4,5:1 auch auf getönten Zeilen */
 .adm-badge--muted{background:color-mix(in srgb,var(--adm-ink) 8%,transparent);color:var(--adm-t2)}
 .adm-badge--draft{background:var(--adm-fill);color:var(--adm-t2)}
 .adm-badge--adm-warn{background:var(--adm-warn-bg);color:var(--adm-warn)}

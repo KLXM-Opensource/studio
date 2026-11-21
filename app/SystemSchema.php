@@ -164,6 +164,12 @@ final class SystemSchema
                     'help' => 'Mehrere Adressen mit Komma trennen.', 'placeholder' => 'info@ihre-domain.de'],
                 ['name' => 'sys.mail_redirect', 'label' => 'Test-Umleitung: alle E-Mails an', 'type' => 'text', 'placeholder' => 'test@ihre-domain.de',
                     'help' => 'Zum Testen: Alle E-Mails dieser Website (Formulare, Eingangsbestätigungen, Benachrichtigungen, Anfragen) gehen stattdessen an diese Adresse(n) – Betreff mit [TEST], die eigentlichen Empfänger stehen in der Nachricht. Mails zur Kontosicherheit (Passwort, Einladung) gehen weiter an die Person. Leer lassen = aus.'],
+                // Core\Mail\Imprint: steht in jeder E-Mail der Website (Text und HTML), dazu der Link zur Impressum-Seite
+                ['type' => 'heading', 'label' => 'Impressum für E-Mails',
+                    'help' => 'Jede E-Mail dieser Website – Formulare, Bestätigungen, Passwort, Einladungen, Benachrichtigungen, Newsletter – endet mit diesem Impressum und dem Link zur Impressum-Seite (Einstellungen → Recht).'],
+                ['name' => 'sys.mail_imprint', 'label' => 'Anbieterkennzeichnung', 'type' => 'textarea', 'rows' => 6,
+                    'placeholder' => "Muster GmbH\nMusterstraße 1, 12345 Musterstadt\nTelefon 01234 567890 · info@example.org\nGeschäftsführung: Erika Musterfrau\nAmtsgericht Musterstadt, HRB 12345 · USt-IdNr. DE123456789",
+                    'help' => 'Tragen Sie die Anbieterkennzeichnung ein, eine Angabe je Zeile: Name bzw. Firma mit Rechtsform, Anschrift, Kontakt (Telefon, E-Mail), ggf. Vertretungsberechtigte, Registergericht und -nummer, USt-IdNr. Bleibt das Feld leer, enthält jede E-Mail mindestens den Link zur Impressum-Seite. Fehlt beides, gehen einzelne E-Mails trotzdem hinaus, Newsletter-Versand ist dann aber gesperrt.'],
             ]],
             ['id' => 'spam', 'label' => 'Spamschutz', 'fields' => [
                 ['type' => 'heading', 'label' => 'Mehrstufiger Schutz ohne externe Dienste',
