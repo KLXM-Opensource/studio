@@ -13,7 +13,7 @@ namespace Core\Graphics;
  */
 final class Library
 {
-    /** @return array<string, array{group: string, label: string, w: int, h: int, color: string, svg: string}> */
+    /** @return array<string, array{group: string, label: string, w: int, h: int, color: string, svg: string, text?: string}> */
     public static function all(): array
     {
         static $items = null;
@@ -137,20 +137,66 @@ final class Library
             'dots' => ['group' => 'shape', 'label' => 'Punkte', 'w' => 120, 'h' => 120, 'color' => '#581D47',
                 'svg' => implode('', array_map(fn($i) => "<circle cx='" . (12 + ($i % 5) * 24) . "' cy='" . (12 + intdiv($i, 5) * 24) . "' r='4' fill='currentColor'/>", range(0, 24)))],
         ];
+        // ---------------------------------------------------------------- Flussdiagramm, Organigramm, Hinweise (Ausbaustufe 3a)
+        // data-ge-box: Fläche für den Text in der Form (der Editor legt dort einen zentrierten, umbrechenden Text an; Inhalt aus
+        // 'text', Absätze mit |). Füllung hell in der Akzentfarbe, Kontur in der Akzentfarbe – Farbe über currentColor.
+        $fl = "fill='currentColor' fill-opacity='.12' stroke='currentColor' stroke-width='2'";
+        $items += [
+            'fc-terminal' => ['group' => 'flow', 'label' => 'Start/Ende', 'text' => 'Start', 'w' => 160, 'h' => 60, 'color' => '#2E7D52',
+                'svg' => "<rect x='1' y='1' width='158' height='58' rx='29' $fl data-ge-box='1'/>"],
+            'fc-process' => ['group' => 'flow', 'label' => 'Prozess', 'text' => 'Prozess', 'w' => 160, 'h' => 70, 'color' => '#314164',
+                'svg' => "<rect x='1' y='1' width='158' height='68' rx='4' $fl data-ge-box='1'/>"],
+            'fc-decision' => ['group' => 'flow', 'label' => 'Entscheidung', 'text' => 'Entscheidung?', 'w' => 170, 'h' => 110, 'color' => '#B26A00',
+                'svg' => "<polygon points='85,1 169,55 85,109 1,55' $fl stroke-linejoin='round' data-ge-box='1'/>"],
+            'fc-io' => ['group' => 'flow', 'label' => 'Ein-/Ausgabe', 'text' => 'Eingabe', 'w' => 170, 'h' => 70, 'color' => '#581D47',
+                'svg' => "<polygon points='26,1 169,1 144,69 1,69' $fl stroke-linejoin='round' data-ge-box='1'/>"],
+            'fc-document' => ['group' => 'flow', 'label' => 'Dokument', 'text' => 'Dokument', 'w' => 160, 'h' => 84, 'color' => '#314164',
+                'svg' => "<path d='M1 1h158v68c-26 18-52-12-79 0S27 86 1 69z' $fl stroke-linejoin='round' data-ge-box='1'/>"],
+            'fc-database' => ['group' => 'flow', 'label' => 'Datenbank', 'text' => 'Daten', 'w' => 130, 'h' => 100, 'color' => '#581D47',
+                'svg' => "<path d='M1 14v72c0 7 29 13 64 13s64-6 64-13V14' $fl data-ge-box='1'/><ellipse cx='65' cy='14' rx='64' ry='13' $fl/>"],
+            'fc-subprocess' => ['group' => 'flow', 'label' => 'Unterprozess', 'text' => 'Unterprozess', 'w' => 170, 'h' => 70, 'color' => '#314164',
+                'svg' => "<rect x='1' y='1' width='168' height='68' rx='4' $fl data-ge-box='1'/><path d='M15 1v68M155 1v68' fill='none' stroke='currentColor' stroke-width='2'/>"],
+            'fc-connector' => ['group' => 'flow', 'label' => 'Verbindungsstelle', 'text' => 'A', 'w' => 44, 'h' => 44, 'color' => '#314164',
+                'svg' => "<circle cx='22' cy='22' r='21' $fl data-ge-box='1'/>"],
+            'org-person' => ['group' => 'org', 'label' => 'Person', 'text' => 'Erika Musterfrau|Leitung', 'w' => 190, 'h' => 128, 'color' => '#314164',
+                'svg' => "<rect x='1' y='1' width='188' height='126' rx='12' fill='#FFFFFF' stroke='currentColor' stroke-width='2'/><circle cx='95' cy='34' r='22' fill='currentColor'/>"
+                    . "<text x='95' y='41' text-anchor='middle' font-size='18' font-weight='700' fill='#FFFFFF' data-ge-initials='1'>EM</text><rect x='10' y='62' width='170' height='58' fill='none' stroke='none' data-ge-box='1'/>"],
+            'org-team' => ['group' => 'org', 'label' => 'Team', 'text' => 'Team', 'w' => 170, 'h' => 64, 'color' => '#2E7D52',
+                'svg' => "<rect x='1' y='1' width='168' height='62' rx='10' $fl data-ge-box='1'/>"],
+            'org-person-small' => ['group' => 'org', 'label' => 'Person (klein)', 'text' => 'Max Mustermann', 'w' => 170, 'h' => 56, 'color' => '#581D47',
+                'svg' => "<rect x='1' y='1' width='168' height='54' rx='27' fill='#FFFFFF' stroke='currentColor' stroke-width='2'/><circle cx='28' cy='28' r='19' fill='currentColor'/>"
+                    . "<path d='M28 18a6 6 0 1 1 0 12a6 6 0 1 1 0-12zM17 41c2-6 6-9 11-9s9 3 11 9' fill='#FFFFFF'/><rect x='52' y='6' width='112' height='44' fill='none' stroke='none' data-ge-box='1'/>"],
+            'co-bubble' => ['group' => 'callout', 'label' => 'Sprechblase', 'text' => 'Hinweis', 'w' => 180, 'h' => 100, 'color' => '#314164',
+                'svg' => "<path d='M14 1h152a13 13 0 0 1 13 13v50a13 13 0 0 1-13 13H62L34 99V77H14A13 13 0 0 1 1 64V14A13 13 0 0 1 14 1z' $fl stroke-linejoin='round'/><rect x='8' y='6' width='164' height='66' fill='none' stroke='none' data-ge-box='1'/>"],
+            'co-note' => ['group' => 'callout', 'label' => 'Notiz', 'text' => 'Notiz', 'w' => 150, 'h' => 120, 'color' => '#B26A00',
+                'svg' => "<path d='M1 1h148v96l-22 22H1z' fill='#FFF4D6' stroke='currentColor' stroke-width='2' stroke-linejoin='round' data-ge-box='1'/><path d='M149 97h-22v22' fill='none' stroke='currentColor' stroke-width='2' stroke-linejoin='round'/>"],
+            'co-pointer' => ['group' => 'callout', 'label' => 'Hinweis mit Linie', 'text' => 'Erklärung', 'w' => 220, 'h' => 80, 'color' => '#C0392B',
+                'svg' => "<circle cx='12' cy='68' r='8' fill='currentColor'/><path d='M12 68L60 22' fill='none' stroke='currentColor' stroke-width='2'/><rect x='60' y='2' width='158' height='40' rx='8' $fl data-ge-box='1'/>"],
+            'ar-block' => ['group' => 'callout', 'label' => 'Blockpfeil', 'text' => 'Weiter', 'w' => 180, 'h' => 80, 'color' => '#314164',
+                'svg' => "<path d='M1 20h120V1l58 39-58 39V60H1z' $fl stroke-linejoin='round'/><rect x='8' y='22' width='110' height='36' fill='none' stroke='none' data-ge-box='1'/>"],
+            'ar-double' => ['group' => 'callout', 'label' => 'Doppelpfeil', 'text' => '', 'w' => 180, 'h' => 60, 'color' => '#314164',
+                'svg' => "<path d='M1 30L36 1v15h108V1l35 29-35 29V44H36v15z' $fl stroke-linejoin='round'/>"],
+            'step' => ['group' => 'callout', 'label' => 'Prozessschritt', 'text' => 'Schritt 1', 'w' => 180, 'h' => 64, 'color' => '#581D47',
+                'svg' => "<path d='M1 1h150l28 31-28 31H1l28-31z' $fl stroke-linejoin='round'/><rect x='30' y='8' width='118' height='48' fill='none' stroke='none' data-ge-box='1'/>"],
+        ];
         return $items;
     }
 
     /** Gruppen der Bibliothek in Reihenfolge */
     public static function groups(): array
     {
-        return ['ui' => __('Oberflächen'), 'icon' => __('Zeichen'), 'shape' => __('Formen & Linien')];
+        return ['flow' => __('Flussdiagramm'), 'org' => __('Organigramm'), 'callout' => __('Hinweise & Pfeile'), 'ui' => __('Oberflächen'), 'icon' => __('Zeichen'), 'shape' => __('Formen & Linien')];
     }
 
-    /** Für den Editor: [{id, group, label, w, h, color, svg}] (Bezeichnungen übersetzt) */
+    /** Für den Editor: [{id, group, label, w, h, color, svg, text?}] (Bezeichnungen und Platzhaltertexte übersetzt) */
     public static function forEditor(): array
     {
         $out = [];
-        foreach (self::all() as $id => $it) $out[] = ['id' => $id, 'label' => __($it['label'])] + $it;
+        foreach (self::all() as $id => $it) {
+            $row = ['id' => $id, 'label' => __($it['label'])] + $it;
+            if (isset($it['text'])) $row['text'] = implode('|', array_map(fn($s) => $s === '' ? '' : __($s), explode('|', (string) $it['text'])));
+            $out[] = $row;
+        }
         return $out;
     }
 }

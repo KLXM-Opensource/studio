@@ -102,7 +102,18 @@ html.ge-full, html.ge-full body, html.ge-open body { overflow: hidden }
 .ge-paper { position: absolute; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 30px rgba(0, 0, 0, .14) }
 .ge[data-format=icon] .ge-paper { background: #fff repeating-conic-gradient(#F3F4F7 0 25%, #fff 0 50%) 0 0 / 16px 16px }
 .ge-ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible }
-.ge-ov [data-h], .ge-ov [data-node] { pointer-events: all }
+.ge-ov [data-h], .ge-ov [data-node], .ge-ov [data-ch] { pointer-events: all }
+/* Verbinder: Ankerpunkte, Auswahl, Enden, Knick (connect.js) */
+.ge-ov__anc { fill: #fff; stroke: var(--adm-a); stroke-width: 1.5 }
+.ge-ov__anc--mag { fill: var(--adm-a) }
+.ge-ov__anc--auto { fill: color-mix(in srgb, var(--adm-a) 20%, #fff); stroke-dasharray: 2 2 }
+.ge-ov__anc.is-on { fill: var(--adm-a); stroke: #fff; stroke-width: 2 }
+.ge-ov__connsel { fill: none; stroke: var(--adm-a); stroke-width: 2; opacity: .6 }
+.ge-ov__cend { cursor: move }
+.ge-ov__cend.is-attached { fill: var(--adm-a); stroke: #fff }
+.ge-ov__cmid { fill: #fff; stroke: var(--adm-a); stroke-width: 1.5 }
+.ge-ov__cmid.is-v { cursor: ew-resize }
+.ge-ov__cmid.is-h { cursor: ns-resize }
 .ge-ov__sel { fill: none; stroke: var(--adm-a); stroke-width: 1.5 }
 .ge-ov__sub { fill: none; stroke: var(--adm-a); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7 }
 .ge-ov__hover { fill: none; stroke: var(--adm-a); stroke-width: 1; opacity: .55 }

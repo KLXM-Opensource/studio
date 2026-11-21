@@ -18,6 +18,7 @@ import { colorPicker, parseColor, toHex, hex, onColor, contrast, over, paintValu
 import { h, tabGroup, iconBtn, modal } from './ui.js';
 import { clipOf } from './clip.js';
 import { buildTextPanel } from './textpanel.js';
+import { layoutText } from './text.js';
 
 const BLEND = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'];
 const blendLabel = b => ({ normal: t('Normal'), multiply: t('Multiplizieren'), screen: t('Negativ multiplizieren'), overlay: t('Ineinanderkopieren'), darken: t('Abdunkeln'), lighten: t('Aufhellen'),
@@ -613,7 +614,7 @@ export function buildPanels(ed) {
   }
 
   /** Teil in die Grafik einfügen (zentriert an p, sonst in der Mitte der Ansicht); passt sehr große Teile ein */
-  function placeFragment(g, w, h, p, label) {
+  function placeFragment(g, w, h, p, label, after = null) {
     const vb = ed.vb;
     const at = p || ed.toDoc(ed.stage.getBoundingClientRect().left + ed.stage.clientWidth / 2, ed.stage.getBoundingClientRect().top + ed.stage.clientHeight / 2);
     const s = Math.min(1, (vb.w * 0.6) / w, (vb.h * 0.6) / h);
@@ -621,8 +622,26 @@ export function buildPanels(ed) {
     g.setAttribute('transform', `translate(${num(local.x - w * s / 2)} ${num(local.y - h * s / 2)})${s < 1 ? ` scale(${num(s, 5)})` : ''}`);
     ed.target.append(g);
     remapIds(g, ed.root);
+    after?.(g);
     ed.sel = [g];
     commit(t('Eingefügt: {name}', { name: label }));
+  }
+
+  /**
+   * Flächen für Text (data-ge-box) eines Bausteins: zentrierter, umbrechender Text in der Form (connect.js innerText).
+   * text: Absätze mit „|“, der erste fett, wenn es mehrere sind (Name | Funktion).
+   */
+  function fillBoxes(g, text) {
+    const boxes = [...g.querySelectorAll('[data-ge-box]')];
+    for (const box of boxes) {
+      box.removeAttribute('data-ge-box');
+      if (!text) continue;
+      const tx = ed.conn.innerText(box, '');
+      const parts = String(text).split('|');
+      layoutText(tx, { paras: parts.map((s, i) => [{ t: s, s: parts.length > 1 && i === 0 ? { 'font-weight': '700' } : {} }]), path: null });
+      ed.conn.fitInner(tx);
+    }
+    for (const ini of g.querySelectorAll('[data-ge-initials]')) { ini.removeAttribute('data-ge-initials'); ini.setAttribute('font-family', ed.opt.fontFamily || 'sans-serif'); }
   }
 
   // ================================================================= Symbole (Symbolsatz des Kerns)
@@ -767,7 +786,7 @@ export function buildPanels(ed) {
         g.setAttribute('data-name', it.label);
         g.setAttribute('color', it.color);
         g.innerHTML = it.svg;
-        placeFragment(g, it.w, it.h, p, it.label);
+        placeFragment(g, it.w, it.h, p, it.label, it.text !== undefined ? x => fillBoxes(x, it.text) : null);
       } else if (item.kind === 'part') {
         const it = (ed.boot.parts || []).find(x => String(x.id) === String(item.id));
         if (!it) return;
